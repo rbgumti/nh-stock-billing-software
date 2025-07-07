@@ -10,16 +10,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-// Function to generate unique patient ID
-const generatePatientId = () => {
+// Function to generate unique patient ID with custom prefix
+const generatePatientId = (prefix: string = "NH") => {
   const timestamp = Date.now().toString();
   const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `PAT-${timestamp.slice(-6)}${randomNum}`;
+  return `${prefix}-${timestamp.slice(-6)}${randomNum}`;
 };
 
 export default function NewPatient() {
   const navigate = useNavigate();
-  const [patientId] = useState(generatePatientId());
+  const [patientIdPrefix, setPatientIdPrefix] = useState("NH");
+  const [patientId, setPatientId] = useState(generatePatientId("NH"));
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -34,6 +35,15 @@ export default function NewPatient() {
     allergies: "",
     currentMedications: ""
   });
+
+  const handlePrefixChange = (newPrefix: string) => {
+    setPatientIdPrefix(newPrefix);
+    setPatientId(generatePatientId(newPrefix));
+  };
+
+  const regenerateId = () => {
+    setPatientId(generatePatientId(patientIdPrefix));
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -83,22 +93,47 @@ export default function NewPatient() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Patient ID Display */}
+        {/* Patient ID Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Patient ID Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="patientIdPrefix">ID Prefix</Label>
+                <Input
+                  id="patientIdPrefix"
+                  value={patientIdPrefix}
+                  onChange={(e) => handlePrefixChange(e.target.value.toUpperCase())}
+                  placeholder="NH"
+                  maxLength={5}
+                />
+              </div>
+              <div>
+                <Label htmlFor="patientId">Generated Patient ID</Label>
+                <Input
+                  id="patientId"
+                  value={patientId}
+                  disabled
+                  className="bg-gray-50 font-medium text-blue-600"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button type="button" variant="outline" onClick={regenerateId}>
+                  Regenerate ID
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Patient Information */}
         <Card>
           <CardHeader>
             <CardTitle>Patient Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="patientId">Patient ID</Label>
-              <Input
-                id="patientId"
-                value={patientId}
-                disabled
-                className="bg-gray-50 font-medium text-blue-600"
-              />
-            </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">First Name *</Label>
