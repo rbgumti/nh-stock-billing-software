@@ -18,7 +18,7 @@ export default function Stock() {
       category: "Medication",
       currentStock: 12,
       minimumStock: 50,
-      unitPrice: 0.25,
+      unitPrice: 15.50,
       supplier: "MedSupply Co.",
       expiryDate: "2024-12-15",
       status: "Low Stock"
@@ -29,7 +29,7 @@ export default function Stock() {
       category: "Medical Supplies",
       currentStock: 8,
       minimumStock: 100,
-      unitPrice: 0.15,
+      unitPrice: 8.25,
       supplier: "Healthcare Plus",
       expiryDate: "2025-06-30",
       status: "Low Stock"
@@ -40,7 +40,7 @@ export default function Stock() {
       category: "Equipment",
       currentStock: 3,
       minimumStock: 5,
-      unitPrice: 85.00,
+      unitPrice: 4250.00,
       supplier: "MedTech Solutions",
       expiryDate: "N/A",
       status: "In Stock"
@@ -51,7 +51,7 @@ export default function Stock() {
       category: "Medical Supplies",
       currentStock: 45,
       minimumStock: 30,
-      unitPrice: 2.50,
+      unitPrice: 125.50,
       supplier: "MedSupply Co.",
       expiryDate: "2025-03-20",
       status: "In Stock"
@@ -62,7 +62,7 @@ export default function Stock() {
       category: "Medication",
       currentStock: 25,
       minimumStock: 20,
-      unitPrice: 12.00,
+      unitPrice: 600.00,
       supplier: "PharmaCorp",
       expiryDate: "2024-08-10",
       status: "In Stock"
@@ -87,6 +87,21 @@ export default function Stock() {
     return { label: "In Stock", variant: "default" as const };
   };
 
+  const handleAddStock = () => {
+    console.log('Add stock item clicked');
+    // Add functionality for adding new stock items
+  };
+
+  const handleEdit = (itemId: number) => {
+    console.log('Edit item:', itemId);
+    // Add edit functionality
+  };
+
+  const handleReorder = (itemId: number) => {
+    console.log('Reorder item:', itemId);
+    // Add reorder functionality
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -94,7 +109,7 @@ export default function Stock() {
           <h1 className="text-3xl font-bold text-gray-900">Stock Management</h1>
           <p className="text-gray-600 mt-2">Monitor and manage your inventory</p>
         </div>
-        <Button>
+        <Button onClick={handleAddStock}>
           <Plus className="h-4 w-4 mr-2" />
           Add Stock Item
         </Button>
@@ -133,7 +148,7 @@ export default function Stock() {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Value</p>
               <p className="text-2xl font-bold">
-                ${stockItems.reduce((total, item) => total + (item.currentStock * item.unitPrice), 0).toFixed(2)}
+                ₹{stockItems.reduce((total, item) => total + (item.currentStock * item.unitPrice), 0).toFixed(2)}
               </p>
             </div>
           </CardContent>
@@ -212,11 +227,11 @@ export default function Stock() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-500">Unit Price</p>
-                      <p className="font-semibold">${item.unitPrice.toFixed(2)}</p>
+                      <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Total Value</p>
-                      <p className="font-semibold">${(item.currentStock * item.unitPrice).toFixed(2)}</p>
+                      <p className="font-semibold">₹{(item.currentStock * item.unitPrice).toFixed(2)}</p>
                     </div>
                   </div>
 
@@ -233,10 +248,20 @@ export default function Stock() {
                   )}
 
                   <div className="flex space-x-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleEdit(item.id)}
+                    >
                       Edit
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleReorder(item.id)}
+                    >
                       Reorder
                     </Button>
                   </div>
@@ -258,7 +283,7 @@ export default function Stock() {
                 : "Get started by adding your first stock item"
               }
             </p>
-            <Button>
+            <Button onClick={handleAddStock}>
               <Plus className="h-4 w-4 mr-2" />
               Add Stock Item
             </Button>
