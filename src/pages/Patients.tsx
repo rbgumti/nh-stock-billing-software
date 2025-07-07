@@ -4,16 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Phone, Mail } from "lucide-react";
+import { Search, Plus, Phone, Mail, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Patients() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Mock patient data
+  // Mock patient data with unique IDs
   const patients = [
     {
-      id: 1,
+      id: "PAT-001",
       name: "John Doe",
       age: 45,
       gender: "Male",
@@ -23,7 +23,7 @@ export default function Patients() {
       status: "Active"
     },
     {
-      id: 2,
+      id: "PAT-002",
       name: "Jane Smith",
       age: 32,
       gender: "Female",
@@ -33,7 +33,7 @@ export default function Patients() {
       status: "Active"
     },
     {
-      id: 3,
+      id: "PAT-003",
       name: "Mike Johnson",
       age: 58,
       gender: "Male",
@@ -43,7 +43,7 @@ export default function Patients() {
       status: "Inactive"
     },
     {
-      id: 4,
+      id: "PAT-004",
       name: "Sarah Wilson",
       age: 28,
       gender: "Female",
@@ -57,7 +57,8 @@ export default function Patients() {
   const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.phone.includes(searchTerm)
+    patient.phone.includes(searchTerm) ||
+    patient.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -81,7 +82,7 @@ export default function Patients() {
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search patients by name, email, or phone..."
+              placeholder="Search patients by name, email, phone, or patient ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -98,6 +99,7 @@ export default function Patients() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-lg">{patient.name}</CardTitle>
+                  <p className="text-sm text-blue-600 font-medium">ID: {patient.id}</p>
                   <p className="text-sm text-gray-500">{patient.age} years old • {patient.gender}</p>
                 </div>
                 <Badge variant={patient.status === "Active" ? "default" : "secondary"}>

@@ -10,8 +10,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
+// Function to generate unique patient ID
+const generatePatientId = () => {
+  const timestamp = Date.now().toString();
+  const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return `PAT-${timestamp.slice(-6)}${randomNum}`;
+};
+
 export default function NewPatient() {
   const navigate = useNavigate();
+  const [patientId] = useState(generatePatientId());
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -48,11 +56,15 @@ export default function NewPatient() {
     }
 
     // In a real app, this would send data to the backend
-    console.log("New patient data:", formData);
+    const newPatientData = {
+      id: patientId,
+      ...formData
+    };
+    console.log("New patient data:", newPatientData);
     
     toast({
       title: "Success",
-      description: "Patient has been added successfully!"
+      description: `Patient ${formData.firstName} ${formData.lastName} has been added with ID: ${patientId}!`
     });
     
     navigate("/patients");
@@ -66,17 +78,27 @@ export default function NewPatient() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Add New Patient</h1>
-          <p className="text-gray-600 mt-2">Enter patient information below</p>
+          <p className="text-gray-600 mt-2">Patient ID: <span className="font-medium text-blue-600">{patientId}</span></p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Personal Information */}
+        {/* Patient ID Display */}
         <Card>
           <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
+            <CardTitle>Patient Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="patientId">Patient ID</Label>
+              <Input
+                id="patientId"
+                value={patientId}
+                disabled
+                className="bg-gray-50 font-medium text-blue-600"
+              />
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">First Name *</Label>
@@ -165,7 +187,6 @@ export default function NewPatient() {
           </CardContent>
         </Card>
 
-        {/* Emergency Contact */}
         <Card>
           <CardHeader>
             <CardTitle>Emergency Contact</CardTitle>
@@ -193,7 +214,6 @@ export default function NewPatient() {
           </CardContent>
         </Card>
 
-        {/* Medical Information */}
         <Card>
           <CardHeader>
             <CardTitle>Medical Information</CardTitle>

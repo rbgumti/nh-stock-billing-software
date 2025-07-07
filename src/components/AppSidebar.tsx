@@ -10,7 +10,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 
 const navigationItems = [
@@ -21,7 +20,6 @@ const navigationItems = [
 ];
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -36,15 +34,10 @@ export function AppSidebar() {
       : "hover:bg-gray-100 text-gray-700";
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible>
+    <Sidebar collapsible="icon">
       <SidebarContent>
         <div className="p-4 border-b">
-          {!collapsed && (
-            <h2 className="text-xl font-bold text-blue-900">MedManager</h2>
-          )}
-          {collapsed && (
-            <div className="text-xl font-bold text-blue-900 text-center">M</div>
-          )}
+          <h2 className="text-xl font-bold text-blue-900">MedManager</h2>
         </div>
         
         <SidebarGroup>
@@ -56,7 +49,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass(item.url)}>
                       <item.icon className="h-5 w-5" />
-                      {!collapsed && <span className="ml-3">{item.title}</span>}
+                      <span className="ml-3">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -73,7 +66,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink to="/patients/new" className="text-green-700 hover:bg-green-50">
                     <Plus className="h-5 w-5" />
-                    {!collapsed && <span className="ml-3">Add Patient</span>}
+                    <span className="ml-3">Add Patient</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -81,7 +74,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink to="/invoices/new" className="text-green-700 hover:bg-green-50">
                     <Plus className="h-5 w-5" />
-                    {!collapsed && <span className="ml-3">New Invoice</span>}
+                    <span className="ml-3">New Invoice</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
