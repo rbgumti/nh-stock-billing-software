@@ -4,13 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Package, AlertTriangle } from "lucide-react";
+import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
+import { toast } from "@/hooks/use-toast";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   // Mock stock data
-  const stockItems = [
+  const [stockItems, setStockItems] = useState([
     {
       id: 1,
       name: "Paracetamol 500mg",
@@ -209,7 +212,7 @@ export default function Stock() {
       expiryDate: "2024-12-20",
       status: "Low Stock"
     }
-  ];
+  ]);
 
   const categories = ["all", "Medication", "Medical Supplies", "Equipment"];
 
@@ -230,8 +233,15 @@ export default function Stock() {
   };
 
   const handleAddStock = () => {
-    console.log('Add stock item clicked');
-    // Add functionality for adding new stock items
+    setShowAddForm(true);
+  };
+
+  const handleSaveStockItem = (newItem: any) => {
+    setStockItems(prev => [...prev, newItem]);
+    toast({
+      title: "Success",
+      description: `${newItem.name} has been added to stock successfully!`
+    });
   };
 
   const handleEdit = (itemId: number) => {
@@ -431,6 +441,13 @@ export default function Stock() {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {showAddForm && (
+        <AddStockItemForm
+          onClose={() => setShowAddForm(false)}
+          onSave={handleSaveStockItem}
+        />
       )}
     </div>
   );

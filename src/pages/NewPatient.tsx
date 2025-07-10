@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,23 @@ import { MedicalInformationForm } from "@/components/forms/MedicalInformationFor
 export default function NewPatient() {
   const navigate = useNavigate();
   const [patientIdPrefix, setPatientIdPrefix] = useState("NH");
-  const [patientId, setPatientId] = useState(generatePatientId("NH"));
+  const [idConfig, setIdConfig] = useState({
+    includeDate: true,
+    includeTime: true,
+    includeRandom: true,
+    separator: "-",
+    randomLength: 3
+  });
+  const [patientId, setPatientId] = useState(
+    generatePatientId(
+      "NH",
+      idConfig.includeDate,
+      idConfig.includeTime,
+      idConfig.includeRandom,
+      idConfig.separator,
+      idConfig.randomLength
+    )
+  );
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -32,11 +47,29 @@ export default function NewPatient() {
 
   const handlePrefixChange = (newPrefix: string) => {
     setPatientIdPrefix(newPrefix);
-    setPatientId(generatePatientId(newPrefix));
+    regenerateIdWithNewConfig(newPrefix, idConfig);
+  };
+
+  const handleConfigChange = (newConfig: any) => {
+    setIdConfig(newConfig);
+    regenerateIdWithNewConfig(patientIdPrefix, newConfig);
+  };
+
+  const regenerateIdWithNewConfig = (prefix: string, config: any) => {
+    setPatientId(
+      generatePatientId(
+        prefix,
+        config.includeDate,
+        config.includeTime,
+        config.includeRandom,
+        config.separator,
+        config.randomLength
+      )
+    );
   };
 
   const regenerateId = () => {
-    setPatientId(generatePatientId(patientIdPrefix));
+    regenerateIdWithNewConfig(patientIdPrefix, idConfig);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -92,6 +125,8 @@ export default function NewPatient() {
           patientId={patientId}
           onPrefixChange={handlePrefixChange}
           onRegenerateId={regenerateId}
+          idConfig={idConfig}
+          onConfigChange={handleConfigChange}
         />
 
         <PatientInformationForm
