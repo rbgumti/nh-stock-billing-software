@@ -23,6 +23,8 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
 
+  console.log("Current path in sidebar:", currentPath);
+
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
     return currentPath.startsWith(path);
@@ -32,6 +34,10 @@ export function AppSidebar() {
     isActive(path) 
       ? "bg-blue-100 text-blue-900 font-medium" 
       : "hover:bg-gray-100 text-gray-700";
+
+  const handleAddPatientClick = () => {
+    console.log("Add Patient link clicked, navigating to /patients/new");
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -64,7 +70,11 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <NavLink to="/patients/new" className="text-green-700 hover:bg-green-50">
+                  <NavLink 
+                    to="/patients/new" 
+                    className="text-green-700 hover:bg-green-50"
+                    onClick={handleAddPatientClick}
+                  >
                     <Plus className="h-5 w-5" />
                     <span className="ml-3">Add Patient</span>
                   </NavLink>
