@@ -15,6 +15,8 @@ interface PatientInformationFormProps {
 }
 
 export function PatientInformationForm({ formData, onInputChange }: PatientInformationFormProps) {
+  console.log("PatientInformationForm rendered with data:", formData);
+  
   return (
     <Card>
       <CardHeader>
@@ -54,7 +56,7 @@ export function PatientInformationForm({ formData, onInputChange }: PatientInfor
           </div>
           <div>
             <Label htmlFor="gender">Gender</Label>
-            <Select onValueChange={(value) => onInputChange("gender", value)}>
+            <Select value={formData.gender} onValueChange={(value) => onInputChange("gender", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>

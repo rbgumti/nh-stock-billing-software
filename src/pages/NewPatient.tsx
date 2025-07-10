@@ -11,6 +11,8 @@ import { EmergencyContactForm } from "@/components/forms/EmergencyContactForm";
 import { MedicalInformationForm } from "@/components/forms/MedicalInformationForm";
 
 export default function NewPatient() {
+  console.log("NewPatient component mounted");
+  
   const navigate = useNavigate();
   const [patientIdPrefix, setPatientIdPrefix] = useState("NH");
   const [idConfig, setIdConfig] = useState({
@@ -45,6 +47,9 @@ export default function NewPatient() {
     currentMedications: ""
   });
 
+  console.log("Current form data:", formData);
+  console.log("Current patient ID:", patientId);
+
   const handlePrefixChange = (newPrefix: string) => {
     setPatientIdPrefix(newPrefix);
     regenerateIdWithNewConfig(newPrefix, idConfig);
@@ -73,6 +78,7 @@ export default function NewPatient() {
   };
 
   const handleInputChange = (field: string, value: string) => {
+    console.log(`Updating field ${field} with value:`, value);
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -81,6 +87,7 @@ export default function NewPatient() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted with data:", formData);
     
     // Basic validation
     if (!formData.firstName || !formData.lastName || !formData.phone) {
