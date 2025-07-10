@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,6 +65,149 @@ export default function Stock() {
       supplier: "PharmaCorp",
       expiryDate: "2024-08-10",
       status: "In Stock"
+    },
+    {
+      id: 6,
+      name: "Digital Thermometer",
+      category: "Equipment",
+      currentStock: 15,
+      minimumStock: 10,
+      unitPrice: 350.00,
+      supplier: "MedTech Solutions",
+      expiryDate: "N/A",
+      status: "In Stock"
+    },
+    {
+      id: 7,
+      name: "Antiseptic Solution (500ml)",
+      category: "Medical Supplies",
+      currentStock: 8,
+      minimumStock: 25,
+      unitPrice: 85.00,
+      supplier: "Healthcare Plus",
+      expiryDate: "2025-01-15",
+      status: "Low Stock"
+    },
+    {
+      id: 8,
+      name: "Amoxicillin 250mg",
+      category: "Medication",
+      currentStock: 35,
+      minimumStock: 40,
+      unitPrice: 120.00,
+      supplier: "PharmaCorp",
+      expiryDate: "2024-11-30",
+      status: "Low Stock"
+    },
+    {
+      id: 9,
+      name: "Surgical Gloves (Latex)",
+      category: "Medical Supplies",
+      currentStock: 150,
+      minimumStock: 100,
+      unitPrice: 12.50,
+      supplier: "MedSupply Co.",
+      expiryDate: "2026-05-20",
+      status: "In Stock"
+    },
+    {
+      id: 10,
+      name: "Pulse Oximeter",
+      category: "Equipment",
+      currentStock: 6,
+      minimumStock: 8,
+      unitPrice: 2850.00,
+      supplier: "MedTech Solutions",
+      expiryDate: "N/A",
+      status: "Low Stock"
+    },
+    {
+      id: 11,
+      name: "Ibuprofen 400mg",
+      category: "Medication",
+      currentStock: 60,
+      minimumStock: 50,
+      unitPrice: 22.00,
+      supplier: "PharmaCorp",
+      expiryDate: "2025-02-28",
+      status: "In Stock"
+    },
+    {
+      id: 12,
+      name: "Cotton Swabs",
+      category: "Medical Supplies",
+      currentStock: 80,
+      minimumStock: 60,
+      unitPrice: 45.00,
+      supplier: "Healthcare Plus",
+      expiryDate: "2025-12-31",
+      status: "In Stock"
+    },
+    {
+      id: 13,
+      name: "Stethoscope",
+      category: "Equipment",
+      currentStock: 4,
+      minimumStock: 6,
+      unitPrice: 1850.00,
+      supplier: "MedTech Solutions",
+      expiryDate: "N/A",
+      status: "Low Stock"
+    },
+    {
+      id: 14,
+      name: "Aspirin 75mg",
+      category: "Medication",
+      currentStock: 2,
+      minimumStock: 30,
+      unitPrice: 18.00,
+      supplier: "PharmaCorp",
+      expiryDate: "2024-09-15",
+      status: "Critical"
+    },
+    {
+      id: 15,
+      name: "Medical Masks (N95)",
+      category: "Medical Supplies",
+      currentStock: 25,
+      minimumStock: 100,
+      unitPrice: 35.00,
+      supplier: "Healthcare Plus",
+      expiryDate: "2025-08-10",
+      status: "Low Stock"
+    },
+    {
+      id: 16,
+      name: "Glucose Test Strips",
+      category: "Medical Supplies",
+      currentStock: 40,
+      minimumStock: 50,
+      unitPrice: 450.00,
+      supplier: "MedSupply Co.",
+      expiryDate: "2024-10-30",
+      status: "Low Stock"
+    },
+    {
+      id: 17,
+      name: "Wheelchair",
+      category: "Equipment",
+      currentStock: 2,
+      minimumStock: 3,
+      unitPrice: 8500.00,
+      supplier: "MedTech Solutions",
+      expiryDate: "N/A",
+      status: "Low Stock"
+    },
+    {
+      id: 18,
+      name: "Cough Syrup (200ml)",
+      category: "Medication",
+      currentStock: 18,
+      minimumStock: 25,
+      unitPrice: 95.00,
+      supplier: "PharmaCorp",
+      expiryDate: "2024-12-20",
+      status: "Low Stock"
     }
   ];
 
