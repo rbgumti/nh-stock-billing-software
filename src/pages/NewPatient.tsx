@@ -1,37 +1,17 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { generatePatientId } from "@/utils/patientIdGenerator";
-import { PatientIdConfiguration } from "@/components/forms/PatientIdConfiguration";
-import { PatientInformationForm } from "@/components/forms/PatientInformationForm";
-import { ContactInformationForm } from "@/components/forms/ContactInformationForm";
-import { EmergencyContactForm } from "@/components/forms/EmergencyContactForm";
-import { MedicalInformationForm } from "@/components/forms/MedicalInformationForm";
 
 export default function NewPatient() {
-  console.log("NewPatient component mounted");
-  
   const navigate = useNavigate();
-  const [patientIdPrefix, setPatientIdPrefix] = useState("NH");
-  const [idConfig, setIdConfig] = useState({
-    includeDate: true,
-    includeTime: true,
-    includeRandom: true,
-    separator: "-",
-    randomLength: 3
-  });
-  const [patientId, setPatientId] = useState(
-    generatePatientId(
-      "NH",
-      idConfig.includeDate,
-      idConfig.includeTime,
-      idConfig.includeRandom,
-      idConfig.separator,
-      idConfig.randomLength
-    )
-  );
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -47,38 +27,7 @@ export default function NewPatient() {
     currentMedications: ""
   });
 
-  console.log("Current form data:", formData);
-  console.log("Current patient ID:", patientId);
-
-  const handlePrefixChange = (newPrefix: string) => {
-    setPatientIdPrefix(newPrefix);
-    regenerateIdWithNewConfig(newPrefix, idConfig);
-  };
-
-  const handleConfigChange = (newConfig: any) => {
-    setIdConfig(newConfig);
-    regenerateIdWithNewConfig(patientIdPrefix, newConfig);
-  };
-
-  const regenerateIdWithNewConfig = (prefix: string, config: any) => {
-    setPatientId(
-      generatePatientId(
-        prefix,
-        config.includeDate,
-        config.includeTime,
-        config.includeRandom,
-        config.separator,
-        config.randomLength
-      )
-    );
-  };
-
-  const regenerateId = () => {
-    regenerateIdWithNewConfig(patientIdPrefix, idConfig);
-  };
-
   const handleInputChange = (field: string, value: string) => {
-    console.log(`Updating field ${field} with value:`, value);
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -87,7 +36,6 @@ export default function NewPatient() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted with data:", formData);
     
     // Basic validation
     if (!formData.firstName || !formData.lastName || !formData.phone) {
@@ -100,15 +48,11 @@ export default function NewPatient() {
     }
 
     // In a real app, this would send data to the backend
-    const newPatientData = {
-      id: patientId,
-      ...formData
-    };
-    console.log("New patient data:", newPatientData);
+    console.log("New patient data:", formData);
     
     toast({
       title: "Success",
-      description: `Patient ${formData.firstName} ${formData.lastName} has been added with ID: ${patientId}!`
+      description: "Patient has been added successfully!"
     });
     
     navigate("/patients");
@@ -122,55 +66,173 @@ export default function NewPatient() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Add New Patient</h1>
-          <p className="text-gray-600 mt-2">Patient ID: <span className="font-medium text-blue-600">{patientId}</span></p>
+          <p className="text-gray-600 mt-2">Enter patient information below</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <PatientIdConfiguration
-          patientIdPrefix={patientIdPrefix}
-          patientId={patientId}
-          onPrefixChange={handlePrefixChange}
-          onRegenerateId={regenerateId}
-          idConfig={idConfig}
-          onConfigChange={handleConfigChange}
-        />
+        {/* Personal Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Personal Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
 
-        <PatientInformationForm
-          formData={{
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            dateOfBirth: formData.dateOfBirth,
-            gender: formData.gender
-          }}
-          onInputChange={handleInputChange}
-        />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                <Input
+                  id="dateOfBirth"
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="gender">Gender</Label>
+                <Select onValueChange={(value) => handleInputChange("gender", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <ContactInformationForm
-          formData={{
-            phone: formData.phone,
-            email: formData.email,
-            address: formData.address
-          }}
-          onInputChange={handleInputChange}
-        />
+        {/* Contact Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Contact Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                />
+              </div>
+            </div>
 
-        <EmergencyContactForm
-          formData={{
-            emergencyContact: formData.emergencyContact,
-            emergencyPhone: formData.emergencyPhone
-          }}
-          onInputChange={handleInputChange}
-        />
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Textarea
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                rows={3}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-        <MedicalInformationForm
-          formData={{
-            medicalHistory: formData.medicalHistory,
-            allergies: formData.allergies,
-            currentMedications: formData.currentMedications
-          }}
-          onInputChange={handleInputChange}
-        />
+        {/* Emergency Contact */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Emergency Contact</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="emergencyContact">Emergency Contact Name</Label>
+                <Input
+                  id="emergencyContact"
+                  value={formData.emergencyContact}
+                  onChange={(e) => handleInputChange("emergencyContact", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="emergencyPhone">Emergency Contact Phone</Label>
+                <Input
+                  id="emergencyPhone"
+                  type="tel"
+                  value={formData.emergencyPhone}
+                  onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Medical Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Medical Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="medicalHistory">Medical History</Label>
+              <Textarea
+                id="medicalHistory"
+                value={formData.medicalHistory}
+                onChange={(e) => handleInputChange("medicalHistory", e.target.value)}
+                rows={3}
+                placeholder="Enter relevant medical history..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="allergies">Allergies</Label>
+              <Textarea
+                id="allergies"
+                value={formData.allergies}
+                onChange={(e) => handleInputChange("allergies", e.target.value)}
+                rows={2}
+                placeholder="Enter known allergies..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="currentMedications">Current Medications</Label>
+              <Textarea
+                id="currentMedications"
+                value={formData.currentMedications}
+                onChange={(e) => handleInputChange("currentMedications", e.target.value)}
+                rows={3}
+                placeholder="Enter current medications..."
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="flex space-x-4">
           <Button type="submit" className="flex-1">

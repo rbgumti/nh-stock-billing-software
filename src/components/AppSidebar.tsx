@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const navigationItems = [
@@ -20,10 +21,9 @@ const navigationItems = [
 ];
 
 export function AppSidebar() {
+  const { collapsed } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
-
-  console.log("Current path in sidebar:", currentPath);
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
@@ -35,15 +35,16 @@ export function AppSidebar() {
       ? "bg-blue-100 text-blue-900 font-medium" 
       : "hover:bg-gray-100 text-gray-700";
 
-  const handleAddPatientClick = () => {
-    console.log("Add Patient link clicked, navigating to /patients/new");
-  };
-
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible>
       <SidebarContent>
         <div className="p-4 border-b">
-          <h2 className="text-xl font-bold text-blue-900">MedManager</h2>
+          {!collapsed && (
+            <h2 className="text-xl font-bold text-blue-900">MedManager</h2>
+          )}
+          {collapsed && (
+            <div className="text-xl font-bold text-blue-900 text-center">M</div>
+          )}
         </div>
         
         <SidebarGroup>
@@ -55,7 +56,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass(item.url)}>
                       <item.icon className="h-5 w-5" />
-                      <span className="ml-3">{item.title}</span>
+                      {!collapsed && <span className="ml-3">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -70,13 +71,9 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <NavLink 
-                    to="/patients/new" 
-                    className="text-green-700 hover:bg-green-50"
-                    onClick={handleAddPatientClick}
-                  >
+                  <NavLink to="/patients/new" className="text-green-700 hover:bg-green-50">
                     <Plus className="h-5 w-5" />
-                    <span className="ml-3">Add Patient</span>
+                    {!collapsed && <span className="ml-3">Add Patient</span>}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -84,7 +81,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink to="/invoices/new" className="text-green-700 hover:bg-green-50">
                     <Plus className="h-5 w-5" />
-                    <span className="ml-3">New Invoice</span>
+                    {!collapsed && <span className="ml-3">New Invoice</span>}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
