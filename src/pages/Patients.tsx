@@ -13,41 +13,57 @@ export default function Patients() {
   const patients = [
     {
       id: 1,
+      patientId: "PT001",
       name: "John Doe",
       age: 45,
       gender: "Male",
       phone: "+1 234-567-8900",
       email: "john.doe@email.com",
+      aadhar: "1234 5678 9012",
+      govtIdOld: "DL123456",
+      govtIdNew: "AB1234567890",
       lastVisit: "2024-01-15",
       status: "Active"
     },
     {
       id: 2,
+      patientId: "PT002",
       name: "Jane Smith",
       age: 32,
       gender: "Female",
       phone: "+1 234-567-8901",
       email: "jane.smith@email.com",
+      aadhar: "2345 6789 0123",
+      govtIdOld: "DL234567",
+      govtIdNew: "CD2345678901",
       lastVisit: "2024-01-14",
       status: "Active"
     },
     {
       id: 3,
+      patientId: "PT003",
       name: "Mike Johnson",
       age: 58,
       gender: "Male",
       phone: "+1 234-567-8902",
       email: "mike.johnson@email.com",
+      aadhar: "3456 7890 1234",
+      govtIdOld: "DL345678",
+      govtIdNew: "EF3456789012",
       lastVisit: "2024-01-10",
       status: "Inactive"
     },
     {
       id: 4,
+      patientId: "PT004",
       name: "Sarah Wilson",
       age: 28,
       gender: "Female",
       phone: "+1 234-567-8903",
       email: "sarah.wilson@email.com",
+      aadhar: "4567 8901 2345",
+      govtIdOld: "DL456789",
+      govtIdNew: "GH4567890123",
       lastVisit: "2024-01-12",
       status: "Active"
     }
@@ -56,7 +72,11 @@ export default function Patients() {
   const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.phone.includes(searchTerm)
+    patient.phone.includes(searchTerm) ||
+    patient.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.aadhar.includes(searchTerm) ||
+    patient.govtIdOld.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.govtIdNew.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -80,7 +100,7 @@ export default function Patients() {
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search patients by name, email, or phone..."
+              placeholder="Search patients by name, email, phone, patient ID, Aadhar, or govt ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
