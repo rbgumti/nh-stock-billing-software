@@ -144,7 +144,7 @@ export default function Stock() {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Value</p>
               <p className="text-2xl font-bold">
-                ${stockItems.reduce((total, item) => total + (item.currentStock * item.unitPrice), 0).toFixed(2)}
+                ₹{stockItems.reduce((total, item) => total + (item.currentStock * item.unitPrice), 0).toFixed(2)}
               </p>
             </div>
           </CardContent>
@@ -223,11 +223,11 @@ export default function Stock() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-500">Unit Price</p>
-                      <p className="font-semibold">${item.unitPrice.toFixed(2)}</p>
+                      <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Total Value</p>
-                      <p className="font-semibold">${(item.currentStock * item.unitPrice).toFixed(2)}</p>
+                      <p className="font-semibold">₹{(item.currentStock * item.unitPrice).toFixed(2)}</p>
                     </div>
                   </div>
 
