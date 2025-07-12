@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Package, AlertTriangle } from "lucide-react";
+import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
+import { toast } from "@/hooks/use-toast";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [stockItems, setStockItems] = useState([
 
-  // Mock stock data
-  const stockItems = [
+    // Initial mock stock data
     {
       id: 1,
       name: "Paracetamol 500mg",
@@ -67,7 +70,7 @@ export default function Stock() {
       expiryDate: "2024-08-10",
       status: "In Stock"
     }
-  ];
+  ]);
 
   const categories = ["all", "Medication", "Medical Supplies", "Equipment"];
 
@@ -80,6 +83,14 @@ export default function Stock() {
     
     return matchesSearch && matchesCategory;
   });
+
+  const handleAddStockItem = (newItem: any) => {
+    setStockItems(prev => [...prev, newItem]);
+    toast({
+      title: "Success",
+      description: "Stock item has been added successfully!"
+    });
+  };
 
   const getStockStatus = (current: number, minimum: number) => {
     if (current <= minimum * 0.5) return { label: "Critical", variant: "destructive" as const };
@@ -94,7 +105,7 @@ export default function Stock() {
           <h1 className="text-3xl font-bold text-gray-900">Stock Management</h1>
           <p className="text-gray-600 mt-2">Monitor and manage your inventory</p>
         </div>
-        <Button>
+        <Button onClick={() => setShowAddForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Stock Item
         </Button>
@@ -258,12 +269,19 @@ export default function Stock() {
                 : "Get started by adding your first stock item"
               }
             </p>
-            <Button>
+            <Button onClick={() => setShowAddForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Stock Item
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {showAddForm && (
+        <AddStockItemForm
+          onClose={() => setShowAddForm(false)}
+          onSubmit={handleAddStockItem}
+        />
       )}
     </div>
   );
