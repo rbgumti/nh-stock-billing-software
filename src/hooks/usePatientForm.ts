@@ -4,10 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
 export interface PatientFormData {
+  patientId: string;
   firstName: string;
   lastName: string;
   dateOfBirth: string;
   gender: string;
+  aadhar: string;
+  govtIdOld: string;
+  govtIdNew: string;
   phone: string;
   email: string;
   address: string;
@@ -21,10 +25,14 @@ export interface PatientFormData {
 export function usePatientForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<PatientFormData>({
+    patientId: `PT${Date.now()}`,
     firstName: "",
     lastName: "",
     dateOfBirth: "",
     gender: "",
+    aadhar: "",
+    govtIdOld: "",
+    govtIdNew: "",
     phone: "",
     email: "",
     address: "",

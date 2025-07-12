@@ -27,10 +27,14 @@ export default function NewPatient() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <PersonalInformationForm
           formData={{
+            patientId: formData.patientId,
             firstName: formData.firstName,
             lastName: formData.lastName,
             dateOfBirth: formData.dateOfBirth,
-            gender: formData.gender
+            gender: formData.gender,
+            aadhar: formData.aadhar,
+            govtIdOld: formData.govtIdOld,
+            govtIdNew: formData.govtIdNew
           }}
           onInputChange={handleInputChange}
         />

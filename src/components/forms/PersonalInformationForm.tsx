@@ -6,10 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PersonalInformationFormProps {
   formData: {
+    patientId: string;
     firstName: string;
     lastName: string;
     dateOfBirth: string;
     gender: string;
+    aadhar: string;
+    govtIdOld: string;
+    govtIdNew: string;
   };
   onInputChange: (field: string, value: string) => void;
 }
@@ -21,6 +25,16 @@ export function PersonalInformationForm({ formData, onInputChange }: PersonalInf
         <CardTitle>Personal Information</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div>
+          <Label htmlFor="patientId">Patient ID *</Label>
+          <Input
+            id="patientId"
+            value={formData.patientId}
+            onChange={(e) => onInputChange("patientId", e.target.value)}
+            required
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="firstName">First Name *</Label>
@@ -64,6 +78,36 @@ export function PersonalInformationForm({ formData, onInputChange }: PersonalInf
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label htmlFor="aadhar">Aadhar Number</Label>
+            <Input
+              id="aadhar"
+              value={formData.aadhar}
+              onChange={(e) => onInputChange("aadhar", e.target.value)}
+              placeholder="Enter Aadhar number"
+            />
+          </div>
+          <div>
+            <Label htmlFor="govtIdOld">Govt ID Old</Label>
+            <Input
+              id="govtIdOld"
+              value={formData.govtIdOld}
+              onChange={(e) => onInputChange("govtIdOld", e.target.value)}
+              placeholder="Enter old govt ID"
+            />
+          </div>
+          <div>
+            <Label htmlFor="govtIdNew">Govt ID New</Label>
+            <Input
+              id="govtIdNew"
+              value={formData.govtIdNew}
+              onChange={(e) => onInputChange("govtIdNew", e.target.value)}
+              placeholder="Enter new govt ID"
+            />
           </div>
         </div>
       </CardContent>
