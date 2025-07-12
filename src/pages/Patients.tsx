@@ -121,8 +121,10 @@ export default function Patients() {
                   <Button variant="outline" size="sm" className="flex-1">
                     View Details
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Edit
+                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Link to={`/patients/edit/${patient.id}`}>
+                      Edit
+                    </Link>
                   </Button>
                 </div>
               </div>

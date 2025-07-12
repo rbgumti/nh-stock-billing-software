@@ -74,9 +74,14 @@ export function usePatientForm() {
     navigate("/patients");
   };
 
+  const loadPatientData = (patientData: PatientFormData) => {
+    setFormData(patientData);
+  };
+
   return {
     formData,
     handleInputChange,
-    handleSubmit
+    handleSubmit,
+    loadPatientData
   };
 }

@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import NewPatient from "./pages/NewPatient";
+import EditPatient from "./pages/EditPatient";
 import Stock from "./pages/Stock";
 import Invoices from "./pages/Invoices";
 import NewInvoice from "./pages/NewInvoice";
@@ -34,6 +35,7 @@ const App = () => (
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/patients" element={<Patients />} />
                   <Route path="/patients/new" element={<NewPatient />} />
+                  <Route path="/patients/edit/:id" element={<EditPatient />} />
                   <Route path="/stock" element={<Stock />} />
                   <Route path="/invoices" element={<Invoices />} />
                   <Route path="/invoices/new" element={<NewInvoice />} />
