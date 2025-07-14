@@ -12,6 +12,7 @@ export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const [stockItems, setStockItems] = useState([
 
     // Initial mock stock data
@@ -89,6 +90,17 @@ export default function Stock() {
     toast({
       title: "Success",
       description: "Stock item has been added successfully!"
+    });
+  };
+
+  const handleEditStockItem = (updatedItem: any) => {
+    setStockItems(prev => prev.map(item => 
+      item.id === updatedItem.id ? updatedItem : item
+    ));
+    setEditingItem(null);
+    toast({
+      title: "Success",
+      description: "Stock item has been updated successfully!"
     });
   };
 
@@ -244,7 +256,12 @@ export default function Stock() {
                   )}
 
                   <div className="flex space-x-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => setEditingItem(item)}
+                    >
                       Edit
                     </Button>
                     <Button variant="outline" size="sm" className="flex-1">
@@ -281,6 +298,15 @@ export default function Stock() {
         <AddStockItemForm
           onClose={() => setShowAddForm(false)}
           onSubmit={handleAddStockItem}
+        />
+      )}
+
+      {editingItem && (
+        <AddStockItemForm
+          onClose={() => setEditingItem(null)}
+          onSubmit={handleEditStockItem}
+          initialData={editingItem}
+          isEditing={true}
         />
       )}
     </div>

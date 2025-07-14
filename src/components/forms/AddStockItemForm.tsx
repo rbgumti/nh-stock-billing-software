@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,11 @@ import { X } from "lucide-react";
 interface AddStockItemFormProps {
   onClose: () => void;
   onSubmit: (stockItem: any) => void;
+  initialData?: any;
+  isEditing?: boolean;
 }
 
-export function AddStockItemForm({ onClose, onSubmit }: AddStockItemFormProps) {
+export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = false }: AddStockItemFormProps) {
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -23,6 +25,22 @@ export function AddStockItemForm({ onClose, onSubmit }: AddStockItemFormProps) {
     expiryDate: "",
     description: ""
   });
+
+  // Populate form when editing
+  useEffect(() => {
+    if (isEditing && initialData) {
+      setFormData({
+        name: initialData.name || "",
+        category: initialData.category || "",
+        currentStock: initialData.currentStock?.toString() || "",
+        minimumStock: initialData.minimumStock?.toString() || "",
+        unitPrice: initialData.unitPrice?.toString() || "",
+        supplier: initialData.supplier || "",
+        expiryDate: initialData.expiryDate === "N/A" ? "" : initialData.expiryDate || "",
+        description: initialData.description || ""
+      });
+    }
+  }, [isEditing, initialData]);
 
   const categories = ["Medication", "Medical Supplies", "Equipment"];
 
@@ -37,7 +55,7 @@ export function AddStockItemForm({ onClose, onSubmit }: AddStockItemFormProps) {
     e.preventDefault();
     
     const stockItem = {
-      id: Date.now(),
+      id: isEditing ? initialData.id : Date.now(),
       name: formData.name,
       category: formData.category,
       currentStock: parseInt(formData.currentStock) || 0,
@@ -57,7 +75,7 @@ export function AddStockItemForm({ onClose, onSubmit }: AddStockItemFormProps) {
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Add New Stock Item</CardTitle>
+            <CardTitle>{isEditing ? "Edit Stock Item" : "Add New Stock Item"}</CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
@@ -161,7 +179,7 @@ export function AddStockItemForm({ onClose, onSubmit }: AddStockItemFormProps) {
 
             <div className="flex space-x-4 pt-4">
               <Button type="submit" className="flex-1">
-                Add Stock Item
+                {isEditing ? "Update Stock Item" : "Add Stock Item"}
               </Button>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
