@@ -1,73 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Phone, Mail, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { usePatientStore } from "@/hooks/usePatientStore";
 
 export default function Patients() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { patients: storePatients, subscribe } = usePatientStore();
 
-  // Mock patient data
-  const patients = [
-    {
-      id: 1,
-      patientId: "PT001",
-      name: "John Doe",
-      age: 45,
-      gender: "Male",
-      phone: "+1 234-567-8900",
-      email: "john.doe@email.com",
-      aadhar: "1234 5678 9012",
-      govtIdOld: "DL123456",
-      govtIdNew: "AB1234567890",
-      lastVisit: "2024-01-15",
-      status: "Active"
-    },
-    {
-      id: 2,
-      patientId: "PT002",
-      name: "Jane Smith",
-      age: 32,
-      gender: "Female",
-      phone: "+1 234-567-8901",
-      email: "jane.smith@email.com",
-      aadhar: "2345 6789 0123",
-      govtIdOld: "DL234567",
-      govtIdNew: "CD2345678901",
-      lastVisit: "2024-01-14",
-      status: "Active"
-    },
-    {
-      id: 3,
-      patientId: "PT003",
-      name: "Mike Johnson",
-      age: 58,
-      gender: "Male",
-      phone: "+1 234-567-8902",
-      email: "mike.johnson@email.com",
-      aadhar: "3456 7890 1234",
-      govtIdOld: "DL345678",
-      govtIdNew: "EF3456789012",
-      lastVisit: "2024-01-10",
-      status: "Inactive"
-    },
-    {
-      id: 4,
-      patientId: "PT004",
-      name: "Sarah Wilson",
-      age: 28,
-      gender: "Female",
-      phone: "+1 234-567-8903",
-      email: "sarah.wilson@email.com",
-      aadhar: "4567 8901 2345",
-      govtIdOld: "DL456789",
-      govtIdNew: "GH4567890123",
-      lastVisit: "2024-01-12",
-      status: "Active"
-    }
-  ];
+  // Force re-render when patients are updated
+  useEffect(() => {
+    const unsubscribe = subscribe(() => {
+      // This will trigger a re-render
+    });
+    return unsubscribe;
+  }, [subscribe]);
+
+  // Transform patient data for display
+  const patients = storePatients.map((patient, index) => ({
+    id: index + 1,
+    patientId: patient.patientId,
+    name: `${patient.firstName} ${patient.lastName}`,
+    age: patient.dateOfBirth ? new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear() : 0,
+    gender: patient.gender,
+    phone: patient.phone,
+    email: patient.email,
+    aadhar: patient.aadhar,
+    govtIdOld: patient.govtIdOld,
+    govtIdNew: patient.govtIdNew,
+    lastVisit: "2024-01-15", // Default for now
+    status: "Active" // Default for now
+  }));
 
   const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

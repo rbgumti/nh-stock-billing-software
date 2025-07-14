@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { usePatientStore } from "./usePatientStore";
 
 export interface PatientFormData {
   patientId: string;
@@ -24,6 +25,7 @@ export interface PatientFormData {
 
 export function usePatientForm() {
   const navigate = useNavigate();
+  const { addPatient, updatePatient } = usePatientStore();
   const [formData, setFormData] = useState<PatientFormData>({
     patientId: `PT${Date.now()}`,
     firstName: "",
@@ -63,8 +65,8 @@ export function usePatientForm() {
       return;
     }
 
-    // In a real app, this would send data to the backend
-    console.log("New patient data:", formData);
+    // Add patient to store
+    addPatient(formData);
     
     toast({
       title: "Success",
