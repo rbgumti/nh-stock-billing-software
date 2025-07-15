@@ -33,7 +33,6 @@ export default function NewInvoice() {
   const [patientSearchId, setPatientSearchId] = useState("");
   const [foundPatient, setFoundPatient] = useState<any>(null);
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
-  const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<InvoiceItem[]>([
     { 
@@ -177,7 +176,6 @@ export default function NewInvoice() {
       patient: selectedPatient,
       patientDetails: foundPatient,
       invoiceDate,
-      dueDate,
       items,
       subtotal,
       tax,
@@ -250,25 +248,14 @@ export default function NewInvoice() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="invoiceDate">Invoice Date</Label>
-                <Input
-                  id="invoiceDate"
-                  type="date"
-                  value={invoiceDate}
-                  onChange={(e) => setInvoiceDate(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="dueDate">Due Date</Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                />
-              </div>
+            <div>
+              <Label htmlFor="invoiceDate">Invoice Date</Label>
+              <Input
+                id="invoiceDate"
+                type="date"
+                value={invoiceDate}
+                onChange={(e) => setInvoiceDate(e.target.value)}
+              />
             </div>
           </CardContent>
         </Card>
