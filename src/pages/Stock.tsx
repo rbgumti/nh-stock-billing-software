@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,71 +7,22 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Package, AlertTriangle } from "lucide-react";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { toast } from "@/hooks/use-toast";
+import { useStockStore } from "@/hooks/useStockStore";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
-  const [stockItems, setStockItems] = useState([
+  const { stockItems, addStockItem, updateStockItem, subscribe } = useStockStore();
 
-    // Initial mock stock data
-    {
-      id: 1,
-      name: "Paracetamol 500mg",
-      category: "Medication",
-      currentStock: 12,
-      minimumStock: 50,
-      unitPrice: 0.25,
-      supplier: "MedSupply Co.",
-      expiryDate: "2024-12-15",
-      status: "Low Stock"
-    },
-    {
-      id: 2,
-      name: "Disposable Syringes (10ml)",
-      category: "Medical Supplies",
-      currentStock: 8,
-      minimumStock: 100,
-      unitPrice: 0.15,
-      supplier: "Healthcare Plus",
-      expiryDate: "2025-06-30",
-      status: "Low Stock"
-    },
-    {
-      id: 3,
-      name: "Blood Pressure Monitor",
-      category: "Equipment",
-      currentStock: 3,
-      minimumStock: 5,
-      unitPrice: 85.00,
-      supplier: "MedTech Solutions",
-      expiryDate: "N/A",
-      status: "In Stock"
-    },
-    {
-      id: 4,
-      name: "Bandages (Various Sizes)",
-      category: "Medical Supplies",
-      currentStock: 45,
-      minimumStock: 30,
-      unitPrice: 2.50,
-      supplier: "MedSupply Co.",
-      expiryDate: "2025-03-20",
-      status: "In Stock"
-    },
-    {
-      id: 5,
-      name: "Insulin Pen",
-      category: "Medication",
-      currentStock: 25,
-      minimumStock: 20,
-      unitPrice: 12.00,
-      supplier: "PharmaCorp",
-      expiryDate: "2024-08-10",
-      status: "In Stock"
-    }
-  ]);
+  // Force re-render when stock items are updated
+  useEffect(() => {
+    const unsubscribe = subscribe(() => {
+      // This will trigger a re-render
+    });
+    return unsubscribe;
+  }, [subscribe]);
 
   const categories = ["all", "Medication", "Medical Supplies", "Equipment"];
 
@@ -86,7 +37,7 @@ export default function Stock() {
   });
 
   const handleAddStockItem = (newItem: any) => {
-    setStockItems(prev => [...prev, newItem]);
+    addStockItem(newItem);
     toast({
       title: "Success",
       description: "Stock item has been added successfully!"
@@ -94,9 +45,7 @@ export default function Stock() {
   };
 
   const handleEditStockItem = (updatedItem: any) => {
-    setStockItems(prev => prev.map(item => 
-      item.id === updatedItem.id ? updatedItem : item
-    ));
+    updateStockItem(updatedItem.id, updatedItem);
     setEditingItem(null);
     toast({
       title: "Success",

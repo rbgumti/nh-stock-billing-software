@@ -23,6 +23,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
     unitPrice: "",
     supplier: "",
     expiryDate: "",
+    batchNo: "",
     description: ""
   });
 
@@ -37,6 +38,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
         unitPrice: initialData.unitPrice?.toString() || "",
         supplier: initialData.supplier || "",
         expiryDate: initialData.expiryDate === "N/A" ? "" : initialData.expiryDate || "",
+        batchNo: initialData.batchNo || "",
         description: initialData.description || ""
       });
     }
@@ -63,6 +65,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
       unitPrice: parseFloat(formData.unitPrice) || 0,
       supplier: formData.supplier,
       expiryDate: formData.expiryDate || "N/A",
+      batchNo: formData.batchNo || `BATCH${Date.now()}`,
       status: "In Stock"
     };
 
@@ -147,13 +150,22 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="supplier">Supplier</Label>
                 <Input
                   id="supplier"
                   value={formData.supplier}
                   onChange={(e) => handleInputChange("supplier", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="batchNo">Batch Number</Label>
+                <Input
+                  id="batchNo"
+                  value={formData.batchNo}
+                  onChange={(e) => handleInputChange("batchNo", e.target.value)}
+                  placeholder="e.g., BATCH001"
                 />
               </div>
               <div>
