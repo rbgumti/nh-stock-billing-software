@@ -6,37 +6,26 @@ import { ContactInformationForm } from "@/components/forms/ContactInformationFor
 import { EmergencyContactForm } from "@/components/forms/EmergencyContactForm";
 import { MedicalInformationForm } from "@/components/forms/MedicalInformationForm";
 import { usePatientForm } from "@/hooks/usePatientForm";
+import { usePatientStore } from "@/hooks/usePatientStore";
 import { useEffect } from "react";
 
 export default function EditPatient() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { formData, handleInputChange, handleSubmit, loadPatientData } = usePatientForm();
+  const { formData, handleInputChange, handleSubmit, loadPatientData } = usePatientForm(true);
+  const { getPatient } = usePatientStore();
 
   useEffect(() => {
     if (id) {
-      // Mock patient data - in real app, this would fetch from API
-      const mockPatient = {
-        patientId: `PT${id}`,
-        firstName: id === "1" ? "John" : id === "2" ? "Jane" : id === "3" ? "Mike" : "Sarah",
-        lastName: id === "1" ? "Doe" : id === "2" ? "Smith" : id === "3" ? "Johnson" : "Wilson",
-        dateOfBirth: id === "1" ? "1979-01-15" : id === "2" ? "1992-05-20" : id === "3" ? "1966-03-10" : "1996-08-25",
-        gender: id === "1" ? "male" : id === "2" ? "female" : id === "3" ? "male" : "female",
-        aadhar: "",
-        govtIdOld: "",
-        govtIdNew: "",
-        phone: id === "1" ? "+1 234-567-8900" : id === "2" ? "+1 234-567-8901" : id === "3" ? "+1 234-567-8902" : "+1 234-567-8903",
-        email: id === "1" ? "john.doe@email.com" : id === "2" ? "jane.smith@email.com" : id === "3" ? "mike.johnson@email.com" : "sarah.wilson@email.com",
-        address: "",
-        emergencyContact: "",
-        emergencyPhone: "",
-        medicalHistory: "",
-        allergies: "",
-        currentMedications: ""
-      };
-      loadPatientData(mockPatient);
+      const patient = getPatient(id);
+      if (patient) {
+        loadPatientData(patient);
+      } else {
+        console.error("Patient not found:", id);
+        navigate("/patients");
+      }
     }
-  }, [id, loadPatientData]);
+  }, [id, loadPatientData, getPatient, navigate]);
 
   return (
     <div className="p-6 space-y-6">

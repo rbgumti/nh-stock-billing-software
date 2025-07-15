@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import NewPatient from "./pages/NewPatient";
 import EditPatient from "./pages/EditPatient";
+import ViewPatient from "./pages/ViewPatient";
 import Stock from "./pages/Stock";
 import Invoices from "./pages/Invoices";
 import NewInvoice from "./pages/NewInvoice";
@@ -35,6 +36,7 @@ const App = () => (
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/patients" element={<Patients />} />
                   <Route path="/patients/new" element={<NewPatient />} />
+                  <Route path="/patients/view/:id" element={<ViewPatient />} />
                   <Route path="/patients/edit/:id" element={<EditPatient />} />
                   <Route path="/stock" element={<Stock />} />
                   <Route path="/invoices" element={<Invoices />} />

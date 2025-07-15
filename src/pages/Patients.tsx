@@ -104,11 +104,13 @@ export default function Patients() {
                   Last visit: {patient.lastVisit}
                 </div>
                 <div className="flex space-x-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    View Details
+                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Link to={`/patients/view/${patient.patientId}`}>
+                      View Details
+                    </Link>
                   </Button>
                   <Button variant="outline" size="sm" className="flex-1" asChild>
-                    <Link to={`/patients/edit/${patient.id}`}>
+                    <Link to={`/patients/edit/${patient.patientId}`}>
                       Edit
                     </Link>
                   </Button>

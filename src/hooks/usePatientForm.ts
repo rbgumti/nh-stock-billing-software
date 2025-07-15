@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -23,9 +22,10 @@ export interface PatientFormData {
   currentMedications: string;
 }
 
-export function usePatientForm() {
+export function usePatientForm(isEditing: boolean = false) {
   const navigate = useNavigate();
   const { addPatient, updatePatient } = usePatientStore();
+  const [originalPatientId, setOriginalPatientId] = useState<string>("");
   const [formData, setFormData] = useState<PatientFormData>({
     patientId: `PT${Date.now()}`,
     firstName: "",
@@ -65,19 +65,28 @@ export function usePatientForm() {
       return;
     }
 
-    // Add patient to store
-    addPatient(formData);
-    
-    toast({
-      title: "Success",
-      description: "Patient has been added successfully!"
-    });
+    if (isEditing && originalPatientId) {
+      // Update existing patient
+      updatePatient(originalPatientId, formData);
+      toast({
+        title: "Success",
+        description: "Patient has been updated successfully!"
+      });
+    } else {
+      // Add new patient
+      addPatient(formData);
+      toast({
+        title: "Success",
+        description: "Patient has been added successfully!"
+      });
+    }
     
     navigate("/patients");
   };
 
   const loadPatientData = (patientData: PatientFormData) => {
     setFormData(patientData);
+    setOriginalPatientId(patientData.patientId);
   };
 
   return {
