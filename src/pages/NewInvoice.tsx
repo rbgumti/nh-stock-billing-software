@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -132,8 +131,8 @@ export default function NewInvoice() {
   };
 
   const subtotal = items.reduce((sum, item) => sum + item.total, 0);
-  const tax = subtotal * 0.1; // 10% tax
-  const total = subtotal + tax;
+  // Removed tax; total equals subtotal now
+  const total = subtotal;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,15 +172,22 @@ export default function NewInvoice() {
     });
 
     const invoiceData = {
+      id: `INV-${Date.now()}`,
       patient: selectedPatient,
       patientDetails: foundPatient,
       invoiceDate,
       items,
       subtotal,
-      tax,
+      // Keep tax field for compatibility but set to 0 since tax is removed
+      tax: 0,
       total,
       notes
     };
+
+    // Persist invoice to localStorage
+    const existing = JSON.parse(localStorage.getItem("invoices") || "[]");
+    const updated = [...existing, invoiceData];
+    localStorage.setItem("invoices", JSON.stringify(updated));
 
     console.log("New invoice data:", invoiceData);
     
@@ -354,10 +360,7 @@ export default function NewInvoice() {
                   <span>Subtotal:</span>
                   <span className="font-medium">₹{subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Tax (10%):</span>
-                  <span className="font-medium">₹{tax.toFixed(2)}</span>
-                </div>
+                {/* Tax removed */}
                 <div className="flex justify-between text-lg font-bold border-t pt-2">
                   <span>Total:</span>
                   <span>₹{total.toFixed(2)}</span>
@@ -382,6 +385,7 @@ export default function NewInvoice() {
           </CardContent>
         </Card>
 
+        {/* Actions */}
         <div className="flex space-x-4">
           <Button type="submit" className="flex-1">
             Create Invoice
