@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,59 +10,29 @@ import { Link } from "react-router-dom";
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [invoices, setInvoices] = useState([]);
 
-  // Mock invoice data
-  const invoices = [
-    {
-      id: "INV-001",
-      patientName: "John Doe",
-      patientId: 1,
-      date: "2024-01-15",
-      amount: 250.00,
-      status: "Paid",
-      items: [
-        { name: "Consultation", quantity: 1, price: 150.00 },
-        { name: "Blood Test", quantity: 1, price: 100.00 }
-      ]
-    },
-    {
-      id: "INV-002",
-      patientName: "Jane Smith",
-      patientId: 2,
-      date: "2024-01-14",
-      amount: 180.00,
-      status: "Pending",
-      items: [
-        { name: "Consultation", quantity: 1, price: 150.00 },
-        { name: "Prescription", quantity: 1, price: 30.00 }
-      ]
-    },
-    {
-      id: "INV-003",
-      patientName: "Mike Johnson",
-      patientId: 3,
-      date: "2024-01-13",
-      amount: 320.00,
-      status: "Overdue",
-      items: [
-        { name: "Consultation", quantity: 1, price: 150.00 },
-        { name: "X-Ray", quantity: 1, price: 120.00 },
-        { name: "Medication", quantity: 1, price: 50.00 }
-      ]
-    },
-    {
-      id: "INV-004",
-      patientName: "Sarah Wilson",
-      patientId: 4,
-      date: "2024-01-12",
-      amount: 200.00,
-      status: "Paid",
-      items: [
-        { name: "Consultation", quantity: 1, price: 150.00 },
-        { name: "Follow-up", quantity: 1, price: 50.00 }
-      ]
-    }
-  ];
+  // Load invoices from localStorage
+  useEffect(() => {
+    const savedInvoices = JSON.parse(localStorage.getItem("invoices") || "[]");
+    
+    // Transform saved invoices to match expected format
+    const transformedInvoices = savedInvoices.map((invoice: any) => ({
+      id: invoice.id,
+      patientName: invoice.patientDetails?.fullName || invoice.patient || "Unknown Patient",
+      patientId: invoice.patientDetails?.patientId || 0,
+      date: invoice.invoiceDate,
+      amount: invoice.total,
+      status: "Pending", // Default status for new invoices
+      items: invoice.items.map((item: any) => ({
+        name: item.medicine || item.name,
+        quantity: item.quantity,
+        price: item.price
+      }))
+    }));
+    
+    setInvoices(transformedInvoices);
+  }, []);
 
   const statuses = ["all", "Paid", "Pending", "Overdue"];
 
@@ -122,7 +92,7 @@ export default function Invoices() {
           <CardContent className="pt-6">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Amount</p>
-              <p className="text-2xl font-bold">${totalAmount.toFixed(2)}</p>
+              <p className="text-2xl font-bold">₹{totalAmount.toFixed(2)}</p>
             </div>
           </CardContent>
         </Card>
@@ -131,7 +101,7 @@ export default function Invoices() {
           <CardContent className="pt-6">
             <div>
               <p className="text-sm font-medium text-gray-600">Paid</p>
-              <p className="text-2xl font-bold text-green-600">${paidAmount.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-green-600">₹{paidAmount.toFixed(2)}</p>
             </div>
           </CardContent>
         </Card>
@@ -140,7 +110,7 @@ export default function Invoices() {
           <CardContent className="pt-6">
             <div>
               <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-orange-600">${pendingAmount.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-orange-600">₹{pendingAmount.toFixed(2)}</p>
             </div>
           </CardContent>
         </Card>
@@ -188,7 +158,7 @@ export default function Invoices() {
                       <p className="text-gray-600">{invoice.patientName}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold">${invoice.amount.toFixed(2)}</p>
+                      <p className="text-2xl font-bold">₹{invoice.amount.toFixed(2)}</p>
                       <Badge variant={getStatusVariant(invoice.status)}>
                         {invoice.status}
                       </Badge>
