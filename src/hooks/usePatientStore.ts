@@ -77,15 +77,31 @@ const initialPatients: PatientFormData[] = [
   }
 ];
 
-// Simple in-memory store
-let patientsStore: PatientFormData[] = [...initialPatients];
+// Load from localStorage if available, otherwise use initial data
+const loadPatientsFromStorage = (): PatientFormData[] => {
+  try {
+    const stored = localStorage.getItem('patients');
+    return stored ? JSON.parse(stored) : initialPatients;
+  } catch {
+    return initialPatients;
+  }
+};
+
+// Initialize store with data from localStorage
+let patientsStore: PatientFormData[] = loadPatientsFromStorage();
 let listeners: (() => void)[] = [];
+
+// Save to localStorage whenever store changes
+const saveToStorage = () => {
+  localStorage.setItem('patients', JSON.stringify(patientsStore));
+};
 
 export function usePatientStore() {
   const [patients, setPatients] = useState<PatientFormData[]>(patientsStore);
 
   const addPatient = (patient: PatientFormData) => {
     patientsStore = [...patientsStore, patient];
+    saveToStorage();
     notifyListeners();
   };
 
@@ -93,6 +109,7 @@ export function usePatientStore() {
     patientsStore = patientsStore.map(p => 
       p.patientId === patientId ? updatedPatient : p
     );
+    saveToStorage();
     notifyListeners();
   };
 
