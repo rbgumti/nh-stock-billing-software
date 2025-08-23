@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Receipt, Download, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
+import jsPDF from 'jspdf';
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -61,6 +62,40 @@ export default function Invoices() {
   const pendingAmount = filteredInvoices
     .filter(inv => inv.status === "Pending")
     .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+  const generatePDF = (invoice: any) => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('INVOICE', 20, 30);
+    
+    // Invoice details
+    doc.setFontSize(12);
+    doc.text(`Invoice ID: ${invoice.id}`, 20, 50);
+    doc.text(`Patient: ${invoice.patientName}`, 20, 60);
+    doc.text(`Date: ${invoice.date}`, 20, 70);
+    
+    // Items header
+    doc.setFontSize(14);
+    doc.text('Items:', 20, 90);
+    
+    // Items list
+    doc.setFontSize(10);
+    let yPos = 100;
+    invoice.items.forEach((item: any, index: number) => {
+      doc.text(`${index + 1}. ${item.name} - Qty: ${item.quantity} - ₹${item.price.toFixed(2)}`, 20, yPos);
+      yPos += 10;
+    });
+    
+    // Total
+    doc.setFontSize(14);
+    doc.text(`Total Amount: ₹${invoice.amount.toFixed(2)}`, 20, yPos + 20);
+    doc.text(`Status: ${invoice.status}`, 20, yPos + 35);
+    
+    // Save the PDF
+    doc.save(`invoice-${invoice.id}.pdf`);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -188,7 +223,7 @@ export default function Invoices() {
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => generatePDF(invoice)}>
                       <Download className="h-4 w-4 mr-2" />
                       Download PDF
                     </Button>
