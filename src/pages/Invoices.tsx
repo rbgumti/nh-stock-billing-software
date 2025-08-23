@@ -7,11 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Receipt, Download, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import jsPDF from 'jspdf';
+import { useToast } from "@/hooks/use-toast";
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [invoices, setInvoices] = useState([]);
+  const { toast } = useToast();
 
   // Load invoices from localStorage
   useEffect(() => {
@@ -95,6 +97,39 @@ export default function Invoices() {
     
     // Save the PDF
     doc.save(`invoice-${invoice.id}.pdf`);
+    
+    toast({
+      title: "Success",
+      description: "PDF downloaded successfully!"
+    });
+  };
+
+  const markAsPaid = (invoiceId: string) => {
+    const updatedInvoices = invoices.map((inv: any) => 
+      inv.id === invoiceId ? { ...inv, status: "Paid" } : inv
+    );
+    setInvoices(updatedInvoices);
+    
+    // Update localStorage
+    const savedInvoices = JSON.parse(localStorage.getItem("invoices") || "[]");
+    const updatedSavedInvoices = savedInvoices.map((inv: any) => 
+      inv.id === invoiceId ? { ...inv, status: "Paid" } : inv
+    );
+    localStorage.setItem("invoices", JSON.stringify(updatedSavedInvoices));
+    
+    toast({
+      title: "Success",
+      description: "Invoice marked as paid!"
+    });
+  };
+
+  const viewInvoiceDetails = (invoice: any) => {
+    // Create a detailed view modal or alert
+    const itemsList = invoice.items.map((item: any, index: number) => 
+      `${index + 1}. ${item.name} - Qty: ${item.quantity} - ₹${item.price.toFixed(2)}`
+    ).join('\n');
+    
+    alert(`INVOICE DETAILS\n\nInvoice ID: ${invoice.id}\nPatient: ${invoice.patientName}\nDate: ${invoice.date}\nStatus: ${invoice.status}\n\nITEMS:\n${itemsList}\n\nTotal Amount: ₹${invoice.amount.toFixed(2)}`);
   };
 
   return (
@@ -219,7 +254,7 @@ export default function Invoices() {
                   </div>
 
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => viewInvoiceDetails(invoice)}>
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
                     </Button>
@@ -228,7 +263,7 @@ export default function Invoices() {
                       Download PDF
                     </Button>
                     {invoice.status !== "Paid" && (
-                      <Button size="sm">
+                      <Button size="sm" onClick={() => markAsPaid(invoice.id)}>
                         Mark as Paid
                       </Button>
                     )}
