@@ -390,22 +390,58 @@ export default function Reports() {
             </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Stock by Category</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={formatBarData(stockStats.byCategory)}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#10b981" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Stock by Category</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={formatBarData(stockStats.byCategory)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#10b981" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Stock Ledger</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {invoices.flatMap(invoice => 
+                    invoice.items?.map((item: any, index: number) => (
+                      <div key={`${invoice.id}-${index}`} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-medium">{item.medicineName || item.name}</p>
+                          <p className="text-sm text-gray-600">
+                            Patient: {invoice.patientDetails?.firstName || invoice.patient} 
+                            {invoice.patientDetails?.lastName ? ` ${invoice.patientDetails.lastName}` : ''}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            ID: {invoice.patientDetails?.patientId || 'N/A'} | 
+                            Date: {new Date(invoice.invoiceDate || Date.now()).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">Qty: {item.quantity}</p>
+                          <p className="text-sm text-gray-600">₹{(item.unitPrice * item.quantity).toFixed(2)}</p>
+                        </div>
+                      </div>
+                    )) || []
+                  )}
+                  {(!invoices.length || !invoices.some(inv => inv.items?.length)) && (
+                    <p className="text-gray-500 text-center py-8">No stock movements recorded</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="invoices" className="space-y-6">
@@ -455,22 +491,72 @@ export default function Reports() {
             </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Monthly Revenue</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={formatBarData(invoiceStats.monthlyRevenue)}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => [`₹${value}`, 'Revenue']} />
-                  <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Monthly Revenue</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={formatBarData(invoiceStats.monthlyRevenue)}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`₹${value}`, 'Revenue']} />
+                    <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Detailed Invoice Report</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {invoices.map((invoice: any) => (
+                    <div key={invoice.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-semibold">Invoice #{invoice.id}</h4>
+                          <p className="text-sm text-gray-600">
+                            Patient: {invoice.patientDetails?.firstName || invoice.patient} 
+                            {invoice.patientDetails?.lastName ? ` ${invoice.patientDetails.lastName}` : ''}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            ID: {invoice.patientDetails?.patientId || 'N/A'} | 
+                            Date: {new Date(invoice.invoiceDate || Date.now()).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Pending' ? 'secondary' : 'destructive'}>
+                            {invoice.status || 'Pending'}
+                          </Badge>
+                          <p className="font-semibold mt-1">₹{(invoice.total || 0).toFixed(2)}</p>
+                        </div>
+                      </div>
+                      
+                      {invoice.items && invoice.items.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-gray-700">Medicines:</p>
+                          {invoice.items.map((item: any, index: number) => (
+                            <div key={index} className="flex justify-between text-sm bg-gray-50 p-2 rounded">
+                              <span>{item.medicineName || item.name}</span>
+                              <span>Qty: {item.quantity} | ₹{((item.unitPrice || 0) * (item.quantity || 0)).toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {!invoices.length && (
+                    <p className="text-gray-500 text-center py-8">No invoices found</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
