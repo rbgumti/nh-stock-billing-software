@@ -21,17 +21,22 @@ export default function Invoices() {
     
     // Transform saved invoices to match expected format
     const transformedInvoices = savedInvoices.map((invoice: any) => ({
-      id: invoice.id,
-      patientName: invoice.patientDetails?.fullName || invoice.patient || "Unknown Patient",
+      id: String(invoice.id ?? ""),
+      patientName:
+        (invoice.patientDetails
+          ? `${invoice.patientDetails?.firstName ?? ""} ${invoice.patientDetails?.lastName ?? ""}`.trim()
+          : "") || invoice.patient || "Unknown Patient",
       patientId: invoice.patientDetails?.patientId || 0,
       date: invoice.invoiceDate,
-      amount: invoice.total,
-      status: "Pending", // Default status for new invoices
-      items: invoice.items.map((item: any) => ({
-        name: item.medicine || item.name,
-        quantity: item.quantity,
-        price: item.price
-      }))
+      amount: Number(invoice.total ?? 0),
+      status: invoice.status || "Pending", // Use saved status if available
+      items: Array.isArray(invoice.items)
+        ? invoice.items.map((item: any) => ({
+            name: item.medicineName || item.name || item.medicine || "Item",
+            quantity: Number(item.quantity ?? item.qty ?? 0),
+            price: Number(item.unitPrice ?? item.price ?? 0),
+          }))
+        : [],
     }));
     
     setInvoices(transformedInvoices);
