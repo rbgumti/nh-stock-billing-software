@@ -14,6 +14,7 @@ import ViewPatient from "./pages/ViewPatient";
 import Stock from "./pages/Stock";
 import Invoices from "./pages/Invoices";
 import NewInvoice from "./pages/NewInvoice";
+import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
                   <Route path="/stock" element={<Stock />} />
                   <Route path="/invoices" element={<Invoices />} />
                   <Route path="/invoices/new" element={<NewInvoice />} />
+                  <Route path="/reports" element={<Reports />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
