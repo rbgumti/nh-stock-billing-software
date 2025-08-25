@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [invoices, setInvoices] = useState([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
   const { toast } = useToast();
 
   // Load invoices from localStorage
@@ -39,7 +39,7 @@ export default function Invoices() {
 
   const statuses = ["all", "Paid", "Pending", "Overdue"];
 
-  const filteredInvoices = invoices.filter(invoice => {
+  const filteredInvoices = invoices.filter((invoice: any) => {
     const matchesSearch = invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          invoice.patientName.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -57,13 +57,13 @@ export default function Invoices() {
     }
   };
 
-  const totalAmount = filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+  const totalAmount = filteredInvoices.reduce((sum: number, invoice: any) => sum + invoice.amount, 0);
   const paidAmount = filteredInvoices
-    .filter(inv => inv.status === "Paid")
-    .reduce((sum, invoice) => sum + invoice.amount, 0);
+    .filter((inv: any) => inv.status === "Paid")
+    .reduce((sum: number, invoice: any) => sum + invoice.amount, 0);
   const pendingAmount = filteredInvoices
-    .filter(inv => inv.status === "Pending")
-    .reduce((sum, invoice) => sum + invoice.amount, 0);
+    .filter((inv: any) => inv.status === "Pending")
+    .reduce((sum: number, invoice: any) => sum + invoice.amount, 0);
 
   const generatePDF = (invoice: any) => {
     const doc = new jsPDF();
@@ -217,7 +217,7 @@ export default function Invoices() {
 
       {/* Invoice List */}
       <div className="space-y-4">
-        {filteredInvoices.map((invoice) => (
+        {filteredInvoices.map((invoice: any) => (
           <Card key={invoice.id} className="hover:shadow-md transition-shadow">
             <CardContent className="pt-6">
               <div className="flex justify-between items-start">
@@ -243,7 +243,7 @@ export default function Invoices() {
                     <div>
                       <p className="text-sm text-gray-500">Items</p>
                       <div className="text-sm">
-                        {invoice.items.map((item, index) => (
+                        {invoice.items.map((item: any, index: number) => (
                           <span key={index}>
                             {item.name}
                             {index < invoice.items.length - 1 && ", "}
