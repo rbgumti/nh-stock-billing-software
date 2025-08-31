@@ -26,7 +26,11 @@ import {
   Package, 
   Receipt,
   Calendar,
-  DollarSign
+  DollarSign,
+  Activity,
+  AlertTriangle,
+  Clock,
+  ShoppingCart
 } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 
@@ -199,11 +203,12 @@ export default function Reports() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="patients">Patient Reports</TabsTrigger>
           <TabsTrigger value="stock">Stock Reports</TabsTrigger>
           <TabsTrigger value="invoices">Invoice Reports</TabsTrigger>
+          <TabsTrigger value="stockledger">Stock Ledger</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -341,6 +346,51 @@ export default function Reports() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Detailed Patient List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Detailed Patient Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 max-h-80 overflow-y-auto">
+                {patients.map((patient: any) => (
+                  <div key={patient.patientId} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold">
+                          {patient.personalInfo?.firstName} {patient.personalInfo?.lastName}
+                        </h4>
+                        <p className="text-sm text-gray-600">ID: {patient.patientId}</p>
+                        <p className="text-sm text-gray-600">
+                          Age: {patient.personalInfo?.dateOfBirth 
+                            ? new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear()
+                            : 'N/A'} | Gender: {patient.personalInfo?.gender || 'N/A'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600">Contact</p>
+                        <p className="text-sm">{patient.personalInfo?.phone || 'N/A'}</p>
+                        <p className="text-xs text-gray-500">{patient.personalInfo?.email || 'N/A'}</p>
+                      </div>
+                    </div>
+                    {patient.medicalInfo && (
+                      <div className="pt-2 border-t">
+                        <p className="text-xs text-gray-600">
+                          <strong>Medical Info:</strong> {patient.medicalInfo.allergies || 'No allergies'} | 
+                          Conditions: {patient.medicalInfo.chronicConditions || 'None'} |
+                          Blood Group: {patient.medicalInfo.bloodGroup || 'Unknown'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {!patients.length && (
+                  <p className="text-gray-500 text-center py-8">No patients found</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="stock" className="space-y-6">
@@ -410,33 +460,57 @@ export default function Reports() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Stock Ledger</CardTitle>
+                <CardTitle>Stock Status Overview</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4 max-h-80 overflow-y-auto">
-                  {invoices.flatMap(invoice => 
-                    invoice.items?.map((item: any, index: number) => (
-                      <div key={`${invoice.id}-${index}`} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <p className="font-medium">{item.medicineName || item.name}</p>
-                          <p className="text-sm text-gray-600">
-                            Patient: {invoice.patientDetails?.firstName || invoice.patient} 
-                            {invoice.patientDetails?.lastName ? ` ${invoice.patientDetails.lastName}` : ''}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            ID: {invoice.patientDetails?.patientId || 'N/A'} | 
-                            Date: {new Date(invoice.invoiceDate || Date.now()).toLocaleDateString()}
-                          </p>
+                  {stockItems.map((item) => {
+                    const isLowStock = item.currentStock <= item.minimumStock;
+                    const expiryDate = new Date(item.expiryDate);
+                    const warningDate = new Date();
+                    warningDate.setMonth(warningDate.getMonth() + 3);
+                    const isExpiringSoon = expiryDate <= warningDate;
+                    
+                    return (
+                      <div key={item.id} className="border rounded-lg p-4 space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-semibold">{item.name}</h4>
+                            <p className="text-sm text-gray-600">Category: {item.category}</p>
+                            <p className="text-sm text-gray-600">Supplier: {item.supplier}</p>
+                            <p className="text-sm text-gray-600">Batch: {item.batchNo}</p>
+                          </div>
+                          <div className="text-right space-y-1">
+                            <p className="text-sm font-medium">Stock: {item.currentStock}/{item.minimumStock}</p>
+                            <p className="text-sm text-gray-600">₹{item.unitPrice} per unit</p>
+                            <p className="text-xs text-gray-500">Value: ₹{(item.currentStock * item.unitPrice).toFixed(2)}</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold">Qty: {item.quantity}</p>
-                          <p className="text-sm text-gray-600">₹{(item.unitPrice * item.quantity).toFixed(2)}</p>
+                        <div className="flex gap-2">
+                          {isLowStock && (
+                            <Badge variant="destructive" className="text-xs">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Low Stock
+                            </Badge>
+                          )}
+                          {isExpiringSoon && (
+                            <Badge variant="secondary" className="text-xs">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Expires: {expiryDate.toLocaleDateString()}
+                            </Badge>
+                          )}
+                          {!isLowStock && !isExpiringSoon && (
+                            <Badge variant="default" className="text-xs">
+                              <Activity className="h-3 w-3 mr-1" />
+                              Good Stock
+                            </Badge>
+                          )}
                         </div>
                       </div>
-                    )) || []
-                  )}
-                  {(!invoices.length || !invoices.some(inv => inv.items?.length)) && (
-                    <p className="text-gray-500 text-center py-8">No stock movements recorded</p>
+                    );
+                  })}
+                  {!stockItems.length && (
+                    <p className="text-gray-500 text-center py-8">No stock items found</p>
                   )}
                 </div>
               </CardContent>
@@ -557,6 +631,152 @@ export default function Reports() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="stockledger" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Stock Ledger</h2>
+            <Button onClick={() => exportReport('stock')}>
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <ShoppingCart className="h-8 w-8 text-blue-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total Transactions</p>
+                    <p className="text-2xl font-bold">
+                      {invoices.reduce((sum, inv) => sum + (inv.items?.length || 0), 0)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <Package className="h-8 w-8 text-green-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Items Dispensed</p>
+                    <p className="text-2xl font-bold">
+                      {invoices.reduce((sum, inv) => sum + (inv.items?.reduce((itemSum: number, item: any) => itemSum + (item.quantity || 0), 0) || 0), 0)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <DollarSign className="h-8 w-8 text-purple-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total Sales Value</p>
+                    <p className="text-2xl font-bold">
+                      ₹{invoices.reduce((sum, inv) => sum + (inv.total || 0), 0).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center">
+                  <Users className="h-8 w-8 text-orange-600" />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Unique Patients</p>
+                    <p className="text-2xl font-bold">
+                      {new Set(invoices.map(inv => inv.patientDetails?.patientId || inv.patient)).size}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Detailed Stock Movement Ledger</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {invoices.flatMap(invoice => 
+                  invoice.items?.map((item: any, index: number) => {
+                    const stockItem = stockItems.find(s => s.name === item.medicineName || s.name === item.name);
+                    return (
+                      <div key={`${invoice.id}-${index}`} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <h4 className="font-semibold text-lg">{item.medicineName || item.name}</h4>
+                            <p className="text-sm text-gray-600">
+                              <strong>Patient:</strong> {invoice.patientDetails?.firstName || invoice.patient} 
+                              {invoice.patientDetails?.lastName ? ` ${invoice.patientDetails.lastName}` : ''}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              <strong>Patient ID:</strong> {invoice.patientDetails?.patientId || 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              <strong>Transaction Date:</strong> {new Date(invoice.invoiceDate || Date.now()).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="text-right space-y-1">
+                            <p className="text-lg font-bold">Qty: {item.quantity}</p>
+                            <p className="text-sm text-gray-600">Unit Price: ₹{(item.unitPrice || 0).toFixed(2)}</p>
+                            <p className="text-lg font-semibold text-green-600">
+                              Total: ₹{((item.unitPrice || 0) * (item.quantity || 0)).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {stockItem && (
+                          <div className="pt-3 border-t bg-gray-50 rounded p-3">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div>
+                                <p className="text-gray-600">Category</p>
+                                <p className="font-medium">{stockItem.category}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-600">Current Stock</p>
+                                <p className="font-medium">{stockItem.currentStock}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-600">Supplier</p>
+                                <p className="font-medium">{stockItem.supplier}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-600">Batch No</p>
+                                <p className="font-medium">{stockItem.batchNo}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-center pt-2">
+                          <Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Pending' ? 'secondary' : 'destructive'}>
+                            {invoice.status || 'Pending'}
+                          </Badge>
+                          <p className="text-sm text-gray-500">Invoice #{invoice.id}</p>
+                        </div>
+                      </div>
+                    );
+                  }) || []
+                )}
+                {(!invoices.length || !invoices.some(inv => inv.items?.length)) && (
+                  <div className="text-center py-12">
+                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 text-lg">No stock movements recorded</p>
+                    <p className="text-gray-400 text-sm">Stock transactions will appear here when invoices are created</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
