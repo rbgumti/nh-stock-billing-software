@@ -142,12 +142,12 @@ export default function Reports() {
 
     switch (reportType) {
       case 'patients':
-        csvContent = "Patient ID,Name,Gender,Age,Phone,Email\n";
+        csvContent = "Patient ID,Name,Gender,Age,Phone,Email,Address,Aadhar,Old Govt ID,New Govt ID\n";
         patients.forEach(patient => {
           const age = patient.personalInfo?.dateOfBirth 
             ? new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear()
             : 'N/A';
-          csvContent += `${patient.patientId || ''},${patient.personalInfo?.firstName || ''} ${patient.personalInfo?.lastName || ''},${patient.personalInfo?.gender || ''},${age},${patient.personalInfo?.phone || ''},${patient.personalInfo?.email || ''}\n`;
+          csvContent += `${patient.patientId || ''},${patient.personalInfo?.firstName || ''} ${patient.personalInfo?.lastName || ''},${patient.personalInfo?.gender || ''},${age},${patient.personalInfo?.phone || ''},${patient.personalInfo?.email || ''},${patient.personalInfo?.address || ''},${patient.personalInfo?.aadhar || ''},${patient.personalInfo?.oldGovtId || ''},${patient.personalInfo?.newGovtId || ''}\n`;
         });
         filename = "patients-report.csv";
         break;
@@ -367,11 +367,32 @@ export default function Reports() {
                             ? new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear()
                             : 'N/A'} | Gender: {patient.personalInfo?.gender || 'N/A'}
                         </p>
+                        <p className="text-sm text-gray-600">
+                          <strong>Address:</strong> {patient.personalInfo?.address || 'N/A'}
+                        </p>
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600">
+                            <strong>Aadhar:</strong> {patient.personalInfo?.aadhar || 'N/A'}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            <strong>Old Govt ID:</strong> {patient.personalInfo?.oldGovtId || 'N/A'}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            <strong>New Govt ID:</strong> {patient.personalInfo?.newGovtId || 'N/A'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right space-y-1">
                         <p className="text-sm text-gray-600">Contact</p>
                         <p className="text-sm">{patient.personalInfo?.phone || 'N/A'}</p>
                         <p className="text-xs text-gray-500">{patient.personalInfo?.email || 'N/A'}</p>
+                        {patient.emergencyContact && (
+                          <div className="pt-2">
+                            <p className="text-xs text-gray-600"><strong>Emergency Contact:</strong></p>
+                            <p className="text-xs">{patient.emergencyContact.name || 'N/A'}</p>
+                            <p className="text-xs">{patient.emergencyContact.phone || 'N/A'}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                     {patient.medicalInfo && (
