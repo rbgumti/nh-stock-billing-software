@@ -1,0 +1,239 @@
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Trash2 } from "lucide-react";
+import { StockItem } from "@/hooks/useStockStore";
+import { PurchaseOrder, PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
+
+interface PurchaseOrderFormProps {
+  onClose: () => void;
+  onSubmit: (po: PurchaseOrder) => void;
+  stockItems: StockItem[];
+}
+
+export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrderFormProps) {
+  const [formData, setFormData] = useState({
+    supplier: "",
+    expectedDelivery: "",
+    notes: ""
+  });
+
+  const [items, setItems] = useState<PurchaseOrderItem[]>([]);
+  const [currentItem, setCurrentItem] = useState({
+    stockItemId: "",
+    quantity: "",
+    unitPrice: ""
+  });
+
+  const generatePONumber = () => {
+    const date = new Date();
+    const timestamp = date.getTime().toString().slice(-6);
+    return `PO${date.getFullYear()}${timestamp}`;
+  };
+
+  const addItem = () => {
+    if (!currentItem.stockItemId || !currentItem.quantity || !currentItem.unitPrice) return;
+
+    const stockItem = stockItems.find(item => item.id === parseInt(currentItem.stockItemId));
+    if (!stockItem) return;
+
+    const quantity = parseInt(currentItem.quantity);
+    const unitPrice = parseFloat(currentItem.unitPrice);
+
+    const newItem: PurchaseOrderItem = {
+      stockItemId: stockItem.id,
+      stockItemName: stockItem.name,
+      quantity,
+      unitPrice,
+      totalPrice: quantity * unitPrice
+    };
+
+    setItems([...items, newItem]);
+    setCurrentItem({ stockItemId: "", quantity: "", unitPrice: "" });
+  };
+
+  const removeItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index));
+  };
+
+  const totalAmount = items.reduce((sum, item) => sum + item.totalPrice, 0);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.supplier || !formData.expectedDelivery || items.length === 0) {
+      return;
+    }
+
+    const purchaseOrder: PurchaseOrder = {
+      id: Date.now(),
+      poNumber: generatePONumber(),
+      supplier: formData.supplier,
+      orderDate: new Date().toISOString().split('T')[0],
+      expectedDelivery: formData.expectedDelivery,
+      status: 'Pending',
+      items,
+      totalAmount,
+      notes: formData.notes
+    };
+
+    onSubmit(purchaseOrder);
+  };
+
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create Purchase Order</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="supplier">Supplier *</Label>
+              <Input
+                id="supplier"
+                value={formData.supplier}
+                onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+                placeholder="Enter supplier name"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="expectedDelivery">Expected Delivery Date *</Label>
+              <Input
+                id="expectedDelivery"
+                type="date"
+                value={formData.expectedDelivery}
+                onChange={(e) => setFormData({ ...formData, expectedDelivery: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              placeholder="Additional notes or instructions"
+              rows={3}
+            />
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Add Items</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label>Stock Item</Label>
+                  <Select value={currentItem.stockItemId} onValueChange={(value) => 
+                    setCurrentItem({ ...currentItem, stockItemId: value })
+                  }>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select item" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stockItems.map((item) => (
+                        <SelectItem key={item.id} value={item.id.toString()}>
+                          {item.name} - {item.category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Quantity</Label>
+                  <Input
+                    type="number"
+                    value={currentItem.quantity}
+                    onChange={(e) => setCurrentItem({ ...currentItem, quantity: e.target.value })}
+                    placeholder="0"
+                    min="1"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Unit Price (₹)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={currentItem.unitPrice}
+                    onChange={(e) => setCurrentItem({ ...currentItem, unitPrice: e.target.value })}
+                    placeholder="0.00"
+                    min="0"
+                  />
+                </div>
+
+                <div className="flex items-end">
+                  <Button type="button" onClick={addItem} className="w-full">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+              </div>
+
+              {items.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-medium">Order Items</h4>
+                  <div className="border rounded-lg">
+                    <div className="grid grid-cols-5 gap-4 p-3 bg-gray-50 font-medium text-sm">
+                      <div>Item</div>
+                      <div>Quantity</div>
+                      <div>Unit Price</div>
+                      <div>Total</div>
+                      <div>Action</div>
+                    </div>
+                    {items.map((item, index) => (
+                      <div key={index} className="grid grid-cols-5 gap-4 p-3 border-t">
+                        <div className="font-medium">{item.stockItemName}</div>
+                        <div>{item.quantity}</div>
+                        <div>₹{item.unitPrice.toFixed(2)}</div>
+                        <div>₹{item.totalPrice.toFixed(2)}</div>
+                        <div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeItem(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="p-3 border-t bg-gray-50">
+                      <div className="flex justify-between font-bold">
+                        <span>Total Amount:</span>
+                        <span>₹{totalAmount.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end space-x-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={items.length === 0}>
+              Create Purchase Order
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
