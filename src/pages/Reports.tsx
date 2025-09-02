@@ -142,21 +142,17 @@ export default function Reports() {
 
     switch (reportType) {
       case 'patients':
-        data = patients.map(patient => {
-          const age = patient.personalInfo?.dateOfBirth 
-            ? new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear()
-            : 'N/A';
+        data = patients.map((patient, index) => {
           return {
+            'S.No.': index + 1,
             'Patient ID': patient.patientId || '',
-            'Name': `${patient.personalInfo?.firstName || ''} ${patient.personalInfo?.lastName || ''}`.trim(),
-            'Gender': patient.personalInfo?.gender || '',
-            'Age': age,
-            'Phone': patient.personalInfo?.phone || '',
-            'Email': patient.personalInfo?.email || '',
-            'Address': patient.personalInfo?.address || '',
-            'Aadhar': patient.personalInfo?.aadhar || '',
+            'Patient Name': `${patient.personalInfo?.firstName || ''} ${patient.personalInfo?.lastName || ''}`.trim(),
+            'New Govt ID': patient.personalInfo?.newGovtId || '',
             'Old Govt ID': patient.personalInfo?.oldGovtId || '',
-            'New Govt ID': patient.personalInfo?.newGovtId || ''
+            'Aadhaar No.': patient.personalInfo?.aadhar || '',
+            'Phone No.': patient.personalInfo?.phone || '',
+            'Address': patient.personalInfo?.address || '',
+            'Registration Date': patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : ''
           };
         });
         filename = "patients-report.xlsx";
