@@ -198,17 +198,40 @@ export default function Reports() {
           return;
         }
         
-        data = invoices.map(invoice => {
+        data = [];
+        invoices.forEach(invoice => {
           const patientName = invoice.patientDetails 
             ? `${invoice.patientDetails.firstName || ''} ${invoice.patientDetails.lastName || ''}`.trim()
             : invoice.patient || 'Unknown';
-          return {
-            'Invoice ID': invoice.id || '',
-            'Patient': patientName,
-            'Date': invoice.invoiceDate || '',
-            'Amount': invoice.total || 0,
-            'Status': invoice.status || 'Pending'
-          };
+          const patientId = invoice.patientDetails?.patientId || invoice.patientId || '';
+          
+          if (invoice.items && invoice.items.length > 0) {
+            // Create a row for each medicine/item in the invoice
+            invoice.items.forEach((item: any) => {
+              data.push({
+                'INVOICE NO': invoice.invoiceNumber || invoice.id || '',
+                'DATE': invoice.invoiceDate || '',
+                'PATIENT ID': patientId,
+                'PATIENT NAME': patientName,
+                'MEDICINE NAME': item.name || item.medicine || '',
+                'QTY OF MEDICINE': item.quantity || '',
+                'RATE': item.price || item.rate || 0,
+                'AMOUNT': (item.quantity || 0) * (item.price || item.rate || 0)
+              });
+            });
+          } else {
+            // Fallback for invoices without items
+            data.push({
+              'INVOICE NO': invoice.invoiceNumber || invoice.id || '',
+              'DATE': invoice.invoiceDate || '',
+              'PATIENT ID': patientId,
+              'PATIENT NAME': patientName,
+              'MEDICINE NAME': 'N/A',
+              'QTY OF MEDICINE': 'N/A',
+              'RATE': 0,
+              'AMOUNT': invoice.total || 0
+            });
+          }
         });
         filename = "invoices-report.xlsx";
         break;
