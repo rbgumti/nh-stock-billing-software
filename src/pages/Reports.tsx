@@ -33,6 +33,7 @@ import {
   ShoppingCart
 } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
+import * as XLSX from "xlsx";
 
 export default function Reports() {
   const { stockItems } = useStockStore();
@@ -136,47 +137,68 @@ export default function Reports() {
   };
 
   const exportReport = (reportType: string) => {
-    // Simple CSV export functionality
-    let csvContent = "";
+    let data: any[] = [];
     let filename = "";
 
     switch (reportType) {
       case 'patients':
-        csvContent = "Patient ID,Name,Gender,Age,Phone,Email,Address,Aadhar,Old Govt ID,New Govt ID\n";
-        patients.forEach(patient => {
+        data = patients.map(patient => {
           const age = patient.personalInfo?.dateOfBirth 
             ? new Date().getFullYear() - new Date(patient.personalInfo.dateOfBirth).getFullYear()
             : 'N/A';
-          csvContent += `${patient.patientId || ''},${patient.personalInfo?.firstName || ''} ${patient.personalInfo?.lastName || ''},${patient.personalInfo?.gender || ''},${age},${patient.personalInfo?.phone || ''},${patient.personalInfo?.email || ''},${patient.personalInfo?.address || ''},${patient.personalInfo?.aadhar || ''},${patient.personalInfo?.oldGovtId || ''},${patient.personalInfo?.newGovtId || ''}\n`;
+          return {
+            'Patient ID': patient.patientId || '',
+            'Name': `${patient.personalInfo?.firstName || ''} ${patient.personalInfo?.lastName || ''}`.trim(),
+            'Gender': patient.personalInfo?.gender || '',
+            'Age': age,
+            'Phone': patient.personalInfo?.phone || '',
+            'Email': patient.personalInfo?.email || '',
+            'Address': patient.personalInfo?.address || '',
+            'Aadhar': patient.personalInfo?.aadhar || '',
+            'Old Govt ID': patient.personalInfo?.oldGovtId || '',
+            'New Govt ID': patient.personalInfo?.newGovtId || ''
+          };
         });
-        filename = "patients-report.csv";
+        filename = "patients-report.xlsx";
         break;
       case 'stock':
-        csvContent = "Item Name,Category,Current Stock,Minimum Stock,Unit Price,Supplier,Expiry Date\n";
-        stockItems.forEach(item => {
-          csvContent += `${item.name},${item.category},${item.currentStock},${item.minimumStock},${item.unitPrice},${item.supplier},${item.expiryDate}\n`;
-        });
-        filename = "stock-report.csv";
+        data = stockItems.map(item => ({
+          'Item Name': item.name,
+          'Category': item.category,
+          'Current Stock': item.currentStock,
+          'Minimum Stock': item.minimumStock,
+          'Unit Price': item.unitPrice,
+          'Supplier': item.supplier,
+          'Expiry Date': item.expiryDate
+        }));
+        filename = "stock-report.xlsx";
         break;
       case 'invoices':
-        csvContent = "Invoice ID,Patient,Date,Amount,Status\n";
-        invoices.forEach(invoice => {
+        data = invoices.map(invoice => {
           const patientName = invoice.patientDetails 
             ? `${invoice.patientDetails.firstName || ''} ${invoice.patientDetails.lastName || ''}`.trim()
             : invoice.patient || 'Unknown';
-          csvContent += `${invoice.id || ''},${patientName},${invoice.invoiceDate || ''},${invoice.total || 0},${invoice.status || 'Pending'}\n`;
+          return {
+            'Invoice ID': invoice.id || '',
+            'Patient': patientName,
+            'Date': invoice.invoiceDate || '',
+            'Amount': invoice.total || 0,
+            'Status': invoice.status || 'Pending'
+          };
         });
-        filename = "invoices-report.csv";
+        filename = "invoices-report.xlsx";
         break;
     }
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    // Create workbook and worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, reportType.charAt(0).toUpperCase() + reportType.slice(1));
+    
+    // Save file
+    XLSX.writeFile(workbook, filename);
   };
 
   return (
@@ -268,7 +290,7 @@ export default function Reports() {
             <h2 className="text-2xl font-bold">Patient Reports</h2>
             <Button onClick={() => exportReport('patients')}>
               <Download className="h-4 w-4 mr-2" />
-              Export CSV
+              Export Excel
             </Button>
           </div>
 
@@ -419,7 +441,7 @@ export default function Reports() {
             <h2 className="text-2xl font-bold">Stock Reports</h2>
             <Button onClick={() => exportReport('stock')}>
               <Download className="h-4 w-4 mr-2" />
-              Export CSV
+              Export Excel
             </Button>
           </div>
 
@@ -544,7 +566,7 @@ export default function Reports() {
             <h2 className="text-2xl font-bold">Invoice Reports</h2>
             <Button onClick={() => exportReport('invoices')}>
               <Download className="h-4 w-4 mr-2" />
-              Export CSV
+              Export Excel
             </Button>
           </div>
 
@@ -659,7 +681,7 @@ export default function Reports() {
             <h2 className="text-2xl font-bold">Stock Ledger</h2>
             <Button onClick={() => exportReport('stock')}>
               <Download className="h-4 w-4 mr-2" />
-              Export CSV
+              Export Excel
             </Button>
           </div>
 
