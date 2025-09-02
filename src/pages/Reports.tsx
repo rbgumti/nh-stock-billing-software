@@ -152,16 +152,25 @@ export default function Reports() {
         }
         
         data = patients.map((patient, index) => {
+          const firstName = patient.personalInfo?.firstName ?? patient.firstName ?? '';
+          const lastName = patient.personalInfo?.lastName ?? patient.lastName ?? '';
+          const newGovt = patient.personalInfo?.newGovtId ?? patient.govtIdNew ?? '';
+          const oldGovt = patient.personalInfo?.oldGovtId ?? patient.govtIdOld ?? '';
+          const aadhar = patient.personalInfo?.aadhar ?? patient.aadhar ?? '';
+          const phone = patient.personalInfo?.phone ?? patient.phone ?? '';
+          const address = patient.personalInfo?.address ?? patient.address ?? '';
+          const regDate = patient.createdAt || patient.registrationDate || '';
+
           return {
-            'S.No.': index + 1,
-            'Patient ID': patient.patientId || '',
-            'Patient Name': `${patient.personalInfo?.firstName || ''} ${patient.personalInfo?.lastName || ''}`.trim(),
-            'New Govt ID': patient.personalInfo?.newGovtId || '',
-            'Old Govt ID': patient.personalInfo?.oldGovtId || '',
-            'Aadhaar No.': patient.personalInfo?.aadhar || '',
-            'Phone No.': patient.personalInfo?.phone || '',
-            'Address': patient.personalInfo?.address || '',
-            'Registration Date': patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : ''
+            'S.no.': index + 1,
+            'patient id': patient.patientId || patient.personalInfo?.patientId || '',
+            'Patient name': `${firstName} ${lastName}`.trim(),
+            'New govt id': newGovt,
+            'Old govt id': oldGovt,
+            'Aadhaar no.': aadhar,
+            'Phone No.': phone,
+            'Address': address,
+            'registeration date': regDate ? new Date(regDate).toLocaleDateString() : ''
           };
         });
         filename = "patients-report.xlsx";
