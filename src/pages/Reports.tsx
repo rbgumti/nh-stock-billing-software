@@ -140,8 +140,17 @@ export default function Reports() {
     let data: any[] = [];
     let filename = "";
 
+    console.log(`Exporting ${reportType} report`);
+    console.log(`Available patients:`, patients.length);
+    console.log(`Sample patient:`, patients[0]);
+
     switch (reportType) {
       case 'patients':
+        if (patients.length === 0) {
+          alert('No patient data available to export');
+          return;
+        }
+        
         data = patients.map((patient, index) => {
           return {
             'S.No.': index + 1,
@@ -158,6 +167,11 @@ export default function Reports() {
         filename = "patients-report.xlsx";
         break;
       case 'stock':
+        if (stockItems.length === 0) {
+          alert('No stock data available to export');
+          return;
+        }
+        
         data = stockItems.map(item => ({
           'Item Name': item.name,
           'Category': item.category,
@@ -170,6 +184,11 @@ export default function Reports() {
         filename = "stock-report.xlsx";
         break;
       case 'invoices':
+        if (invoices.length === 0) {
+          alert('No invoice data available to export');
+          return;
+        }
+        
         data = invoices.map(invoice => {
           const patientName = invoice.patientDetails 
             ? `${invoice.patientDetails.firstName || ''} ${invoice.patientDetails.lastName || ''}`.trim()
@@ -184,6 +203,13 @@ export default function Reports() {
         });
         filename = "invoices-report.xlsx";
         break;
+    }
+
+    console.log(`Data to export:`, data);
+
+    if (data.length === 0) {
+      alert('No data available to export');
+      return;
     }
 
     // Create workbook and worksheet
