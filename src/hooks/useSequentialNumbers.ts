@@ -32,9 +32,12 @@ export const useSequentialNumbers = () => {
   }, [numbers]);
 
   const getNextPurchaseOrderNumber = (): string => {
-    const currentYear = new Date().getFullYear();
-    const paddedNumber = sequentialStore.purchaseOrder.toString().padStart(4, '0');
-    const poNumber = `PO${currentYear}${paddedNumber}`;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const paddedNumber = sequentialStore.purchaseOrder.toString().padStart(3, '0');
+    const poNumber = `PO${year}${month}${day}${paddedNumber}`;
     
     // Increment for next use
     const newNumbers = {
@@ -47,9 +50,12 @@ export const useSequentialNumbers = () => {
   };
 
   const getNextInvoiceNumber = (): string => {
-    const currentYear = new Date().getFullYear();
-    const paddedNumber = sequentialStore.invoice.toString().padStart(4, '0');
-    const invoiceNumber = `INV${currentYear}${paddedNumber}`;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const paddedNumber = sequentialStore.invoice.toString().padStart(3, '0');
+    const invoiceNumber = `INV${year}${month}${day}${paddedNumber}`;
     
     // Increment for next use
     const newNumbers = {
@@ -62,9 +68,12 @@ export const useSequentialNumbers = () => {
   };
 
   const getNextGoodsReceiptNumber = (): string => {
-    const currentYear = new Date().getFullYear();
-    const paddedNumber = sequentialStore.goodsReceipt.toString().padStart(4, '0');
-    const grnNumber = `GRN${currentYear}${paddedNumber}`;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const paddedNumber = sequentialStore.goodsReceipt.toString().padStart(3, '0');
+    const grnNumber = `GRN${year}${month}${day}${paddedNumber}`;
     
     // Increment for next use
     const newNumbers = {
