@@ -10,6 +10,7 @@ import { ArrowLeft, Plus, Trash2, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePatientStore } from "@/hooks/usePatientStore";
 import { useStockStore } from "@/hooks/useStockStore";
+import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 
 interface InvoiceItem {
   id: string;
@@ -27,6 +28,7 @@ export default function NewInvoice() {
   const navigate = useNavigate();
   const { patients, getPatient } = usePatientStore();
   const { getMedicines, getStockItem, reduceStock } = useStockStore();
+  const { getNextInvoiceNumber } = useSequentialNumbers();
   
   const [selectedPatient, setSelectedPatient] = useState("");
   const [patientSearchId, setPatientSearchId] = useState("");
@@ -171,8 +173,10 @@ export default function NewInvoice() {
       reduceStock(item.medicineId, item.quantity);
     });
 
+    const invoiceNumber = getNextInvoiceNumber();
     const invoiceData = {
-      id: `INV-${Date.now()}`,
+      id: invoiceNumber,
+      invoiceNumber: invoiceNumber,
       patient: selectedPatient,
       patientDetails: foundPatient,
       invoiceDate,

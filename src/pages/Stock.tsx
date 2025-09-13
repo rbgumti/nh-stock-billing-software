@@ -82,7 +82,7 @@ export default function Stock() {
     });
   };
 
-  const handleGRN = (grnData: any) => {
+  const handleGRN = (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (po) {
       // Update stock levels based on GRN
@@ -108,7 +108,7 @@ export default function Stock() {
     setSelectedPO(null);
     toast({
       title: "Success",
-      description: "GRN has been processed successfully! Stock levels updated."
+      description: `GRN ${grnData.grnNumber} has been processed successfully! Stock levels updated.`
     });
   };
 

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder, PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
+import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 
 interface PurchaseOrderFormProps {
   onClose: () => void;
@@ -17,6 +18,8 @@ interface PurchaseOrderFormProps {
 }
 
 export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrderFormProps) {
+  const { getNextPurchaseOrderNumber } = useSequentialNumbers();
+  
   const [formData, setFormData] = useState({
     supplier: "",
     expectedDelivery: "",
@@ -29,12 +32,6 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
     quantity: "",
     unitPrice: ""
   });
-
-  const generatePONumber = () => {
-    const date = new Date();
-    const timestamp = date.getTime().toString().slice(-6);
-    return `PO${date.getFullYear()}${timestamp}`;
-  };
 
   const addItem = () => {
     if (!currentItem.stockItemId || !currentItem.quantity || !currentItem.unitPrice) return;
@@ -72,7 +69,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
 
     const purchaseOrder: PurchaseOrder = {
       id: Date.now(),
-      poNumber: generatePONumber(),
+      poNumber: getNextPurchaseOrderNumber(),
       supplier: formData.supplier,
       orderDate: new Date().toISOString().split('T')[0],
       expectedDelivery: formData.expectedDelivery,

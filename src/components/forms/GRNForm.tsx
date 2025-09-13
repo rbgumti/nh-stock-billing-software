@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
+import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 
 interface GRNItem {
   stockItemId: number;
@@ -19,12 +20,14 @@ interface GRNItem {
 
 interface GRNFormProps {
   onClose: () => void;
-  onSubmit: (grnData: { purchaseOrderId: number; items: GRNItem[]; notes?: string }) => void;
+  onSubmit: (grnData: { grnNumber: string; purchaseOrderId: number; items: GRNItem[]; notes?: string }) => void;
   purchaseOrder: PurchaseOrder;
   stockItems: StockItem[];
 }
 
 export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFormProps) {
+  const { getNextGoodsReceiptNumber } = useSequentialNumbers();
+  
   const [grnItems, setGRNItems] = useState<GRNItem[]>(
     purchaseOrder.items.map(item => ({
       stockItemId: item.stockItemId,
@@ -58,7 +61,10 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const grnNumber = getNextGoodsReceiptNumber();
+    
     onSubmit({
+      grnNumber,
       purchaseOrderId: purchaseOrder.id,
       items: grnItems,
       notes
@@ -75,6 +81,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Goods Receipt Note - PO #{purchaseOrder.poNumber}</DialogTitle>
+          <p className="text-sm text-gray-500">Generate GRN for received goods</p>
         </DialogHeader>
 
         <div className="mb-6">
