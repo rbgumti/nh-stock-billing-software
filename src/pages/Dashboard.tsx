@@ -71,7 +71,7 @@ export default function Dashboard() {
             <TrendingUp className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.monthlyRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">Rs.{stats.monthlyRevenue.toLocaleString()}</div>
             <p className="text-xs text-green-600 mt-1">+15% from last month</p>
           </CardContent>
         </Card>
