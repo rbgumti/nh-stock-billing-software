@@ -15,6 +15,9 @@ interface GRNItem {
   stockItemId: number;
   orderedQuantity: number;
   receivedQuantity: number;
+  batchNo?: string;
+  expiryDate?: string;
+  mrp?: number;
   remarks?: string;
 }
 
@@ -33,6 +36,9 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
       stockItemId: item.stockItemId,
       orderedQuantity: item.quantity,
       receivedQuantity: item.quantity, // Default to ordered quantity
+      batchNo: "",
+      expiryDate: "",
+      mrp: 0,
       remarks: ""
     }))
   );
@@ -42,6 +48,24 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
   const updateReceivedQuantity = (index: number, quantity: string) => {
     const newItems = [...grnItems];
     newItems[index].receivedQuantity = parseInt(quantity) || 0;
+    setGRNItems(newItems);
+  };
+
+  const updateBatchNo = (index: number, batchNo: string) => {
+    const newItems = [...grnItems];
+    newItems[index].batchNo = batchNo;
+    setGRNItems(newItems);
+  };
+
+  const updateExpiryDate = (index: number, expiryDate: string) => {
+    const newItems = [...grnItems];
+    newItems[index].expiryDate = expiryDate;
+    setGRNItems(newItems);
+  };
+
+  const updateMRP = (index: number, mrp: string) => {
+    const newItems = [...grnItems];
+    newItems[index].mrp = parseFloat(mrp) || 0;
     setGRNItems(newItems);
   };
 
@@ -119,13 +143,15 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-6 gap-4 p-3 bg-gray-50 font-medium text-sm rounded-lg">
+                <div className="grid grid-cols-8 gap-4 p-3 bg-gray-50 font-medium text-sm rounded-lg">
                   <div>Item</div>
                   <div>Ordered Qty</div>
                   <div>Received Qty</div>
+                  <div>Batch No</div>
+                  <div>Expiry Date</div>
+                  <div>MRP (₹)</div>
                   <div>Status</div>
                   <div>Remarks</div>
-                  <div></div>
                 </div>
 
                 {grnItems.map((grnItem, index) => {
@@ -133,7 +159,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                   const StatusIcon = status.icon;
                   
                   return (
-                    <div key={index} className="grid grid-cols-6 gap-4 p-3 border rounded-lg">
+                    <div key={index} className="grid grid-cols-8 gap-4 p-3 border rounded-lg">
                       <div className="font-medium">
                         {getStockItemName(grnItem.stockItemId)}
                       </div>
@@ -147,6 +173,36 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                           type="number"
                           value={grnItem.receivedQuantity}
                           onChange={(e) => updateReceivedQuantity(index, e.target.value)}
+                          min="0"
+                          className="w-full"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Input
+                          value={grnItem.batchNo || ""}
+                          onChange={(e) => updateBatchNo(index, e.target.value)}
+                          placeholder="Batch No"
+                          className="w-full"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Input
+                          type="date"
+                          value={grnItem.expiryDate || ""}
+                          onChange={(e) => updateExpiryDate(index, e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={grnItem.mrp || ""}
+                          onChange={(e) => updateMRP(index, e.target.value)}
+                          placeholder="0.00"
                           min="0"
                           className="w-full"
                         />
@@ -167,8 +223,6 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                           className="w-full"
                         />
                       </div>
-                      
-                      <div></div>
                     </div>
                   );
                 })}
