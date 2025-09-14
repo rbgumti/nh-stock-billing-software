@@ -55,6 +55,9 @@ export default function Invoices() {
     const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
     
     return matchesSearch && matchesStatus;
+  }).sort((a: any, b: any) => {
+    // Sort by date descending (latest first)
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
   const getStatusVariant = (status: string) => {
