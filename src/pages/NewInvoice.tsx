@@ -17,6 +17,8 @@ interface InvoiceItem {
   medicineId: number;
   medicineName: string;
   batchNo: string;
+  expiryDate: string;
+  mrp: number;
   quantity: number;
   unitPrice: number;
   total: number;
@@ -41,6 +43,8 @@ export default function NewInvoice() {
       medicineId: 0,
       medicineName: "", 
       batchNo: "",
+      expiryDate: "",
+      mrp: 0,
       quantity: 1, 
       unitPrice: 0, 
       total: 0,
@@ -87,6 +91,8 @@ export default function NewInvoice() {
       medicineId: 0,
       medicineName: "",
       batchNo: "",
+      expiryDate: "",
+      mrp: 0,
       quantity: 1,
       unitPrice: 0,
       total: 0,
@@ -112,7 +118,9 @@ export default function NewInvoice() {
           const medicine = getStockItem(value as number);
           if (medicine) {
             updatedItem.medicineName = medicine.name;
-            updatedItem.batchNo = medicine.batchNo;
+            updatedItem.batchNo = medicine.batchNo || "";
+            updatedItem.expiryDate = medicine.expiryDate || "";
+            updatedItem.mrp = medicine.mrp || 0;
             updatedItem.unitPrice = medicine.unitPrice;
             updatedItem.availableStock = medicine.currentStock;
             updatedItem.stockAfterInvoice = medicine.currentStock - updatedItem.quantity;
@@ -315,26 +323,56 @@ export default function NewInvoice() {
                   </div>
                   
                   {item.medicineName && (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-3 bg-gray-50 rounded-lg text-sm">
-                      <div>
-                        <span className="font-medium text-gray-600">Batch No:</span>
-                        <p className="font-semibold">{item.batchNo}</p>
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor={`batchNo-${item.id}`}>Batch No</Label>
+                          <Input
+                            id={`batchNo-${item.id}`}
+                            value={item.batchNo}
+                            onChange={(e) => updateItem(item.id, "batchNo", e.target.value)}
+                            placeholder="Enter batch number"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`expiryDate-${item.id}`}>Expiry Date</Label>
+                          <Input
+                            id={`expiryDate-${item.id}`}
+                            type="date"
+                            value={item.expiryDate}
+                            onChange={(e) => updateItem(item.id, "expiryDate", e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`mrp-${item.id}`}>MRP (₹)</Label>
+                          <Input
+                            id={`mrp-${item.id}`}
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={item.mrp}
+                            onChange={(e) => updateItem(item.id, "mrp", parseFloat(e.target.value) || 0)}
+                            placeholder="0.00"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <span className="font-medium text-gray-600">Unit Price:</span>
-                        <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg text-sm">
+                        <div>
+                          <span className="font-medium text-gray-600">Unit Price:</span>
+                          <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-600">Available Stock:</span>
+                          <p className="font-semibold text-blue-600">{item.availableStock}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-600">Stock After Invoice:</span>
+                          <p className={`font-semibold ${item.stockAfterInvoice < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                            {item.stockAfterInvoice}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <span className="font-medium text-gray-600">Available Stock:</span>
-                        <p className="font-semibold text-blue-600">{item.availableStock}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-600">Stock After Invoice:</span>
-                        <p className={`font-semibold ${item.stockAfterInvoice < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {item.stockAfterInvoice}
-                        </p>
-                      </div>
-                    </div>
+                    </>
                   )}
                   
                   <div className="flex items-center justify-between">

@@ -7,6 +7,7 @@ export interface StockItem {
   currentStock: number;
   minimumStock: number;
   unitPrice: number;
+  mrp?: number;
   supplier: string;
   expiryDate: string;
   batchNo: string;
@@ -21,6 +22,7 @@ const initialStockItems: StockItem[] = [
     currentStock: 120,
     minimumStock: 50,
     unitPrice: 0.25,
+    mrp: 0.30,
     supplier: "MedSupply Co.",
     expiryDate: "2024-12-15",
     batchNo: "PAR001",
@@ -33,6 +35,7 @@ const initialStockItems: StockItem[] = [
     currentStock: 85,
     minimumStock: 30,
     unitPrice: 0.75,
+    mrp: 0.90,
     supplier: "PharmaCorp",
     expiryDate: "2025-03-20",
     batchNo: "AMX002",
@@ -45,6 +48,7 @@ const initialStockItems: StockItem[] = [
     currentStock: 95,
     minimumStock: 40,
     unitPrice: 0.50,
+    mrp: 0.60,
     supplier: "MedSupply Co.",
     expiryDate: "2024-11-30",
     batchNo: "IBU003",
@@ -57,6 +61,7 @@ const initialStockItems: StockItem[] = [
     currentStock: 45,
     minimumStock: 20,
     unitPrice: 3.50,
+    mrp: 4.00,
     supplier: "Healthcare Plus",
     expiryDate: "2025-01-15",
     batchNo: "CSY004",
@@ -69,6 +74,7 @@ const initialStockItems: StockItem[] = [
     currentStock: 25,
     minimumStock: 20,
     unitPrice: 12.00,
+    mrp: 15.00,
     supplier: "PharmaCorp",
     expiryDate: "2024-08-10",
     batchNo: "INS005",
@@ -81,6 +87,7 @@ const initialStockItems: StockItem[] = [
     currentStock: 200,
     minimumStock: 100,
     unitPrice: 0.15,
+    mrp: 0.20,
     supplier: "Healthcare Plus",
     expiryDate: "2025-06-30",
     batchNo: "SYR006",

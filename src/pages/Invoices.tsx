@@ -35,8 +35,12 @@ export default function Invoices() {
             name: item.medicineName || item.name || item.medicine || "Item",
             quantity: Number(item.quantity ?? item.qty ?? 0),
             price: Number(item.unitPrice ?? item.price ?? 0),
+            batchNo: item.batchNo || "",
+            expiryDate: item.expiryDate || "",
+            mrp: Number(item.mrp ?? 0),
           }))
         : [],
+      originalData: invoice, // Keep original data for detailed PDF generation
     }));
     
     setInvoices(transformedInvoices);
@@ -75,30 +79,65 @@ export default function Invoices() {
     
     // Header
     doc.setFontSize(20);
-    doc.text('INVOICE', 20, 30);
+    doc.text('INVOICE', 105, 30, { align: 'center' });
+    
+    // Company details (you can customize this)
+    doc.setFontSize(12);
+    doc.text('Medical Center', 105, 45, { align: 'center' });
+    doc.text('123 Health Street, Medical City', 105, 55, { align: 'center' });
+    doc.text('Phone: (555) 123-4567', 105, 65, { align: 'center' });
+    
+    // Line separator
+    doc.line(20, 75, 190, 75);
     
     // Invoice details
     doc.setFontSize(12);
-    doc.text(`Invoice ID: ${invoice.id}`, 20, 50);
-    doc.text(`Patient: ${invoice.patientName}`, 20, 60);
-    doc.text(`Date: ${invoice.date}`, 20, 70);
+    doc.text(`Invoice Number: ${invoice.id}`, 20, 90);
+    doc.text(`Date: ${invoice.date}`, 20, 100);
+    doc.text(`Patient: ${invoice.patientName}`, 20, 110);
     
-    // Items header
-    doc.setFontSize(14);
-    doc.text('Items:', 20, 90);
+    // Items table header
+    doc.setFontSize(10);
+    const tableTop = 130;
+    doc.text('Item', 20, tableTop);
+    doc.text('Batch', 70, tableTop);
+    doc.text('Expiry', 100, tableTop);
+    doc.text('MRP', 130, tableTop);
+    doc.text('Qty', 150, tableTop);
+    doc.text('Price', 170, tableTop);
+    
+    // Line under header
+    doc.line(20, tableTop + 5, 190, tableTop + 5);
     
     // Items list
-    doc.setFontSize(10);
-    let yPos = 100;
+    let yPos = tableTop + 15;
     invoice.items.forEach((item: any, index: number) => {
-      doc.text(`${index + 1}. ${item.name} - Qty: ${item.quantity} - ₹${item.price.toFixed(2)}`, 20, yPos);
+      doc.text(item.name.substring(0, 20), 20, yPos);
+      doc.text(item.batchNo || 'N/A', 70, yPos);
+      doc.text(item.expiryDate || 'N/A', 100, yPos);
+      doc.text(`₹${(item.mrp || 0).toFixed(2)}`, 130, yPos);
+      doc.text(item.quantity.toString(), 150, yPos);
+      doc.text(`₹${item.price.toFixed(2)}`, 170, yPos);
       yPos += 10;
+      
+      // Add new page if content exceeds page height
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 30;
+      }
     });
+    
+    // Line before total
+    doc.line(20, yPos + 5, 190, yPos + 5);
     
     // Total
     doc.setFontSize(14);
-    doc.text(`Total Amount: ₹${invoice.amount.toFixed(2)}`, 20, yPos + 20);
-    doc.text(`Status: ${invoice.status}`, 20, yPos + 35);
+    doc.text(`Total Amount: ₹${invoice.amount.toFixed(2)}`, 130, yPos + 20);
+    doc.text(`Status: ${invoice.status}`, 20, yPos + 20);
+    
+    // Footer
+    doc.setFontSize(10);
+    doc.text('Thank you for your business!', 105, yPos + 40, { align: 'center' });
     
     // Save the PDF
     doc.save(`invoice-${invoice.id}.pdf`);
