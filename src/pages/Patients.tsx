@@ -3,12 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Phone, Mail, Users } from "lucide-react";
+import { Search, Plus, Phone, Mail, Users, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePatientStore } from "@/hooks/usePatientStore";
+import { PatientExcelImport } from "@/components/PatientExcelImport";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export default function Patients() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [showImport, setShowImport] = useState(false);
   const { patients: storePatients, subscribe } = usePatientStore();
 
   // Force re-render when patients are updated
@@ -52,13 +55,26 @@ export default function Patients() {
           <h1 className="text-3xl font-bold text-gray-900">Patients</h1>
           <p className="text-gray-600 mt-2">Manage your patient records</p>
         </div>
-        <Button asChild>
-          <Link to="/patients/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Patient
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowImport(!showImport)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import Excel
+          </Button>
+          <Button asChild>
+            <Link to="/patients/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Patient
+            </Link>
+          </Button>
+        </div>
       </div>
+
+      {/* Import Section */}
+      <Collapsible open={showImport} onOpenChange={setShowImport}>
+        <CollapsibleContent>
+          <PatientExcelImport />
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Search */}
       <Card>
