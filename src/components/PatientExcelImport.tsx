@@ -25,10 +25,9 @@ export function PatientExcelImport() {
   const validatePatientData = (data: any, rowIndex: number): { isValid: boolean; patient?: PatientFormData; error?: string } => {
     const errors: string[] = [];
 
-    // Check required fields
-    if (!data.firstName) errors.push("First Name is required");
-    if (!data.lastName) errors.push("Last Name is required");
-    if (!data.phone) errors.push("Phone is required");
+    // Check required fields based on the new template
+    if (!data["Patient Name"]) errors.push("Patient Name is required");
+    if (!data["ph"]) errors.push("Phone (ph) is required");
 
     if (errors.length > 0) {
       return {
@@ -37,24 +36,38 @@ export function PatientExcelImport() {
       };
     }
 
-    // Create patient object with default values for missing fields
+    // Split patient name into first and last name
+    const fullName = data["Patient Name"] || "";
+    const nameParts = fullName.trim().split(" ");
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    // Calculate date of birth from age if provided
+    let dateOfBirth = "";
+    if (data["Age"]) {
+      const currentYear = new Date().getFullYear();
+      const birthYear = currentYear - parseInt(data["Age"]);
+      dateOfBirth = `${birthYear}-01-01`; // Default to Jan 1st
+    }
+
+    // Create patient object mapping the template fields
     const patient: PatientFormData = {
-      patientId: data.patientId || `PT${Date.now()}_${rowIndex}`,
-      firstName: data.firstName || "",
-      lastName: data.lastName || "",
-      dateOfBirth: data.dateOfBirth || "",
-      gender: data.gender || "",
-      aadhar: data.aadhar || "",
-      govtIdOld: data.govtIdOld || "",
-      govtIdNew: data.govtIdNew || "",
-      phone: data.phone || "",
-      email: data.email || "",
-      address: data.address || "",
-      emergencyContact: data.emergencyContact || "",
-      emergencyPhone: data.emergencyPhone || "",
-      medicalHistory: data.medicalHistory || "",
-      allergies: data.allergies || "",
-      currentMedications: data.currentMedications || ""
+      patientId: data["Fill no."] || `PT${Date.now()}_${rowIndex}`,
+      firstName: firstName,
+      lastName: lastName,
+      dateOfBirth: dateOfBirth,
+      gender: "", // Not in template, will be empty
+      aadhar: data["Addhar Card"] || "",
+      govtIdOld: data["Govt. ID"] || "",
+      govtIdNew: data["New Govt, ID"] || "",
+      phone: data["ph"] || "",
+      email: "", // Not in template, will be empty
+      address: data["Address"] || "",
+      emergencyContact: data["Father Name"] || "",
+      emergencyPhone: "", // Not in template, will be empty
+      medicalHistory: data["VISIT DATE"] ? `Visit Date: ${data["VISIT DATE"]}` : "",
+      allergies: data["Days"] ? `Days: ${data["Days"]}` : "",
+      currentMedications: data["Follow up date"] ? `Follow up date: ${data["Follow up date"]}` : ""
     };
 
     return { isValid: true, patient };
@@ -121,22 +134,19 @@ export function PatientExcelImport() {
   const downloadTemplate = () => {
     const template = [
       {
-        patientId: "PT001",
-        firstName: "John",
-        lastName: "Doe",
-        dateOfBirth: "1990-01-15",
-        gender: "Male",
-        aadhar: "1234 5678 9012",
-        govtIdOld: "DL123456",
-        govtIdNew: "AB1234567890",
-        phone: "+1 234-567-8900",
-        email: "john.doe@email.com",
-        address: "123 Main St",
-        emergencyContact: "Jane Doe",
-        emergencyPhone: "+1 234-567-8901",
-        medicalHistory: "No significant history",
-        allergies: "None",
-        currentMedications: "None"
+        "S.No.": 1,
+        "Fill no.": "PT001",
+        "Patient Name": "John Doe",
+        "Age": 30,
+        "Father Name": "Robert Doe",
+        "Govt. ID": "DL123456",
+        "New Govt, ID": "AB1234567890",
+        "Addhar Card": "1234 5678 9012",
+        "ph": "+1 234-567-8900",
+        "Address": "123 Main Street, City",
+        "VISIT DATE": "2024-01-15",
+        "Days": "7",
+        "Follow up date": "2024-01-22"
       }
     ];
 
@@ -227,9 +237,10 @@ export function PatientExcelImport() {
         )}
 
         <div className="text-xs text-gray-500 space-y-1">
-          <p><strong>Required fields:</strong> firstName, lastName, phone</p>
-          <p><strong>Optional fields:</strong> All other patient information fields</p>
-          <p><strong>Note:</strong> If patientId is not provided, it will be auto-generated</p>
+          <p><strong>Required fields:</strong> Patient Name, ph (phone)</p>
+          <p><strong>Template fields:</strong> S.No., Fill no., Patient Name, Age, Father Name, Govt. ID, New Govt, ID, Addhar Card, ph, Address, VISIT DATE, Days, Follow up date</p>
+          <p><strong>Note:</strong> Age will be converted to birth year, Father Name maps to Emergency Contact</p>
+          <p><strong>Note:</strong> VISIT DATE, Days, and Follow up date will be stored in medical information fields</p>
         </div>
       </CardContent>
     </Card>
