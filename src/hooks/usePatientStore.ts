@@ -107,20 +107,20 @@ export function usePatientStore() {
 
   const updatePatient = (patientId: string, updatedPatient: PatientFormData) => {
     patientsStore = patientsStore.map(p => 
-      p.patientId === patientId ? updatedPatient : p
+      String(p.patientId) === String(patientId) ? updatedPatient : p
     );
     saveToStorage();
     notifyListeners();
   };
 
   const deletePatient = (patientId: string) => {
-    patientsStore = patientsStore.filter(p => p.patientId !== patientId);
+    patientsStore = patientsStore.filter(p => String(p.patientId) !== String(patientId));
     saveToStorage();
     notifyListeners();
   };
 
   const getPatient = (patientId: string) => {
-    return patientsStore.find(p => p.patientId === patientId);
+    return patientsStore.find(p => String(p.patientId) === String(patientId));
   };
 
   const notifyListeners = () => {
