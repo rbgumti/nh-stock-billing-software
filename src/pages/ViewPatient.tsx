@@ -21,12 +21,11 @@ export default function ViewPatient() {
         setPatient(foundPatient);
       } else {
         console.error("Patient not found:", id);
-        // Let's also check what patients are available
         console.log("Available patients:", patients.map(p => p.patientId));
         navigate("/patients");
       }
     }
-  }, [id, getPatient, navigate]);
+  }, [id, getPatient, navigate, patients]);
 
   if (!patient) {
     return <div>Loading...</div>;

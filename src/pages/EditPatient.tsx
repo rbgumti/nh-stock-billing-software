@@ -24,12 +24,11 @@ export default function EditPatient() {
         loadPatientData(patient);
       } else {
         console.error("Patient not found:", id);
-        // Let's also check what patients are available
         console.log("Available patients:", patients.map(p => p.patientId));
         navigate("/patients");
       }
     }
-  }, [id, loadPatientData, getPatient, navigate]);
+  }, [id, loadPatientData, getPatient, navigate, patients]);
 
   return (
     <div className="p-6 space-y-6">
