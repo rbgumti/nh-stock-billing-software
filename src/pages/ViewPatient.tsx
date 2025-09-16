@@ -9,16 +9,20 @@ import { PatientFormData } from "@/hooks/usePatientForm";
 export default function ViewPatient() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getPatient } = usePatientStore();
+  const { getPatient, patients } = usePatientStore();
   const [patient, setPatient] = useState<PatientFormData | null>(null);
 
   useEffect(() => {
     if (id) {
+      console.log("Looking for patient with ID:", id);
       const foundPatient = getPatient(id);
       if (foundPatient) {
+        console.log("Found patient:", foundPatient);
         setPatient(foundPatient);
       } else {
         console.error("Patient not found:", id);
+        // Let's also check what patients are available
+        console.log("Available patients:", patients.map(p => p.patientId));
         navigate("/patients");
       }
     }

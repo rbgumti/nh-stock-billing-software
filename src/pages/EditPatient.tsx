@@ -13,15 +13,19 @@ export default function EditPatient() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { formData, handleInputChange, handleSubmit, loadPatientData } = usePatientForm(true);
-  const { getPatient } = usePatientStore();
+  const { getPatient, patients } = usePatientStore();
 
   useEffect(() => {
     if (id) {
+      console.log("Looking for patient with ID:", id);
       const patient = getPatient(id);
       if (patient) {
+        console.log("Found patient:", patient);
         loadPatientData(patient);
       } else {
         console.error("Patient not found:", id);
+        // Let's also check what patients are available
+        console.log("Available patients:", patients.map(p => p.patientId));
         navigate("/patients");
       }
     }
