@@ -113,6 +113,12 @@ export function usePatientStore() {
     notifyListeners();
   };
 
+  const deletePatient = (patientId: string) => {
+    patientsStore = patientsStore.filter(p => p.patientId !== patientId);
+    saveToStorage();
+    notifyListeners();
+  };
+
   const getPatient = (patientId: string) => {
     return patientsStore.find(p => p.patientId === patientId);
   };
@@ -134,6 +140,7 @@ export function usePatientStore() {
     patients,
     addPatient,
     updatePatient,
+    deletePatient,
     getPatient,
     subscribe
   };

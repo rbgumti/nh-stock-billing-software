@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Phone, Mail, Users, Upload } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Search, Plus, Phone, Mail, Users, Upload, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePatientStore } from "@/hooks/usePatientStore";
 import { PatientExcelImport } from "@/components/PatientExcelImport";
@@ -12,7 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 export default function Patients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showImport, setShowImport] = useState(false);
-  const { patients: storePatients, subscribe } = usePatientStore();
+  const { patients: storePatients, subscribe, deletePatient } = usePatientStore();
 
   // Force re-render when patients are updated
   useEffect(() => {
@@ -130,6 +131,30 @@ export default function Patients() {
                       Edit
                     </Link>
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Patient</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete {patient.name}? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => deletePatient(patient.patientId)}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </CardContent>
