@@ -109,6 +109,9 @@ export default function Patients() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Patient ID:</span> {patient.patientId}
+                </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <Phone className="h-4 w-4 mr-2" />
                   {patient.phone}
@@ -116,6 +119,9 @@ export default function Patients() {
                 <div className="flex items-center text-sm text-gray-600">
                   <Mail className="h-4 w-4 mr-2" />
                   {patient.email}
+                </div>
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Aadhar:</span> {patient.aadhar}
                 </div>
                 <div className="text-sm text-gray-500">
                   Last visit: {patient.lastVisit}
