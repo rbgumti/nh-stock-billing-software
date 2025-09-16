@@ -24,7 +24,7 @@ export default function EditPatient() {
         loadPatientData(patient);
       } else {
         console.error("Patient not found:", id);
-        console.log("Available patients:", patients.map(p => p.patientId));
+        console.log("Available patients:", patients.map(p => ({ id: p.patientId, name: p.firstName })));
         navigate("/patients");
       }
     }

@@ -128,12 +128,12 @@ export default function Patients() {
                 </div>
                 <div className="flex space-x-2 pt-2">
                   <Button variant="outline" size="sm" className="flex-1" asChild>
-                    <Link to={`/patients/view/${patient.patientId}`} onClick={() => console.log("Navigating to view patient:", patient.patientId)}>
+                    <Link to={`/patients/view/${patient.patientId}`} onClick={() => console.log("Navigating to view patient:", patient.patientId, "Full patient:", patient)}>
                       View Details
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" className="flex-1" asChild>
-                    <Link to={`/patients/edit/${patient.patientId}`} onClick={() => console.log("Navigating to edit patient:", patient.patientId)}>
+                    <Link to={`/patients/edit/${patient.patientId}`} onClick={() => console.log("Navigating to edit patient:", patient.patientId, "Full patient:", patient)}>
                       Edit
                     </Link>
                   </Button>
