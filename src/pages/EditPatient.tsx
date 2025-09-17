@@ -17,18 +17,18 @@ export default function EditPatient() {
 
   useEffect(() => {
     if (id) {
-      console.log("Looking for patient with ID:", id);
+      console.log("EditPatient: Looking for patient with ID:", id);
+      console.log("EditPatient: Available patients:", patients.map(p => ({ id: p.patientId, name: p.firstName })));
       const patient = getPatient(id);
       if (patient) {
-        console.log("Found patient:", patient);
+        console.log("EditPatient: Found patient:", patient);
         loadPatientData(patient);
       } else {
-        console.error("Patient not found:", id);
-        console.log("Available patients:", patients.map(p => ({ id: p.patientId, name: p.firstName })));
+        console.error("EditPatient: Patient not found:", id);
         navigate("/patients");
       }
     }
-  }, [id, loadPatientData, getPatient, navigate, patients]);
+  }, [id, patients, getPatient, loadPatientData, navigate]);
 
   return (
     <div className="p-6 space-y-6">
