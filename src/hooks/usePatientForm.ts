@@ -46,10 +46,15 @@ export function usePatientForm(isEditing: boolean = false) {
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    console.log(`Updating field ${field} with value:`, value);
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      console.log("Updated form data:", updated);
+      return updated;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {

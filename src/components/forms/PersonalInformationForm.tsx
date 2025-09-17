@@ -32,6 +32,8 @@ export function PersonalInformationForm({ formData, onInputChange }: PersonalInf
             value={formData.patientId}
             onChange={(e) => onInputChange("patientId", e.target.value)}
             required
+            disabled
+            className="bg-muted"
           />
         </div>
 
