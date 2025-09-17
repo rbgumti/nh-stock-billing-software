@@ -46,13 +46,16 @@ export function usePatientForm(isEditing: boolean = false) {
   });
 
   const handleInputChange = (field: string, value: string) => {
-    console.log(`Updating field ${field} with value:`, value);
+    console.log(`[DEBUG] Updating field "${field}" with value:`, value);
+    console.log(`[DEBUG] Previous value for ${field}:`, formData[field as keyof PatientFormData]);
+    
     setFormData(prev => {
       const updated = {
         ...prev,
         [field]: value
       };
-      console.log("Updated form data:", updated);
+      console.log(`[DEBUG] Updated form data:`, updated);
+      console.log(`[DEBUG] Field ${field} changed from "${prev[field as keyof PatientFormData]}" to "${value}"`);
       return updated;
     });
   };
@@ -90,8 +93,26 @@ export function usePatientForm(isEditing: boolean = false) {
   };
 
   const loadPatientData = (patientData: PatientFormData) => {
-    setFormData(patientData);
-    setOriginalPatientId(patientData.patientId);
+    console.log("Loading patient data:", patientData);
+    // Convert numeric values to strings to ensure form compatibility
+    const formattedData = {
+      ...patientData,
+      patientId: String(patientData.patientId),
+      aadhar: String(patientData.aadhar || ''),
+      govtIdOld: String(patientData.govtIdOld || ''),
+      govtIdNew: String(patientData.govtIdNew || ''),
+      phone: String(patientData.phone || ''),
+      email: String(patientData.email || ''),
+      address: String(patientData.address || ''),
+      emergencyContact: String(patientData.emergencyContact || ''),
+      emergencyPhone: String(patientData.emergencyPhone || ''),
+      medicalHistory: String(patientData.medicalHistory || ''),
+      allergies: String(patientData.allergies || ''),
+      currentMedications: String(patientData.currentMedications || '')
+    };
+    console.log("Formatted patient data for form:", formattedData);
+    setFormData(formattedData);
+    setOriginalPatientId(String(patientData.patientId));
   };
 
   return {
