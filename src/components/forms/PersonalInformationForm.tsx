@@ -107,7 +107,10 @@ export function PersonalInformationForm({ formData, onInputChange }: PersonalInf
             <Input
               id="govtIdNew"
               value={formData.govtIdNew}
-              onChange={(e) => onInputChange("govtIdNew", e.target.value)}
+              onChange={(e) => {
+                console.log("[DEBUG] govtIdNew field change:", e.target.value);
+                onInputChange("govtIdNew", e.target.value);
+              }}
               placeholder="Enter new govt ID"
             />
           </div>
