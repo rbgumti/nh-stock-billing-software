@@ -16,9 +16,10 @@ interface PersonalInformationFormProps {
     govtIdNew: string;
   };
   onInputChange: (field: string, value: string) => void;
+  isEditing?: boolean;
 }
 
-export function PersonalInformationForm({ formData, onInputChange }: PersonalInformationFormProps) {
+export function PersonalInformationForm({ formData, onInputChange, isEditing = false }: PersonalInformationFormProps) {
   return (
     <Card>
       <CardHeader>
@@ -32,8 +33,9 @@ export function PersonalInformationForm({ formData, onInputChange }: PersonalInf
             value={formData.patientId}
             onChange={(e) => onInputChange("patientId", e.target.value)}
             required
-            disabled
-            className="bg-muted"
+            disabled={isEditing}
+            className={isEditing ? "bg-muted" : ""}
+            placeholder={isEditing ? "Auto-generated" : "Enter patient ID"}
           />
         </div>
 

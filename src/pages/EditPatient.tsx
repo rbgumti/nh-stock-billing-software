@@ -55,6 +55,7 @@ export default function EditPatient() {
             govtIdNew: formData.govtIdNew
           }}
           onInputChange={handleInputChange}
+          isEditing={true}
         />
 
         <ContactInformationForm

@@ -37,6 +37,7 @@ export default function NewPatient() {
             govtIdNew: formData.govtIdNew
           }}
           onInputChange={handleInputChange}
+          isEditing={false}
         />
 
         <ContactInformationForm
