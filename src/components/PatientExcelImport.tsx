@@ -67,7 +67,11 @@ export function PatientExcelImport() {
       emergencyPhone: "", // Not in template, will be empty
       medicalHistory: data["VISIT DATE"] ? `Visit Date: ${data["VISIT DATE"]}` : "",
       allergies: data["Days"] ? `Days: ${data["Days"]}` : "",
-      currentMedications: data["Follow up date"] ? `Follow up date: ${data["Follow up date"]}` : ""
+      currentMedications: data["Follow up date"] ? `Follow up date: ${data["Follow up date"]}` : "",
+      fatherName: data["Father Name"] || "",
+      visitDate: data["VISIT DATE"] || "",
+      medicinePrescribedDays: data["Days"] || "",
+      nextFollowUpDate: data["Follow up date"] || ""
     };
 
     return { isValid: true, patient };

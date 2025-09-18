@@ -19,7 +19,11 @@ const initialPatients: PatientFormData[] = [
     emergencyPhone: "+1 234-567-8901",
     medicalHistory: "",
     allergies: "",
-    currentMedications: ""
+    currentMedications: "",
+    fatherName: "",
+    visitDate: "",
+    medicinePrescribedDays: "",
+    nextFollowUpDate: ""
   },
   {
     patientId: "PT002",
@@ -37,7 +41,11 @@ const initialPatients: PatientFormData[] = [
     emergencyPhone: "+1 234-567-8902",
     medicalHistory: "",
     allergies: "",
-    currentMedications: ""
+    currentMedications: "",
+    fatherName: "",
+    visitDate: "",
+    medicinePrescribedDays: "",
+    nextFollowUpDate: ""
   },
   {
     patientId: "PT003",
@@ -55,7 +63,11 @@ const initialPatients: PatientFormData[] = [
     emergencyPhone: "+1 234-567-8903",
     medicalHistory: "",
     allergies: "",
-    currentMedications: ""
+    currentMedications: "",
+    fatherName: "",
+    visitDate: "",
+    medicinePrescribedDays: "",
+    nextFollowUpDate: ""
   },
   {
     patientId: "PT004",
@@ -73,7 +85,11 @@ const initialPatients: PatientFormData[] = [
     emergencyPhone: "+1 234-567-8904",
     medicalHistory: "",
     allergies: "",
-    currentMedications: ""
+    currentMedications: "",
+    fatherName: "",
+    visitDate: "",
+    medicinePrescribedDays: "",
+    nextFollowUpDate: ""
   }
 ];
 

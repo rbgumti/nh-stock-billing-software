@@ -20,6 +20,10 @@ export interface PatientFormData {
   medicalHistory: string;
   allergies: string;
   currentMedications: string;
+  fatherName: string;
+  visitDate: string;
+  medicinePrescribedDays: string;
+  nextFollowUpDate: string;
 }
 
 export function usePatientForm(isEditing: boolean = false) {
@@ -42,7 +46,11 @@ export function usePatientForm(isEditing: boolean = false) {
     emergencyPhone: "",
     medicalHistory: "",
     allergies: "",
-    currentMedications: ""
+    currentMedications: "",
+    fatherName: "",
+    visitDate: "",
+    medicinePrescribedDays: "",
+    nextFollowUpDate: ""
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -108,7 +116,11 @@ export function usePatientForm(isEditing: boolean = false) {
       emergencyPhone: String(patientData.emergencyPhone || ''),
       medicalHistory: String(patientData.medicalHistory || ''),
       allergies: String(patientData.allergies || ''),
-      currentMedications: String(patientData.currentMedications || '')
+      currentMedications: String(patientData.currentMedications || ''),
+      fatherName: String(patientData.fatherName || ''),
+      visitDate: String(patientData.visitDate || ''),
+      medicinePrescribedDays: String(patientData.medicinePrescribedDays || ''),
+      nextFollowUpDate: String(patientData.nextFollowUpDate || '')
     };
     console.log("Formatted patient data for form:", formattedData);
     setFormData(formattedData);

@@ -6,6 +6,7 @@ import { PersonalInformationForm } from "@/components/forms/PersonalInformationF
 import { ContactInformationForm } from "@/components/forms/ContactInformationForm";
 import { EmergencyContactForm } from "@/components/forms/EmergencyContactForm";
 import { MedicalInformationForm } from "@/components/forms/MedicalInformationForm";
+import { VisitDetailsForm } from "@/components/forms/VisitDetailsForm";
 import { usePatientForm } from "@/hooks/usePatientForm";
 
 export default function NewPatient() {
@@ -62,6 +63,16 @@ export default function NewPatient() {
             medicalHistory: formData.medicalHistory,
             allergies: formData.allergies,
             currentMedications: formData.currentMedications
+          }}
+          onInputChange={handleInputChange}
+        />
+
+        <VisitDetailsForm
+          formData={{
+            fatherName: formData.fatherName,
+            visitDate: formData.visitDate,
+            medicinePrescribedDays: formData.medicinePrescribedDays,
+            nextFollowUpDate: formData.nextFollowUpDate
           }}
           onInputChange={handleInputChange}
         />
