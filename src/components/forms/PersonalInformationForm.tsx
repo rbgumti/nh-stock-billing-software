@@ -45,7 +45,10 @@ export function PersonalInformationForm({ formData, onInputChange, isEditing = f
             <Input
               id="firstName"
               value={formData.firstName}
-              onChange={(e) => onInputChange("firstName", e.target.value)}
+              onChange={(e) => {
+                console.log("[DEBUG] firstName field change:", e.target.value);
+                onInputChange("firstName", e.target.value);
+              }}
               required
             />
           </div>
