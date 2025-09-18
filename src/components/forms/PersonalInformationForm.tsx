@@ -45,10 +45,7 @@ export function PersonalInformationForm({ formData, onInputChange, isEditing = f
             <Input
               id="firstName"
               value={formData.firstName}
-              onChange={(e) => {
-                console.log("[DEBUG] firstName field change:", e.target.value);
-                onInputChange("firstName", e.target.value);
-              }}
+              onChange={(e) => onInputChange("firstName", e.target.value)}
               required
             />
           </div>
@@ -112,10 +109,7 @@ export function PersonalInformationForm({ formData, onInputChange, isEditing = f
             <Input
               id="govtIdNew"
               value={formData.govtIdNew}
-              onChange={(e) => {
-                console.log("[DEBUG] govtIdNew field change:", e.target.value);
-                onInputChange("govtIdNew", e.target.value);
-              }}
+              onChange={(e) => onInputChange("govtIdNew", e.target.value)}
               placeholder="Enter new govt ID"
             />
           </div>
