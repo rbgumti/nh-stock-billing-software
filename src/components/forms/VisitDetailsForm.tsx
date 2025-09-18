@@ -52,12 +52,12 @@ export function VisitDetailsForm({ formData, onInputChange }: VisitDetailsFormPr
         </div>
 
         <div>
-          <Label htmlFor="medicinePrescribedDays">Medicine Prescribed for Days</Label>
+          <Label htmlFor="medicinePrescribedDays">PRESCRIPTION VALID FOR ___DAYS</Label>
           <Textarea
             id="medicinePrescribedDays"
             value={formData.medicinePrescribedDays}
             onChange={(e) => onInputChange("medicinePrescribedDays", e.target.value)}
-            placeholder="Enter prescribed medicines and duration (e.g., Paracetamol - 5 days, Amoxicillin - 7 days)"
+            placeholder="Enter prescription validity period (e.g., 7 days, 15 days)"
             rows={3}
           />
         </div>
