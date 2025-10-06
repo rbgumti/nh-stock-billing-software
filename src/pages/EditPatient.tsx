@@ -18,12 +18,15 @@ export default function EditPatient() {
 
   useEffect(() => {
     if (id) {
+      console.log("=== EDIT PATIENT COMPONENT LOADED ===");
       console.log("EditPatient: Looking for patient with ID:", id);
       console.log("EditPatient: Available patients:", patients.map(p => ({ id: p.patientId, name: p.firstName })));
       const patient = getPatient(id);
       if (patient) {
         console.log("EditPatient: Found patient:", patient);
+        console.log("EditPatient: Loading patient data into form...");
         loadPatientData(patient);
+        console.log("EditPatient: Form data loaded successfully");
       } else {
         console.error("EditPatient: Patient not found:", id);
         navigate("/patients");
@@ -55,7 +58,10 @@ export default function EditPatient() {
             govtIdOld: formData.govtIdOld,
             govtIdNew: formData.govtIdNew
           }}
-          onInputChange={handleInputChange}
+          onInputChange={(field, value) => {
+            console.log(`=== EditPatient: Field changed - ${field} = ${value} ===`);
+            handleInputChange(field, value);
+          }}
           isEditing={true}
         />
 
