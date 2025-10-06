@@ -18,21 +18,15 @@ export default function EditPatient() {
 
   useEffect(() => {
     if (id) {
-      console.log("=== EDIT PATIENT COMPONENT LOADED ===");
-      console.log("EditPatient: Looking for patient with ID:", id);
-      console.log("EditPatient: Available patients:", patients.map(p => ({ id: p.patientId, name: p.firstName })));
       const patient = getPatient(id);
       if (patient) {
-        console.log("EditPatient: Found patient:", patient);
-        console.log("EditPatient: Loading patient data into form...");
         loadPatientData(patient);
-        console.log("EditPatient: Form data loaded successfully");
       } else {
-        console.error("EditPatient: Patient not found:", id);
         navigate("/patients");
       }
     }
-  }, [id, patients, getPatient, loadPatientData, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   return (
     <div className="p-6 space-y-6">
@@ -48,56 +42,28 @@ export default function EditPatient() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <PersonalInformationForm
-          formData={{
-            patientId: formData.patientId,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            dateOfBirth: formData.dateOfBirth,
-            gender: formData.gender,
-            aadhar: formData.aadhar,
-            govtIdOld: formData.govtIdOld,
-            govtIdNew: formData.govtIdNew
-          }}
-          onInputChange={(field, value) => {
-            console.log(`=== EditPatient: Field changed - ${field} = ${value} ===`);
-            handleInputChange(field, value);
-          }}
+          formData={formData}
+          onInputChange={handleInputChange}
           isEditing={true}
         />
 
         <ContactInformationForm
-          formData={{
-            phone: formData.phone,
-            email: formData.email,
-            address: formData.address
-          }}
+          formData={formData}
           onInputChange={handleInputChange}
         />
 
         <EmergencyContactForm
-          formData={{
-            emergencyContact: formData.emergencyContact,
-            emergencyPhone: formData.emergencyPhone
-          }}
+          formData={formData}
           onInputChange={handleInputChange}
         />
 
         <MedicalInformationForm
-          formData={{
-            medicalHistory: formData.medicalHistory,
-            allergies: formData.allergies,
-            currentMedications: formData.currentMedications
-          }}
+          formData={formData}
           onInputChange={handleInputChange}
         />
 
         <VisitDetailsForm
-          formData={{
-            fatherName: formData.fatherName,
-            visitDate: formData.visitDate,
-            medicinePrescribedDays: formData.medicinePrescribedDays,
-            nextFollowUpDate: formData.nextFollowUpDate
-          }}
+          formData={formData}
           onInputChange={handleInputChange}
         />
 
