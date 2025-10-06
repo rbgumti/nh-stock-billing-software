@@ -27,10 +27,7 @@ export function ContactInformationForm({ formData, onInputChange }: ContactInfor
               id="phone"
               type="tel"
               value={formData.phone}
-              onChange={(e) => {
-                console.log("ContactInfoForm: phone changed to:", e.target.value);
-                onInputChange("phone", e.target.value);
-              }}
+              onChange={(e) => onInputChange("phone", e.target.value)}
               required
             />
           </div>
