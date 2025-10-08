@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export interface StockItem {
   id: number;
@@ -14,136 +16,169 @@ export interface StockItem {
   status?: string;
 }
 
-const initialStockItems: StockItem[] = [
-  {
-    id: 1,
-    name: "Paracetamol 500mg",
-    category: "Medication",
-    currentStock: 120,
-    minimumStock: 50,
-    unitPrice: 0.25,
-    mrp: 0.30,
-    supplier: "MedSupply Co.",
-    expiryDate: "2024-12-15",
-    batchNo: "PAR001",
-    status: "In Stock"
-  },
-  {
-    id: 2,
-    name: "Amoxicillin 250mg",
-    category: "Medication",  
-    currentStock: 85,
-    minimumStock: 30,
-    unitPrice: 0.75,
-    mrp: 0.90,
-    supplier: "PharmaCorp",
-    expiryDate: "2025-03-20",
-    batchNo: "AMX002",
-    status: "In Stock"
-  },
-  {
-    id: 3,
-    name: "Ibuprofen 400mg",
-    category: "Medication",
-    currentStock: 95,
-    minimumStock: 40,
-    unitPrice: 0.50,
-    mrp: 0.60,
-    supplier: "MedSupply Co.",
-    expiryDate: "2024-11-30",
-    batchNo: "IBU003",
-    status: "In Stock"
-  },
-  {
-    id: 4,
-    name: "Cough Syrup 100ml",
-    category: "Medication",
-    currentStock: 45,
-    minimumStock: 20,
-    unitPrice: 3.50,
-    mrp: 4.00,
-    supplier: "Healthcare Plus",
-    expiryDate: "2025-01-15",
-    batchNo: "CSY004",
-    status: "In Stock"
-  },
-  {
-    id: 5,
-    name: "Insulin Pen",
-    category: "Medication",
-    currentStock: 25,
-    minimumStock: 20,
-    unitPrice: 12.00,
-    mrp: 15.00,
-    supplier: "PharmaCorp",
-    expiryDate: "2024-08-10",
-    batchNo: "INS005",
-    status: "In Stock"
-  },
-  {
-    id: 6,
-    name: "Disposable Syringes (10ml)",
-    category: "Medical Supplies",
-    currentStock: 200,
-    minimumStock: 100,
-    unitPrice: 0.15,
-    mrp: 0.20,
-    supplier: "Healthcare Plus",
-    expiryDate: "2025-06-30",
-    batchNo: "SYR006",
-    status: "In Stock"
-  }
-];
-
-let stockStore: StockItem[] = [...initialStockItems];
-let listeners: (() => void)[] = [];
-
 export function useStockStore() {
-  const [stockItems, setStockItems] = useState<StockItem[]>(stockStore);
+  const [stockItems, setStockItems] = useState<StockItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addStockItem = (item: StockItem) => {
-    stockStore = [...stockStore, item];
-    notifyListeners();
+  useEffect(() => {
+    loadStockItems();
+    
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('stock-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'stock_items'
+        },
+        () => {
+          loadStockItems();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const loadStockItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('stock_items')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedItems: StockItem[] = (data || []).map(item => ({
+        id: item.item_id,
+        name: item.name,
+        category: item.category,
+        currentStock: item.current_stock,
+        minimumStock: item.minimum_stock,
+        unitPrice: item.unit_price,
+        mrp: item.mrp || undefined,
+        supplier: item.supplier,
+        expiryDate: item.expiry_date,
+        batchNo: item.batch_no,
+        status: item.status || undefined
+      }));
+
+      setStockItems(formattedItems);
+    } catch (error) {
+      console.error('Error loading stock items:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load stock items",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateStockItem = (id: number, updatedItem: StockItem) => {
-    stockStore = stockStore.map(item => 
-      item.id === id ? updatedItem : item
-    );
-    notifyListeners();
+  const addStockItem = async (item: StockItem) => {
+    try {
+      const { error } = await supabase
+        .from('stock_items')
+        .insert({
+          name: item.name,
+          category: item.category,
+          current_stock: item.currentStock,
+          minimum_stock: item.minimumStock,
+          unit_price: item.unitPrice,
+          mrp: item.mrp || null,
+          supplier: item.supplier,
+          expiry_date: item.expiryDate,
+          batch_no: item.batchNo,
+          status: item.status || null
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error adding stock item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add stock item",
+        variant: "destructive"
+      });
+      throw error;
+    }
   };
 
-  const reduceStock = (id: number, quantity: number) => {
-    stockStore = stockStore.map(item => 
-      item.id === id 
-        ? { ...item, currentStock: Math.max(0, item.currentStock - quantity) }
-        : item
-    );
-    notifyListeners();
+  const updateStockItem = async (id: number, updatedItem: StockItem) => {
+    try {
+      const { error } = await supabase
+        .from('stock_items')
+        .update({
+          name: updatedItem.name,
+          category: updatedItem.category,
+          current_stock: updatedItem.currentStock,
+          minimum_stock: updatedItem.minimumStock,
+          unit_price: updatedItem.unitPrice,
+          mrp: updatedItem.mrp || null,
+          supplier: updatedItem.supplier,
+          expiry_date: updatedItem.expiryDate,
+          batch_no: updatedItem.batchNo,
+          status: updatedItem.status || null
+        })
+        .eq('item_id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating stock item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update stock item",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const reduceStock = async (id: number, quantity: number) => {
+    try {
+      const item = stockItems.find(item => item.id === id);
+      if (!item) return;
+
+      const newStock = Math.max(0, item.currentStock - quantity);
+      
+      const { error } = await supabase
+        .from('stock_items')
+        .update({ current_stock: newStock })
+        .eq('item_id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error reducing stock:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reduce stock",
+        variant: "destructive"
+      });
+      throw error;
+    }
   };
 
   const getMedicines = () => {
-    return stockStore.filter(item => item.category === "Medication");
+    return stockItems.filter(item => item.category === "Medication");
   };
 
   const getStockItem = (id: number) => {
-    return stockStore.find(item => item.id === id);
-  };
-
-  const notifyListeners = () => {
-    listeners.forEach(listener => listener());
-    setStockItems([...stockStore]);
+    return stockItems.find(item => item.id === id);
   };
 
   const subscribe = (listener: () => void) => {
-    listeners.push(listener);
-    return () => {
-      listeners = listeners.filter(l => l !== listener);
-    };
+    // Legacy compatibility - not needed with real-time subscriptions
+    return () => {};
   };
 
   return {
     stockItems,
+    loading,
     addStockItem,
     updateStockItem,
     reduceStock,

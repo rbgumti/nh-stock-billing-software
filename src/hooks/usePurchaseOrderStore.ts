@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export interface PurchaseOrderItem {
   stockItemId: number;
@@ -21,44 +23,205 @@ export interface PurchaseOrder {
   notes?: string;
 }
 
-const initialPurchaseOrders: PurchaseOrder[] = [];
-
-let purchaseOrderStore: PurchaseOrder[] = [...initialPurchaseOrders];
-let listeners: (() => void)[] = [];
-
 export function usePurchaseOrderStore() {
-  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(purchaseOrderStore);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addPurchaseOrder = (po: PurchaseOrder) => {
-    purchaseOrderStore = [...purchaseOrderStore, po];
-    notifyListeners();
+  useEffect(() => {
+    loadPurchaseOrders();
+    
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('po-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'purchase_orders'
+        },
+        () => {
+          loadPurchaseOrders();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const loadPurchaseOrders = async () => {
+    try {
+      const { data: orders, error: ordersError } = await supabase
+        .from('purchase_orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (ordersError) throw ordersError;
+
+      const { data: allItems, error: itemsError } = await supabase
+        .from('purchase_order_items')
+        .select('*');
+
+      if (itemsError) throw itemsError;
+
+      const formattedOrders: PurchaseOrder[] = (orders || []).map(po => {
+        const poItems = (allItems || [])
+          .filter(item => item.purchase_order_id === po.id)
+          .map(item => ({
+            stockItemId: item.stock_item_id,
+            stockItemName: item.stock_item_name,
+            quantity: item.quantity,
+            unitPrice: item.unit_price,
+            totalPrice: item.total_price
+          }));
+
+        return {
+          id: po.po_id,
+          poNumber: po.po_number,
+          supplier: po.supplier,
+          orderDate: po.order_date,
+          expectedDelivery: po.expected_delivery,
+          status: po.status,
+          items: poItems,
+          totalAmount: po.total_amount,
+          grnDate: po.grn_date || undefined,
+          notes: po.notes || undefined
+        };
+      });
+
+      setPurchaseOrders(formattedOrders);
+    } catch (error) {
+      console.error('Error loading purchase orders:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load purchase orders",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updatePurchaseOrder = (id: number, updatedPO: PurchaseOrder) => {
-    purchaseOrderStore = purchaseOrderStore.map(po => 
-      po.id === id ? updatedPO : po
-    );
-    notifyListeners();
+  const addPurchaseOrder = async (po: PurchaseOrder) => {
+    try {
+      const { data: poData, error: poError } = await supabase
+        .from('purchase_orders')
+        .insert({
+          po_number: po.poNumber,
+          supplier: po.supplier,
+          order_date: po.orderDate,
+          expected_delivery: po.expectedDelivery,
+          status: po.status,
+          total_amount: po.totalAmount,
+          grn_date: po.grnDate || null,
+          notes: po.notes || null
+        })
+        .select()
+        .single();
+
+      if (poError) throw poError;
+
+      // Insert items
+      const itemsToInsert = po.items.map(item => ({
+        purchase_order_id: poData.id,
+        stock_item_id: item.stockItemId,
+        stock_item_name: item.stockItemName,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        total_price: item.totalPrice
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('purchase_order_items')
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
+    } catch (error) {
+      console.error('Error adding purchase order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add purchase order",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const updatePurchaseOrder = async (id: number, updatedPO: PurchaseOrder) => {
+    try {
+      // Get the database ID from po_id
+      const { data: poData, error: findError } = await supabase
+        .from('purchase_orders')
+        .select('id')
+        .eq('po_id', id)
+        .single();
+
+      if (findError) throw findError;
+
+      const { error: updateError } = await supabase
+        .from('purchase_orders')
+        .update({
+          po_number: updatedPO.poNumber,
+          supplier: updatedPO.supplier,
+          order_date: updatedPO.orderDate,
+          expected_delivery: updatedPO.expectedDelivery,
+          status: updatedPO.status,
+          total_amount: updatedPO.totalAmount,
+          grn_date: updatedPO.grnDate || null,
+          notes: updatedPO.notes || null
+        })
+        .eq('po_id', id);
+
+      if (updateError) throw updateError;
+
+      // Delete existing items
+      const { error: deleteError } = await supabase
+        .from('purchase_order_items')
+        .delete()
+        .eq('purchase_order_id', poData.id);
+
+      if (deleteError) throw deleteError;
+
+      // Insert updated items
+      const itemsToInsert = updatedPO.items.map(item => ({
+        purchase_order_id: poData.id,
+        stock_item_id: item.stockItemId,
+        stock_item_name: item.stockItemName,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        total_price: item.totalPrice
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('purchase_order_items')
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
+    } catch (error) {
+      console.error('Error updating purchase order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update purchase order",
+        variant: "destructive"
+      });
+      throw error;
+    }
   };
 
   const getPurchaseOrder = (id: number) => {
-    return purchaseOrderStore.find(po => po.id === id);
-  };
-
-  const notifyListeners = () => {
-    listeners.forEach(listener => listener());
-    setPurchaseOrders([...purchaseOrderStore]);
+    return purchaseOrders.find(po => po.id === id);
   };
 
   const subscribe = (listener: () => void) => {
-    listeners.push(listener);
-    return () => {
-      listeners = listeners.filter(l => l !== listener);
-    };
+    // Legacy compatibility - not needed with real-time subscriptions
+    return () => {};
   };
 
   return {
     purchaseOrders,
+    loading,
     addPurchaseOrder,
     updatePurchaseOrder,
     getPurchaseOrder,

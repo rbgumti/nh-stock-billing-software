@@ -1,159 +1,192 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PatientFormData } from "./usePatientForm";
-
-// Mock initial data
-const initialPatients: PatientFormData[] = [
-  {
-    patientId: "PT001",
-    firstName: "John",
-    lastName: "Doe",
-    dateOfBirth: "1979-01-15",
-    gender: "Male",
-    phone: "+1 234-567-8900",
-    email: "john.doe@email.com",
-    address: "123 Main St",
-    aadhar: "1234 5678 9012",
-    govtIdOld: "DL123456",
-    govtIdNew: "AB1234567890",
-    emergencyContact: "Jane Doe",
-    emergencyPhone: "+1 234-567-8901",
-    medicalHistory: "",
-    allergies: "",
-    currentMedications: "",
-    fatherName: "",
-    visitDate: "",
-    medicinePrescribedDays: "",
-    nextFollowUpDate: ""
-  },
-  {
-    patientId: "PT002",
-    firstName: "Jane",
-    lastName: "Smith",
-    dateOfBirth: "1992-06-20",
-    gender: "Female",
-    phone: "+1 234-567-8901",
-    email: "jane.smith@email.com",
-    address: "456 Oak Ave",
-    aadhar: "2345 6789 0123",
-    govtIdOld: "DL234567",
-    govtIdNew: "CD2345678901",
-    emergencyContact: "John Smith",
-    emergencyPhone: "+1 234-567-8902",
-    medicalHistory: "",
-    allergies: "",
-    currentMedications: "",
-    fatherName: "",
-    visitDate: "",
-    medicinePrescribedDays: "",
-    nextFollowUpDate: ""
-  },
-  {
-    patientId: "PT003",
-    firstName: "Mike",
-    lastName: "Johnson",
-    dateOfBirth: "1966-03-10",
-    gender: "Male",
-    phone: "+1 234-567-8902",
-    email: "mike.johnson@email.com",
-    address: "789 Pine St",
-    aadhar: "3456 7890 1234",
-    govtIdOld: "DL345678",
-    govtIdNew: "EF3456789012",
-    emergencyContact: "Sarah Johnson",
-    emergencyPhone: "+1 234-567-8903",
-    medicalHistory: "",
-    allergies: "",
-    currentMedications: "",
-    fatherName: "",
-    visitDate: "",
-    medicinePrescribedDays: "",
-    nextFollowUpDate: ""
-  },
-  {
-    patientId: "PT004",
-    firstName: "Sarah",
-    lastName: "Wilson",
-    dateOfBirth: "1996-08-12",
-    gender: "Female",
-    phone: "+1 234-567-8903",
-    email: "sarah.wilson@email.com",
-    address: "321 Elm Dr",
-    aadhar: "4567 8901 2345",
-    govtIdOld: "DL456789",
-    govtIdNew: "GH4567890123",
-    emergencyContact: "Tom Wilson",
-    emergencyPhone: "+1 234-567-8904",
-    medicalHistory: "",
-    allergies: "",
-    currentMedications: "",
-    fatherName: "",
-    visitDate: "",
-    medicinePrescribedDays: "",
-    nextFollowUpDate: ""
-  }
-];
-
-// Load from localStorage if available, otherwise use initial data
-const loadPatientsFromStorage = (): PatientFormData[] => {
-  try {
-    const stored = localStorage.getItem('patients');
-    return stored ? JSON.parse(stored) : initialPatients;
-  } catch {
-    return initialPatients;
-  }
-};
-
-// Initialize store with data from localStorage
-let patientsStore: PatientFormData[] = loadPatientsFromStorage();
-let listeners: (() => void)[] = [];
-
-// Save to localStorage whenever store changes
-const saveToStorage = () => {
-  localStorage.setItem('patients', JSON.stringify(patientsStore));
-};
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export function usePatientStore() {
-  const [patients, setPatients] = useState<PatientFormData[]>(patientsStore);
+  const [patients, setPatients] = useState<PatientFormData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addPatient = (patient: PatientFormData) => {
-    patientsStore = [...patientsStore, patient];
-    saveToStorage();
-    notifyListeners();
+  // Load patients from Supabase
+  useEffect(() => {
+    loadPatients();
+    
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('patients-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'patients'
+        },
+        () => {
+          loadPatients();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const loadPatients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedPatients: PatientFormData[] = (data || []).map(p => ({
+        patientId: p.patient_id,
+        firstName: p.first_name,
+        lastName: p.last_name,
+        dateOfBirth: p.date_of_birth,
+        gender: p.gender,
+        phone: p.phone || '',
+        email: p.email || '',
+        address: p.address || '',
+        aadhar: p.aadhar || '',
+        govtIdOld: p.govt_id_old || '',
+        govtIdNew: p.govt_id_new || '',
+        emergencyContact: p.emergency_contact || '',
+        emergencyPhone: p.emergency_phone || '',
+        medicalHistory: p.medical_history || '',
+        allergies: p.allergies || '',
+        currentMedications: p.current_medications || '',
+        fatherName: p.father_name || '',
+        visitDate: p.visit_date || '',
+        medicinePrescribedDays: p.medicine_prescribed_days || '',
+        nextFollowUpDate: p.next_follow_up_date || ''
+      }));
+
+      setPatients(formattedPatients);
+    } catch (error) {
+      console.error('Error loading patients:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load patients",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updatePatient = (patientId: string, updatedPatient: PatientFormData) => {
-    patientsStore = patientsStore.map(p => 
-      String(p.patientId) === String(patientId) ? updatedPatient : p
-    );
-    saveToStorage();
-    notifyListeners();
+  const addPatient = async (patient: PatientFormData) => {
+    try {
+      const { error } = await supabase
+        .from('patients')
+        .insert({
+          patient_id: patient.patientId,
+          first_name: patient.firstName,
+          last_name: patient.lastName,
+          date_of_birth: patient.dateOfBirth,
+          gender: patient.gender,
+          phone: patient.phone,
+          email: patient.email,
+          address: patient.address,
+          aadhar: patient.aadhar,
+          govt_id_old: patient.govtIdOld,
+          govt_id_new: patient.govtIdNew,
+          emergency_contact: patient.emergencyContact,
+          emergency_phone: patient.emergencyPhone,
+          medical_history: patient.medicalHistory,
+          allergies: patient.allergies,
+          current_medications: patient.currentMedications,
+          father_name: patient.fatherName,
+          visit_date: patient.visitDate || null,
+          medicine_prescribed_days: patient.medicinePrescribedDays,
+          next_follow_up_date: patient.nextFollowUpDate || null
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error adding patient:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add patient",
+        variant: "destructive"
+      });
+      throw error;
+    }
   };
 
-  const deletePatient = (patientId: string) => {
-    patientsStore = patientsStore.filter(p => String(p.patientId) !== String(patientId));
-    saveToStorage();
-    notifyListeners();
+  const updatePatient = async (patientId: string, updatedPatient: PatientFormData) => {
+    try {
+      const { error } = await supabase
+        .from('patients')
+        .update({
+          patient_id: updatedPatient.patientId,
+          first_name: updatedPatient.firstName,
+          last_name: updatedPatient.lastName,
+          date_of_birth: updatedPatient.dateOfBirth,
+          gender: updatedPatient.gender,
+          phone: updatedPatient.phone,
+          email: updatedPatient.email,
+          address: updatedPatient.address,
+          aadhar: updatedPatient.aadhar,
+          govt_id_old: updatedPatient.govtIdOld,
+          govt_id_new: updatedPatient.govtIdNew,
+          emergency_contact: updatedPatient.emergencyContact,
+          emergency_phone: updatedPatient.emergencyPhone,
+          medical_history: updatedPatient.medicalHistory,
+          allergies: updatedPatient.allergies,
+          current_medications: updatedPatient.currentMedications,
+          father_name: updatedPatient.fatherName,
+          visit_date: updatedPatient.visitDate || null,
+          medicine_prescribed_days: updatedPatient.medicinePrescribedDays,
+          next_follow_up_date: updatedPatient.nextFollowUpDate || null
+        })
+        .eq('patient_id', patientId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating patient:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update patient",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const deletePatient = async (patientId: string) => {
+    try {
+      const { error } = await supabase
+        .from('patients')
+        .delete()
+        .eq('patient_id', patientId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete patient",
+        variant: "destructive"
+      });
+      throw error;
+    }
   };
 
   const getPatient = (patientId: string) => {
-    return patientsStore.find(p => String(p.patientId) === String(patientId));
+    return patients.find(p => String(p.patientId) === String(patientId));
   };
 
-  const notifyListeners = () => {
-    listeners.forEach(listener => listener());
-    setPatients([...patientsStore]);
-  };
-
-  // Subscribe to changes
   const subscribe = (listener: () => void) => {
-    listeners.push(listener);
-    return () => {
-      listeners = listeners.filter(l => l !== listener);
-    };
+    // Legacy compatibility - not needed with real-time subscriptions
+    return () => {};
   };
 
   return {
     patients,
+    loading,
     addPatient,
     updatePatient,
     deletePatient,
