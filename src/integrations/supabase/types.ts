@@ -14,7 +14,212 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      patients: {
+        Row: {
+          aadhar: string | null
+          address: string | null
+          allergies: string | null
+          blood_group: string | null
+          created_at: string | null
+          current_medications: string | null
+          date_of_birth: string
+          email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relationship: string | null
+          first_name: string
+          gender: string
+          govt_id_new: string | null
+          govt_id_old: string | null
+          last_name: string
+          medical_history: string | null
+          next_follow_up_date: string | null
+          patient_id: string
+          phone: string
+          updated_at: string | null
+          visit_date: string | null
+        }
+        Insert: {
+          aadhar?: string | null
+          address?: string | null
+          allergies?: string | null
+          blood_group?: string | null
+          created_at?: string | null
+          current_medications?: string | null
+          date_of_birth: string
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          first_name: string
+          gender: string
+          govt_id_new?: string | null
+          govt_id_old?: string | null
+          last_name: string
+          medical_history?: string | null
+          next_follow_up_date?: string | null
+          patient_id: string
+          phone: string
+          updated_at?: string | null
+          visit_date?: string | null
+        }
+        Update: {
+          aadhar?: string | null
+          address?: string | null
+          allergies?: string | null
+          blood_group?: string | null
+          created_at?: string | null
+          current_medications?: string | null
+          date_of_birth?: string
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          first_name?: string
+          gender?: string
+          govt_id_new?: string | null
+          govt_id_old?: string | null
+          last_name?: string
+          medical_history?: string | null
+          next_follow_up_date?: string | null
+          patient_id?: string
+          phone?: string
+          updated_at?: string | null
+          visit_date?: string | null
+        }
+        Relationships: []
+      }
+      purchase_order_items: {
+        Row: {
+          created_at: string | null
+          id: number
+          purchase_order_id: number
+          quantity: number
+          stock_item_id: number
+          stock_item_name: string
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          purchase_order_id: number
+          quantity: number
+          stock_item_id: number
+          stock_item_name: string
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          purchase_order_id?: number
+          quantity?: number
+          stock_item_id?: number
+          stock_item_name?: string
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          created_at: string | null
+          expected_delivery: string
+          grn_date: string | null
+          id: number
+          notes: string | null
+          order_date: string
+          po_number: string
+          status: string
+          supplier: string
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expected_delivery: string
+          grn_date?: string | null
+          id?: number
+          notes?: string | null
+          order_date: string
+          po_number: string
+          status: string
+          supplier: string
+          total_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expected_delivery?: string
+          grn_date?: string | null
+          id?: number
+          notes?: string | null
+          order_date?: string
+          po_number?: string
+          status?: string
+          supplier?: string
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      stock_items: {
+        Row: {
+          batch_no: string
+          category: string
+          created_at: string | null
+          current_stock: number
+          expiry_date: string
+          item_id: number
+          minimum_stock: number
+          mrp: number | null
+          name: string
+          status: string | null
+          supplier: string
+          unit_price: number
+          updated_at: string | null
+        }
+        Insert: {
+          batch_no: string
+          category: string
+          created_at?: string | null
+          current_stock?: number
+          expiry_date: string
+          item_id?: number
+          minimum_stock?: number
+          mrp?: number | null
+          name: string
+          status?: string | null
+          supplier: string
+          unit_price: number
+          updated_at?: string | null
+        }
+        Update: {
+          batch_no?: string
+          category?: string
+          created_at?: string | null
+          current_stock?: number
+          expiry_date?: string
+          item_id?: number
+          minimum_stock?: number
+          mrp?: number | null
+          name?: string
+          status?: string | null
+          supplier?: string
+          unit_price?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
