@@ -36,32 +36,31 @@ export function usePatientStore() {
     try {
       const { data, error } = await supabase
         .from('patients')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
 
       if (error) throw error;
 
       const formattedPatients: PatientFormData[] = (data || []).map(p => ({
-        patientId: p.patient_id,
-        firstName: p.first_name,
-        lastName: p.last_name,
-        dateOfBirth: p.date_of_birth,
-        gender: p.gender,
-        phone: p.phone || '',
-        email: p.email || '',
-        address: p.address || '',
-        aadhar: p.aadhar || '',
-        govtIdOld: p.govt_id_old || '',
-        govtIdNew: p.govt_id_new || '',
-        emergencyContact: p.emergency_contact || '',
-        emergencyPhone: p.emergency_phone || '',
-        medicalHistory: p.medical_history || '',
-        allergies: p.allergies || '',
-        currentMedications: p.current_medications || '',
-        fatherName: p.father_name || '',
-        visitDate: p.visit_date || '',
-        medicinePrescribedDays: p.medicine_prescribed_days || '',
-        nextFollowUpDate: p.next_follow_up_date || ''
+        patientId: p['S.No.'] || '',
+        firstName: p['Patient Name']?.split(' ')[0] || '',
+        lastName: p['Patient Name']?.split(' ').slice(1).join(' ') || '',
+        dateOfBirth: '',
+        gender: '',
+        phone: p['PH'] || '',
+        email: '',
+        address: p['Address'] || '',
+        aadhar: p['Addhar Card'] || '',
+        govtIdOld: p['Govt. ID'] || '',
+        govtIdNew: p['New Govt, ID'] || '',
+        emergencyContact: '',
+        emergencyPhone: '',
+        medicalHistory: '',
+        allergies: '',
+        currentMedications: '',
+        fatherName: p['Father Name'] || '',
+        visitDate: '',
+        medicinePrescribedDays: '',
+        nextFollowUpDate: ''
       }));
 
       setPatients(formattedPatients);
@@ -81,28 +80,18 @@ export function usePatientStore() {
     try {
       const { error } = await supabase
         .from('patients')
-        .insert({
-          patient_id: patient.patientId,
-          first_name: patient.firstName,
-          last_name: patient.lastName,
-          date_of_birth: patient.dateOfBirth,
-          gender: patient.gender,
-          phone: patient.phone,
-          email: patient.email,
-          address: patient.address,
-          aadhar: patient.aadhar,
-          govt_id_old: patient.govtIdOld,
-          govt_id_new: patient.govtIdNew,
-          emergency_contact: patient.emergencyContact,
-          emergency_phone: patient.emergencyPhone,
-          medical_history: patient.medicalHistory,
-          allergies: patient.allergies,
-          current_medications: patient.currentMedications,
-          father_name: patient.fatherName,
-          visit_date: patient.visitDate || null,
-          medicine_prescribed_days: patient.medicinePrescribedDays,
-          next_follow_up_date: patient.nextFollowUpDate || null
-        });
+        .insert([{
+          "S.No.": patient.patientId,
+          "Fill no.": '',
+          "Patient Name": `${patient.firstName} ${patient.lastName}`,
+          "Age": '',
+          "Father Name": patient.fatherName,
+          "Govt. ID": patient.govtIdOld,
+          "Addhar Card": patient.aadhar,
+          "PH": patient.phone,
+          "Address": patient.address,
+          "New Govt, ID": patient.govtIdNew
+        }] as any);
 
       if (error) throw error;
     } catch (error) {
@@ -121,28 +110,16 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .update({
-          patient_id: updatedPatient.patientId,
-          first_name: updatedPatient.firstName,
-          last_name: updatedPatient.lastName,
-          date_of_birth: updatedPatient.dateOfBirth,
-          gender: updatedPatient.gender,
-          phone: updatedPatient.phone,
-          email: updatedPatient.email,
-          address: updatedPatient.address,
-          aadhar: updatedPatient.aadhar,
-          govt_id_old: updatedPatient.govtIdOld,
-          govt_id_new: updatedPatient.govtIdNew,
-          emergency_contact: updatedPatient.emergencyContact,
-          emergency_phone: updatedPatient.emergencyPhone,
-          medical_history: updatedPatient.medicalHistory,
-          allergies: updatedPatient.allergies,
-          current_medications: updatedPatient.currentMedications,
-          father_name: updatedPatient.fatherName,
-          visit_date: updatedPatient.visitDate || null,
-          medicine_prescribed_days: updatedPatient.medicinePrescribedDays,
-          next_follow_up_date: updatedPatient.nextFollowUpDate || null
-        })
-        .eq('patient_id', patientId);
+          "S.No.": updatedPatient.patientId,
+          "Patient Name": `${updatedPatient.firstName} ${updatedPatient.lastName}`,
+          "Father Name": updatedPatient.fatherName,
+          "Govt. ID": updatedPatient.govtIdOld,
+          "Addhar Card": updatedPatient.aadhar,
+          "PH": updatedPatient.phone,
+          "Address": updatedPatient.address,
+          "New Govt, ID": updatedPatient.govtIdNew
+        } as any)
+        .eq('S.No.', patientId);
 
       if (error) throw error;
     } catch (error) {
@@ -161,7 +138,7 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .delete()
-        .eq('patient_id', patientId);
+        .eq('S.No.', patientId);
 
       if (error) throw error;
     } catch (error) {
