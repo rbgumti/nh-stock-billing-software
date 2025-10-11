@@ -16,76 +16,40 @@ export type Database = {
     Tables: {
       patients: {
         Row: {
-          aadhar: string | null
-          address: string | null
-          allergies: string | null
-          blood_group: string | null
-          created_at: string | null
-          current_medications: string | null
-          date_of_birth: string
-          email: string | null
-          emergency_contact_name: string | null
-          emergency_contact_phone: string | null
-          emergency_contact_relationship: string | null
-          first_name: string
-          gender: string
-          govt_id_new: string | null
-          govt_id_old: string | null
-          last_name: string
-          medical_history: string | null
-          next_follow_up_date: string | null
-          patient_id: string
-          phone: string
-          updated_at: string | null
-          visit_date: string | null
+          "Addhar Card": string
+          Address: string
+          Age: string
+          "Father Name": string
+          "Fill no.": string
+          "Govt. ID": string
+          "New Govt, ID": string
+          "Patient Name": string
+          PH: string
+          "S.No.": string
         }
         Insert: {
-          aadhar?: string | null
-          address?: string | null
-          allergies?: string | null
-          blood_group?: string | null
-          created_at?: string | null
-          current_medications?: string | null
-          date_of_birth: string
-          email?: string | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          emergency_contact_relationship?: string | null
-          first_name: string
-          gender: string
-          govt_id_new?: string | null
-          govt_id_old?: string | null
-          last_name: string
-          medical_history?: string | null
-          next_follow_up_date?: string | null
-          patient_id: string
-          phone: string
-          updated_at?: string | null
-          visit_date?: string | null
+          "Addhar Card": string
+          Address: string
+          Age: string
+          "Father Name": string
+          "Fill no."?: string
+          "Govt. ID": string
+          "New Govt, ID": string
+          "Patient Name": string
+          PH: string
+          "S.No.": string
         }
         Update: {
-          aadhar?: string | null
-          address?: string | null
-          allergies?: string | null
-          blood_group?: string | null
-          created_at?: string | null
-          current_medications?: string | null
-          date_of_birth?: string
-          email?: string | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          emergency_contact_relationship?: string | null
-          first_name?: string
-          gender?: string
-          govt_id_new?: string | null
-          govt_id_old?: string | null
-          last_name?: string
-          medical_history?: string | null
-          next_follow_up_date?: string | null
-          patient_id?: string
-          phone?: string
-          updated_at?: string | null
-          visit_date?: string | null
+          "Addhar Card"?: string
+          Address?: string
+          Age?: string
+          "Father Name"?: string
+          "Fill no."?: string
+          "Govt. ID"?: string
+          "New Govt, ID"?: string
+          "Patient Name"?: string
+          PH?: string
+          "S.No."?: string
         }
         Relationships: []
       }
