@@ -16,6 +16,8 @@ import Invoices from "./pages/Invoices";
 import NewInvoice from "./pages/NewInvoice";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -34,15 +36,16 @@ const App = () => (
               </header>
               <main className="flex-1 overflow-auto">
                 <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/patients" element={<Patients />} />
-                  <Route path="/patients/new" element={<NewPatient />} />
-                  <Route path="/patients/view/:id" element={<ViewPatient />} />
-                  <Route path="/patients/edit/:id" element={<EditPatient />} />
-                  <Route path="/stock" element={<Stock />} />
-                  <Route path="/invoices" element={<Invoices />} />
-                  <Route path="/invoices/new" element={<NewInvoice />} />
-                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                  <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+                  <Route path="/patients/new" element={<ProtectedRoute><NewPatient /></ProtectedRoute>} />
+                  <Route path="/patients/view/:id" element={<ProtectedRoute><ViewPatient /></ProtectedRoute>} />
+                  <Route path="/patients/edit/:id" element={<ProtectedRoute><EditPatient /></ProtectedRoute>} />
+                  <Route path="/stock" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
+                  <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
+                  <Route path="/invoices/new" element={<ProtectedRoute><NewInvoice /></ProtectedRoute>} />
+                  <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

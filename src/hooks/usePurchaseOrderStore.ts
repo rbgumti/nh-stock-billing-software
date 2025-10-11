@@ -73,19 +73,19 @@ export function usePurchaseOrderStore() {
             stockItemId: item.stock_item_id,
             stockItemName: item.stock_item_name,
             quantity: item.quantity,
-            unitPrice: item.unit_price,
-            totalPrice: item.total_price
+            unitPrice: Number(item.unit_price),
+            totalPrice: Number(item.total_price)
           }));
 
         return {
-          id: po.po_id,
+          id: po.id,
           poNumber: po.po_number,
           supplier: po.supplier,
           orderDate: po.order_date,
           expectedDelivery: po.expected_delivery,
-          status: po.status,
+          status: po.status as 'Pending' | 'Received' | 'Cancelled',
           items: poItems,
-          totalAmount: po.total_amount,
+          totalAmount: Number(po.total_amount),
           grnDate: po.grn_date || undefined,
           notes: po.notes || undefined
         };
@@ -151,15 +151,6 @@ export function usePurchaseOrderStore() {
 
   const updatePurchaseOrder = async (id: number, updatedPO: PurchaseOrder) => {
     try {
-      // Get the database ID from po_id
-      const { data: poData, error: findError } = await supabase
-        .from('purchase_orders')
-        .select('id')
-        .eq('po_id', id)
-        .single();
-
-      if (findError) throw findError;
-
       const { error: updateError } = await supabase
         .from('purchase_orders')
         .update({
@@ -172,7 +163,7 @@ export function usePurchaseOrderStore() {
           grn_date: updatedPO.grnDate || null,
           notes: updatedPO.notes || null
         })
-        .eq('po_id', id);
+        .eq('id', id);
 
       if (updateError) throw updateError;
 
@@ -180,13 +171,13 @@ export function usePurchaseOrderStore() {
       const { error: deleteError } = await supabase
         .from('purchase_order_items')
         .delete()
-        .eq('purchase_order_id', poData.id);
+        .eq('purchase_order_id', id);
 
       if (deleteError) throw deleteError;
 
       // Insert updated items
       const itemsToInsert = updatedPO.items.map(item => ({
-        purchase_order_id: poData.id,
+        purchase_order_id: id,
         stock_item_id: item.stockItemId,
         stock_item_name: item.stockItemName,
         quantity: item.quantity,
