@@ -84,7 +84,7 @@ export default function Auth() {
             {isLogin ? "Welcome Back" : "Create Account"}
           </CardTitle>
           <CardDescription className="text-center">
-            {isLogin ? "Sign in to access the NAVJEEVAN HIMS" : "Sign up for NAVJEEVAN HIMS"}
+            {isLogin ? "Access the NAVJEEVAN HIMS" : "Create account for NAVJEEVAN HIMS"}
           </CardDescription>
         </CardHeader>
         <CardContent>
