@@ -34,9 +34,12 @@ export function usePatientStore() {
 
   const loadPatients = async () => {
     try {
+      console.log('Loading patients from Supabase...');
       const { data, error } = await supabase
         .from('patients')
         .select('*');
+
+      console.log('Supabase response:', { data, error, count: data?.length });
 
       if (error) throw error;
 
@@ -63,6 +66,7 @@ export function usePatientStore() {
         nextFollowUpDate: ''
       }));
 
+      console.log('Formatted patients:', formattedPatients.length, 'First patient:', formattedPatients[0]);
       setPatients(formattedPatients);
     } catch (error) {
       console.error('Error loading patients:', error);
