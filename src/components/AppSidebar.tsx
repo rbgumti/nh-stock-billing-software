@@ -1,10 +1,5 @@
-
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
-import { User } from '@supabase/supabase-js';
+import { NavLink, useLocation } from "react-router-dom";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -28,46 +23,8 @@ const navigationItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
-  const navigate = useNavigate();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    // Get current user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      toast({
-        title: "Logged Out",
-        description: "You have been successfully logged out.",
-      });
-      
-      navigate("/auth");
-    } catch (error: any) {
-      toast({
-        title: "Logout Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  };
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
@@ -132,26 +89,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {user && (
-          <SidebarGroup className="mt-auto">
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={handleLogout} className="text-red-700 hover:bg-red-50">
-                    <LogOut className="h-5 w-5" />
-                    {!collapsed && <span className="ml-3">Logout</span>}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                {!collapsed && (
-                  <div className="px-3 py-2 text-xs text-muted-foreground truncate">
-                    {user.email}
-                  </div>
-                )}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
     </Sidebar>
   );
