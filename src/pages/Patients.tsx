@@ -41,15 +41,18 @@ export default function Patients() {
     status: "Active" // Default for now
   }));
 
-  const filteredPatients = patients.filter(patient =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.phone.includes(searchTerm) ||
-    patient.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.aadhar.includes(searchTerm) ||
-    patient.govtIdOld.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.govtIdNew.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPatients = patients.filter(patient => {
+    const search = searchTerm.toLowerCase();
+    return (
+      patient.name.toLowerCase().includes(search) ||
+      (patient.email || '').toLowerCase().includes(search) ||
+      (patient.phone || '').includes(searchTerm) ||
+      String(patient.patientId || '').toLowerCase().includes(search) ||
+      (patient.aadhar || '').includes(searchTerm) ||
+      (patient.govtIdOld || '').toLowerCase().includes(search) ||
+      (patient.govtIdNew || '').toLowerCase().includes(search)
+    );
+  });
 
   return (
     <div className="p-6 space-y-6">
