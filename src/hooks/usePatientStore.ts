@@ -44,29 +44,35 @@ export function usePatientStore() {
       if (error) throw error;
 
       const formattedPatients: PatientFormData[] = (data || []).map(p => {
+        // S.No. might be a number, so convert to string
+        const patientId = String(p['S.No.'] || '');
+        const fullName = p['Patient Name'] || '';
+        const nameParts = fullName.trim().split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        
         const formatted = {
-          patientId: String(p['S.No.'] || ''),
-          firstName: p['Patient Name']?.split(' ')[0] || '',
-          lastName: p['Patient Name']?.split(' ').slice(1).join(' ') || '',
+          patientId: patientId,
+          firstName: firstName,
+          lastName: lastName,
           dateOfBirth: '',
           gender: '',
-          phone: p['PH'] || '',
+          phone: String(p['PH'] || ''),
           email: '',
-          address: p['Address'] || '',
-          aadhar: p['Addhar Card'] || '',
-          govtIdOld: p['Govt. ID'] || '',
-          govtIdNew: p['New Govt, ID'] || '',
+          address: String(p['Address'] || ''),
+          aadhar: String(p['Addhar Card'] || ''),
+          govtIdOld: String(p['Govt. ID'] || ''),
+          govtIdNew: String(p['New Govt, ID'] || ''),
           emergencyContact: '',
           emergencyPhone: '',
           medicalHistory: '',
           allergies: '',
           currentMedications: '',
-          fatherName: p['Father Name'] || '',
+          fatherName: String(p['Father Name'] || ''),
           visitDate: '',
           medicinePrescribedDays: '',
           nextFollowUpDate: ''
         };
-        console.log('Formatted patient:', formatted.patientId, formatted.firstName);
         return formatted;
       });
 
