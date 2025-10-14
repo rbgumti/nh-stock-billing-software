@@ -43,28 +43,32 @@ export function usePatientStore() {
 
       if (error) throw error;
 
-      const formattedPatients: PatientFormData[] = (data || []).map(p => ({
-        patientId: p['S.No.'] || '',
-        firstName: p['Patient Name']?.split(' ')[0] || '',
-        lastName: p['Patient Name']?.split(' ').slice(1).join(' ') || '',
-        dateOfBirth: '',
-        gender: '',
-        phone: p['PH'] || '',
-        email: '',
-        address: p['Address'] || '',
-        aadhar: p['Addhar Card'] || '',
-        govtIdOld: p['Govt. ID'] || '',
-        govtIdNew: p['New Govt, ID'] || '',
-        emergencyContact: '',
-        emergencyPhone: '',
-        medicalHistory: '',
-        allergies: '',
-        currentMedications: '',
-        fatherName: p['Father Name'] || '',
-        visitDate: '',
-        medicinePrescribedDays: '',
-        nextFollowUpDate: ''
-      }));
+      const formattedPatients: PatientFormData[] = (data || []).map(p => {
+        const formatted = {
+          patientId: String(p['S.No.'] || ''),
+          firstName: p['Patient Name']?.split(' ')[0] || '',
+          lastName: p['Patient Name']?.split(' ').slice(1).join(' ') || '',
+          dateOfBirth: '',
+          gender: '',
+          phone: p['PH'] || '',
+          email: '',
+          address: p['Address'] || '',
+          aadhar: p['Addhar Card'] || '',
+          govtIdOld: p['Govt. ID'] || '',
+          govtIdNew: p['New Govt, ID'] || '',
+          emergencyContact: '',
+          emergencyPhone: '',
+          medicalHistory: '',
+          allergies: '',
+          currentMedications: '',
+          fatherName: p['Father Name'] || '',
+          visitDate: '',
+          medicinePrescribedDays: '',
+          nextFollowUpDate: ''
+        };
+        console.log('Formatted patient:', formatted.patientId, formatted.firstName);
+        return formatted;
+      });
 
       console.log('Formatted patients:', formattedPatients.length, 'First patient:', formattedPatients[0]);
       setPatients(formattedPatients);

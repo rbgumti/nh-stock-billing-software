@@ -13,7 +13,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 export default function Patients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showImport, setShowImport] = useState(false);
-  const { patients: storePatients, subscribe, deletePatient } = usePatientStore();
+  const { patients: storePatients, subscribe, deletePatient, loading } = usePatientStore();
+  
+  console.log('Patients page - storePatients:', storePatients.length, 'loading:', loading);
 
   // Force re-render when patients are updated
   useEffect(() => {
