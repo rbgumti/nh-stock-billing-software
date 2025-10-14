@@ -34,49 +34,45 @@ export function usePatientStore() {
 
   const loadPatients = async () => {
     try {
-      console.log('Loading patients from Supabase...');
       const { data, error } = await supabase
         .from('patients')
         .select('*');
 
-      console.log('Supabase response:', { data, error, count: data?.length });
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
-      if (error) throw error;
+      if (!data || data.length === 0) {
+        console.warn('No patient data returned from Supabase');
+        setPatients([]);
+        return;
+      }
 
-      const formattedPatients: PatientFormData[] = (data || []).map(p => {
-        // S.No. might be a number, so convert to string
-        const patientId = String(p['S.No.'] || '');
-        const fullName = p['Patient Name'] || '';
-        const nameParts = fullName.trim().split(' ');
-        const firstName = nameParts[0] || '';
-        const lastName = nameParts.slice(1).join(' ') || '';
-        
-        const formatted = {
-          patientId: patientId,
-          firstName: firstName,
-          lastName: lastName,
-          dateOfBirth: '',
-          gender: '',
-          phone: String(p['PH'] || ''),
-          email: '',
-          address: String(p['Address'] || ''),
-          aadhar: String(p['Addhar Card'] || ''),
-          govtIdOld: String(p['Govt. ID'] || ''),
-          govtIdNew: String(p['New Govt, ID'] || ''),
-          emergencyContact: '',
-          emergencyPhone: '',
-          medicalHistory: '',
-          allergies: '',
-          currentMedications: '',
-          fatherName: String(p['Father Name'] || ''),
-          visitDate: '',
-          medicinePrescribedDays: '',
-          nextFollowUpDate: ''
-        };
-        return formatted;
-      });
+      const formattedPatients: PatientFormData[] = data.map(p => ({
+        patientId: String(p['S.No.'] || ''),
+        firstName: (p['Patient Name'] || '').split(' ')[0] || '',
+        lastName: (p['Patient Name'] || '').split(' ').slice(1).join(' ') || '',
+        dateOfBirth: '',
+        gender: '',
+        phone: String(p['PH'] || ''),
+        email: '',
+        address: String(p['Address'] || ''),
+        aadhar: String(p['Addhar Card'] || ''),
+        govtIdOld: String(p['Govt. ID'] || ''),
+        govtIdNew: String(p['New Govt, ID'] || ''),
+        emergencyContact: '',
+        emergencyPhone: '',
+        medicalHistory: '',
+        allergies: '',
+        currentMedications: '',
+        fatherName: String(p['Father Name'] || ''),
+        visitDate: '',
+        medicinePrescribedDays: '',
+        nextFollowUpDate: ''
+      }));
 
-      console.log('Formatted patients:', formattedPatients.length, 'First patient:', formattedPatients[0]);
+      console.log(`Loaded ${formattedPatients.length} patients successfully`);
       setPatients(formattedPatients);
     } catch (error) {
       console.error('Error loading patients:', error);
@@ -85,6 +81,7 @@ export function usePatientStore() {
         description: "Failed to load patients",
         variant: "destructive"
       });
+      setPatients([]);
     } finally {
       setLoading(false);
     }
@@ -167,11 +164,7 @@ export function usePatientStore() {
   };
 
   const getPatient = (patientId: string) => {
-    console.log('getPatient - Looking for ID:', patientId, 'Type:', typeof patientId);
-    console.log('getPatient - Available patients:', patients.map(p => ({ id: p.patientId, type: typeof p.patientId })));
-    const found = patients.find(p => String(p.patientId) === String(patientId));
-    console.log('getPatient - Found patient:', found);
-    return found;
+    return patients.find(p => String(p.patientId) === String(patientId));
   };
 
   const subscribe = (listener: () => void) => {
