@@ -161,7 +161,11 @@ export function usePatientStore() {
   };
 
   const getPatient = (patientId: string) => {
-    return patients.find(p => String(p.patientId) === String(patientId));
+    console.log('getPatient - Looking for ID:', patientId, 'Type:', typeof patientId);
+    console.log('getPatient - Available patients:', patients.map(p => ({ id: p.patientId, type: typeof p.patientId })));
+    const found = patients.find(p => String(p.patientId) === String(patientId));
+    console.log('getPatient - Found patient:', found);
+    return found;
   };
 
   const subscribe = (listener: () => void) => {
