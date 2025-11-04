@@ -68,7 +68,7 @@ export function usePatientForm(isEditing: boolean = false) {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic validation
@@ -81,23 +81,23 @@ export function usePatientForm(isEditing: boolean = false) {
       return;
     }
 
-    if (isEditing && originalPatientId) {
-      // Update existing patient
-      updatePatient(originalPatientId, formData);
-      toast({
-        title: "Success",
-        description: "Patient has been updated successfully!"
-      });
-    } else {
-      // Add new patient
-      addPatient(formData);
-      toast({
-        title: "Success",
-        description: "Patient has been added successfully!"
-      });
+    try {
+      if (isEditing && originalPatientId) {
+        // Update existing patient
+        await updatePatient(originalPatientId, formData);
+      } else {
+        // Add new patient
+        await addPatient(formData);
+        toast({
+          title: "Success",
+          description: "Patient has been added successfully!"
+        });
+      }
+      
+      navigate("/patients");
+    } catch (error) {
+      console.error('Error submitting patient form:', error);
     }
-    
-    navigate("/patients");
   };
 
   const loadPatientData = (patientData: PatientFormData) => {

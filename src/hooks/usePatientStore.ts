@@ -121,18 +121,26 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .update({
-          "S.No.": updatedPatient.patientId,
           "Patient Name": `${updatedPatient.firstName} ${updatedPatient.lastName}`,
           "Father Name": updatedPatient.fatherName,
           "Govt. ID": updatedPatient.govtIdOld,
           "Addhar Card": updatedPatient.aadhar,
           "PH": updatedPatient.phone,
           "Address": updatedPatient.address,
-          "New Govt, ID": updatedPatient.govtIdNew
+          "New Govt, ID": updatedPatient.govtIdNew,
+          "Age": updatedPatient.dateOfBirth ? String(new Date().getFullYear() - new Date(updatedPatient.dateOfBirth).getFullYear()) : ''
         } as any)
         .eq('S.No.', patientId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error updating patient:', error);
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Patient updated successfully"
+      });
     } catch (error) {
       console.error('Error updating patient:', error);
       toast({
