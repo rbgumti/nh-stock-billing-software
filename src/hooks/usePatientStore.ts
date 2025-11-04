@@ -118,8 +118,27 @@ export function usePatientStore() {
 
   const updatePatient = async (patientId: string, updatedPatient: PatientFormData) => {
     try {
-      console.log('Attempting to update patient with ID:', patientId);
+      console.log('=== UPDATE PATIENT START ===');
+      console.log('Patient ID to update:', patientId, 'Type:', typeof patientId);
       console.log('Update data:', updatedPatient);
+      
+      // First, verify the patient exists
+      const { data: existingPatient, error: fetchError } = await supabase
+        .from('patients')
+        .select('*')
+        .eq('S.No.', patientId)
+        .maybeSingle();
+      
+      console.log('Existing patient check:', { existingPatient, fetchError });
+      
+      if (fetchError) {
+        console.error('Error fetching patient:', fetchError);
+        throw fetchError;
+      }
+      
+      if (!existingPatient) {
+        throw new Error(`Patient with ID ${patientId} not found`);
+      }
       
       // Prepare update data with all required fields
       const updateData = {
@@ -133,30 +152,25 @@ export function usePatientStore() {
         "Age": updatedPatient.dateOfBirth 
           ? String(new Date().getFullYear() - new Date(updatedPatient.dateOfBirth).getFullYear()) 
           : '',
-        "Fill no.": ''
+        "Fill no.": existingPatient['Fill no.'] || ''
       };
       
-      console.log('Prepared update data:', updateData);
+      console.log('Update payload:', updateData);
       
       const { data, error } = await supabase
         .from('patients')
-        .update(updateData as any)
-        .eq('S.No.', String(patientId))
+        .update(updateData)
+        .eq('S.No.', patientId)
         .select();
 
-      console.log('Update response:', { data, error });
+      console.log('Update result:', { data, error });
 
       if (error) {
-        console.error('Supabase error updating patient:', error);
+        console.error('Supabase update error:', error);
         throw error;
       }
 
-      if (!data || data.length === 0) {
-        console.warn('No rows were updated. Patient ID might not exist:', patientId);
-        throw new Error('Patient not found or no changes made');
-      }
-
-      console.log('Patient updated successfully:', data);
+      console.log('=== UPDATE PATIENT SUCCESS ===');
       
       toast({
         title: "Success",
@@ -165,11 +179,11 @@ export function usePatientStore() {
       
       // Reload patients to reflect changes
       await loadPatients();
-    } catch (error) {
-      console.error('Error updating patient:', error);
+    } catch (error: any) {
+      console.error('=== UPDATE PATIENT ERROR ===', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update patient",
+        description: error?.message || "Failed to update patient",
         variant: "destructive"
       });
       throw error;
