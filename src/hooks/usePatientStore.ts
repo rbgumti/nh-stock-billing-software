@@ -167,6 +167,10 @@ export function usePatientStore() {
 
       if (error) {
         console.error('Supabase update error:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
+        console.error('Error hint:', error.hint);
         throw error;
       }
 
