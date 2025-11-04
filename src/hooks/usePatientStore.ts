@@ -121,18 +121,26 @@ export function usePatientStore() {
       console.log('Attempting to update patient with ID:', patientId);
       console.log('Update data:', updatedPatient);
       
+      // Prepare update data with all required fields
+      const updateData = {
+        "Patient Name": `${updatedPatient.firstName} ${updatedPatient.lastName}`.trim(),
+        "Father Name": updatedPatient.fatherName || '',
+        "Govt. ID": updatedPatient.govtIdOld || '',
+        "Addhar Card": updatedPatient.aadhar || '',
+        "PH": updatedPatient.phone || '',
+        "Address": updatedPatient.address || '',
+        "New Govt, ID": updatedPatient.govtIdNew || '',
+        "Age": updatedPatient.dateOfBirth 
+          ? String(new Date().getFullYear() - new Date(updatedPatient.dateOfBirth).getFullYear()) 
+          : '',
+        "Fill no.": ''
+      };
+      
+      console.log('Prepared update data:', updateData);
+      
       const { data, error } = await supabase
         .from('patients')
-        .update({
-          "Patient Name": `${updatedPatient.firstName} ${updatedPatient.lastName}`,
-          "Father Name": updatedPatient.fatherName,
-          "Govt. ID": updatedPatient.govtIdOld,
-          "Addhar Card": updatedPatient.aadhar,
-          "PH": updatedPatient.phone,
-          "Address": updatedPatient.address,
-          "New Govt, ID": updatedPatient.govtIdNew,
-          "Age": updatedPatient.dateOfBirth ? String(new Date().getFullYear() - new Date(updatedPatient.dateOfBirth).getFullYear()) : ''
-        } as any)
+        .update(updateData as any)
         .eq('S.No.', String(patientId))
         .select();
 
@@ -148,10 +156,15 @@ export function usePatientStore() {
         throw new Error('Patient not found or no changes made');
       }
 
+      console.log('Patient updated successfully:', data);
+      
       toast({
         title: "Success",
         description: "Patient updated successfully"
       });
+      
+      // Reload patients to reflect changes
+      await loadPatients();
     } catch (error) {
       console.error('Error updating patient:', error);
       toast({
