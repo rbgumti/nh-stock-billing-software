@@ -14,10 +14,10 @@ export default function EditPatient() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { formData, handleInputChange, handleSubmit, loadPatientData } = usePatientForm(true);
-  const { getPatient, patients } = usePatientStore();
+  const { getPatient, patients, loading } = usePatientStore();
 
   useEffect(() => {
-    if (id) {
+    if (id && !loading && patients.length > 0) {
       const patient = getPatient(id);
       if (patient) {
         loadPatientData(patient);
@@ -26,7 +26,15 @@ export default function EditPatient() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, loading, patients]);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <p className="text-lg text-gray-600">Loading patient data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

@@ -9,26 +9,34 @@ import { PatientFormData } from "@/hooks/usePatientForm";
 export default function ViewPatient() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getPatient, patients } = usePatientStore();
+  const { getPatient, patients, loading } = usePatientStore();
   const [patient, setPatient] = useState<PatientFormData | null>(null);
 
   useEffect(() => {
-    if (id) {
-      console.log("Looking for patient with ID:", id);
+    if (id && !loading && patients.length > 0) {
       const foundPatient = getPatient(id);
       if (foundPatient) {
-        console.log("Found patient:", foundPatient);
         setPatient(foundPatient);
       } else {
-        console.error("Patient not found:", id);
-        console.log("Available patients:", patients.map(p => ({ id: p.patientId, name: p.firstName })));
         navigate("/patients");
       }
     }
-  }, [id, getPatient, navigate, patients]);
+  }, [id, getPatient, navigate, patients, loading]);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <p className="text-lg text-gray-600">Loading patient data...</p>
+      </div>
+    );
+  }
 
   if (!patient) {
-    return <div>Loading...</div>;
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <p className="text-lg text-gray-600">Loading...</p>
+      </div>
+    );
   }
 
   const age = patient.dateOfBirth 
