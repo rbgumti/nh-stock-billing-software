@@ -118,7 +118,10 @@ export function usePatientStore() {
 
   const updatePatient = async (patientId: string, updatedPatient: PatientFormData) => {
     try {
-      const { error } = await supabase
+      console.log('Attempting to update patient with ID:', patientId);
+      console.log('Update data:', updatedPatient);
+      
+      const { data, error } = await supabase
         .from('patients')
         .update({
           "Patient Name": `${updatedPatient.firstName} ${updatedPatient.lastName}`,
@@ -130,11 +133,19 @@ export function usePatientStore() {
           "New Govt, ID": updatedPatient.govtIdNew,
           "Age": updatedPatient.dateOfBirth ? String(new Date().getFullYear() - new Date(updatedPatient.dateOfBirth).getFullYear()) : ''
         } as any)
-        .eq('S.No.', patientId);
+        .eq('S.No.', String(patientId))
+        .select();
+
+      console.log('Update response:', { data, error });
 
       if (error) {
         console.error('Supabase error updating patient:', error);
         throw error;
+      }
+
+      if (!data || data.length === 0) {
+        console.warn('No rows were updated. Patient ID might not exist:', patientId);
+        throw new Error('Patient not found or no changes made');
       }
 
       toast({
@@ -145,7 +156,7 @@ export function usePatientStore() {
       console.error('Error updating patient:', error);
       toast({
         title: "Error",
-        description: "Failed to update patient",
+        description: error instanceof Error ? error.message : "Failed to update patient",
         variant: "destructive"
       });
       throw error;
