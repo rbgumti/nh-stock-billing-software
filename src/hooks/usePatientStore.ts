@@ -50,7 +50,7 @@ export function usePatientStore() {
       }
 
       const formattedPatients: PatientFormData[] = data.map(p => ({
-        patientId: String(p['S.No.'] || ''),
+        patientId: String(p.id || ''),
         firstName: (p['Patient Name'] || '').split(' ')[0] || '',
         lastName: (p['Patient Name'] || '').split(' ').slice(1).join(' ') || '',
         dateOfBirth: '',
@@ -122,21 +122,6 @@ export function usePatientStore() {
       console.log('Patient ID to update:', patientId, 'Type:', typeof patientId);
       console.log('Update data:', updatedPatient);
       
-      // First, fetch all patients and find the one with matching S.No.
-      const { data: allPatients, error: fetchError } = await supabase
-        .from('patients')
-        .select('*');
-      
-      if (fetchError) throw fetchError;
-      
-      const existingPatient = allPatients?.find(p => p['S.No.'] === patientId);
-      
-      if (!existingPatient) {
-        throw new Error(`Patient with S.No. ${patientId} not found`);
-      }
-      
-      console.log('Existing patient found:', existingPatient);
-      
       // Prepare update data with all required fields
       const updateData = {
         "Patient Name": `${updatedPatient.firstName} ${updatedPatient.lastName}`.trim(),
@@ -148,8 +133,7 @@ export function usePatientStore() {
         "New Govt, ID": updatedPatient.govtIdNew || '',
         "Age": updatedPatient.dateOfBirth 
           ? String(new Date().getFullYear() - new Date(updatedPatient.dateOfBirth).getFullYear()) 
-          : '',
-        "Fill no.": existingPatient['Fill no.'] || ''
+          : ''
       };
       
       console.log('Update payload:', updateData);
@@ -157,7 +141,7 @@ export function usePatientStore() {
       const { data, error } = await supabase
         .from('patients')
         .update(updateData)
-        .eq('Fill no.', existingPatient['Fill no.'])
+        .eq('id', parseInt(patientId))
         .select();
 
       console.log('Update result:', { data, error });
@@ -193,23 +177,10 @@ export function usePatientStore() {
 
   const deletePatient = async (patientId: string) => {
     try {
-      // Fetch all patients to find the one with matching S.No.
-      const { data: allPatients, error: fetchError } = await supabase
-        .from('patients')
-        .select('*');
-      
-      if (fetchError) throw fetchError;
-      
-      const patient = allPatients?.find(p => p['S.No.'] === patientId);
-      if (!patient) {
-        throw new Error('Patient not found');
-      }
-      
-      // Delete using the primary key
       const { error } = await supabase
         .from('patients')
         .delete()
-        .eq('Fill no.', patient['Fill no.']);
+        .eq('id', parseInt(patientId));
 
       if (error) throw error;
     } catch (error) {
