@@ -122,11 +122,11 @@ export function usePatientStore() {
       console.log('Patient ID to update:', patientId, 'Type:', typeof patientId);
       console.log('Update data:', updatedPatient);
       
-      // First, verify the patient exists
+      // First, verify the patient exists using S.No. to find the Fill no. (primary key)
       const { data: existingPatient, error: fetchError } = await supabase
         .from('patients')
         .select('*')
-        .eq('"S.No."', patientId)
+        .eq('S.No.', patientId)
         .maybeSingle();
       
       console.log('Existing patient check:', { existingPatient, fetchError });
@@ -160,7 +160,7 @@ export function usePatientStore() {
       const { data, error } = await supabase
         .from('patients')
         .update(updateData)
-        .eq('"S.No."', patientId)
+        .eq('Fill no.', existingPatient['Fill no.'])
         .select();
 
       console.log('Update result:', { data, error });
@@ -196,10 +196,16 @@ export function usePatientStore() {
 
   const deletePatient = async (patientId: string) => {
     try {
+      // Find the patient first to get the primary key
+      const patient = patients.find(p => String(p.patientId) === String(patientId));
+      if (!patient) {
+        throw new Error('Patient not found');
+      }
+      
       const { error } = await supabase
         .from('patients')
         .delete()
-        .eq('"S.No."', patientId);
+        .eq('S.No.', patientId);
 
       if (error) throw error;
     } catch (error) {
