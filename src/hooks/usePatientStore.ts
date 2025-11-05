@@ -126,7 +126,7 @@ export function usePatientStore() {
       const { data: existingPatient, error: fetchError } = await supabase
         .from('patients')
         .select('*')
-        .eq('S.No.', patientId)
+        .eq('"S.No."', patientId)
         .maybeSingle();
       
       console.log('Existing patient check:', { existingPatient, fetchError });
@@ -160,7 +160,7 @@ export function usePatientStore() {
       const { data, error } = await supabase
         .from('patients')
         .update(updateData)
-        .eq('S.No.', patientId)
+        .eq('"S.No."', patientId)
         .select();
 
       console.log('Update result:', { data, error });
@@ -199,7 +199,7 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .delete()
-        .eq('S.No.', patientId);
+        .eq('"S.No."', patientId);
 
       if (error) throw error;
     } catch (error) {
