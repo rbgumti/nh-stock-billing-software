@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download } from "lucide-react";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
 import { GRNForm } from "@/components/forms/GRNForm";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { usePurchaseOrderStore } from "@/hooks/usePurchaseOrderStore";
+import jsPDF from "jspdf";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -109,6 +110,123 @@ export default function Stock() {
     toast({
       title: "Success",
       description: `GRN ${grnData.grnNumber} has been processed successfully! Stock levels updated.`
+    });
+  };
+
+  const downloadPurchaseOrder = (po: any) => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text("PURCHASE ORDER", 105, 20, { align: "center" });
+    
+    // PO Details
+    doc.setFontSize(12);
+    doc.text(`PO Number: ${po.poNumber}`, 20, 40);
+    doc.text(`Date: ${po.orderDate}`, 20, 50);
+    doc.text(`Supplier: ${po.supplier}`, 20, 60);
+    doc.text(`Expected Delivery: ${po.expectedDelivery}`, 20, 70);
+    doc.text(`Status: ${po.status}`, 20, 80);
+    
+    // Items Table Header
+    doc.setFontSize(10);
+    doc.text("Item Name", 20, 95);
+    doc.text("Quantity", 100, 95);
+    doc.text("Unit Price", 130, 95);
+    doc.text("Total", 165, 95);
+    doc.line(20, 97, 190, 97);
+    
+    // Items
+    let yPos = 105;
+    po.items.forEach((item: any, index: number) => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(item.stockItemName, 20, yPos);
+      doc.text(item.quantity.toString(), 100, yPos);
+      doc.text(`₹${item.unitPrice.toFixed(2)}`, 130, yPos);
+      doc.text(`₹${item.totalPrice.toFixed(2)}`, 165, yPos);
+      yPos += 10;
+    });
+    
+    // Total
+    doc.line(20, yPos, 190, yPos);
+    yPos += 10;
+    doc.setFontSize(12);
+    doc.text(`Total Amount: ₹${po.totalAmount.toFixed(2)}`, 20, yPos);
+    
+    // Notes
+    if (po.notes) {
+      yPos += 15;
+      doc.setFontSize(10);
+      doc.text("Notes:", 20, yPos);
+      yPos += 7;
+      doc.text(po.notes, 20, yPos);
+    }
+    
+    doc.save(`PO-${po.poNumber}.pdf`);
+    toast({
+      title: "Downloaded",
+      description: `Purchase Order ${po.poNumber} has been downloaded.`
+    });
+  };
+
+  const downloadGRN = (po: any) => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text("GOODS RECEIPT NOTE", 105, 20, { align: "center" });
+    
+    // GRN Details
+    doc.setFontSize(12);
+    doc.text(`PO Number: ${po.poNumber}`, 20, 40);
+    doc.text(`Order Date: ${po.orderDate}`, 20, 50);
+    doc.text(`GRN Date: ${po.grnDate}`, 20, 60);
+    doc.text(`Supplier: ${po.supplier}`, 20, 70);
+    
+    // Items Table Header
+    doc.setFontSize(10);
+    doc.text("Item Name", 20, 85);
+    doc.text("Quantity", 100, 85);
+    doc.text("Unit Price", 130, 85);
+    doc.text("Total", 165, 85);
+    doc.line(20, 87, 190, 87);
+    
+    // Items
+    let yPos = 95;
+    po.items.forEach((item: any) => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(item.stockItemName, 20, yPos);
+      doc.text(item.quantity.toString(), 100, yPos);
+      doc.text(`₹${item.unitPrice.toFixed(2)}`, 130, yPos);
+      doc.text(`₹${item.totalPrice.toFixed(2)}`, 165, yPos);
+      yPos += 10;
+    });
+    
+    // Total
+    doc.line(20, yPos, 190, yPos);
+    yPos += 10;
+    doc.setFontSize(12);
+    doc.text(`Total Amount: ₹${po.totalAmount.toFixed(2)}`, 20, yPos);
+    
+    // Notes
+    if (po.notes) {
+      yPos += 15;
+      doc.setFontSize(10);
+      doc.text("Notes:", 20, yPos);
+      yPos += 7;
+      doc.text(po.notes, 20, yPos);
+    }
+    
+    doc.save(`GRN-${po.poNumber}.pdf`);
+    toast({
+      title: "Downloaded",
+      description: `GRN for PO ${po.poNumber} has been downloaded.`
     });
   };
 
@@ -353,18 +471,26 @@ export default function Stock() {
                       <p className="text-gray-500">Items</p>
                       <p className="font-medium">{po.items.length} item(s)</p>
                     </div>
-                    {po.status === 'Pending' && (
+                    <div className="flex gap-2 mt-4">
+                      {po.status === 'Pending' && (
+                        <Button 
+                          className="flex-1" 
+                          onClick={() => {
+                            setSelectedPO(po);
+                            setShowGRNForm(true);
+                          }}
+                        >
+                          <Truck className="h-4 w-4 mr-2" />
+                          Process GRN
+                        </Button>
+                      )}
                       <Button 
-                        className="w-full mt-4" 
-                        onClick={() => {
-                          setSelectedPO(po);
-                          setShowGRNForm(true);
-                        }}
+                        variant="outline" 
+                        onClick={() => downloadPurchaseOrder(po)}
                       >
-                        <Truck className="h-4 w-4 mr-2" />
-                        Process GRN
+                        <Download className="h-4 w-4" />
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -421,6 +547,14 @@ export default function Stock() {
                       <p className="text-gray-500">Items Received</p>
                       <p className="font-medium">{po.items.length} item(s)</p>
                     </div>
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-4"
+                      onClick={() => downloadGRN(po)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download GRN
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
