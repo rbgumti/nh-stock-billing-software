@@ -122,23 +122,20 @@ export function usePatientStore() {
       console.log('Patient ID to update:', patientId, 'Type:', typeof patientId);
       console.log('Update data:', updatedPatient);
       
-      // First, verify the patient exists using S.No. to find the Fill no. (primary key)
-      const { data: existingPatient, error: fetchError } = await supabase
+      // First, fetch all patients and find the one with matching S.No.
+      const { data: allPatients, error: fetchError } = await supabase
         .from('patients')
-        .select('*')
-        .eq('S.No.', patientId)
-        .maybeSingle();
+        .select('*');
       
-      console.log('Existing patient check:', { existingPatient, fetchError });
+      if (fetchError) throw fetchError;
       
-      if (fetchError) {
-        console.error('Error fetching patient:', fetchError);
-        throw fetchError;
-      }
+      const existingPatient = allPatients?.find(p => p['S.No.'] === patientId);
       
       if (!existingPatient) {
-        throw new Error(`Patient with ID ${patientId} not found`);
+        throw new Error(`Patient with S.No. ${patientId} not found`);
       }
+      
+      console.log('Existing patient found:', existingPatient);
       
       // Prepare update data with all required fields
       const updateData = {
@@ -196,16 +193,23 @@ export function usePatientStore() {
 
   const deletePatient = async (patientId: string) => {
     try {
-      // Find the patient first to get the primary key
-      const patient = patients.find(p => String(p.patientId) === String(patientId));
+      // Fetch all patients to find the one with matching S.No.
+      const { data: allPatients, error: fetchError } = await supabase
+        .from('patients')
+        .select('*');
+      
+      if (fetchError) throw fetchError;
+      
+      const patient = allPatients?.find(p => p['S.No.'] === patientId);
       if (!patient) {
         throw new Error('Patient not found');
       }
       
+      // Delete using the primary key
       const { error } = await supabase
         .from('patients')
         .delete()
-        .eq('S.No.', patientId);
+        .eq('Fill no.', patient['Fill no.']);
 
       if (error) throw error;
     } catch (error) {
