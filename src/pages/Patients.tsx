@@ -27,6 +27,7 @@ export default function Patients() {
   const patients = storePatients.map((patient, index) => ({
     id: index + 1,
     patientId: patient.patientId,
+    fileNo: patient.fileNo,
     name: `${patient.firstName} ${patient.lastName}`,
     age: patient.dateOfBirth ? new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear() : 0,
     gender: patient.gender,
@@ -46,6 +47,7 @@ export default function Patients() {
       (patient.email || '').toLowerCase().includes(search) ||
       (patient.phone || '').includes(searchTerm) ||
       String(patient.patientId || '').toLowerCase().includes(search) ||
+      (patient.fileNo || '').toLowerCase().includes(search) ||
       (patient.aadhar || '').includes(searchTerm) ||
       (patient.govtIdOld || '').toLowerCase().includes(search) ||
       (patient.govtIdNew || '').toLowerCase().includes(search)
@@ -86,7 +88,7 @@ export default function Patients() {
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search patients by name, email, phone, patient ID, Aadhar, or govt ID..."
+              placeholder="Search patients by name, email, phone, patient ID, file no., Aadhar, or govt ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -115,6 +117,11 @@ export default function Patients() {
                 <div className="text-sm text-gray-600">
                   <span className="font-medium">Patient ID:</span> {patient.patientId}
                 </div>
+                {patient.fileNo && (
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">File No.:</span> {patient.fileNo}
+                  </div>
+                )}
                 <div className="flex items-center text-sm text-gray-600">
                   <Phone className="h-4 w-4 mr-2" />
                   {patient.phone}

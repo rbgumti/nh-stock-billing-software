@@ -79,6 +79,16 @@ export default function ViewPatient() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
+              <label className="text-sm font-medium text-gray-500">Patient ID</label>
+              <p className="text-lg">{patient.patientId}</p>
+            </div>
+            {patient.fileNo && (
+              <div>
+                <label className="text-sm font-medium text-gray-500">File No.</label>
+                <p className="text-lg">{patient.fileNo}</p>
+              </div>
+            )}
+            <div>
               <label className="text-sm font-medium text-gray-500">Full Name</label>
               <p className="text-lg">{patient.firstName} {patient.lastName}</p>
             </div>
