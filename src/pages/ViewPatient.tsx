@@ -54,7 +54,10 @@ export default function ViewPatient() {
             <h1 className="text-3xl font-bold text-gray-900">
               {patient.firstName} {patient.lastName}
             </h1>
-            <p className="text-gray-600 mt-2">Patient ID: {patient.patientId}</p>
+            <p className="text-gray-600 mt-2">
+              Patient ID: {patient.patientId}
+              {patient.fileNo && <span className="ml-4">| File No.: {patient.fileNo}</span>}
+            </p>
           </div>
         </div>
         <Button asChild>
