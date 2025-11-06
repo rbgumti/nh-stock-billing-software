@@ -5,6 +5,7 @@ import { usePatientStore } from "./usePatientStore";
 
 export interface PatientFormData {
   patientId: string;
+  fileNo: string;
   firstName: string;
   lastName: string;
   dateOfBirth: string;
@@ -32,6 +33,7 @@ export function usePatientForm(isEditing: boolean = false) {
   const [originalPatientId, setOriginalPatientId] = useState<string>("");
   const [formData, setFormData] = useState<PatientFormData>({
     patientId: `PT${Date.now()}`,
+    fileNo: "",
     firstName: "",
     lastName: "",
     dateOfBirth: "",
@@ -106,6 +108,7 @@ export function usePatientForm(isEditing: boolean = false) {
     const formattedData = {
       ...patientData,
       patientId: String(patientData.patientId),
+      fileNo: String(patientData.fileNo || ''),
       aadhar: String(patientData.aadhar || ''),
       govtIdOld: String(patientData.govtIdOld || ''),
       govtIdNew: String(patientData.govtIdNew || ''),

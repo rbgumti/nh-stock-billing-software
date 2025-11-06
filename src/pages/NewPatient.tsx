@@ -29,6 +29,7 @@ export default function NewPatient() {
         <PersonalInformationForm
           formData={{
             patientId: formData.patientId,
+            fileNo: formData.fileNo,
             firstName: formData.firstName,
             lastName: formData.lastName,
             dateOfBirth: formData.dateOfBirth,

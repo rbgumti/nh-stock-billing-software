@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface PersonalInformationFormProps {
   formData: {
     patientId: string;
+    fileNo: string;
     firstName: string;
     lastName: string;
     dateOfBirth: string;
@@ -26,17 +27,28 @@ export function PersonalInformationForm({ formData, onInputChange, isEditing = f
         <CardTitle>Personal Information</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <Label htmlFor="patientId">Patient ID *</Label>
-          <Input
-            id="patientId"
-            value={formData.patientId}
-            onChange={(e) => onInputChange("patientId", e.target.value)}
-            required
-            disabled={isEditing}
-            className={isEditing ? "bg-muted" : ""}
-            placeholder={isEditing ? "Auto-generated" : "Enter patient ID"}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="patientId">Patient ID *</Label>
+            <Input
+              id="patientId"
+              value={formData.patientId}
+              onChange={(e) => onInputChange("patientId", e.target.value)}
+              required
+              disabled={isEditing}
+              className={isEditing ? "bg-muted" : ""}
+              placeholder={isEditing ? "Auto-generated" : "Enter patient ID"}
+            />
+          </div>
+          <div>
+            <Label htmlFor="fileNo">File No.</Label>
+            <Input
+              id="fileNo"
+              value={formData.fileNo}
+              onChange={(e) => onInputChange("fileNo", e.target.value)}
+              placeholder="Enter file number"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

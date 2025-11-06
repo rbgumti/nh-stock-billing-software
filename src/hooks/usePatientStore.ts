@@ -51,6 +51,7 @@ export function usePatientStore() {
 
       const formattedPatients: PatientFormData[] = data.map(p => ({
         patientId: String(p.id || ''),
+        fileNo: String(p['file No.'] || ''),
         firstName: (p['Patient Name'] || '').split(' ')[0] || '',
         lastName: (p['Patient Name'] || '').split(' ').slice(1).join(' ') || '',
         dateOfBirth: '',
@@ -94,6 +95,7 @@ export function usePatientStore() {
         .insert([{
           "S.No.": patient.patientId,
           "Fill no.": '',
+          "file No.": patient.fileNo,
           "Patient Name": `${patient.firstName} ${patient.lastName}`,
           "Age": '',
           "Father Name": patient.fatherName,
@@ -125,6 +127,7 @@ export function usePatientStore() {
       // Prepare update data with all required fields
       const updateData = {
         "Patient Name": `${updatedPatient.firstName} ${updatedPatient.lastName}`.trim(),
+        "file No.": updatedPatient.fileNo || '',
         "Father Name": updatedPatient.fatherName || '',
         "Govt. ID": updatedPatient.govtIdOld || '',
         "Addhar Card": updatedPatient.aadhar || '',

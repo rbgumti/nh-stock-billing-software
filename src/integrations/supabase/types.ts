@@ -133,6 +133,7 @@ export type Database = {
           Address: string
           Age: string
           "Father Name": string
+          "file No.": string
           "Fill no.": string
           "Govt. ID": string
           id: number
@@ -146,6 +147,7 @@ export type Database = {
           Address: string
           Age: string
           "Father Name": string
+          "file No."?: string
           "Fill no."?: string
           "Govt. ID": string
           id?: number
@@ -159,6 +161,7 @@ export type Database = {
           Address?: string
           Age?: string
           "Father Name"?: string
+          "file No."?: string
           "Fill no."?: string
           "Govt. ID"?: string
           id?: number

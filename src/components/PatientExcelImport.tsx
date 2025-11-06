@@ -53,6 +53,7 @@ export function PatientExcelImport() {
     // Create patient object mapping the template fields
     const patient: PatientFormData = {
       patientId: data["Fill no."] || `PT${Date.now()}_${rowIndex}`,
+      fileNo: data["file No."] || "",
       firstName: firstName,
       lastName: lastName,
       dateOfBirth: dateOfBirth,
