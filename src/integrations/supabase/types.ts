@@ -84,6 +84,104 @@ export type Database = {
           },
         ]
       }
+      invoice_items: {
+        Row: {
+          batch_no: string | null
+          created_at: string
+          expiry_date: string | null
+          id: string
+          invoice_id: string
+          medicine_id: number
+          medicine_name: string
+          mrp: number
+          quantity: number
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          batch_no?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          invoice_id: string
+          medicine_id: number
+          medicine_name: string
+          mrp?: number
+          quantity?: number
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          batch_no?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          invoice_id?: string
+          medicine_id?: number
+          medicine_name?: string
+          mrp?: number
+          quantity?: number
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          id: string
+          invoice_date: string
+          invoice_number: string
+          notes: string | null
+          patient_id: string
+          patient_name: string
+          patient_phone: string | null
+          status: string
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          invoice_date: string
+          invoice_number: string
+          notes?: string | null
+          patient_id: string
+          patient_name: string
+          patient_phone?: string | null
+          status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          notes?: string | null
+          patient_id?: string
+          patient_name?: string
+          patient_phone?: string | null
+          status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string

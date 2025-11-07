@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,44 +6,79 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Receipt, Download, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import jsPDF from 'jspdf';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [invoices, setInvoices] = useState<any[]>([]);
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
 
-  // Load invoices from localStorage
+  // Load invoices from Supabase
   useEffect(() => {
-    const savedInvoices = JSON.parse(localStorage.getItem("invoices") || "[]");
-    
-    // Transform saved invoices to match expected format
-    const transformedInvoices = savedInvoices.map((invoice: any) => ({
-      id: String(invoice.id ?? ""),
-      patientName:
-        (invoice.patientDetails
-          ? `${invoice.patientDetails?.firstName ?? ""} ${invoice.patientDetails?.lastName ?? ""}`.trim()
-          : "") || invoice.patient || "Unknown Patient",
-      patientId: invoice.patientDetails?.patientId || 0,
-      date: invoice.invoiceDate,
-      amount: Number(invoice.total ?? 0),
-      status: invoice.status || "Pending", // Use saved status if available
-      items: Array.isArray(invoice.items)
-        ? invoice.items.map((item: any) => ({
-            name: item.medicineName || item.name || item.medicine || "Item",
-            quantity: Number(item.quantity ?? item.qty ?? 0),
-            price: Number(item.unitPrice ?? item.price ?? 0),
-            batchNo: item.batchNo || "",
-            expiryDate: item.expiryDate || "",
-            mrp: Number(item.mrp ?? 0),
-          }))
-        : [],
-      originalData: invoice, // Keep original data for detailed PDF generation
-    }));
-    
-    setInvoices(transformedInvoices);
+    loadInvoices();
   }, []);
+
+  const loadInvoices = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch invoices with their items
+      const { data: invoicesData, error: invoicesError } = await supabase
+        .from('invoices')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (invoicesError) throw invoicesError;
+
+      if (!invoicesData) {
+        setInvoices([]);
+        return;
+      }
+
+      // Fetch items for each invoice
+      const invoicesWithItems = await Promise.all(
+        invoicesData.map(async (invoice) => {
+          const { data: itemsData, error: itemsError } = await supabase
+            .from('invoice_items')
+            .select('*')
+            .eq('invoice_id', invoice.id);
+
+          if (itemsError) throw itemsError;
+
+          return {
+            id: invoice.id,
+            patientName: invoice.patient_name,
+            patientId: invoice.patient_id,
+            date: invoice.invoice_date,
+            amount: Number(invoice.total),
+            status: invoice.status,
+            items: (itemsData || []).map((item: any) => ({
+              name: item.medicine_name,
+              quantity: item.quantity,
+              price: Number(item.unit_price),
+              batchNo: item.batch_no || "",
+              expiryDate: item.expiry_date || "",
+              mrp: Number(item.mrp),
+            })),
+            originalData: invoice,
+          };
+        })
+      );
+
+      setInvoices(invoicesWithItems);
+    } catch (error: any) {
+      console.error("Error loading invoices:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load invoices. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const statuses = ["all", "Paid", "Pending", "Overdue"];
 
@@ -151,23 +185,33 @@ export default function Invoices() {
     });
   };
 
-  const markAsPaid = (invoiceId: string) => {
-    const updatedInvoices = invoices.map((inv: any) => 
-      inv.id === invoiceId ? { ...inv, status: "Paid" } : inv
-    );
-    setInvoices(updatedInvoices);
-    
-    // Update localStorage
-    const savedInvoices = JSON.parse(localStorage.getItem("invoices") || "[]");
-    const updatedSavedInvoices = savedInvoices.map((inv: any) => 
-      inv.id === invoiceId ? { ...inv, status: "Paid" } : inv
-    );
-    localStorage.setItem("invoices", JSON.stringify(updatedSavedInvoices));
-    
-    toast({
-      title: "Success",
-      description: "Invoice marked as paid!"
-    });
+  const markAsPaid = async (invoiceId: string) => {
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({ status: 'Paid' })
+        .eq('id', invoiceId);
+
+      if (error) throw error;
+
+      // Update local state
+      const updatedInvoices = invoices.map((inv: any) => 
+        inv.id === invoiceId ? { ...inv, status: "Paid" } : inv
+      );
+      setInvoices(updatedInvoices);
+      
+      toast({
+        title: "Success",
+        description: "Invoice marked as paid!"
+      });
+    } catch (error: any) {
+      console.error("Error updating invoice:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update invoice status.",
+        variant: "destructive"
+      });
+    }
   };
 
   const viewInvoiceDetails = (invoice: any) => {
@@ -178,6 +222,14 @@ export default function Invoices() {
     
     alert(`INVOICE DETAILS\n\nInvoice ID: ${invoice.id}\nPatient: ${invoice.patientName}\nDate: ${invoice.date}\nStatus: ${invoice.status}\n\nITEMS:\n${itemsList}\n\nTotal Amount: ₹${invoice.amount.toFixed(2)}`);
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <p className="text-lg text-gray-600">Loading invoices...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

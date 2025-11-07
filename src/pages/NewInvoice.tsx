@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { usePatientStore } from "@/hooks/usePatientStore";
 import { useStockStore } from "@/hooks/useStockStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InvoiceItem {
   id: string;
@@ -144,7 +145,7 @@ export default function NewInvoice() {
   // Removed tax; total equals subtotal now
   const total = subtotal;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedPatient) {
@@ -176,39 +177,70 @@ export default function NewInvoice() {
       return;
     }
 
-    // Reduce stock for each item
-    items.forEach(item => {
-      reduceStock(item.medicineId, item.quantity);
-    });
+    try {
+      // Reduce stock for each item
+      items.forEach(item => {
+        reduceStock(item.medicineId, item.quantity);
+      });
 
-    const invoiceNumber = getNextInvoiceNumber();
-    const invoiceData = {
-      id: invoiceNumber,
-      invoiceNumber: invoiceNumber,
-      patient: selectedPatient,
-      patientDetails: foundPatient,
-      invoiceDate,
-      items,
-      subtotal,
-      // Keep tax field for compatibility but set to 0 since tax is removed
-      tax: 0,
-      total,
-      notes
-    };
+      const invoiceNumber = getNextInvoiceNumber();
+      
+      // Insert invoice into database
+      const { data: invoiceData, error: invoiceError } = await supabase
+        .from('invoices')
+        .insert({
+          id: invoiceNumber,
+          invoice_number: invoiceNumber,
+          patient_id: selectedPatient,
+          patient_name: foundPatient ? `${foundPatient.firstName} ${foundPatient.lastName}` : selectedPatient,
+          patient_phone: foundPatient?.phone || '',
+          invoice_date: invoiceDate,
+          subtotal: subtotal,
+          tax: 0,
+          total: total,
+          notes: notes,
+          status: 'Pending'
+        })
+        .select()
+        .single();
 
-    // Persist invoice to localStorage
-    const existing = JSON.parse(localStorage.getItem("invoices") || "[]");
-    const updated = [...existing, invoiceData];
-    localStorage.setItem("invoices", JSON.stringify(updated));
+      if (invoiceError) throw invoiceError;
 
-    console.log("New invoice data:", invoiceData);
-    
-    toast({
-      title: "Success",
-      description: "Invoice has been created successfully!"
-    });
-    
-    navigate("/invoices");
+      // Insert invoice items
+      const itemsToInsert = items.map(item => ({
+        invoice_id: invoiceNumber,
+        medicine_id: item.medicineId,
+        medicine_name: item.medicineName,
+        batch_no: item.batchNo,
+        expiry_date: item.expiryDate,
+        mrp: item.mrp,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        total: item.total
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('invoice_items')
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
+
+      console.log("New invoice created:", invoiceData);
+      
+      toast({
+        title: "Success",
+        description: "Invoice has been created successfully!"
+      });
+      
+      navigate("/invoices");
+    } catch (error: any) {
+      console.error("Error creating invoice:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create invoice. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
