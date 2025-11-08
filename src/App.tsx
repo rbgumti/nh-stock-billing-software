@@ -15,6 +15,7 @@ import Invoices from "./pages/Invoices";
 import NewInvoice from "./pages/NewInvoice";
 import Reports from "./pages/Reports";
 import PatientAnalytics from "./pages/PatientAnalytics";
+import Appointments from "./pages/Appointments";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
                   <Route path="/invoices/new" element={<NewInvoice />} />
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/analytics/patients" element={<PatientAnalytics />} />
+                  <Route path="/appointments" element={<Appointments />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
