@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { usePatientStore } from "@/hooks/usePatientStore";
 import { useStockStore } from "@/hooks/useStockStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
+import { usePrescriptionStore } from "@/hooks/usePrescriptionStore";
 import { supabase } from "@/integrations/supabase/client";
 
 interface InvoiceItem {
@@ -29,15 +30,18 @@ interface InvoiceItem {
 
 export default function NewInvoice() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { patients, getPatient } = usePatientStore();
   const { getMedicines, getStockItem, reduceStock } = useStockStore();
   const { getNextInvoiceNumber } = useSequentialNumbers();
+  const { getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
   
   const [selectedPatient, setSelectedPatient] = useState("");
   const [patientSearchId, setPatientSearchId] = useState("");
   const [foundPatient, setFoundPatient] = useState<any>(null);
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState("");
+  const [prescriptionId, setPrescriptionId] = useState<string | null>(null);
   const [items, setItems] = useState<InvoiceItem[]>([
     { 
       id: "1", 
@@ -55,6 +59,42 @@ export default function NewInvoice() {
   ]);
 
   const medicines = getMedicines();
+
+  // Load prescription data if prescriptionId is in URL
+  useEffect(() => {
+    const rxId = searchParams.get('prescriptionId');
+    if (rxId) {
+      const prescription = getPrescription(rxId);
+      if (prescription) {
+        setPrescriptionId(rxId);
+        setFoundPatient({
+          patientId: prescription.patient_id.toString(),
+          firstName: prescription.patient_name.split(' ')[0] || '',
+          lastName: prescription.patient_name.split(' ').slice(1).join(' ') || '',
+          phoneNumber: prescription.patient_phone || '',
+        });
+        setSelectedPatient(prescription.patient_id.toString());
+        setNotes(prescription.notes || '');
+        
+        // Convert prescription items to invoice items
+        const invoiceItems: InvoiceItem[] = prescription.items.map((item, index) => ({
+          id: index.toString(),
+          medicineId: 0,
+          medicineName: item.medicine_name,
+          batchNo: "",
+          expiryDate: "",
+          mrp: 0,
+          quantity: item.quantity,
+          unitPrice: 0,
+          total: 0,
+          availableStock: 0,
+          stockAfterInvoice: 0
+        }));
+        
+        setItems(invoiceItems.length > 0 ? invoiceItems : items);
+      }
+    }
+  }, [searchParams]);
 
   // Search patient by ID
   const handlePatientSearch = () => {
@@ -147,6 +187,11 @@ export default function NewInvoice() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Mark prescription as dispensed if this invoice is from a prescription
+    if (prescriptionId) {
+      await updatePrescriptionStatus(prescriptionId, 'Dispensed');
+    }
     
     if (!selectedPatient) {
       toast({

@@ -417,6 +417,98 @@ export type Database = {
           },
         ]
       }
+      prescription_items: {
+        Row: {
+          created_at: string
+          dosage: string
+          duration: string
+          frequency: string
+          id: string
+          instructions: string | null
+          medicine_name: string
+          prescription_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          dosage: string
+          duration: string
+          frequency: string
+          id?: string
+          instructions?: string | null
+          medicine_name: string
+          prescription_id: string
+          quantity: number
+        }
+        Update: {
+          created_at?: string
+          dosage?: string
+          duration?: string
+          frequency?: string
+          id?: string
+          instructions?: string | null
+          medicine_name?: string
+          prescription_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_items_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          diagnosis: string
+          id: string
+          notes: string | null
+          patient_age: string | null
+          patient_id: number
+          patient_name: string
+          patient_phone: string | null
+          prescription_date: string
+          prescription_number: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          diagnosis: string
+          id?: string
+          notes?: string | null
+          patient_age?: string | null
+          patient_id: number
+          patient_name: string
+          patient_phone?: string | null
+          prescription_date?: string
+          prescription_number: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string
+          id?: string
+          notes?: string | null
+          patient_age?: string | null
+          patient_id?: number
+          patient_name?: string
+          patient_phone?: string | null
+          prescription_date?: string
+          prescription_number?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       purchase_order_items: {
         Row: {
           created_at: string | null

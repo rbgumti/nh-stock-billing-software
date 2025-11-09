@@ -4,6 +4,7 @@ interface SequentialNumbers {
   purchaseOrder: number;
   invoice: number;
   goodsReceipt: number;
+  prescription: number;
 }
 
 const STORAGE_KEY = 'sequential_numbers';
@@ -16,7 +17,8 @@ const getInitialNumbers = (): SequentialNumbers => {
   return {
     purchaseOrder: 1,
     invoice: 1,
-    goodsReceipt: 1
+    goodsReceipt: 1,
+    prescription: 1
   };
 };
 
@@ -85,11 +87,30 @@ export const useSequentialNumbers = () => {
     return grnNumber;
   };
 
+  const generatePrescriptionNumber = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const paddedNumber = sequentialStore.prescription.toString().padStart(3, '0');
+    const rxNumber = `RX${year}${month}${day}${paddedNumber}`;
+    
+    // Increment for next use
+    const newNumbers = {
+      ...sequentialStore,
+      prescription: sequentialStore.prescription + 1
+    };
+    setNumbers(newNumbers);
+    
+    return rxNumber;
+  };
+
   const resetCounters = () => {
     const resetNumbers = {
       purchaseOrder: 1,
       invoice: 1,
-      goodsReceipt: 1
+      goodsReceipt: 1,
+      prescription: 1
     };
     setNumbers(resetNumbers);
   };
@@ -99,6 +120,7 @@ export const useSequentialNumbers = () => {
     getNextPurchaseOrderNumber,
     getNextInvoiceNumber,
     getNextGoodsReceiptNumber,
+    generatePrescriptionNumber,
     resetCounters
   };
 };

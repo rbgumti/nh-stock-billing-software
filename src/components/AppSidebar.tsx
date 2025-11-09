@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +16,7 @@ const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Patients", url: "/patients", icon: Users },
   { title: "Appointments", url: "/appointments", icon: Calendar },
+  { title: "Prescriptions", url: "/prescriptions", icon: FileText },
   { title: "Patient Analytics", url: "/analytics/patients", icon: Activity },
   { title: "Stock", url: "/stock", icon: Package },
   { title: "Invoices", url: "/invoices", icon: Receipt },
@@ -77,6 +78,14 @@ export function AppSidebar() {
                   <NavLink to="/patients/new" className="text-green-700 hover:bg-green-50">
                     <Plus className="h-5 w-5" />
                     {!collapsed && <span className="ml-3">Add Patient</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink to="/prescriptions/new" className="text-green-700 hover:bg-green-50">
+                    <Plus className="h-5 w-5" />
+                    {!collapsed && <span className="ml-3">New Prescription</span>}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>

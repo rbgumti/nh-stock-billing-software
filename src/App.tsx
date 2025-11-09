@@ -18,6 +18,9 @@ import NewInvoice from "./pages/NewInvoice";
 import Reports from "./pages/Reports";
 import PatientAnalytics from "./pages/PatientAnalytics";
 import Appointments from "./pages/Appointments";
+import Prescriptions from "./pages/Prescriptions";
+import NewPrescription from "./pages/NewPrescription";
+import ViewPrescription from "./pages/ViewPrescription";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +52,9 @@ const App = () => (
                   <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                   <Route path="/analytics/patients" element={<ProtectedRoute><PatientAnalytics /></ProtectedRoute>} />
                   <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
+                  <Route path="/prescriptions" element={<ProtectedRoute><Prescriptions /></ProtectedRoute>} />
+                  <Route path="/prescriptions/new" element={<ProtectedRoute><NewPrescription /></ProtectedRoute>} />
+                  <Route path="/prescriptions/view/:id" element={<ProtectedRoute><ViewPrescription /></ProtectedRoute>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
