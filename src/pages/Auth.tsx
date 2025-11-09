@@ -7,6 +7,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z.string().trim().email('Invalid email format').max(255, 'Email too long'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(128, 'Password too long')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+      'Password must include uppercase, lowercase, number, and special character')
+});
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -37,10 +47,22 @@ export default function Auth() {
     setLoading(true);
 
     try {
+      // Validate inputs
+      const validationResult = authSchema.safeParse({ email, password });
+      if (!validationResult.success) {
+        toast({
+          title: "Validation Error",
+          description: validationResult.error.errors[0].message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: validationResult.data.email,
+          password: validationResult.data.password,
         });
 
         if (error) throw error;
@@ -51,8 +73,8 @@ export default function Auth() {
         });
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: validationResult.data.email,
+          password: validationResult.data.password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
           },
@@ -111,7 +133,7 @@ export default function Auth() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                minLength={6}
+                minLength={8}
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
