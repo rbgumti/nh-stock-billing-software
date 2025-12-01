@@ -147,6 +147,7 @@ export type Database = {
           medicine_id: number
           medicine_name: string
           mrp: number
+          prescription_id: string | null
           quantity: number
           total: number
           unit_price: number
@@ -160,6 +161,7 @@ export type Database = {
           medicine_id: number
           medicine_name: string
           mrp?: number
+          prescription_id?: string | null
           quantity?: number
           total?: number
           unit_price?: number
@@ -173,6 +175,7 @@ export type Database = {
           medicine_id?: number
           medicine_name?: string
           mrp?: number
+          prescription_id?: string | null
           quantity?: number
           total?: number
           unit_price?: number
@@ -183,6 +186,13 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -470,6 +480,7 @@ export type Database = {
           notes: string | null
           patient_age: string | null
           patient_id: number
+          patient_id_temp: number | null
           patient_name: string
           patient_phone: string | null
           prescription_date: string
@@ -485,6 +496,7 @@ export type Database = {
           notes?: string | null
           patient_age?: string | null
           patient_id: number
+          patient_id_temp?: number | null
           patient_name: string
           patient_phone?: string | null
           prescription_date?: string
@@ -500,6 +512,7 @@ export type Database = {
           notes?: string | null
           patient_age?: string | null
           patient_id?: number
+          patient_id_temp?: number | null
           patient_name?: string
           patient_phone?: string | null
           prescription_date?: string
@@ -507,7 +520,15 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       purchase_order_items: {
         Row: {
