@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import navjeevanLogo from "@/assets/NH_LOGO.png";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -42,12 +43,27 @@ export function AppSidebar() {
   return (
     <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible="icon">
       <SidebarContent>
-        <div className="p-4 border-b">
-          {!collapsed && (
-            <h2 className="text-xl font-bold text-blue-900">MedManager</h2>
-          )}
-          {collapsed && (
-            <div className="text-xl font-bold text-blue-900 text-center">M</div>
+        <div className="p-4 border-b border-border bg-card">
+          {!collapsed ? (
+            <div className="flex flex-col items-center gap-2">
+              <img 
+                src={navjeevanLogo} 
+                alt="Navjeevan Hospital Logo" 
+                className="w-20 h-20 object-contain"
+              />
+              <div className="text-center">
+                <h2 className="text-lg font-bold text-foreground tracking-wide">NAVJEEVAN</h2>
+                <p className="text-xs text-muted-foreground">Hospital Sirhind</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <img 
+                src={navjeevanLogo} 
+                alt="NH Logo" 
+                className="w-8 h-8 object-contain"
+              />
+            </div>
           )}
         </div>
         
