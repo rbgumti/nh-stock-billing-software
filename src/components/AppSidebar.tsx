@@ -37,13 +37,13 @@ export function AppSidebar() {
 
   const getNavClass = (path: string) =>
     isActive(path) 
-      ? "bg-blue-100 text-blue-900 font-medium" 
-      : "hover:bg-gray-100 text-gray-700";
+      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+      : "hover:bg-sidebar-accent/50 text-sidebar-foreground";
 
   return (
     <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible="icon">
       <SidebarContent>
-        <div className="p-4 border-b border-border bg-card">
+        <div className="p-4 border-b border-sidebar-border bg-sidebar">
           {!collapsed ? (
             <div className="flex flex-col items-center gap-2">
               <img 
@@ -52,8 +52,8 @@ export function AppSidebar() {
                 className="w-20 h-20 object-contain"
               />
               <div className="text-center">
-                <h2 className="text-lg font-bold text-foreground tracking-wide">NAVJEEVAN</h2>
-                <p className="text-xs text-muted-foreground">Hospital Sirhind</p>
+                <h2 className="text-lg font-bold text-sidebar-foreground tracking-wide">NAVJEEVAN</h2>
+                <p className="text-xs text-sidebar-primary">Hospital Sirhind</p>
               </div>
             </div>
           ) : (
@@ -91,7 +91,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <NavLink to="/patients/new" className="text-green-700 hover:bg-green-50">
+                  <NavLink to="/patients/new" className="text-sidebar-primary hover:bg-sidebar-accent/30">
                     <Plus className="h-5 w-5" />
                     {!collapsed && <span className="ml-3">Add Patient</span>}
                   </NavLink>
@@ -99,7 +99,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <NavLink to="/prescriptions/new" className="text-green-700 hover:bg-green-50">
+                  <NavLink to="/prescriptions/new" className="text-sidebar-primary hover:bg-sidebar-accent/30">
                     <Plus className="h-5 w-5" />
                     {!collapsed && <span className="ml-3">New Prescription</span>}
                   </NavLink>
@@ -107,7 +107,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <NavLink to="/invoices/new" className="text-green-700 hover:bg-green-50">
+                  <NavLink to="/invoices/new" className="text-sidebar-primary hover:bg-sidebar-accent/30">
                     <Plus className="h-5 w-5" />
                     {!collapsed && <span className="ml-3">New Invoice</span>}
                   </NavLink>
