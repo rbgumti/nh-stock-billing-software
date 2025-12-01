@@ -234,11 +234,11 @@ export default function Stock() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Stock Management</h1>
-          <p className="text-gray-600 mt-2">Monitor and manage your inventory, purchase orders, and goods receipt</p>
+          <h1 className="text-3xl font-bold text-navy">Stock Management</h1>
+          <p className="text-muted-foreground mt-2">Monitor and manage your inventory, purchase orders, and goods receipt</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setShowAddForm(true)}>
+          <Button onClick={() => setShowAddForm(true)} className="bg-gold hover:bg-gold/90 text-navy">
             <Plus className="h-4 w-4 mr-2" />
             Add Stock Item
           </Button>

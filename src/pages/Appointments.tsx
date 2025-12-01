@@ -112,7 +112,7 @@ export default function Appointments() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Confirmed': return 'bg-primary/10 text-primary';
+      case 'Confirmed': return 'bg-gold/20 text-gold';
       case 'Completed': return 'bg-muted text-muted-foreground';
       case 'Cancelled': return 'bg-destructive/10 text-destructive';
       case 'No-Show': return 'bg-destructive/20 text-destructive';
@@ -137,7 +137,7 @@ export default function Appointments() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Appointments</h1>
+          <h1 className="text-3xl font-bold text-navy">Appointments</h1>
           <p className="text-muted-foreground mt-2">Manage patient appointments and schedules</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -145,7 +145,7 @@ export default function Appointments() {
           if (!open) setEditingAppointment(null);
         }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-gold hover:bg-gold/90 text-navy">
               <Plus className="mr-2 h-4 w-4" />
               New Appointment
             </Button>
