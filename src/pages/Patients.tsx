@@ -58,15 +58,15 @@ export default function Patients() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Patients</h1>
-          <p className="text-gray-600 mt-2">Manage your patient records</p>
+          <h1 className="text-3xl font-bold text-navy">Patients</h1>
+          <p className="text-muted-foreground mt-2">Manage your patient records</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowImport(!showImport)}>
             <Upload className="h-4 w-4 mr-2" />
             Import Excel
           </Button>
-          <Button asChild>
+          <Button asChild className="bg-gold hover:bg-gold/90 text-navy">
             <Link to="/patients/new">
               <Plus className="h-4 w-4 mr-2" />
               Add Patient

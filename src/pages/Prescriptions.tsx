@@ -40,10 +40,10 @@ export default function Prescriptions() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Prescriptions</h1>
+          <h1 className="text-3xl font-bold text-navy">Prescriptions</h1>
           <p className="text-muted-foreground">Manage patient prescriptions</p>
         </div>
-        <Button onClick={() => navigate('/prescriptions/new')}>
+        <Button onClick={() => navigate('/prescriptions/new')} className="bg-gold hover:bg-gold/90 text-navy">
           <Plus className="mr-2 h-4 w-4" />
           New Prescription
         </Button>

@@ -90,16 +90,16 @@ export default function Dashboard() {
 
   const monthlyData = getMonthlyData();
 
-  const COLORS = ['hsl(var(--primary))', 'hsl(var(--muted))'];
+  const COLORS = ['hsl(var(--gold))', 'hsl(var(--muted))'];
 
   const chartConfig = {
     revenue: {
       label: "Revenue",
-      color: "hsl(var(--primary))",
+      color: "hsl(var(--gold))",
     },
     invoices: {
       label: "Invoices",
-      color: "hsl(var(--accent))",
+      color: "hsl(var(--navy))",
     },
   };
 
@@ -114,52 +114,52 @@ export default function Dashboard() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Invoice Dashboard</h1>
+        <h1 className="text-3xl font-bold text-navy">Invoice Dashboard</h1>
         <p className="text-muted-foreground mt-2">Track revenue trends, payment status, and monthly performance.</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="border-l-4 border-l-gold">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-gold" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rs.{totalRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-navy">Rs.{totalRevenue.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground mt-1">All time</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-gold">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Paid Amount</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-gold" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rs.{paidAmount.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-navy">Rs.{paidAmount.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground mt-1">{paidInvoices.length} invoices</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-gold">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Amount</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-gold" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rs.{pendingAmount.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-navy">Rs.{pendingAmount.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground mt-1">{pendingInvoices.length} invoices</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-gold">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
-            <Receipt className="h-4 w-4 text-muted-foreground" />
+            <Receipt className="h-4 w-4 text-gold" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{invoices.length}</div>
+            <div className="text-2xl font-bold text-navy">{invoices.length}</div>
             <p className="text-xs text-muted-foreground mt-1">Generated</p>
           </CardContent>
         </Card>
@@ -192,7 +192,7 @@ export default function Dashboard() {
                   <Line 
                     type="monotone" 
                     dataKey="revenue" 
-                    stroke="hsl(var(--primary))" 
+                    stroke="hsl(var(--gold))" 
                     strokeWidth={2}
                     name="Revenue (Rs.)"
                   />
@@ -219,7 +219,7 @@ export default function Dashboard() {
                     labelLine={false}
                     label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
                     outerRadius={80}
-                    fill="hsl(var(--primary))"
+                    fill="hsl(var(--gold))"
                     dataKey="value"
                   >
                     {paymentStatusData.map((entry, index) => (
@@ -266,14 +266,14 @@ export default function Dashboard() {
                 <Bar 
                   yAxisId="left"
                   dataKey="revenue" 
-                  fill="hsl(var(--primary))" 
+                  fill="hsl(var(--gold))" 
                   name="Revenue (Rs.)"
                   radius={[8, 8, 0, 0]}
                 />
                 <Bar 
                   yAxisId="right"
                   dataKey="invoices" 
-                  fill="hsl(var(--muted))" 
+                  fill="hsl(var(--navy))" 
                   name="Invoice Count"
                   radius={[8, 8, 0, 0]}
                 />
@@ -297,10 +297,10 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground">{invoice.patient_name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium text-foreground">Rs.{Number(invoice.total).toLocaleString()}</p>
+                  <p className="font-medium text-navy">Rs.{Number(invoice.total).toLocaleString()}</p>
                   <span className={`text-xs px-2 py-1 rounded ${
                     invoice.status === 'Paid' 
-                      ? 'bg-primary/10 text-primary' 
+                      ? 'bg-gold/20 text-gold' 
                       : 'bg-muted text-muted-foreground'
                   }`}>
                     {invoice.status}
