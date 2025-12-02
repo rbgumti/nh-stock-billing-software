@@ -17,12 +17,10 @@ import * as XLSX from "xlsx";
 
 interface StockReportItem {
   brand: string;
-  mainStockOpening: number;
-  subStockOpening: number;
-  subStockClosing: number;
+  stockOpening: number;
   issuedToPatients: number;
   stockReceived: number;
-  mainStockClosing: number;
+  stockClosing: number;
   rate: number;
   amount: number;
 }
@@ -100,31 +98,26 @@ export default function DailyStockReport() {
       }, {});
     }
 
-    // Calculate report data for each stock item
+    // Calculate report data for each stock item (medicines only)
     const data: StockReportItem[] = stockItems
       .filter(item => item.category === "Medication")
       .map(item => {
         const issued = issuedQuantities[item.name] || 0;
         const received = receivedQuantities[item.name] || 0;
-        // Sub stock is assumed to be a portion of current stock
-        const subStockOpening = Math.min(Math.ceil(item.currentStock * 0.3), item.currentStock);
-        const subStockClosing = Math.max(0, subStockOpening - issued);
-        const mainStockOpening = item.currentStock;
-        const mainStockClosing = mainStockOpening - issued + received;
+        const stockOpening = item.currentStock;
+        const stockClosing = stockOpening - issued + received;
 
         return {
           brand: item.name,
-          mainStockOpening,
-          subStockOpening,
-          subStockClosing,
+          stockOpening,
           issuedToPatients: issued,
           stockReceived: received,
-          mainStockClosing,
+          stockClosing,
           rate: item.mrp || item.unitPrice,
           amount: issued * (item.mrp || item.unitPrice),
         };
       })
-      .filter(item => item.mainStockOpening > 0 || item.issuedToPatients > 0 || item.stockReceived > 0);
+      .filter(item => item.stockOpening > 0 || item.issuedToPatients > 0 || item.stockReceived > 0);
 
     setReportData(data);
   };
@@ -145,12 +138,10 @@ export default function DailyStockReport() {
     // Create main stock report data
     const mainReportData = reportData.map(item => ({
       'Brand': item.brand,
-      'Main Stock Opening': item.mainStockOpening,
-      'Sub Stock Opening': item.subStockOpening,
-      'Sub Stock Closing': item.subStockClosing,
+      'Stock Opening': item.stockOpening,
       'Issued to Patients': item.issuedToPatients,
       'Stock Received': item.stockReceived,
-      'Main Stock Closing': item.mainStockClosing,
+      'Stock Closing': item.stockClosing,
       'Rate': item.rate,
       'Amount': item.amount,
     }));
@@ -158,12 +149,10 @@ export default function DailyStockReport() {
     // Add grand total row
     mainReportData.push({
       'Brand': 'Grand Total',
-      'Main Stock Opening': reportData.reduce((sum, item) => sum + item.mainStockOpening, 0),
-      'Sub Stock Opening': reportData.reduce((sum, item) => sum + item.subStockOpening, 0),
-      'Sub Stock Closing': reportData.reduce((sum, item) => sum + item.subStockClosing, 0),
+      'Stock Opening': reportData.reduce((sum, item) => sum + item.stockOpening, 0),
       'Issued to Patients': reportData.reduce((sum, item) => sum + item.issuedToPatients, 0),
       'Stock Received': reportData.reduce((sum, item) => sum + item.stockReceived, 0),
-      'Main Stock Closing': reportData.reduce((sum, item) => sum + item.mainStockClosing, 0),
+      'Stock Closing': reportData.reduce((sum, item) => sum + item.stockClosing, 0),
       'Rate': 0,
       'Amount': totalSale,
     });
@@ -225,13 +214,11 @@ export default function DailyStockReport() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-navy/10">
-                    <TableHead className="font-bold text-navy">Brand</TableHead>
-                    <TableHead className="font-bold text-navy text-right">Main Stock Opening</TableHead>
-                    <TableHead className="font-bold text-navy text-right">Sub Stock Opening</TableHead>
-                    <TableHead className="font-bold text-navy text-right">Sub Stock Closing</TableHead>
+                    <TableHead className="font-bold text-navy">Medicine Name</TableHead>
+                    <TableHead className="font-bold text-navy text-right">Stock Opening</TableHead>
                     <TableHead className="font-bold text-navy text-right">Issued to Patients</TableHead>
                     <TableHead className="font-bold text-navy text-right">Stock Received</TableHead>
-                    <TableHead className="font-bold text-navy text-right">Main Stock Closing</TableHead>
+                    <TableHead className="font-bold text-navy text-right">Stock Closing</TableHead>
                     <TableHead className="font-bold text-navy text-right">Rate</TableHead>
                     <TableHead className="font-bold text-navy text-right">Amount</TableHead>
                   </TableRow>
@@ -239,7 +226,7 @@ export default function DailyStockReport() {
                 <TableBody>
                   {reportData.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         No stock data available for this date
                       </TableCell>
                     </TableRow>
@@ -248,24 +235,20 @@ export default function DailyStockReport() {
                       {reportData.map((item, index) => (
                         <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                           <TableCell className="font-medium">{item.brand}</TableCell>
-                          <TableCell className="text-right">{item.mainStockOpening}</TableCell>
-                          <TableCell className="text-right">{item.subStockOpening}</TableCell>
-                          <TableCell className="text-right">{item.subStockClosing}</TableCell>
+                          <TableCell className="text-right">{item.stockOpening}</TableCell>
                           <TableCell className="text-right font-semibold text-gold">{item.issuedToPatients}</TableCell>
-                          <TableCell className="text-right">{item.stockReceived}</TableCell>
-                          <TableCell className="text-right">{item.mainStockClosing}</TableCell>
+                          <TableCell className="text-right text-green-600">{item.stockReceived}</TableCell>
+                          <TableCell className="text-right">{item.stockClosing}</TableCell>
                           <TableCell className="text-right">₹{item.rate.toFixed(2)}</TableCell>
                           <TableCell className="text-right font-semibold">₹{item.amount.toFixed(2)}</TableCell>
                         </TableRow>
                       ))}
                       <TableRow className="bg-navy text-white font-bold">
                         <TableCell>Grand Total</TableCell>
-                        <TableCell className="text-right">{reportData.reduce((sum, item) => sum + item.mainStockOpening, 0)}</TableCell>
-                        <TableCell className="text-right">{reportData.reduce((sum, item) => sum + item.subStockOpening, 0)}</TableCell>
-                        <TableCell className="text-right">{reportData.reduce((sum, item) => sum + item.subStockClosing, 0)}</TableCell>
+                        <TableCell className="text-right">{reportData.reduce((sum, item) => sum + item.stockOpening, 0)}</TableCell>
                         <TableCell className="text-right">{reportData.reduce((sum, item) => sum + item.issuedToPatients, 0)}</TableCell>
                         <TableCell className="text-right">{reportData.reduce((sum, item) => sum + item.stockReceived, 0)}</TableCell>
-                        <TableCell className="text-right">{reportData.reduce((sum, item) => sum + item.mainStockClosing, 0)}</TableCell>
+                        <TableCell className="text-right">{reportData.reduce((sum, item) => sum + item.stockClosing, 0)}</TableCell>
                         <TableCell className="text-right">-</TableCell>
                         <TableCell className="text-right">₹{totalSale.toFixed(2)}</TableCell>
                       </TableRow>
