@@ -77,16 +77,40 @@ export default function DailyStockReport() {
       }, {});
     }
 
+    // Get stock received from GRN (purchase orders with grn_date matching report date)
+    const { data: grnOrders } = await supabase
+      .from('purchase_orders')
+      .select('id')
+      .eq('grn_date', reportDate)
+      .eq('status', 'Received');
+
+    const grnOrderIds = grnOrders?.map(po => po.id) || [];
+    
+    let receivedQuantities: Record<string, number> = {};
+    
+    if (grnOrderIds.length > 0) {
+      const { data: poItems } = await supabase
+        .from('purchase_order_items')
+        .select('stock_item_name, quantity')
+        .in('purchase_order_id', grnOrderIds);
+
+      receivedQuantities = (poItems || []).reduce((acc: Record<string, number>, item) => {
+        acc[item.stock_item_name] = (acc[item.stock_item_name] || 0) + item.quantity;
+        return acc;
+      }, {});
+    }
+
     // Calculate report data for each stock item
     const data: StockReportItem[] = stockItems
       .filter(item => item.category === "Medication")
       .map(item => {
         const issued = issuedQuantities[item.name] || 0;
-        // For demo purposes, sub stock is assumed to be a portion of current stock
+        const received = receivedQuantities[item.name] || 0;
+        // Sub stock is assumed to be a portion of current stock
         const subStockOpening = Math.min(Math.ceil(item.currentStock * 0.3), item.currentStock);
         const subStockClosing = Math.max(0, subStockOpening - issued);
         const mainStockOpening = item.currentStock;
-        const mainStockClosing = mainStockOpening - issued;
+        const mainStockClosing = mainStockOpening - issued + received;
 
         return {
           brand: item.name,
@@ -94,13 +118,13 @@ export default function DailyStockReport() {
           subStockOpening,
           subStockClosing,
           issuedToPatients: issued,
-          stockReceived: 0, // Would come from purchase orders/GRN
+          stockReceived: received,
           mainStockClosing,
           rate: item.mrp || item.unitPrice,
           amount: issued * (item.mrp || item.unitPrice),
         };
       })
-      .filter(item => item.mainStockOpening > 0 || item.issuedToPatients > 0);
+      .filter(item => item.mainStockOpening > 0 || item.issuedToPatients > 0 || item.stockReceived > 0);
 
     setReportData(data);
   };
