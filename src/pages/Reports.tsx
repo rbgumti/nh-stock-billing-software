@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import * as XLSX from "xlsx";
+import DailyStockReport from "@/components/DailyStockReport";
 
 export default function Reports() {
   const { stockItems } = useStockStore();
@@ -279,12 +280,13 @@ export default function Reports() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="patients">Patient Reports</TabsTrigger>
           <TabsTrigger value="stock">Stock Reports</TabsTrigger>
           <TabsTrigger value="invoices">Invoice Reports</TabsTrigger>
           <TabsTrigger value="stockledger">Stock Ledger</TabsTrigger>
+          <TabsTrigger value="dailystock">Daily Stock</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -874,6 +876,10 @@ export default function Reports() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="dailystock" className="space-y-6">
+          <DailyStockReport />
         </TabsContent>
       </Tabs>
     </div>
