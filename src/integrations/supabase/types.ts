@@ -137,6 +137,81 @@ export type Database = {
           },
         ]
       }
+      day_reports: {
+        Row: {
+          adjustments: number | null
+          cash_denominations: Json | null
+          cash_handover_amarjeet: number | null
+          cash_handover_mandeep: number | null
+          cash_handover_sir: number | null
+          cash_previous_day: number | null
+          created_at: string | null
+          created_by: string | null
+          deposit_in_bank: number | null
+          expenses: Json | null
+          fees: number | null
+          follow_up_patients: number | null
+          id: string
+          lab_collection: number | null
+          loose_balance: number | null
+          new_patients: number | null
+          paytm_gpay: number | null
+          psychiatry_collection: number | null
+          psychiatry_patients: number | null
+          report_date: string
+          tapentadol_patients: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          adjustments?: number | null
+          cash_denominations?: Json | null
+          cash_handover_amarjeet?: number | null
+          cash_handover_mandeep?: number | null
+          cash_handover_sir?: number | null
+          cash_previous_day?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          deposit_in_bank?: number | null
+          expenses?: Json | null
+          fees?: number | null
+          follow_up_patients?: number | null
+          id?: string
+          lab_collection?: number | null
+          loose_balance?: number | null
+          new_patients?: number | null
+          paytm_gpay?: number | null
+          psychiatry_collection?: number | null
+          psychiatry_patients?: number | null
+          report_date: string
+          tapentadol_patients?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          adjustments?: number | null
+          cash_denominations?: Json | null
+          cash_handover_amarjeet?: number | null
+          cash_handover_mandeep?: number | null
+          cash_handover_sir?: number | null
+          cash_previous_day?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          deposit_in_bank?: number | null
+          expenses?: Json | null
+          fees?: number | null
+          follow_up_patients?: number | null
+          id?: string
+          lab_collection?: number | null
+          loose_balance?: number | null
+          new_patients?: number | null
+          paytm_gpay?: number | null
+          psychiatry_collection?: number | null
+          psychiatry_patients?: number | null
+          report_date?: string
+          tapentadol_patients?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       invoice_items: {
         Row: {
           batch_no: string | null
