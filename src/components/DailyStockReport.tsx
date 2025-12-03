@@ -10,8 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar } from "lucide-react";
+import { Download, Calendar, Filter } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import * as XLSX from "xlsx";
 
@@ -35,6 +37,7 @@ export default function DailyStockReport() {
   const { stockItems } = useStockStore();
   const [reportDate, setReportDate] = useState(new Date().toISOString().split('T')[0]);
   const [reportData, setReportData] = useState<StockReportItem[]>([]);
+  const [showOnlyActive, setShowOnlyActive] = useState(true);
   const [cashDetails, setCashDetails] = useState<CashDenomination[]>([
     { denomination: 500, count: 0, amount: 0 },
     { denomination: 200, count: 0, amount: 0 },
@@ -50,7 +53,7 @@ export default function DailyStockReport() {
 
   useEffect(() => {
     loadReportData();
-  }, [stockItems, reportDate]);
+  }, [stockItems, reportDate, showOnlyActive]);
 
   const loadReportData = async () => {
     // Get invoice items for the selected date to calculate issued quantities
@@ -117,7 +120,7 @@ export default function DailyStockReport() {
           amount: issued * (item.mrp || item.unitPrice),
         };
       })
-      .filter(item => item.stockOpening > 0 || item.issuedToPatients > 0 || item.stockReceived > 0);
+      .filter(item => !showOnlyActive || item.issuedToPatients > 0 || item.stockReceived > 0);
 
     setReportData(data);
   };
@@ -186,7 +189,18 @@ export default function DailyStockReport() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-navy">Daily Stock Report</h2>
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-4 items-center flex-wrap">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="activity-filter"
+              checked={showOnlyActive}
+              onCheckedChange={setShowOnlyActive}
+            />
+            <Label htmlFor="activity-filter" className="text-sm cursor-pointer">
+              <Filter className="h-4 w-4 inline mr-1" />
+              Only with activity
+            </Label>
+          </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-navy" />
             <Input
