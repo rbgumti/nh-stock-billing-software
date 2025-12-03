@@ -35,6 +35,7 @@ import {
 import { useStockStore } from "@/hooks/useStockStore";
 import * as XLSX from "xlsx";
 import DailyStockReport from "@/components/DailyStockReport";
+import DayReport from "@/components/DayReport";
 
 export default function Reports() {
   const { stockItems } = useStockStore();
@@ -280,14 +281,19 @@ export default function Reports() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="dayreport">Day's Report</TabsTrigger>
           <TabsTrigger value="patients">Patient Reports</TabsTrigger>
           <TabsTrigger value="stock">Stock Reports</TabsTrigger>
           <TabsTrigger value="invoices">Invoice Reports</TabsTrigger>
           <TabsTrigger value="stockledger">Stock Ledger</TabsTrigger>
           <TabsTrigger value="dailystock">Daily Stock</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dayreport" className="space-y-6">
+          <DayReport />
+        </TabsContent>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
