@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,9 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar } from "lucide-react";
+import { Download, Calendar, Save, Loader2 } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
 interface MedicineReportItem {
@@ -39,6 +40,9 @@ interface ExpenseItem {
 export default function DayReport() {
   const { stockItems } = useStockStore();
   const [reportDate, setReportDate] = useState(new Date().toISOString().split('T')[0]);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [reportId, setReportId] = useState<string | null>(null);
   
   // Patient counts
   const [newPatients, setNewPatients] = useState(0);
@@ -85,11 +89,142 @@ export default function DayReport() {
     { denomination: 1, count: 0, amount: 0 },
   ]);
 
+  const loadSavedReport = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('day_reports')
+        .select('*')
+        .eq('report_date', reportDate)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setReportId(data.id);
+        setNewPatients(data.new_patients || 0);
+        setFollowUpPatients(data.follow_up_patients || 0);
+        setCashPreviousDay(Number(data.cash_previous_day) || 0);
+        setLooseBalance(Number(data.loose_balance) || 5000);
+        setDepositInBank(Number(data.deposit_in_bank) || 0);
+        setPaytmGpay(Number(data.paytm_gpay) || 0);
+        setCashHandoverAmarjeet(Number(data.cash_handover_amarjeet) || 0);
+        setCashHandoverMandeep(Number(data.cash_handover_mandeep) || 0);
+        setCashHandoverSir(Number(data.cash_handover_sir) || 0);
+        setAdjustments(Number(data.adjustments) || 0);
+        setTapentadolPatients(data.tapentadol_patients || 0);
+        setPsychiatryPatients(data.psychiatry_patients || 0);
+        setFees(Number(data.fees) || 0);
+        setLabCollection(Number(data.lab_collection) || 0);
+        setPsychiatryCollection(Number(data.psychiatry_collection) || 0);
+        
+        if (data.cash_denominations) {
+          setCashDetails(data.cash_denominations as unknown as CashDenomination[]);
+        }
+        if (data.expenses && Array.isArray(data.expenses) && data.expenses.length > 0) {
+          setExpenses(data.expenses as unknown as ExpenseItem[]);
+        } else {
+          setExpenses([{ description: "", amount: 0 }]);
+        }
+      } else {
+        // Reset to defaults for new date
+        setReportId(null);
+        setNewPatients(0);
+        setFollowUpPatients(0);
+        setCashPreviousDay(0);
+        setLooseBalance(5000);
+        setDepositInBank(0);
+        setPaytmGpay(0);
+        setCashHandoverAmarjeet(0);
+        setCashHandoverMandeep(0);
+        setCashHandoverSir(0);
+        setAdjustments(0);
+        setTapentadolPatients(0);
+        setPsychiatryPatients(0);
+        setFees(0);
+        setLabCollection(0);
+        setPsychiatryCollection(0);
+        setCashDetails([
+          { denomination: 500, count: 0, amount: 0 },
+          { denomination: 200, count: 0, amount: 0 },
+          { denomination: 100, count: 0, amount: 0 },
+          { denomination: 50, count: 0, amount: 0 },
+          { denomination: 20, count: 0, amount: 0 },
+          { denomination: 10, count: 0, amount: 0 },
+          { denomination: 5, count: 0, amount: 0 },
+          { denomination: 2, count: 0, amount: 0 },
+          { denomination: 1, count: 0, amount: 0 },
+        ]);
+        setExpenses([{ description: "", amount: 0 }]);
+      }
+    } catch (error) {
+      console.error('Error loading report:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [reportDate]);
+
+  const saveReport = async () => {
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const reportData = {
+        report_date: reportDate,
+        new_patients: newPatients,
+        follow_up_patients: followUpPatients,
+        cash_previous_day: cashPreviousDay,
+        loose_balance: looseBalance,
+        deposit_in_bank: depositInBank,
+        paytm_gpay: paytmGpay,
+        cash_handover_amarjeet: cashHandoverAmarjeet,
+        cash_handover_mandeep: cashHandoverMandeep,
+        cash_handover_sir: cashHandoverSir,
+        adjustments: adjustments,
+        tapentadol_patients: tapentadolPatients,
+        psychiatry_patients: psychiatryPatients,
+        fees: fees,
+        lab_collection: labCollection,
+        psychiatry_collection: psychiatryCollection,
+        cash_denominations: JSON.parse(JSON.stringify(cashDetails)),
+        expenses: JSON.parse(JSON.stringify(expenses.filter(e => e.description || e.amount > 0))),
+        created_by: user?.id,
+      };
+
+      if (reportId) {
+        const { error } = await supabase
+          .from('day_reports')
+          .update(reportData)
+          .eq('id', reportId);
+        if (error) throw error;
+        toast.success('Report updated successfully');
+      } else {
+        const { data, error } = await supabase
+          .from('day_reports')
+          .insert(reportData)
+          .select()
+          .single();
+        if (error) throw error;
+        setReportId(data.id);
+        toast.success('Report saved successfully');
+      }
+    } catch (error: any) {
+      console.error('Error saving report:', error);
+      toast.error('Failed to save report: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   useEffect(() => {
-    loadReportData();
+    loadSavedReport();
+  }, [loadSavedReport]);
+
+  useEffect(() => {
+    loadMedicineData();
   }, [stockItems, reportDate]);
 
-  const loadReportData = async () => {
+  const loadMedicineData = async () => {
     // Get invoice items for the selected date
     const { data: invoiceData } = await supabase
       .from('invoices')
@@ -222,7 +357,6 @@ export default function DayReport() {
   const exportToExcel = () => {
     const workbook = XLSX.utils.book_new();
 
-    // Main report data
     const reportData: any[][] = [
       [formatDate(reportDate)],
       [],
@@ -233,14 +367,12 @@ export default function DayReport() {
       ['Brand', 'Qty sold', 'Rate', 'Amount', 'Opening', 'Stock Received', 'Closing', 'Lab Collection', labCollection],
     ];
 
-    // Add BNX medicines
     bnxMedicines.forEach(m => {
       reportData.push([m.brand, m.qtySold, m.rate, m.amount, m.opening, m.stockReceived, m.closing]);
     });
     reportData.push(['BNX Total', '', '', bnxTotal]);
     reportData.push([]);
 
-    // Add cash management section
     reportData.push(['Cash Management']);
     reportData.push(['Cash in Hand (Previous Day)', cashPreviousDay]);
     reportData.push(["Today's Collection", todaysCollection]);
@@ -255,7 +387,6 @@ export default function DayReport() {
     reportData.push(['Cash left in hand (Today)', cashLeftInHand]);
     reportData.push([]);
 
-    // Add Tapentadol medicines
     if (tapentadolMedicines.length > 0) {
       reportData.push(['Tapentadol Medicines']);
       reportData.push(['Brand', 'Qty sold', 'Rate', 'Amount', 'Opening', 'Stock Received', 'Closing']);
@@ -266,7 +397,6 @@ export default function DayReport() {
       reportData.push([]);
     }
 
-    // Add Psychiatry medicines
     if (psychiatryMedicines.length > 0) {
       reportData.push(['Psychiatry Medicines']);
       reportData.push(['Brand', 'Qty sold', 'Rate', 'Amount', 'Opening', 'Stock Received', 'Closing']);
@@ -277,7 +407,6 @@ export default function DayReport() {
       reportData.push([]);
     }
 
-    // Add summary
     reportData.push(['Summary']);
     reportData.push(['BNX Collection', bnxTotal]);
     reportData.push(['Tapentadol Collection', tapentadolTotal]);
@@ -287,7 +416,6 @@ export default function DayReport() {
     reportData.push(['Total Sale', totalSale]);
     reportData.push([]);
 
-    // Add cash details
     reportData.push(['CASH DETAILS']);
     reportData.push(['Denomination', 'Count', 'Amount']);
     cashDetails.forEach(c => {
@@ -357,11 +485,23 @@ export default function DayReport() {
     </Card>
   );
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-navy" />
+        <span className="ml-2">Loading report...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 text-sm">
       {/* Header */}
       <div className="flex justify-between items-center flex-wrap gap-2">
-        <h2 className="text-xl font-bold text-navy">Day's Report - {formatDate(reportDate)}</h2>
+        <div>
+          <h2 className="text-xl font-bold text-navy">Day's Report - {formatDate(reportDate)}</h2>
+          {reportId && <span className="text-xs text-green-600">✓ Saved</span>}
+        </div>
         <div className="flex gap-2 items-center">
           <Calendar className="h-4 w-4 text-navy" />
           <Input
@@ -370,6 +510,10 @@ export default function DayReport() {
             onChange={(e) => setReportDate(e.target.value)}
             className="w-auto h-8"
           />
+          <Button onClick={saveReport} size="sm" className="bg-navy hover:bg-navy/90" disabled={saving}>
+            {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+            Save
+          </Button>
           <Button onClick={exportToExcel} size="sm" className="bg-gold hover:bg-gold/90 text-navy">
             <Download className="h-4 w-4 mr-1" />
             Export
