@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Save, Loader2 } from "lucide-react";
+import { Download, Calendar, Loader2, Check } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -43,6 +43,9 @@ export default function DayReport() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialLoadRef = useRef(true);
   
   // Patient counts
   const [newPatients, setNewPatients] = useState(0);
@@ -204,10 +207,10 @@ export default function DayReport() {
           .insert(reportData)
           .select()
           .single();
-        if (error) throw error;
+      if (error) throw error;
         setReportId(data.id);
-        toast.success('Report saved successfully');
       }
+      setLastSaved(new Date());
     } catch (error: any) {
       console.error('Error saving report:', error);
       toast.error('Failed to save report: ' + error.message);
@@ -216,8 +219,42 @@ export default function DayReport() {
     }
   };
 
+  // Auto-save with debounce
+  const triggerAutoSave = useCallback(() => {
+    if (isInitialLoadRef.current || loading) return;
+    
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+    
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      saveReport();
+    }, 1500);
+  }, [reportDate, newPatients, followUpPatients, cashPreviousDay, looseBalance, depositInBank, 
+      paytmGpay, cashHandoverAmarjeet, cashHandoverMandeep, cashHandoverSir, adjustments,
+      tapentadolPatients, psychiatryPatients, fees, labCollection, psychiatryCollection,
+      cashDetails, expenses]);
+
+  // Watch for changes and trigger auto-save
   useEffect(() => {
-    loadSavedReport();
+    triggerAutoSave();
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [newPatients, followUpPatients, cashPreviousDay, looseBalance, depositInBank,
+      paytmGpay, cashHandoverAmarjeet, cashHandoverMandeep, cashHandoverSir, adjustments,
+      tapentadolPatients, psychiatryPatients, fees, labCollection, psychiatryCollection,
+      cashDetails, expenses]);
+
+  useEffect(() => {
+    isInitialLoadRef.current = true;
+    loadSavedReport().then(() => {
+      setTimeout(() => {
+        isInitialLoadRef.current = false;
+      }, 100);
+    });
   }, [loadSavedReport]);
 
   useEffect(() => {
@@ -500,7 +537,17 @@ export default function DayReport() {
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div>
           <h2 className="text-xl font-bold text-navy">Day's Report - {formatDate(reportDate)}</h2>
-          {reportId && <span className="text-xs text-green-600">✓ Saved</span>}
+          <div className="flex items-center gap-2 text-xs">
+            {saving ? (
+              <span className="text-muted-foreground flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" /> Saving...
+              </span>
+            ) : lastSaved ? (
+              <span className="text-green-600 flex items-center gap-1">
+                <Check className="h-3 w-3" /> Auto-saved
+              </span>
+            ) : null}
+          </div>
         </div>
         <div className="flex gap-2 items-center">
           <Calendar className="h-4 w-4 text-navy" />
@@ -510,10 +557,6 @@ export default function DayReport() {
             onChange={(e) => setReportDate(e.target.value)}
             className="w-auto h-8"
           />
-          <Button onClick={saveReport} size="sm" className="bg-navy hover:bg-navy/90" disabled={saving}>
-            {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
-            Save
-          </Button>
           <Button onClick={exportToExcel} size="sm" className="bg-gold hover:bg-gold/90 text-navy">
             <Download className="h-4 w-4 mr-1" />
             Export
