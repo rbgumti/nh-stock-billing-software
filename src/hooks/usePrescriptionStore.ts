@@ -24,6 +24,7 @@ export interface Prescription {
   prescription_date: string;
   status: 'Active' | 'Dispensed' | 'Cancelled';
   items: PrescriptionItem[];
+  appointment_id?: string;
 }
 
 export const usePrescriptionStore = () => {
@@ -96,6 +97,7 @@ export const usePrescriptionStore = () => {
           notes: prescription.notes,
           prescription_date: prescription.prescription_date,
           status: prescription.status,
+          appointment_id: prescription.appointment_id || null,
         })
         .select()
         .single();

@@ -63,7 +63,7 @@ export default function NewInvoice() {
   // Load prescription data if prescriptionId is in URL
   useEffect(() => {
     const rxId = searchParams.get('prescriptionId');
-    if (rxId) {
+    if (rxId && medicines.length > 0) {
       const prescription = getPrescription(rxId);
       if (prescription) {
         setPrescriptionId(rxId);
@@ -76,25 +76,49 @@ export default function NewInvoice() {
         setSelectedPatient(prescription.patient_id.toString());
         setNotes(prescription.notes || '');
         
-        // Convert prescription items to invoice items
-        const invoiceItems: InvoiceItem[] = prescription.items.map((item, index) => ({
-          id: index.toString(),
-          medicineId: 0,
-          medicineName: item.medicine_name,
-          batchNo: "",
-          expiryDate: "",
-          mrp: 0,
-          quantity: item.quantity,
-          unitPrice: 0,
-          total: 0,
-          availableStock: 0,
-          stockAfterInvoice: 0
-        }));
+        // Convert prescription items to invoice items and auto-match medicines from stock
+        const invoiceItems: InvoiceItem[] = prescription.items.map((item, index) => {
+          // Try to find matching medicine in stock (case-insensitive partial match)
+          const matchedMedicine = medicines.find(med => 
+            med.name.toLowerCase().includes(item.medicine_name.toLowerCase()) ||
+            item.medicine_name.toLowerCase().includes(med.name.toLowerCase())
+          );
+          
+          if (matchedMedicine) {
+            return {
+              id: index.toString(),
+              medicineId: matchedMedicine.id,
+              medicineName: matchedMedicine.name,
+              batchNo: matchedMedicine.batchNo || "",
+              expiryDate: matchedMedicine.expiryDate || "",
+              mrp: matchedMedicine.mrp || 0,
+              quantity: item.quantity,
+              unitPrice: matchedMedicine.unitPrice,
+              total: item.quantity * matchedMedicine.unitPrice,
+              availableStock: matchedMedicine.currentStock,
+              stockAfterInvoice: matchedMedicine.currentStock - item.quantity
+            };
+          }
+          
+          return {
+            id: index.toString(),
+            medicineId: 0,
+            medicineName: item.medicine_name,
+            batchNo: "",
+            expiryDate: "",
+            mrp: 0,
+            quantity: item.quantity,
+            unitPrice: 0,
+            total: 0,
+            availableStock: 0,
+            stockAfterInvoice: 0
+          };
+        });
         
         setItems(invoiceItems.length > 0 ? invoiceItems : items);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, medicines]);
 
   // Search patient by ID
   const handlePatientSearch = () => {

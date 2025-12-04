@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Plus, Clock, User, Phone, FileText } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Clock, User, Phone, FileText, Pill } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
@@ -25,6 +26,7 @@ interface Appointment {
 }
 
 export default function Appointments() {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
@@ -279,7 +281,7 @@ export default function Appointments() {
                           </div>
                         )}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {appointment.status === 'Scheduled' && (
                           <Button
                             size="sm"
@@ -290,13 +292,23 @@ export default function Appointments() {
                           </Button>
                         )}
                         {(appointment.status === 'Scheduled' || appointment.status === 'Confirmed') && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleStatusUpdate(appointment.id, 'Completed')}
-                          >
-                            Complete
-                          </Button>
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleStatusUpdate(appointment.id, 'Completed')}
+                            >
+                              Complete
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-gold hover:bg-gold/90 text-navy"
+                              onClick={() => navigate(`/prescriptions/new?appointmentId=${appointment.id}`)}
+                            >
+                              <Pill className="h-3 w-3 mr-1" />
+                              Prescribe
+                            </Button>
+                          </>
                         )}
                         <Button
                           size="sm"

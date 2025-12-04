@@ -1,13 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import PrescriptionForm from "@/components/forms/PrescriptionForm";
 import { usePrescriptionStore, PrescriptionItem } from "@/hooks/usePrescriptionStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function NewPrescription() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { addPrescription } = usePrescriptionStore();
   const { generatePrescriptionNumber } = useSequentialNumbers();
   
@@ -18,10 +20,44 @@ export default function NewPrescription() {
     patient_age: '',
     diagnosis: '',
     notes: '',
+    appointment_id: '',
   });
 
   const [items, setItems] = useState<PrescriptionItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load appointment data if appointmentId is in URL
+  useEffect(() => {
+    const appointmentId = searchParams.get('appointmentId');
+    if (appointmentId) {
+      loadAppointmentData(appointmentId);
+    }
+  }, [searchParams]);
+
+  const loadAppointmentData = async (appointmentId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('id', appointmentId)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setFormData(prev => ({
+          ...prev,
+          patient_id: data.patient_id,
+          patient_name: data.patient_name,
+          patient_phone: data.patient_phone || '',
+          diagnosis: data.reason || '',
+          notes: data.notes || '',
+          appointment_id: appointmentId,
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading appointment:', error);
+    }
+  };
 
   const handleFormChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -71,7 +107,16 @@ export default function NewPrescription() {
         prescription_date: new Date().toISOString(),
         status: 'Active',
         items,
+        appointment_id: formData.appointment_id || undefined,
       });
+
+      // Update appointment status to completed if linked
+      if (formData.appointment_id) {
+        await supabase
+          .from('appointments')
+          .update({ status: 'Completed' })
+          .eq('id', formData.appointment_id);
+      }
 
       navigate('/prescriptions');
     } catch (error) {
