@@ -44,7 +44,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
     }
   }, [isEditing, initialData]);
 
-  const categories = ["Medication", "Medical Supplies", "Equipment"];
+  const categories = ["BNX", "TPN", "PSHY", "BNX + PSHY", "TPN + PSHY"];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
