@@ -72,7 +72,8 @@ export function PatientExcelImport() {
       fatherName: data["Father Name"] || "",
       visitDate: data["VISIT DATE"] || "",
       medicinePrescribedDays: data["Days"] || "",
-      nextFollowUpDate: data["Follow up date"] || ""
+      nextFollowUpDate: data["Follow up date"] || "",
+      category: data["Category"] || ""
     };
 
     return { isValid: true, patient };

@@ -36,7 +36,8 @@ export default function NewPatient() {
             gender: formData.gender,
             aadhar: formData.aadhar,
             govtIdOld: formData.govtIdOld,
-            govtIdNew: formData.govtIdNew
+            govtIdNew: formData.govtIdNew,
+            category: formData.category
           }}
           onInputChange={handleInputChange}
           isEditing={false}

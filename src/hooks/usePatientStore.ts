@@ -70,7 +70,8 @@ export function usePatientStore() {
         fatherName: String(p['Father Name'] || ''),
         visitDate: '',
         medicinePrescribedDays: '',
-        nextFollowUpDate: ''
+        nextFollowUpDate: '',
+        category: String(p.category || '')
       }));
 
       console.log(`Loaded ${formattedPatients.length} patients successfully`);
@@ -103,7 +104,8 @@ export function usePatientStore() {
           "Addhar Card": patient.aadhar,
           "PH": patient.phone,
           "Address": patient.address,
-          "New Govt, ID": patient.govtIdNew
+          "New Govt, ID": patient.govtIdNew,
+          "category": patient.category || null
         }] as any);
 
       if (error) throw error;
@@ -136,7 +138,8 @@ export function usePatientStore() {
         "New Govt, ID": updatedPatient.govtIdNew || '',
         "Age": updatedPatient.dateOfBirth 
           ? String(new Date().getFullYear() - new Date(updatedPatient.dateOfBirth).getFullYear()) 
-          : ''
+          : '',
+        "category": updatedPatient.category || null
       };
       
       console.log('Update payload:', updateData);

@@ -368,6 +368,7 @@ export type Database = {
           "Addhar Card": string
           Address: string
           Age: string
+          category: string | null
           "Father Name": string
           "file No.": string
           "Fill no.": string
@@ -382,6 +383,7 @@ export type Database = {
           "Addhar Card": string
           Address: string
           Age: string
+          category?: string | null
           "Father Name": string
           "file No."?: string
           "Fill no."?: string
@@ -396,6 +398,7 @@ export type Database = {
           "Addhar Card"?: string
           Address?: string
           Age?: string
+          category?: string | null
           "Father Name"?: string
           "file No."?: string
           "Fill no."?: string
