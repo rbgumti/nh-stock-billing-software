@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PATIENT_CATEGORIES } from "@/hooks/usePatientForm";
 
 interface PersonalInformationFormProps {
   formData: {
@@ -15,6 +16,7 @@ interface PersonalInformationFormProps {
     aadhar: string;
     govtIdOld: string;
     govtIdNew: string;
+    category: string;
   };
   onInputChange: (field: string, value: string) => void;
   isEditing?: boolean;
@@ -92,6 +94,22 @@ export function PersonalInformationForm({ formData, onInputChange, isEditing = f
                 <SelectItem value="Male">Male</SelectItem>
                 <SelectItem value="Female">Female</SelectItem>
                 <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="category">Patient Category</Label>
+            <Select value={formData.category} onValueChange={(value) => onInputChange("category", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {PATIENT_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
