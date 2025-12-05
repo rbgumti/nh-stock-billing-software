@@ -21,7 +21,7 @@ const appointmentSchema = z.object({
   patient_phone: z.string().optional(),
   appointment_date: z.date({ required_error: "Please select a date" }),
   appointment_time: z.string().min(1, "Please select a time"),
-  duration_minutes: z.number().min(15, "Duration must be at least 15 minutes"),
+  duration_minutes: z.number().min(2, "Duration must be at least 2 minutes"),
   reason: z.string().min(1, "Reason is required"),
   notes: z.string().optional(),
   status: z.string(),
@@ -270,13 +270,23 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
 
       <div className="space-y-2">
         <Label htmlFor="duration_minutes">Duration (minutes) *</Label>
-        <Input
-          id="duration_minutes"
-          type="number"
-          min="15"
-          step="15"
-          {...register('duration_minutes', { valueAsNumber: true })}
-        />
+        <Select
+          onValueChange={(value) => setValue('duration_minutes', parseInt(value))}
+          defaultValue={watch('duration_minutes')?.toString()}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select duration" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="2">2 minutes</SelectItem>
+            <SelectItem value="5">5 minutes</SelectItem>
+            <SelectItem value="10">10 minutes</SelectItem>
+            <SelectItem value="15">15 minutes</SelectItem>
+            <SelectItem value="30">30 minutes</SelectItem>
+            <SelectItem value="45">45 minutes</SelectItem>
+            <SelectItem value="60">60 minutes</SelectItem>
+          </SelectContent>
+        </Select>
         {errors.duration_minutes && (
           <p className="text-sm text-destructive">{errors.duration_minutes.message}</p>
         )}
