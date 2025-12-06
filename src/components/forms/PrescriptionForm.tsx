@@ -1,10 +1,17 @@
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trash2, Plus, Search } from "lucide-react";
 import { PrescriptionItem } from "@/hooks/usePrescriptionStore";
+
+interface StockItem {
+  item_id: number;
+  name: string;
+}
 
 interface PrescriptionFormProps {
   formData: {
@@ -16,6 +23,7 @@ interface PrescriptionFormProps {
     notes: string;
   };
   items: PrescriptionItem[];
+  stockItems: StockItem[];
   onFormChange: (field: string, value: string | number) => void;
   onAddItem: () => void;
   onRemoveItem: (index: number) => void;
@@ -25,11 +33,27 @@ interface PrescriptionFormProps {
 export default function PrescriptionForm({
   formData,
   items,
+  stockItems,
   onFormChange,
   onAddItem,
   onRemoveItem,
   onItemChange,
 }: PrescriptionFormProps) {
+  const [medicineSearches, setMedicineSearches] = useState<Record<number, string>>({});
+
+  const getFilteredMedicines = (index: number) => {
+    const search = medicineSearches[index]?.toLowerCase() || "";
+    if (!search) return stockItems;
+    return stockItems.filter((item) =>
+      item.name.toLowerCase().includes(search)
+    );
+  };
+
+  const handleMedicineSelect = (index: number, medicineName: string) => {
+    onItemChange(index, 'medicine_name', medicineName);
+    setMedicineSearches((prev) => ({ ...prev, [index]: "" }));
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -113,13 +137,45 @@ export default function PrescriptionForm({
                   </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
+                  <div className="col-span-2">
                     <Label>Medicine Name *</Label>
-                    <Input
-                      value={item.medicine_name}
-                      onChange={(e) => onItemChange(index, 'medicine_name', e.target.value)}
-                      required
-                    />
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search medicine..."
+                          value={medicineSearches[index] || ""}
+                          onChange={(e) =>
+                            setMedicineSearches((prev) => ({
+                              ...prev,
+                              [index]: e.target.value,
+                            }))
+                          }
+                          className="pl-9"
+                        />
+                      </div>
+                      <Select
+                        value={item.medicine_name}
+                        onValueChange={(value) => handleMedicineSelect(index, value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select medicine from stock" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 bg-background">
+                          {getFilteredMedicines(index).length === 0 ? (
+                            <div className="py-2 px-3 text-sm text-muted-foreground">
+                              No medicines found
+                            </div>
+                          ) : (
+                            getFilteredMedicines(index).map((med) => (
+                              <SelectItem key={med.item_id} value={med.name}>
+                                {med.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div>
                     <Label>Dosage *</Label>
@@ -158,7 +214,7 @@ export default function PrescriptionForm({
                       min="1"
                     />
                   </div>
-                  <div>
+                  <div className="col-span-2">
                     <Label>Instructions</Label>
                     <Input
                       placeholder="e.g., After meals"
