@@ -161,7 +161,7 @@ export default function PrescriptionForm({
                         <SelectTrigger>
                           <SelectValue placeholder="Select medicine from stock" />
                         </SelectTrigger>
-                        <SelectContent className="max-h-60 bg-background">
+                        <SelectContent className="max-h-60 bg-background z-50">
                           {getFilteredMedicines(index).length === 0 ? (
                             <div className="py-2 px-3 text-sm text-muted-foreground">
                               No medicines found

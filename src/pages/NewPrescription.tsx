@@ -247,7 +247,7 @@ export default function NewPrescription() {
                   <SelectTrigger>
                     <SelectValue placeholder="Select a patient" />
                   </SelectTrigger>
-                  <SelectContent className="max-h-60">
+                  <SelectContent className="max-h-60 bg-background z-50">
                     {filteredPatients.length === 0 ? (
                       <div className="py-2 px-3 text-sm text-muted-foreground">No patients found</div>
                     ) : (
