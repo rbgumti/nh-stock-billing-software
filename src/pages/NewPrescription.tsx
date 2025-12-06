@@ -20,6 +20,11 @@ interface Patient {
   "Addhar Card": string;
 }
 
+interface StockItem {
+  item_id: number;
+  name: string;
+}
+
 export default function NewPrescription() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -27,6 +32,7 @@ export default function NewPrescription() {
   const { generatePrescriptionNumber } = useSequentialNumbers();
   
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     patient_id: 0,
@@ -41,9 +47,10 @@ export default function NewPrescription() {
   const [items, setItems] = useState<PrescriptionItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Load patients on mount
+  // Load patients and stock items on mount
   useEffect(() => {
     loadPatients();
+    loadStockItems();
   }, []);
 
   // Load appointment data if appointmentId is in URL
@@ -65,6 +72,20 @@ export default function NewPrescription() {
       setPatients(data || []);
     } catch (error) {
       console.error('Error loading patients:', error);
+    }
+  };
+
+  const loadStockItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('stock_items')
+        .select('item_id, name')
+        .order('name');
+
+      if (error) throw error;
+      setStockItems(data || []);
+    } catch (error) {
+      console.error('Error loading stock items:', error);
     }
   };
 
@@ -249,6 +270,7 @@ export default function NewPrescription() {
         <PrescriptionForm
           formData={formData}
           items={items}
+          stockItems={stockItems}
           onFormChange={handleFormChange}
           onAddItem={handleAddItem}
           onRemoveItem={handleRemoveItem}
