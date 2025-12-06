@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,14 @@ interface PrescriptionFormProps {
   onItemChange: (index: number, field: string, value: string | number) => void;
 }
 
+const FREQUENCY_OPTIONS = [
+  { value: "OD", label: "OD (Once daily)", multiplier: 1 },
+  { value: "BD", label: "BD (Twice daily)", multiplier: 2 },
+  { value: "TDS", label: "TDS (Three times daily)", multiplier: 3 },
+  { value: "4 Times a day", label: "4 Times a day", multiplier: 4 },
+  { value: "5 Times a day", label: "5 Times a day", multiplier: 5 },
+];
+
 export default function PrescriptionForm({
   formData,
   items,
@@ -52,6 +60,28 @@ export default function PrescriptionForm({
   const handleMedicineSelect = (index: number, medicineName: string) => {
     onItemChange(index, 'medicine_name', medicineName);
     setMedicineSearches((prev) => ({ ...prev, [index]: "" }));
+  };
+
+  const handleFrequencyChange = (index: number, frequency: string) => {
+    onItemChange(index, 'frequency', frequency);
+    // Auto-calculate quantity
+    const item = items[index];
+    const durationDays = parseInt(item.duration) || 0;
+    const freqOption = FREQUENCY_OPTIONS.find(f => f.value === frequency);
+    if (freqOption && durationDays > 0) {
+      onItemChange(index, 'quantity', durationDays * freqOption.multiplier);
+    }
+  };
+
+  const handleDurationChange = (index: number, duration: string) => {
+    onItemChange(index, 'duration', duration);
+    // Auto-calculate quantity
+    const item = items[index];
+    const durationDays = parseInt(duration) || 0;
+    const freqOption = FREQUENCY_OPTIONS.find(f => f.value === item.frequency);
+    if (freqOption && durationDays > 0) {
+      onItemChange(index, 'quantity', durationDays * freqOption.multiplier);
+    }
   };
 
   return (
@@ -137,7 +167,7 @@ export default function PrescriptionForm({
                   </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
+                  <div>
                     <Label>Medicine Name *</Label>
                     <div className="space-y-2">
                       <div className="relative">
@@ -159,7 +189,7 @@ export default function PrescriptionForm({
                         onValueChange={(value) => handleMedicineSelect(index, value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select medicine from stock" />
+                          <SelectValue placeholder="Select medicine" />
                         </SelectTrigger>
                         <SelectContent className="max-h-60 bg-background z-50">
                           {getFilteredMedicines(index).length === 0 ? (
@@ -188,20 +218,31 @@ export default function PrescriptionForm({
                   </div>
                   <div>
                     <Label>Frequency *</Label>
-                    <Input
-                      placeholder="e.g., Twice daily"
+                    <Select
                       value={item.frequency}
-                      onChange={(e) => onItemChange(index, 'frequency', e.target.value)}
-                      required
-                    />
+                      onValueChange={(value) => handleFrequencyChange(index, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        {FREQUENCY_OPTIONS.map((freq) => (
+                          <SelectItem key={freq.value} value={freq.value}>
+                            {freq.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
-                    <Label>Duration *</Label>
+                    <Label>Duration (days) *</Label>
                     <Input
-                      placeholder="e.g., 7 days"
+                      type="number"
+                      placeholder="e.g., 7"
                       value={item.duration}
-                      onChange={(e) => onItemChange(index, 'duration', e.target.value)}
+                      onChange={(e) => handleDurationChange(index, e.target.value)}
                       required
+                      min="1"
                     />
                   </div>
                   <div>
@@ -212,9 +253,12 @@ export default function PrescriptionForm({
                       onChange={(e) => onItemChange(index, 'quantity', parseInt(e.target.value) || 0)}
                       required
                       min="1"
+                      className="bg-muted"
+                      readOnly
                     />
+                    <p className="text-xs text-muted-foreground mt-1">Auto-calculated</p>
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <Label>Instructions</Label>
                     <Input
                       placeholder="e.g., After meals"
