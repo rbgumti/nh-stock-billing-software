@@ -320,6 +320,42 @@ export type Database = {
         }
         Relationships: []
       }
+      leaked_password_rejections: {
+        Row: {
+          created_by: string | null
+          email: string | null
+          event_time: string
+          id: string
+          ip: unknown
+          raw_payload: Json | null
+          reason: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_by?: string | null
+          email?: string | null
+          event_time?: string
+          id?: string
+          ip?: unknown
+          raw_payload?: Json | null
+          reason?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_by?: string | null
+          email?: string | null
+          event_time?: string
+          id?: string
+          ip?: unknown
+          raw_payload?: Json | null
+          reason?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string
@@ -856,6 +892,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_leaked_password_rejection: {
+        Args: {
+          p_actor?: string
+          p_email: string
+          p_ip: unknown
+          p_raw_payload: Json
+          p_reason: string
+          p_user_agent: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

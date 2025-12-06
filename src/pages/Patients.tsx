@@ -36,6 +36,7 @@ export default function Patients() {
     aadhar: patient.aadhar,
     govtIdOld: patient.govtIdOld,
     govtIdNew: patient.govtIdNew,
+    category: patient.category,
     lastVisit: "2024-01-15", // Default for now
     status: "Active" // Default for now
   }));
@@ -107,9 +108,16 @@ export default function Patients() {
                   <CardTitle className="text-lg">{patient.name}</CardTitle>
                   <p className="text-sm text-gray-500">{patient.age} years old • {patient.gender}</p>
                 </div>
-                <Badge variant={patient.status === "Active" ? "default" : "secondary"}>
-                  {patient.status}
-                </Badge>
+                <div className="flex flex-col gap-1 items-end">
+                  {patient.category && (
+                    <Badge variant="outline" className="bg-gold/10 text-navy border-gold">
+                      {patient.category}
+                    </Badge>
+                  )}
+                  <Badge variant={patient.status === "Active" ? "default" : "secondary"}>
+                    {patient.status}
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
