@@ -73,7 +73,18 @@ export function PatientSearchSelect({
     });
   }, [patients, searchQuery, fileNoQuery, activeSearch]);
 
-  // Exact File No selection happens on Enter to avoid interrupting typing
+  // Auto-select only when exactly 1 match is found (unique match)
+  useEffect(() => {
+    if (activeSearch === "fileNo" && fileNoQuery.trim().length >= 1 && filteredPatients.length === 1) {
+      const patient = filteredPatients[0];
+      onPatientSelect(patient);
+      // Clear after a tiny delay to avoid interrupting typing
+      setTimeout(() => {
+        setFileNoQuery("");
+        setIsOpen(false);
+      }, 50);
+    }
+  }, [filteredPatients, activeSearch, fileNoQuery, onPatientSelect]);
 
   // Reset highlighted index when filtered patients change
   useEffect(() => {
