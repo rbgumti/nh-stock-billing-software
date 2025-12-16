@@ -7,6 +7,7 @@ import { ArrowLeft, FileText, Printer, Pencil, Download } from "lucide-react";
 import { usePrescriptionStore, Prescription } from "@/hooks/usePrescriptionStore";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
+import hospitalLogo from "@/assets/NH_LOGO.png";
 
 export default function ViewPrescription() {
   const { id } = useParams<{ id: string }>();
@@ -46,27 +47,62 @@ export default function ViewPrescription() {
     window.print();
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!prescription) return;
 
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
-    let y = 20;
+    let y = 15;
 
-    // Header
-    doc.setFontSize(20);
+    // Load and add hospital logo
+    try {
+      const img = new Image();
+      img.src = hospitalLogo;
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+      // Add logo (centered, 30x30)
+      const logoWidth = 25;
+      const logoHeight = 25;
+      doc.addImage(img, "PNG", pageWidth / 2 - logoWidth / 2, y, logoWidth, logoHeight);
+      y += logoHeight + 5;
+    } catch (error) {
+      console.error("Error loading logo:", error);
+      y += 10;
+    }
+
+    // Hospital Name
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(27, 53, 97); // Navy color
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
+    y += 7;
+
+    // Hospital tagline/address
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text("De-Addiction & Rehabilitation Centre", pageWidth / 2, y, { align: "center" });
+    y += 12;
+
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+
+    // Prescription title
+    doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     doc.text("PRESCRIPTION", pageWidth / 2, y, { align: "center" });
-    y += 10;
+    y += 8;
 
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.text(prescription.prescription_number, pageWidth / 2, y, { align: "center" });
-    y += 15;
+    y += 10;
 
     // Divider line
-    doc.setDrawColor(200);
+    doc.setDrawColor(212, 175, 55); // Gold color
+    doc.setLineWidth(0.5);
     doc.line(margin, y, pageWidth - margin, y);
     y += 10;
 
@@ -145,12 +181,20 @@ export default function ViewPrescription() {
     });
 
     // Footer
-    y = doc.internal.pageSize.getHeight() - 30;
-    doc.setDrawColor(200);
+    y = doc.internal.pageSize.getHeight() - 35;
+    doc.setDrawColor(212, 175, 55); // Gold color
+    doc.setLineWidth(0.5);
     doc.line(margin, y, pageWidth - margin, y);
     y += 8;
+    
     doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(27, 53, 97); // Navy color
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
+    y += 5;
+    
     doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
     doc.text("This is a computer-generated prescription.", pageWidth / 2, y, { align: "center" });
 
     // Download PDF
