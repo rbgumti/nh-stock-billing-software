@@ -63,12 +63,25 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				gold: 'hsl(var(--gold))',
-				navy: 'hsl(var(--navy))'
+				navy: 'hsl(var(--navy))',
+				glass: {
+					DEFAULT: 'hsl(var(--glass-background))',
+					border: 'hsl(var(--glass-border))',
+					highlight: 'hsl(var(--glass-highlight))'
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				'2xl': 'calc(var(--radius) + 8px)',
+				'3xl': 'calc(var(--radius) + 16px)'
+			},
+			boxShadow: {
+				'glass': '0 8px 32px hsl(var(--glass-shadow)), inset 0 1px 0 hsl(var(--glass-highlight))',
+				'glass-lg': '0 12px 40px hsl(var(--glass-shadow)), inset 0 2px 0 hsl(var(--glass-highlight))',
+				'glow': '0 0 20px hsl(var(--gold) / 0.3)',
+				'glow-lg': '0 0 40px hsl(var(--gold) / 0.4)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -86,11 +99,54 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'scale-in': {
+					'0%': {
+						transform: 'scale(0.95)',
+						opacity: '0'
+					},
+					'100%': {
+						transform: 'scale(1)',
+						opacity: '1'
+					}
+				},
+				'shimmer': {
+					'0%': {
+						backgroundPosition: '-200% 0'
+					},
+					'100%': {
+						backgroundPosition: '200% 0'
+					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0)'
+					},
+					'50%': {
+						transform: 'translateY(-10px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'scale-in': 'scale-in 0.2s ease-out',
+				'shimmer': 'shimmer 2s linear infinite',
+				'float': 'float 3s ease-in-out infinite'
+			},
+			backdropBlur: {
+				'glass': '20px'
 			}
 		}
 	},
