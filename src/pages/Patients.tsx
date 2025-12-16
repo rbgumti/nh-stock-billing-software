@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Search, Plus, Phone, Mail, Users, Upload, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Search, Plus, Phone, Users, Upload, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, LayoutGrid, List, Eye, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PatientExcelImport } from "@/components/PatientExcelImport";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface Patient {
   id: number;
@@ -26,6 +28,8 @@ interface Patient {
   category: string | null;
 }
 
+type ViewMode = 'grid' | 'table';
+
 export default function Patients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -35,6 +39,7 @@ export default function Patients() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   // Debounce search term
   useEffect(() => {
@@ -220,12 +225,20 @@ export default function Patients() {
                 </SelectContent>
               </Select>
             </div>
+            <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as ViewMode)}>
+              <ToggleGroupItem value="grid" aria-label="Grid view">
+                <LayoutGrid className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="table" aria-label="Table view">
+                <List className="h-4 w-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
         </CardContent>
       </Card>
 
       {/* Loading State */}
-      {loading && (
+      {loading && viewMode === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: pageSize }).map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -245,8 +258,28 @@ export default function Patients() {
         </div>
       )}
 
-      {/* Patients Grid */}
-      {!loading && (
+      {/* Loading State - Table */}
+      {loading && viewMode === 'table' && (
+        <Card>
+          <CardContent className="p-0">
+            <div className="animate-pulse">
+              <div className="h-12 bg-muted border-b"></div>
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="h-14 border-b flex items-center gap-4 px-4">
+                  <div className="h-4 bg-muted rounded w-16"></div>
+                  <div className="h-4 bg-muted rounded w-32"></div>
+                  <div className="h-4 bg-muted rounded w-24"></div>
+                  <div className="h-4 bg-muted rounded w-28"></div>
+                  <div className="h-4 bg-muted rounded flex-1"></div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Patients Grid View */}
+      {!loading && viewMode === 'grid' && patients.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {patients.map((patient) => (
             <Card key={patient.id} className="hover:shadow-md transition-shadow">
@@ -324,6 +357,92 @@ export default function Patients() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Patients Table View */}
+      {!loading && viewMode === 'table' && patients.length > 0 && (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">ID</TableHead>
+                  <TableHead className="w-20">File No.</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Aadhar</TableHead>
+                  <TableHead>Govt ID</TableHead>
+                  <TableHead className="w-20">Category</TableHead>
+                  <TableHead className="w-32 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {patients.map((patient) => (
+                  <TableRow key={patient.id}>
+                    <TableCell className="font-medium">{patient.id}</TableCell>
+                    <TableCell>{patient.file_no || '-'}</TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{patient.patient_name}</div>
+                        {patient.age && (
+                          <div className="text-xs text-muted-foreground">{patient.age} years</div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>{patient.phone || '-'}</TableCell>
+                    <TableCell className="font-mono text-xs">{patient.aadhar_card || '-'}</TableCell>
+                    <TableCell className="font-mono text-xs">{patient.govt_id || '-'}</TableCell>
+                    <TableCell>
+                      {patient.category && (
+                        <Badge variant="outline" className="bg-gold/10 text-navy border-gold text-xs">
+                          {patient.category}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link to={`/patients/view/${patient.id}`}>
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link to={`/patients/edit/${patient.id}`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Patient</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete {patient.patient_name}? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => deletePatient(patient.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
 
       {/* Empty State */}
