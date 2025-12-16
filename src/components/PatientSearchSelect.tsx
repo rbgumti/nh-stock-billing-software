@@ -77,8 +77,14 @@ export function PatientSearchSelect({
   useEffect(() => {
     if (activeSearch === "fileNo" && fileNoQuery.trim().length >= 1) {
       const query = fileNoQuery.toLowerCase().trim();
+      console.log('[PatientSearchSelect] fileNoQuery:', query, '| patients count:', patients.length);
       // Only auto-select on EXACT match (case-insensitive, trimmed)
-      const exactMatch = patients.find(p => p.file_no?.toLowerCase().trim() === query);
+      const exactMatch = patients.find(p => {
+        const fileNo = p.file_no?.toLowerCase().trim();
+        console.log('[PatientSearchSelect] Comparing:', fileNo, '===', query, '| match:', fileNo === query);
+        return fileNo === query;
+      });
+      console.log('[PatientSearchSelect] exactMatch:', exactMatch?.patient_name || 'none');
       if (exactMatch) {
         onPatientSelect(exactMatch);
         setFileNoQuery("");
