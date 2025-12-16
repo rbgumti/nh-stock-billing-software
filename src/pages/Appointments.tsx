@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Plus, Clock, User, Phone, FileText, Pill, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Clock, User, Phone, FileText, Pill, ChevronLeft, ChevronRight, ArrowUpDown, GripVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
@@ -37,6 +37,8 @@ export default function Appointments() {
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("day");
   const [sortOrder, setSortOrder] = useState<"earliest" | "latest">("latest");
+  const [draggedAppointment, setDraggedAppointment] = useState<Appointment | null>(null);
+  const [dropTargetDate, setDropTargetDate] = useState<Date | null>(null);
   useEffect(() => {
     loadAppointments();
   }, []);
@@ -175,6 +177,57 @@ export default function Appointments() {
     return eachDayOfInterval({ start, end });
   };
 
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent, appointment: Appointment) => {
+    setDraggedAppointment(appointment);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', appointment.id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, date: Date) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDropTargetDate(date);
+  };
+
+  const handleDragLeave = () => {
+    setDropTargetDate(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetDate: Date) => {
+    e.preventDefault();
+    setDropTargetDate(null);
+    
+    if (!draggedAppointment) return;
+
+    const originalDate = new Date(draggedAppointment.appointment_date);
+    const newDate = new Date(targetDate);
+    // Keep the original time, just change the date
+    newDate.setHours(originalDate.getHours(), originalDate.getMinutes(), originalDate.getSeconds());
+
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .update({ appointment_date: newDate.toISOString() })
+        .eq('id', draggedAppointment.id);
+
+      if (error) throw error;
+
+      await loadAppointments();
+      toast.success(`Appointment moved to ${format(newDate, 'MMM d, yyyy')}`);
+    } catch (error) {
+      console.error('Error rescheduling appointment:', error);
+      toast.error('Failed to reschedule appointment');
+    }
+
+    setDraggedAppointment(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedAppointment(null);
+    setDropTargetDate(null);
+  };
+
   const dayAppointments = getAppointmentsForDate(selectedDate);
   const upcomingAppointments = appointments
     .filter(apt => new Date(apt.appointment_date) >= new Date() && apt.status !== 'Cancelled' && apt.status !== 'Completed')
@@ -304,18 +357,26 @@ export default function Appointments() {
           <div className="grid grid-cols-7 gap-2">
             {weekDays.map((day) => {
               const dayAppts = getAppointmentsForDate(day);
+              const isDropTarget = dropTargetDate && isSameDay(day, dropTargetDate);
               return (
                 <div
                   key={day.toISOString()}
                   className={cn(
-                    "border rounded-lg p-2 min-h-[200px] cursor-pointer hover:bg-muted/50 transition-colors",
+                    "border rounded-lg p-2 min-h-[200px] cursor-pointer transition-colors",
                     isToday(day) && "border-gold border-2",
-                    isSameDay(day, selectedDate) && "bg-muted/50"
+                    isSameDay(day, selectedDate) && "bg-muted/50",
+                    isDropTarget && "bg-gold/20 border-gold border-dashed",
+                    !isDropTarget && "hover:bg-muted/50"
                   )}
                   onClick={() => {
-                    setSelectedDate(day);
-                    setViewMode("day");
+                    if (!draggedAppointment) {
+                      setSelectedDate(day);
+                      setViewMode("day");
+                    }
                   }}
+                  onDragOver={(e) => handleDragOver(e, day)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, day)}
                 >
                   <div className={cn(
                     "text-sm font-medium mb-2 text-center",
@@ -333,9 +394,16 @@ export default function Appointments() {
                     {dayAppts.slice(0, 3).map((apt) => (
                       <div
                         key={apt.id}
-                        className="text-xs p-1 rounded bg-muted truncate flex items-center gap-1"
-                        title={`${apt.patient_name} - ${apt.reason}`}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, apt)}
+                        onDragEnd={handleDragEnd}
+                        className={cn(
+                          "text-xs p-1 rounded bg-muted truncate flex items-center gap-1 cursor-grab active:cursor-grabbing",
+                          draggedAppointment?.id === apt.id && "opacity-50"
+                        )}
+                        title={`${apt.patient_name} - ${apt.reason} (Drag to reschedule)`}
                       >
+                        <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                         <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", getStatusDotColor(apt.status))} />
                         <span className="truncate">{format(new Date(apt.appointment_date), 'h:mm a')} {apt.patient_name}</span>
                       </div>
@@ -387,20 +455,28 @@ export default function Appointments() {
             {allDays.map((day) => {
               const dayAppts = getAppointmentsForDate(day);
               const isCurrentMonth = day.getMonth() === selectedDate.getMonth();
+              const isDropTarget = dropTargetDate && isSameDay(day, dropTargetDate);
               
               return (
                 <div
                   key={day.toISOString()}
                   className={cn(
-                    "border rounded p-1 min-h-[80px] cursor-pointer hover:bg-muted/50 transition-colors",
+                    "border rounded p-1 min-h-[80px] cursor-pointer transition-colors",
                     !isCurrentMonth && "opacity-40",
                     isToday(day) && "border-gold border-2",
-                    isSameDay(day, selectedDate) && "bg-muted/50"
+                    isSameDay(day, selectedDate) && "bg-muted/50",
+                    isDropTarget && "bg-gold/20 border-gold border-dashed",
+                    !isDropTarget && "hover:bg-muted/50"
                   )}
                   onClick={() => {
-                    setSelectedDate(day);
-                    setViewMode("day");
+                    if (!draggedAppointment) {
+                      setSelectedDate(day);
+                      setViewMode("day");
+                    }
                   }}
+                  onDragOver={(e) => handleDragOver(e, day)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, day)}
                 >
                   <div className={cn(
                     "text-xs font-medium mb-1",
@@ -416,8 +492,14 @@ export default function Appointments() {
                     {dayAppts.slice(0, 2).map((apt) => (
                       <div
                         key={apt.id}
-                        className="text-[10px] p-0.5 rounded bg-muted truncate flex items-center gap-0.5"
-                        title={`${apt.patient_name} - ${apt.reason}`}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, apt)}
+                        onDragEnd={handleDragEnd}
+                        className={cn(
+                          "text-[10px] p-0.5 rounded bg-muted truncate flex items-center gap-0.5 cursor-grab active:cursor-grabbing",
+                          draggedAppointment?.id === apt.id && "opacity-50"
+                        )}
+                        title={`${apt.patient_name} - ${apt.reason} (Drag to reschedule)`}
                       >
                         <div className={cn("w-1 h-1 rounded-full flex-shrink-0", getStatusDotColor(apt.status))} />
                         <span className="truncate">{apt.patient_name}</span>
