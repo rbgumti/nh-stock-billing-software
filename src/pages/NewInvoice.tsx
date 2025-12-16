@@ -386,11 +386,14 @@ export default function NewInvoice() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-2">
                       <Label htmlFor={`medicine-${item.id}`}>Select Medicine *</Label>
-                      <Select onValueChange={(value) => updateItem(item.id, "medicineId", parseInt(value))}>
+                      <Select 
+                        value={item.medicineId ? item.medicineId.toString() : undefined}
+                        onValueChange={(value) => updateItem(item.id, "medicineId", parseInt(value))}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Choose medicine" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-background z-50 max-h-60">
                           {medicines.map((medicine) => (
                             <SelectItem key={medicine.id} value={medicine.id.toString()}>
                               {medicine.name} - Batch: {medicine.batchNo} (Stock: {medicine.currentStock})
