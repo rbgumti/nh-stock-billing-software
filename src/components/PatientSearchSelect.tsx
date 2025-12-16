@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Patient {
@@ -28,14 +28,17 @@ export function PatientSearchSelect({
   selectedPatientId,
   onPatientSelect,
   label = "Patient *",
-  placeholder = "Search by Name, Phone, File No, Aadhar, or Govt ID...",
+  placeholder = "Search by Name, Phone, Aadhar, or Govt ID...",
   disabled = false,
 }: PatientSearchSelectProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [fileNoQuery, setFileNoQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [activeSearch, setActiveSearch] = useState<"main" | "fileNo">("main");
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileNoInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const selectedPatient = useMemo(() => 
@@ -45,6 +48,16 @@ export function PatientSearchSelect({
 
   // Filter patients based on search query
   const filteredPatients = useMemo(() => {
+    // If file number search is active and has a query
+    if (activeSearch === "fileNo" && fileNoQuery.trim()) {
+      const query = fileNoQuery.toLowerCase().trim();
+      return patients.filter((patient) => {
+        if (!patient || patient.id == null) return false;
+        return patient.file_no?.toLowerCase().includes(query);
+      });
+    }
+    
+    // Main search
     if (!searchQuery.trim()) return patients.filter(p => p && p.id != null);
     
     const query = searchQuery.toLowerCase().trim();
@@ -53,13 +66,12 @@ export function PatientSearchSelect({
       const idMatch = patient.id.toString().includes(query);
       const nameMatch = patient.patient_name?.toLowerCase().includes(query);
       const phoneMatch = patient.phone?.toLowerCase().includes(query);
-      const fileNoMatch = patient.file_no?.toLowerCase().includes(query);
       const aadharMatch = patient.aadhar_card?.toLowerCase().includes(query);
       const govtIdMatch = patient.govt_id?.toLowerCase().includes(query);
       
-      return idMatch || nameMatch || phoneMatch || fileNoMatch || aadharMatch || govtIdMatch;
+      return idMatch || nameMatch || phoneMatch || aadharMatch || govtIdMatch;
     });
-  }, [patients, searchQuery]);
+  }, [patients, searchQuery, fileNoQuery, activeSearch]);
 
   // Reset highlighted index when filtered patients change
   useEffect(() => {
@@ -127,6 +139,7 @@ export function PatientSearchSelect({
   const handleSelect = (patient: Patient) => {
     onPatientSelect(patient);
     setSearchQuery("");
+    setFileNoQuery("");
     setIsOpen(false);
   };
 
@@ -134,28 +147,59 @@ export function PatientSearchSelect({
     <div ref={containerRef} className="space-y-2">
       {label && <Label>{label}</Label>}
       
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-        <Input
-          ref={inputRef}
-          placeholder={placeholder}
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setIsOpen(true);
-          }}
-          onFocus={() => setIsOpen(true)}
-          onKeyDown={handleKeyDown}
-          className="pl-9 pr-9"
-          disabled={disabled}
-        />
-        <ChevronDown 
-          className={cn(
-            "absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-transform",
-            isOpen && "rotate-180"
-          )}
-        />
+      {/* Search Inputs */}
+      <div className="grid grid-cols-3 gap-2">
+        {/* Main Search */}
+        <div className="relative col-span-2">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            ref={inputRef}
+            placeholder={placeholder}
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setFileNoQuery("");
+              setActiveSearch("main");
+              setIsOpen(true);
+            }}
+            onFocus={() => {
+              setActiveSearch("main");
+              setIsOpen(true);
+            }}
+            onKeyDown={handleKeyDown}
+            className="pl-9 pr-9"
+            disabled={disabled}
+          />
+          <ChevronDown 
+            className={cn(
+              "absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-transform",
+              isOpen && activeSearch === "main" && "rotate-180"
+            )}
+          />
+        </div>
+        
+        {/* File No Quick Search */}
+        <div className="relative">
+          <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gold pointer-events-none" />
+          <Input
+            ref={fileNoInputRef}
+            placeholder="File No..."
+            value={fileNoQuery}
+            onChange={(e) => {
+              setFileNoQuery(e.target.value);
+              setSearchQuery("");
+              setActiveSearch("fileNo");
+              setIsOpen(true);
+            }}
+            onFocus={() => {
+              setActiveSearch("fileNo");
+              setIsOpen(true);
+            }}
+            onKeyDown={handleKeyDown}
+            className="pl-9 border-gold/30 focus-visible:ring-gold/50"
+            disabled={disabled}
+          />
+        </div>
       </div>
 
       {/* Selected Patient Display */}
