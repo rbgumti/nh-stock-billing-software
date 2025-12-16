@@ -60,7 +60,10 @@ export default function Patients() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-navy">Patients</h1>
-          <p className="text-muted-foreground mt-2">Manage your patient records</p>
+          <p className="text-muted-foreground mt-2">
+            {loading ? "Loading patients..." : `${patients.length.toLocaleString()} patients total`}
+            {searchTerm && ` • ${filteredPatients.length.toLocaleString()} matching`}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowImport(!showImport)}>
