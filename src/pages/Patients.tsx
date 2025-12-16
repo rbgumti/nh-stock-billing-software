@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Search, Plus, Phone, Users, Upload, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, LayoutGrid, List, Eye, Pencil } from "lucide-react";
+import { Search, Plus, Phone, Users, Upload, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, LayoutGrid, List, Eye, Pencil, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PatientExcelImport } from "@/components/PatientExcelImport";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
@@ -29,6 +29,37 @@ interface Patient {
 }
 
 type ViewMode = 'grid' | 'table';
+type SortColumnType = 'id' | 'file_no' | 'patient_name' | 'phone' | 'aadhar_card' | 'govt_id' | 'category';
+type SortDirectionType = 'asc' | 'desc';
+
+interface SortableHeaderProps {
+  column: SortColumnType;
+  label: string;
+  sortColumn: SortColumnType;
+  sortDirection: SortDirectionType;
+  onSort: (column: SortColumnType) => void;
+  className?: string;
+}
+
+const SortableHeader = ({ column, label, sortColumn, sortDirection, onSort, className }: SortableHeaderProps) => (
+  <TableHead 
+    className={`cursor-pointer hover:bg-muted/50 select-none ${className || ''}`}
+    onClick={() => onSort(column)}
+  >
+    <div className="flex items-center gap-1">
+      {label}
+      {sortColumn === column ? (
+        sortDirection === 'asc' ? (
+          <ArrowUp className="h-3 w-3" />
+        ) : (
+          <ArrowDown className="h-3 w-3" />
+        )
+      ) : (
+        <ArrowUpDown className="h-3 w-3 opacity-30" />
+      )}
+    </div>
+  </TableHead>
+);
 
 export default function Patients() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,6 +71,8 @@ export default function Patients() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [sortColumn, setSortColumn] = useState<SortColumnType>('id');
+  const [sortDirection, setSortDirection] = useState<SortDirectionType>('desc');
 
   // Debounce search term
   useEffect(() => {
@@ -70,7 +103,7 @@ export default function Patients() {
       }
 
       const { data, error, count } = await query
-        .order('id', { ascending: false })
+        .order(sortColumn, { ascending: sortDirection === 'asc' })
         .range(from, to);
 
       if (error) throw error;
@@ -87,7 +120,7 @@ export default function Patients() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, debouncedSearch]);
+  }, [currentPage, pageSize, debouncedSearch, sortColumn, sortDirection]);
 
   useEffect(() => {
     loadPatients();
@@ -138,6 +171,16 @@ export default function Patients() {
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  const handleSort = (column: SortColumnType) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+    setCurrentPage(1);
   };
 
   // Generate page numbers to display
@@ -366,13 +409,13 @@ export default function Patients() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-16">ID</TableHead>
-                  <TableHead className="w-20">File No.</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Aadhar</TableHead>
-                  <TableHead>Govt ID</TableHead>
-                  <TableHead className="w-20">Category</TableHead>
+                  <SortableHeader column="id" label="ID" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="w-16" />
+                  <SortableHeader column="file_no" label="File No." sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="w-20" />
+                  <SortableHeader column="patient_name" label="Name" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
+                  <SortableHeader column="phone" label="Phone" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
+                  <SortableHeader column="aadhar_card" label="Aadhar" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
+                  <SortableHeader column="govt_id" label="Govt ID" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
+                  <SortableHeader column="category" label="Category" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="w-20" />
                   <TableHead className="w-32 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
