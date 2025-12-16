@@ -31,10 +31,10 @@ type AppointmentFormData = z.infer<typeof appointmentSchema>;
 
 interface Patient {
   id: number;
-  "Patient Name": string;
-  PH: string;
-  "Fill no.": string;
-  "Addhar Card": string;
+  patient_name: string;
+  phone: string;
+  file_no: string;
+  aadhar_card: string;
 }
 
 interface Appointment {
@@ -96,8 +96,8 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     try {
       const { data, error } = await supabase
         .from('patients')
-        .select('id, "Patient Name", PH, "Fill no.", "Addhar Card"')
-        .order('"Patient Name"');
+        .select('id, patient_name, phone, file_no, aadhar_card')
+        .order('patient_name');
 
       if (error) throw error;
       setPatients(data || []);
@@ -114,10 +114,10 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     const query = searchQuery.toLowerCase().trim();
     return patients.filter((patient) => {
       const idMatch = patient.id.toString().includes(query);
-      const nameMatch = patient["Patient Name"]?.toLowerCase().includes(query);
-      const phoneMatch = patient.PH?.toLowerCase().includes(query);
-      const fileNoMatch = patient["Fill no."]?.toLowerCase().includes(query);
-      const aadharMatch = patient["Addhar Card"]?.toLowerCase().includes(query);
+      const nameMatch = patient.patient_name?.toLowerCase().includes(query);
+      const phoneMatch = patient.phone?.toLowerCase().includes(query);
+      const fileNoMatch = patient.file_no?.toLowerCase().includes(query);
+      const aadharMatch = patient.aadhar_card?.toLowerCase().includes(query);
       
       return idMatch || nameMatch || phoneMatch || fileNoMatch || aadharMatch;
     });
@@ -175,8 +175,8 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     const patient = patients.find(p => p.id === parseInt(patientId));
     if (patient) {
       setValue('patient_id', patient.id);
-      setValue('patient_name', patient["Patient Name"]);
-      setValue('patient_phone', patient.PH || '');
+      setValue('patient_name', patient.patient_name);
+      setValue('patient_phone', patient.phone || '');
     }
   };
 
@@ -206,9 +206,9 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
             ) : (
               filteredPatients.map((patient) => (
                 <SelectItem key={patient.id} value={patient.id.toString()}>
-                  <span className="font-medium">{patient["Patient Name"]}</span>
+                  <span className="font-medium">{patient.patient_name}</span>
                   <span className="text-muted-foreground text-xs ml-2">
-                    ID: {patient.id} {patient.PH && `| Ph: ${patient.PH}`} {patient["Fill no."] && `| File: ${patient["Fill no."]}`}
+                    ID: {patient.id} {patient.phone && `| Ph: ${patient.phone}`} {patient.file_no && `| File: ${patient.file_no}`}
                   </span>
                 </SelectItem>
               ))

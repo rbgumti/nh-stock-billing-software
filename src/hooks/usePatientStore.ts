@@ -51,23 +51,23 @@ export function usePatientStore() {
 
       const formattedPatients: PatientFormData[] = data.map(p => ({
         patientId: String(p.id || ''),
-        fileNo: String(p['file No.'] || ''),
-        firstName: (p['Patient Name'] || '').split(' ')[0] || '',
-        lastName: (p['Patient Name'] || '').split(' ').slice(1).join(' ') || '',
+        fileNo: String(p.file_no || ''),
+        firstName: (p.patient_name || '').split(' ')[0] || '',
+        lastName: (p.patient_name || '').split(' ').slice(1).join(' ') || '',
         dateOfBirth: '',
         gender: '',
-        phone: String(p['PH'] || ''),
+        phone: String(p.phone || ''),
         email: '',
-        address: String(p['Address'] || ''),
-        aadhar: String(p['Addhar Card'] || ''),
-        govtIdOld: String(p['Govt. ID'] || ''),
-        govtIdNew: String(p['New Govt, ID'] || ''),
+        address: String(p.address || ''),
+        aadhar: String(p.aadhar_card || ''),
+        govtIdOld: String(p.govt_id || ''),
+        govtIdNew: String(p.new_govt_id || ''),
         emergencyContact: '',
         emergencyPhone: '',
         medicalHistory: '',
         allergies: '',
         currentMedications: '',
-        fatherName: String(p['Father Name'] || ''),
+        fatherName: String(p.father_name || ''),
         visitDate: '',
         medicinePrescribedDays: '',
         nextFollowUpDate: '',
@@ -94,19 +94,20 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .insert([{
-          "S.No.": patient.patientId,
-          "Fill no.": '',
-          "file No.": patient.fileNo,
-          "Patient Name": `${patient.firstName} ${patient.lastName}`,
-          "Age": '',
-          "Father Name": patient.fatherName,
-          "Govt. ID": patient.govtIdOld,
-          "Addhar Card": patient.aadhar,
-          "PH": patient.phone,
-          "Address": patient.address,
-          "New Govt, ID": patient.govtIdNew,
-          "category": patient.category || null
-        }] as any);
+          s_no: patient.patientId,
+          file_no: patient.fileNo || '',
+          patient_name: `${patient.firstName} ${patient.lastName}`.trim(),
+          age: patient.dateOfBirth 
+            ? String(new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()) 
+            : '',
+          father_name: patient.fatherName || '',
+          govt_id: patient.govtIdOld || '',
+          aadhar_card: patient.aadhar || '',
+          phone: patient.phone || '',
+          address: patient.address || '',
+          new_govt_id: patient.govtIdNew || '',
+          category: patient.category || null
+        }]);
 
       if (error) throw error;
     } catch (error) {
@@ -128,18 +129,18 @@ export function usePatientStore() {
       
       // Prepare update data with all required fields
       const updateData = {
-        "Patient Name": `${updatedPatient.firstName} ${updatedPatient.lastName}`.trim(),
-        "file No.": updatedPatient.fileNo || '',
-        "Father Name": updatedPatient.fatherName || '',
-        "Govt. ID": updatedPatient.govtIdOld || '',
-        "Addhar Card": updatedPatient.aadhar || '',
-        "PH": updatedPatient.phone || '',
-        "Address": updatedPatient.address || '',
-        "New Govt, ID": updatedPatient.govtIdNew || '',
-        "Age": updatedPatient.dateOfBirth 
+        patient_name: `${updatedPatient.firstName} ${updatedPatient.lastName}`.trim(),
+        file_no: updatedPatient.fileNo || '',
+        father_name: updatedPatient.fatherName || '',
+        govt_id: updatedPatient.govtIdOld || '',
+        aadhar_card: updatedPatient.aadhar || '',
+        phone: updatedPatient.phone || '',
+        address: updatedPatient.address || '',
+        new_govt_id: updatedPatient.govtIdNew || '',
+        age: updatedPatient.dateOfBirth 
           ? String(new Date().getFullYear() - new Date(updatedPatient.dateOfBirth).getFullYear()) 
           : '',
-        "category": updatedPatient.category || null
+        category: updatedPatient.category || null
       };
       
       console.log('Update payload:', updateData);

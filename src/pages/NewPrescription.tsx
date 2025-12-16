@@ -13,11 +13,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface Patient {
   id: number;
-  "Patient Name": string;
-  PH: string;
-  Age: string;
-  "Fill no.": string;
-  "Addhar Card": string;
+  patient_name: string;
+  phone: string;
+  age: string;
+  file_no: string;
+  aadhar_card: string;
 }
 
 interface StockItem {
@@ -65,8 +65,8 @@ export default function NewPrescription() {
     try {
       const { data, error } = await supabase
         .from('patients')
-        .select('id, "Patient Name", PH, Age, "Fill no.", "Addhar Card"')
-        .order('"Patient Name"');
+        .select('id, patient_name, phone, age, file_no, aadhar_card')
+        .order('patient_name');
 
       if (error) throw error;
       setPatients(data || []);
@@ -96,10 +96,10 @@ export default function NewPrescription() {
     const query = searchQuery.toLowerCase().trim();
     return patients.filter((patient) => {
       const idMatch = patient.id.toString().includes(query);
-      const nameMatch = patient["Patient Name"]?.toLowerCase().includes(query);
-      const phoneMatch = patient.PH?.toLowerCase().includes(query);
-      const fileNoMatch = patient["Fill no."]?.toLowerCase().includes(query);
-      const aadharMatch = patient["Addhar Card"]?.toLowerCase().includes(query);
+      const nameMatch = patient.patient_name?.toLowerCase().includes(query);
+      const phoneMatch = patient.phone?.toLowerCase().includes(query);
+      const fileNoMatch = patient.file_no?.toLowerCase().includes(query);
+      const aadharMatch = patient.aadhar_card?.toLowerCase().includes(query);
       
       return idMatch || nameMatch || phoneMatch || fileNoMatch || aadharMatch;
     });
@@ -136,9 +136,9 @@ export default function NewPrescription() {
       setFormData(prev => ({
         ...prev,
         patient_id: patient.id,
-        patient_name: patient["Patient Name"],
-        patient_phone: patient.PH || '',
-        patient_age: patient.Age || '',
+        patient_name: patient.patient_name,
+        patient_phone: patient.phone || '',
+        patient_age: patient.age || '',
       }));
     }
   };
@@ -253,9 +253,9 @@ export default function NewPrescription() {
                     ) : (
                       filteredPatients.map((patient) => (
                         <SelectItem key={patient.id} value={patient.id.toString()}>
-                          <span className="font-medium">{patient["Patient Name"]}</span>
+                          <span className="font-medium">{patient.patient_name}</span>
                           <span className="text-muted-foreground text-xs ml-2">
-                            ID: {patient.id} {patient.PH && `| Ph: ${patient.PH}`} {patient["Fill no."] && `| File: ${patient["Fill no."]}`}
+                            ID: {patient.id} {patient.phone && `| Ph: ${patient.phone}`} {patient.file_no && `| File: ${patient.file_no}`}
                           </span>
                         </SelectItem>
                       ))

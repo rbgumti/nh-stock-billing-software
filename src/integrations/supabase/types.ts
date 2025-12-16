@@ -401,49 +401,46 @@ export type Database = {
       }
       patients: {
         Row: {
-          "Addhar Card": string
-          Address: string
-          Age: string
+          aadhar_card: string
+          address: string
+          age: string
           category: string | null
-          "Father Name": string
-          "file No.": string
-          "Fill no.": string
-          "Govt. ID": string
+          father_name: string
+          file_no: string
+          govt_id: string
           id: number
-          "New Govt, ID": string
-          "Patient Name": string
-          PH: string
-          "S.No.": string
+          new_govt_id: string
+          patient_name: string
+          phone: string
+          s_no: string
         }
         Insert: {
-          "Addhar Card": string
-          Address: string
-          Age: string
+          aadhar_card: string
+          address: string
+          age: string
           category?: string | null
-          "Father Name": string
-          "file No."?: string
-          "Fill no."?: string
-          "Govt. ID": string
+          father_name: string
+          file_no?: string
+          govt_id: string
           id?: number
-          "New Govt, ID": string
-          "Patient Name": string
-          PH: string
-          "S.No.": string
+          new_govt_id: string
+          patient_name: string
+          phone: string
+          s_no: string
         }
         Update: {
-          "Addhar Card"?: string
-          Address?: string
-          Age?: string
+          aadhar_card?: string
+          address?: string
+          age?: string
           category?: string | null
-          "Father Name"?: string
-          "file No."?: string
-          "Fill no."?: string
-          "Govt. ID"?: string
+          father_name?: string
+          file_no?: string
+          govt_id?: string
           id?: number
-          "New Govt, ID"?: string
-          "Patient Name"?: string
-          PH?: string
-          "S.No."?: string
+          new_govt_id?: string
+          patient_name?: string
+          phone?: string
+          s_no?: string
         }
         Relationships: []
       }

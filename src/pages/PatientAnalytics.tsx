@@ -7,11 +7,11 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 
 interface Patient {
   id: number;
-  "Patient Name": string;
-  Age: string;
-  PH: string;
-  Address: string;
-  "Father Name": string;
+  patient_name: string;
+  age: string;
+  phone: string;
+  address: string;
+  father_name: string;
 }
 
 interface Invoice {
@@ -61,7 +61,7 @@ export default function PatientAnalytics() {
     };
 
     patients.forEach(patient => {
-      const age = parseInt(patient.Age);
+      const age = parseInt(patient.age);
       if (isNaN(age)) return;
 
       if (age <= 18) ageGroups['0-18']++;
@@ -107,7 +107,7 @@ export default function PatientAnalytics() {
     const locationMap = new Map<string, number>();
 
     patients.forEach(patient => {
-      const location = patient.Address?.trim() || 'Unknown';
+      const location = patient.address?.trim() || 'Unknown';
       locationMap.set(location, (locationMap.get(location) || 0) + 1);
     });
 
@@ -189,9 +189,9 @@ export default function PatientAnalytics() {
               {patients.length > 0
                 ? Math.round(
                     patients.reduce((sum, p) => {
-                      const age = parseInt(p.Age);
+                      const age = parseInt(p.age);
                       return sum + (isNaN(age) ? 0 : age);
-                    }, 0) / patients.filter(p => !isNaN(parseInt(p.Age))).length
+                    }, 0) / patients.filter(p => !isNaN(parseInt(p.age))).length
                   )
                 : 0}
             </div>
@@ -332,12 +332,12 @@ export default function PatientAnalytics() {
             {patients.slice(0, 10).map((patient) => (
               <div key={patient.id} className="flex items-center justify-between border-b border-border pb-3 last:border-b-0">
                 <div>
-                  <p className="font-medium text-foreground">{patient["Patient Name"]}</p>
-                  <p className="text-sm text-muted-foreground">{patient.PH}</p>
+                  <p className="font-medium text-foreground">{patient.patient_name}</p>
+                  <p className="text-sm text-muted-foreground">{patient.phone}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-foreground">Age: {patient.Age}</p>
-                  <p className="text-xs text-muted-foreground">{patient.Address?.substring(0, 30)}</p>
+                  <p className="text-sm text-foreground">Age: {patient.age}</p>
+                  <p className="text-xs text-muted-foreground">{patient.address?.substring(0, 30)}</p>
                 </div>
               </div>
             ))}
