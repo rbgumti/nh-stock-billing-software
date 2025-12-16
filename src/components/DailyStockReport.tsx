@@ -241,6 +241,14 @@ export default function DailyStockReport() {
               onChange={(e) => setReportDate(e.target.value)}
               className="w-auto"
             />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => loadReportData()}
+              title="Refresh data"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
           </div>
           <Button onClick={exportToExcel} className="bg-gold hover:bg-gold/90 text-navy">
             <Download className="h-4 w-4 mr-2" />
