@@ -73,7 +73,7 @@ export function PatientExcelImport() {
       visitDate: data["VISIT DATE"] || "",
       medicinePrescribedDays: data["Days"] || "",
       nextFollowUpDate: data["Follow up date"] || "",
-      category: data["Category"] || ""
+      category: data["Category"] || data["category"] || ""
     };
 
     return { isValid: true, patient };
@@ -103,7 +103,7 @@ export function PatientExcelImport() {
         
         if (validation.isValid && validation.patient) {
           try {
-            addPatient(validation.patient);
+            await addPatient(validation.patient);
             result.success++;
           } catch (error) {
             result.errors.push(`Row ${i + 2}: Failed to add patient - ${error}`);
@@ -142,14 +142,16 @@ export function PatientExcelImport() {
       {
         "S.No.": 1,
         "Fill no.": "PT001",
+        "file No.": "F001",
         "Patient Name": "John Doe",
         "Age": 30,
         "Father Name": "Robert Doe",
         "Govt. ID": "DL123456",
         "New Govt, ID": "AB1234567890",
         "Addhar Card": "1234 5678 9012",
-        "ph": "+1 234-567-8900",
+        "ph": "+91 9876543210",
         "Address": "123 Main Street, City",
+        "Category": "BNX",
         "VISIT DATE": "2024-01-15",
         "Days": "7",
         "Follow up date": "2024-01-22"
@@ -242,11 +244,11 @@ export function PatientExcelImport() {
           </div>
         )}
 
-        <div className="text-xs text-gray-500 space-y-1">
+        <div className="text-xs text-muted-foreground space-y-1">
           <p><strong>Required fields:</strong> Patient Name, ph (phone)</p>
-          <p><strong>Template fields:</strong> S.No., Fill no., Patient Name, Age, Father Name, Govt. ID, New Govt, ID, Addhar Card, ph, Address, VISIT DATE, Days, Follow up date</p>
-          <p><strong>Note:</strong> Age will be converted to birth year, Father Name maps to Emergency Contact</p>
-          <p><strong>Note:</strong> VISIT DATE, Days, and Follow up date will be stored in medical information fields</p>
+          <p><strong>Template fields:</strong> S.No., Fill no., file No., Patient Name, Age, Father Name, Govt. ID, New Govt, ID, Addhar Card, ph, Address, Category, VISIT DATE, Days, Follow up date</p>
+          <p><strong>Categories:</strong> BNX, TPN, PSHY, BNX + PSHY, TPN + PSHY</p>
+          <p><strong>Note:</strong> Age will be converted to birth year</p>
         </div>
       </CardContent>
     </Card>
