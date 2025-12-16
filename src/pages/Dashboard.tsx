@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { FloatingOrbs } from "@/components/ui/floating-orbs";
 
 interface Invoice {
   id: string;
@@ -112,7 +113,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 relative">
+      <FloatingOrbs />
       <div>
         <h1 className="text-3xl font-bold text-navy">Invoice Dashboard</h1>
         <p className="text-muted-foreground mt-2">Track revenue trends, payment status, and monthly performance.</p>
