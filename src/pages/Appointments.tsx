@@ -62,7 +62,7 @@ export default function Appointments() {
     return appointments.filter(apt => {
       const aptDate = new Date(apt.appointment_date);
       return aptDate.toDateString() === date.toDateString();
-    }).sort((a, b) => new Date(a.appointment_date).getTime() - new Date(b.appointment_date).getTime());
+    }).sort((a, b) => new Date(b.appointment_date).getTime() - new Date(a.appointment_date).getTime());
   };
 
   const getDatesWithAppointments = () => {
