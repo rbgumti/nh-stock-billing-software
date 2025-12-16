@@ -2,6 +2,19 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
+const formatSupabaseError = (error: any) => {
+  if (!error) return "Unknown error";
+  if (typeof error === "string") return error;
+
+  const parts: string[] = [];
+  if (error.code) parts.push(`Code: ${error.code}`);
+  if (error.message) parts.push(String(error.message));
+  if (error.details) parts.push(String(error.details));
+  if (error.hint) parts.push(String(error.hint));
+
+  return parts.filter(Boolean).join(" • ");
+};
+
 export interface PrescriptionItem {
   id?: string;
   medicine_name: string;
@@ -85,16 +98,8 @@ export const usePrescriptionStore = () => {
 
   const addPrescription = async (prescription: Prescription) => {
     try {
-      console.log('Creating prescription with data:', {
-        prescription_number: prescription.prescription_number,
-        patient_id: prescription.patient_id,
-        patient_name: prescription.patient_name,
-        diagnosis: prescription.diagnosis,
-        appointment_id: prescription.appointment_id,
-      });
-
       const { data: prescriptionData, error: prescriptionError } = await supabase
-        .from('prescriptions')
+        .from("prescriptions")
         .insert({
           prescription_number: prescription.prescription_number,
           patient_id: prescription.patient_id,
@@ -110,34 +115,24 @@ export const usePrescriptionStore = () => {
         .select()
         .single();
 
-      if (prescriptionError) {
-        console.error('Prescription insert error:', prescriptionError);
-        throw prescriptionError;
-      }
-
-      console.log('Prescription created:', prescriptionData);
+      if (prescriptionError) throw prescriptionError;
 
       if (prescription.items.length > 0) {
-        const itemsToInsert = prescription.items.map(item => ({
+        const itemsToInsert = prescription.items.map((item) => ({
           prescription_id: prescriptionData.id,
           medicine_name: item.medicine_name,
           dosage: item.dosage,
           frequency: item.frequency,
           duration: item.duration,
           quantity: item.quantity,
-          instructions: item.instructions || '',
+          instructions: item.instructions || "",
         }));
 
-        console.log('Inserting prescription items:', itemsToInsert);
-
         const { error: itemsError } = await supabase
-          .from('prescription_items')
+          .from("prescription_items")
           .insert(itemsToInsert);
 
-        if (itemsError) {
-          console.error('Prescription items insert error:', itemsError);
-          throw itemsError;
-        }
+        if (itemsError) throw itemsError;
       }
 
       toast({
@@ -148,10 +143,9 @@ export const usePrescriptionStore = () => {
       await loadPrescriptions();
       return prescriptionData.id;
     } catch (error: any) {
-      console.error('Full error object:', error);
       toast({
         title: "Error creating prescription",
-        description: error.message || 'Unknown error occurred',
+        description: formatSupabaseError(error),
         variant: "destructive",
       });
       throw error;
