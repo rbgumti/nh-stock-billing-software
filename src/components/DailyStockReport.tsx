@@ -77,14 +77,14 @@ export default function DailyStockReport() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [reportDate, showOnlyActive]);
+  }, [reportDate, showOnlyActive, stockItems]);
 
   const loadReportData = async () => {
     // Get invoice items for the selected date to calculate issued quantities
     const { data: invoiceData } = await supabase
       .from('invoices')
       .select('id, invoice_date')
-      .eq('invoice_date', reportDate);
+      .like('invoice_date', `${reportDate}%`);
 
     const invoiceIds = invoiceData?.map(inv => inv.id) || [];
 
@@ -106,7 +106,7 @@ export default function DailyStockReport() {
     const { data: grnOrders } = await supabase
       .from('purchase_orders')
       .select('id')
-      .eq('grn_date', reportDate)
+      .like('grn_date', `${reportDate}%`)
       .eq('status', 'Received');
 
     const grnOrderIds = grnOrders?.map(po => po.id) || [];
@@ -125,9 +125,8 @@ export default function DailyStockReport() {
       }, {});
     }
 
-    // Calculate report data for each stock item (medicines only)
+    // Calculate report data for each stock item (medicines)
     const data: StockReportItem[] = stockItems
-      .filter(item => item.category === "Medication")
       .map(item => {
         const issued = issuedQuantities[item.name] || 0;
         const received = receivedQuantities[item.name] || 0;

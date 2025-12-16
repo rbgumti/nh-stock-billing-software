@@ -283,14 +283,14 @@ export default function DayReport() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [reportDate]);
+  }, [reportDate, stockItems]);
 
   const loadMedicineData = async () => {
     // Get invoice items for the selected date
     const { data: invoiceData } = await supabase
       .from('invoices')
       .select('id, invoice_date')
-      .eq('invoice_date', reportDate);
+      .like('invoice_date', `${reportDate}%`);
 
     const invoiceIds = invoiceData?.map(inv => inv.id) || [];
 
@@ -312,7 +312,7 @@ export default function DayReport() {
     const { data: grnOrders } = await supabase
       .from('purchase_orders')
       .select('id')
-      .eq('grn_date', reportDate)
+      .like('grn_date', `${reportDate}%`)
       .eq('status', 'Received');
 
     const grnOrderIds = grnOrders?.map(po => po.id) || [];
@@ -346,7 +346,6 @@ export default function DayReport() {
 
     const createMedicineData = (items: typeof stockItems): MedicineReportItem[] => {
       return items
-        .filter(item => item.category === "Medication")
         .map(item => {
           const sold = soldQuantities[item.name] || 0;
           const received = receivedQuantities[item.name] || 0;
