@@ -42,7 +42,7 @@ export default function Appointments() {
       const { data, error } = await supabase
         .from('appointments')
         .select('*')
-        .order('appointment_date', { ascending: true });
+        .order('appointment_date', { ascending: false });
 
       if (error) throw error;
       setAppointments(data || []);
