@@ -184,15 +184,20 @@ export function PatientSearchSelect({
               <div
                 key={patient.id}
                 className={cn(
-                  "px-4 py-2 cursor-pointer transition-colors",
+                  "px-4 py-2.5 cursor-pointer transition-all duration-150 border-l-2",
                   index === highlightedIndex 
-                    ? "bg-accent text-accent-foreground" 
-                    : "hover:bg-muted"
+                    ? "bg-primary/15 text-primary border-l-primary font-medium" 
+                    : "hover:bg-muted border-l-transparent"
                 )}
                 onClick={() => handleSelect(patient)}
                 onMouseEnter={() => setHighlightedIndex(index)}
               >
-                <span className="font-medium">{patient.patient_name}</span>
+                <span className={cn(
+                  "font-medium",
+                  index === highlightedIndex && "text-primary"
+                )}>
+                  {patient.patient_name}
+                </span>
                 <span className="text-muted-foreground text-xs ml-2">
                   ID: {patient.id}
                   {patient.phone && ` | Ph: ${patient.phone}`}
