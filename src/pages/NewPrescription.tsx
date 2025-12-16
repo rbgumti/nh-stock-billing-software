@@ -136,8 +136,27 @@ export default function NewPrescription() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.patient_id || formData.patient_id === 0) {
+      alert('Please select a patient');
+      return;
+    }
+
+    if (!formData.diagnosis.trim()) {
+      alert('Please enter a diagnosis');
+      return;
+    }
+
     if (items.length === 0) {
       alert('Please add at least one medicine');
+      return;
+    }
+
+    // Validate all medicine items have required fields
+    const invalidItems = items.filter(item => 
+      !item.medicine_name.trim() || !item.dosage.trim() || !item.frequency.trim() || !item.duration.trim()
+    );
+    if (invalidItems.length > 0) {
+      alert('Please fill in all required fields for each medicine (name, dosage, frequency, duration)');
       return;
     }
 
@@ -170,6 +189,7 @@ export default function NewPrescription() {
       navigate('/prescriptions');
     } catch (error) {
       console.error('Error creating prescription:', error);
+      alert('Failed to create prescription. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
