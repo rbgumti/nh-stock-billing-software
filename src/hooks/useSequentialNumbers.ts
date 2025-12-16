@@ -10,16 +10,27 @@ interface SequentialNumbers {
 const STORAGE_KEY = 'sequential_numbers';
 
 const getInitialNumbers = (): SequentialNumbers => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    return JSON.parse(stored);
-  }
-  return {
+  const defaults = {
     purchaseOrder: 1,
     invoice: 1,
     goodsReceipt: 1,
     prescription: 1
   };
+  
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      // Merge with defaults to ensure all fields exist
+      return {
+        ...defaults,
+        ...parsed
+      };
+    } catch {
+      return defaults;
+    }
+  }
+  return defaults;
 };
 
 let sequentialStore = getInitialNumbers();
@@ -92,13 +103,14 @@ export const useSequentialNumbers = () => {
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     const day = now.getDate().toString().padStart(2, '0');
-    const paddedNumber = sequentialStore.prescription.toString().padStart(3, '0');
+    const prescriptionNum = sequentialStore.prescription ?? 1;
+    const paddedNumber = prescriptionNum.toString().padStart(3, '0');
     const rxNumber = `RX${year}${month}${day}${paddedNumber}`;
     
     // Increment for next use
     const newNumbers = {
       ...sequentialStore,
-      prescription: sequentialStore.prescription + 1
+      prescription: prescriptionNum + 1
     };
     setNumbers(newNumbers);
     
