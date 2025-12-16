@@ -10,6 +10,7 @@ import jsPDF from 'jspdf';
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
+import hospitalLogo from "@/assets/NH_LOGO.png";
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -114,70 +115,129 @@ export default function Invoices() {
     .filter((inv: any) => inv.status === "Pending")
     .reduce((sum: number, invoice: any) => sum + invoice.amount, 0);
 
-  const generatePDF = (invoice: any) => {
+  const generatePDF = async (invoice: any) => {
     const doc = new jsPDF();
-    
-    // Header
-    doc.setFontSize(20);
-    doc.text('INVOICE', 105, 30, { align: 'center' });
-    
-    // Company details (you can customize this)
-    doc.setFontSize(12);
-    doc.text('Medical Center', 105, 45, { align: 'center' });
-    doc.text('123 Health Street, Medical City', 105, 55, { align: 'center' });
-    doc.text('Phone: (555) 123-4567', 105, 65, { align: 'center' });
-    
-    // Line separator
-    doc.line(20, 75, 190, 75);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let y = 15;
+
+    // Load and add hospital logo
+    try {
+      const img = new Image();
+      img.src = hospitalLogo;
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+      const logoWidth = 25;
+      const logoHeight = 25;
+      doc.addImage(img, "PNG", pageWidth / 2 - logoWidth / 2, y, logoWidth, logoHeight);
+      y += logoHeight + 5;
+    } catch (error) {
+      console.error("Error loading logo:", error);
+      y += 10;
+    }
+
+    // Hospital Name
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(27, 53, 97); // Navy color
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
+    y += 7;
+
+    // Hospital tagline
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text("De-Addiction & Rehabilitation Centre", pageWidth / 2, y, { align: "center" });
+    y += 12;
+
+    // Invoice title
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 0, 0);
+    doc.text("INVOICE", pageWidth / 2, y, { align: "center" });
+    y += 10;
+
+    // Divider line
+    doc.setDrawColor(212, 175, 55); // Gold color
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
     
     // Invoice details
-    doc.setFontSize(12);
-    doc.text(`Invoice Number: ${invoice.id}`, 20, 90);
-    doc.text(`Date: ${invoice.date}`, 20, 100);
-    doc.text(`Patient: ${invoice.patientName}`, 20, 110);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Invoice Number: ${invoice.id}`, margin, y);
+    doc.text(`Date: ${invoice.date}`, pageWidth - margin, y, { align: "right" });
+    y += 8;
+    doc.text(`Patient: ${invoice.patientName}`, margin, y);
+    doc.text(`Status: ${invoice.status}`, pageWidth - margin, y, { align: "right" });
+    y += 15;
     
     // Items table header
+    doc.setFillColor(27, 53, 97); // Navy background
+    doc.rect(margin, y - 5, pageWidth - margin * 2, 10, "F");
     doc.setFontSize(10);
-    const tableTop = 130;
-    doc.text('Item', 20, tableTop);
-    doc.text('Batch', 70, tableTop);
-    doc.text('Expiry', 100, tableTop);
-    doc.text('MRP', 130, tableTop);
-    doc.text('Qty', 150, tableTop);
-    doc.text('Price', 170, tableTop);
-    
-    // Line under header
-    doc.line(20, tableTop + 5, 190, tableTop + 5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255); // White text
+    doc.text("Item", margin + 3, y);
+    doc.text("Batch", 70, y);
+    doc.text("Expiry", 100, y);
+    doc.text("MRP", 130, y);
+    doc.text("Qty", 150, y);
+    doc.text("Price", 170, y);
+    y += 10;
     
     // Items list
-    let yPos = tableTop + 15;
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "normal");
     invoice.items.forEach((item: any, index: number) => {
-      doc.text(item.name.substring(0, 20), 20, yPos);
-      doc.text(item.batchNo || 'N/A', 70, yPos);
-      doc.text(item.expiryDate || 'N/A', 100, yPos);
-      doc.text(`₹${(item.mrp || 0).toFixed(2)}`, 130, yPos);
-      doc.text(item.quantity.toString(), 150, yPos);
-      doc.text(`₹${item.price.toFixed(2)}`, 170, yPos);
-      yPos += 10;
+      if (index % 2 === 0) {
+        doc.setFillColor(245, 245, 245);
+        doc.rect(margin, y - 5, pageWidth - margin * 2, 10, "F");
+      }
+      doc.text(item.name.substring(0, 20), margin + 3, y);
+      doc.text(item.batchNo || "N/A", 70, y);
+      doc.text(item.expiryDate || "N/A", 100, y);
+      doc.text(`₹${(item.mrp || 0).toFixed(2)}`, 130, y);
+      doc.text(item.quantity.toString(), 150, y);
+      doc.text(`₹${item.price.toFixed(2)}`, 170, y);
+      y += 10;
       
-      // Add new page if content exceeds page height
-      if (yPos > 250) {
+      if (y > 250) {
         doc.addPage();
-        yPos = 30;
+        y = 30;
       }
     });
     
-    // Line before total
-    doc.line(20, yPos + 5, 190, yPos + 5);
+    // Total section
+    y += 5;
+    doc.setDrawColor(212, 175, 55);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
     
-    // Total
     doc.setFontSize(14);
-    doc.text(`Total Amount: ₹${invoice.amount.toFixed(2)}`, 130, yPos + 20);
-    doc.text(`Status: ${invoice.status}`, 20, yPos + 20);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(27, 53, 97);
+    doc.text(`Total Amount: ₹${invoice.amount.toFixed(2)}`, pageWidth - margin, y, { align: "right" });
     
     // Footer
-    doc.setFontSize(10);
-    doc.text('Thank you for your business!', 105, yPos + 40, { align: 'center' });
+    y = doc.internal.pageSize.getHeight() - 25;
+    doc.setDrawColor(212, 175, 55);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 8;
+    
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(27, 53, 97);
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
+    y += 5;
+    
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text("Thank you for choosing us!", pageWidth / 2, y, { align: "center" });
     
     // Save the PDF
     doc.save(`invoice-${invoice.id}.pdf`);
