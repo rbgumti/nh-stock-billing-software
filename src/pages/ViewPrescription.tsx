@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, FileText, Printer, Pencil } from "lucide-react";
+import { ArrowLeft, FileText, Printer, Pencil, Download } from "lucide-react";
 import { usePrescriptionStore, Prescription } from "@/hooks/usePrescriptionStore";
 import { format } from "date-fns";
+import jsPDF from "jspdf";
 
 export default function ViewPrescription() {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +46,117 @@ export default function ViewPrescription() {
     window.print();
   };
 
+  const handleDownloadPDF = () => {
+    if (!prescription) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let y = 20;
+
+    // Header
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("PRESCRIPTION", pageWidth / 2, y, { align: "center" });
+    y += 10;
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(prescription.prescription_number, pageWidth / 2, y, { align: "center" });
+    y += 15;
+
+    // Divider line
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
+
+    // Patient Information
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Patient Information", margin, y);
+    y += 8;
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    
+    const patientInfo = [
+      ["Patient Name:", prescription.patient_name],
+      ["Age:", prescription.patient_age || "N/A"],
+      ["Phone:", prescription.patient_phone || "N/A"],
+      ["Date:", format(new Date(prescription.prescription_date), "dd MMM yyyy, hh:mm a")],
+      ["Diagnosis:", prescription.diagnosis],
+    ];
+
+    patientInfo.forEach(([label, value]) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(label, margin, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(value, margin + 35, y);
+      y += 7;
+    });
+
+    if (prescription.notes) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Notes:", margin, y);
+      doc.setFont("helvetica", "normal");
+      const notesLines = doc.splitTextToSize(prescription.notes, pageWidth - margin * 2 - 35);
+      doc.text(notesLines, margin + 35, y);
+      y += notesLines.length * 7;
+    }
+
+    y += 10;
+
+    // Divider line
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
+
+    // Medicines
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Prescribed Medicines", margin, y);
+    y += 10;
+
+    prescription.items.forEach((item, index) => {
+      // Check if we need a new page
+      if (y > 260) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${index + 1}. ${item.medicine_name}`, margin, y);
+      y += 7;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      
+      const medicineDetails = `Dosage: ${item.dosage} | Frequency: ${item.frequency} | Duration: ${item.duration} days | Qty: ${item.quantity}`;
+      doc.text(medicineDetails, margin + 5, y);
+      y += 6;
+
+      if (item.instructions) {
+        doc.setFont("helvetica", "italic");
+        doc.text(`Instructions: ${item.instructions}`, margin + 5, y);
+        y += 6;
+      }
+
+      y += 5;
+    });
+
+    // Footer
+    y = doc.internal.pageSize.getHeight() - 30;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 8;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text("This is a computer-generated prescription.", pageWidth / 2, y, { align: "center" });
+
+    // Download PDF
+    doc.save(`${prescription.prescription_number}.pdf`);
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6 print:hidden">
@@ -67,6 +179,10 @@ export default function ViewPrescription() {
             <Button variant="outline" onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
               Print
+            </Button>
+            <Button variant="outline" onClick={handleDownloadPDF}>
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
             </Button>
             {prescription.status === 'Active' && (
               <>
