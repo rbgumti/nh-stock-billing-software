@@ -387,7 +387,7 @@ export default function NewInvoice() {
           <CardContent>
             <div className="space-y-6">
               {items.map((item, index) => (
-                <div key={item.id} className="p-4 border rounded-lg space-y-4">
+                <div key={item.id} className={`p-4 border rounded-lg space-y-4 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500 bg-red-50 dark:bg-red-950/30' : ''}`}>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-2">
                       <div className="flex items-center gap-2 mb-1">
@@ -429,7 +429,11 @@ export default function NewInvoice() {
                         max={item.availableStock}
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
+                        className={item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}
                       />
+                      {item.quantity > item.availableStock && item.medicineId > 0 && (
+                        <p className="text-xs text-red-500 mt-1">Exceeds available stock ({item.availableStock})</p>
+                      )}
                     </div>
                   </div>
                   
