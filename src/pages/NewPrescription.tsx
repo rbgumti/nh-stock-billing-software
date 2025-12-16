@@ -84,11 +84,23 @@ export default function NewPrescription() {
 
       if (error) throw error;
       if (data) {
+        // Also fetch patient age from patients table
+        let patientAge = '';
+        if (data.patient_id) {
+          const { data: patientData } = await supabase
+            .from('patients')
+            .select('age')
+            .eq('id', data.patient_id)
+            .single();
+          patientAge = patientData?.age || '';
+        }
+
         setFormData(prev => ({
           ...prev,
           patient_id: data.patient_id,
           patient_name: data.patient_name,
           patient_phone: data.patient_phone || '',
+          patient_age: patientAge,
           diagnosis: data.reason || '',
           notes: data.notes || '',
           appointment_id: appointmentId,
@@ -96,6 +108,11 @@ export default function NewPrescription() {
       }
     } catch (error) {
       console.error('Error loading appointment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load appointment data",
+        variant: "destructive",
+      });
     }
   };
 
