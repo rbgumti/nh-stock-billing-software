@@ -164,7 +164,8 @@ export function useStockStore() {
   };
 
   const getMedicines = () => {
-    return stockItems.filter(item => item.category === "Medication");
+    // Return all stock items as medicines (categories are BNX, TPN, PSHY, etc.)
+    return stockItems;
   };
 
   const getStockItem = (id: number) => {

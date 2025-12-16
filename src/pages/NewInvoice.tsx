@@ -32,9 +32,9 @@ interface InvoiceItem {
 export default function NewInvoice() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { getMedicines, getStockItem, reduceStock } = useStockStore();
+  const { stockItems, getMedicines, getStockItem, reduceStock } = useStockStore();
   const { getNextInvoiceNumber } = useSequentialNumbers();
-  const { getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
+  const { prescriptions, getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
   
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState("");
@@ -77,7 +77,7 @@ export default function NewInvoice() {
   // Load prescription data if prescriptionId is in URL
   useEffect(() => {
     const rxId = searchParams.get('prescriptionId');
-    if (rxId && medicines.length > 0 && patients.length > 0) {
+    if (rxId && medicines.length > 0 && patients.length > 0 && prescriptions.length > 0) {
       const prescription = getPrescription(rxId);
       if (prescription) {
         setPrescriptionId(rxId);
@@ -124,6 +124,7 @@ export default function NewInvoice() {
             };
           }
           
+          // No match found - show prescription medicine name but no stock data
           return {
             id: index.toString(),
             medicineId: 0,
@@ -142,7 +143,7 @@ export default function NewInvoice() {
         setItems(invoiceItems.length > 0 ? invoiceItems : items);
       }
     }
-  }, [searchParams, medicines, patients]);
+  }, [searchParams, medicines, patients, prescriptions]);
 
   // Handle patient selection
   const handlePatientSelect = (patient: Patient) => {
