@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Plus, Clock, User, Phone, FileText, Pill, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Clock, User, Phone, FileText, Pill, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
@@ -36,7 +36,7 @@ export default function Appointments() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("day");
-
+  const [sortOrder, setSortOrder] = useState<"earliest" | "latest">("latest");
   useEffect(() => {
     loadAppointments();
   }, []);
@@ -62,7 +62,11 @@ export default function Appointments() {
     return appointments.filter(apt => {
       const aptDate = new Date(apt.appointment_date);
       return aptDate.toDateString() === date.toDateString();
-    }).sort((a, b) => new Date(b.appointment_date).getTime() - new Date(a.appointment_date).getTime());
+    }).sort((a, b) => {
+      const timeA = new Date(a.appointment_date).getTime();
+      const timeB = new Date(b.appointment_date).getTime();
+      return sortOrder === "latest" ? timeB - timeA : timeA - timeB;
+    });
   };
 
   const getDatesWithAppointments = () => {
@@ -464,13 +468,24 @@ export default function Appointments() {
       </div>
 
       {/* View Mode Tabs */}
-      <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-        <TabsList>
-          <TabsTrigger value="day">Day</TabsTrigger>
-          <TabsTrigger value="week">Week</TabsTrigger>
-          <TabsTrigger value="month">Month</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex items-center justify-between">
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+          <TabsList>
+            <TabsTrigger value="day">Day</TabsTrigger>
+            <TabsTrigger value="week">Week</TabsTrigger>
+            <TabsTrigger value="month">Month</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSortOrder(sortOrder === "latest" ? "earliest" : "latest")}
+          className="gap-2"
+        >
+          <ArrowUpDown className="h-4 w-4" />
+          {sortOrder === "latest" ? "Latest First" : "Earliest First"}
+        </Button>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
