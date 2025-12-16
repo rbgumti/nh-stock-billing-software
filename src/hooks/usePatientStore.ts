@@ -34,22 +34,42 @@ export function usePatientStore() {
 
   const loadPatients = async () => {
     try {
-      const { data, error } = await supabase
-        .from('patients')
-        .select('*');
+      // Fetch all patients with pagination to overcome 1000 row limit
+      let allPatients: any[] = [];
+      let from = 0;
+      const batchSize = 1000;
+      let hasMore = true;
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('patients')
+          .select('*')
+          .range(from, from + batchSize - 1)
+          .order('id', { ascending: true });
+
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          hasMore = false;
+        } else {
+          allPatients = [...allPatients, ...data];
+          from += batchSize;
+          if (data.length < batchSize) {
+            hasMore = false;
+          }
+        }
       }
 
-      if (!data || data.length === 0) {
+      if (allPatients.length === 0) {
         console.warn('No patient data returned from Supabase');
         setPatients([]);
         return;
       }
 
-      const formattedPatients: PatientFormData[] = data.map(p => ({
+      const formattedPatients: PatientFormData[] = allPatients.map(p => ({
         patientId: String(p.id || ''),
         fileNo: String(p.file_no || ''),
         firstName: (p.patient_name || '').split(' ')[0] || '',
