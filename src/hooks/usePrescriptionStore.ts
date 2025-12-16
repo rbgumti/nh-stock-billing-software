@@ -164,6 +164,73 @@ export const usePrescriptionStore = () => {
     }
   };
 
+  const updatePrescription = async (id: string, updates: {
+    patient_name?: string;
+    patient_phone?: string;
+    patient_age?: string;
+    diagnosis?: string;
+    notes?: string;
+    items?: PrescriptionItem[];
+  }) => {
+    try {
+      // Update prescription details
+      const { error: prescriptionError } = await supabase
+        .from('prescriptions')
+        .update({
+          patient_name: updates.patient_name,
+          patient_phone: updates.patient_phone,
+          patient_age: updates.patient_age,
+          diagnosis: updates.diagnosis,
+          notes: updates.notes,
+        })
+        .eq('id', id);
+
+      if (prescriptionError) throw prescriptionError;
+
+      // Update items if provided
+      if (updates.items) {
+        // Delete existing items
+        const { error: deleteError } = await supabase
+          .from('prescription_items')
+          .delete()
+          .eq('prescription_id', id);
+
+        if (deleteError) throw deleteError;
+
+        // Insert new items
+        const itemsToInsert = updates.items.map(item => ({
+          prescription_id: id,
+          medicine_name: item.medicine_name,
+          dosage: item.dosage,
+          frequency: item.frequency,
+          duration: item.duration,
+          quantity: item.quantity,
+          instructions: item.instructions || null,
+        }));
+
+        const { error: insertError } = await supabase
+          .from('prescription_items')
+          .insert(itemsToInsert);
+
+        if (insertError) throw insertError;
+      }
+
+      toast({
+        title: "Success",
+        description: "Prescription updated successfully",
+      });
+
+      await loadPrescriptions();
+    } catch (error: any) {
+      toast({
+        title: "Error updating prescription",
+        description: formatSupabaseError(error),
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const getPrescription = (id: string) => {
     return prescriptions.find(p => p.id === id);
   };
@@ -172,6 +239,7 @@ export const usePrescriptionStore = () => {
     prescriptions,
     loading,
     addPrescription,
+    updatePrescription,
     updatePrescriptionStatus,
     getPrescription,
   };
