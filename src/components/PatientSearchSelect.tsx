@@ -73,6 +73,16 @@ export function PatientSearchSelect({
     });
   }, [patients, searchQuery, fileNoQuery, activeSearch]);
 
+  // Auto-select when exactly one match found in File No search
+  useEffect(() => {
+    if (activeSearch === "fileNo" && fileNoQuery.trim().length >= 2 && filteredPatients.length === 1) {
+      const patient = filteredPatients[0];
+      onPatientSelect(patient);
+      setFileNoQuery("");
+      setIsOpen(false);
+    }
+  }, [filteredPatients, activeSearch, fileNoQuery, onPatientSelect]);
+
   // Reset highlighted index when filtered patients change
   useEffect(() => {
     setHighlightedIndex(0);
