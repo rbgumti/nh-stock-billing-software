@@ -73,15 +73,19 @@ export function PatientSearchSelect({
     });
   }, [patients, searchQuery, fileNoQuery, activeSearch]);
 
-  // Auto-select when exactly one match found in File No search
+  // Auto-select when exact file number match found
   useEffect(() => {
-    if (activeSearch === "fileNo" && fileNoQuery.trim().length >= 2 && filteredPatients.length === 1) {
-      const patient = filteredPatients[0];
-      onPatientSelect(patient);
-      setFileNoQuery("");
-      setIsOpen(false);
+    if (activeSearch === "fileNo" && fileNoQuery.trim().length >= 1) {
+      const query = fileNoQuery.toLowerCase().trim();
+      // Only auto-select on EXACT match (case-insensitive)
+      const exactMatch = patients.find(p => p.file_no?.toLowerCase() === query);
+      if (exactMatch) {
+        onPatientSelect(exactMatch);
+        setFileNoQuery("");
+        setIsOpen(false);
+      }
     }
-  }, [filteredPatients, activeSearch, fileNoQuery, onPatientSelect]);
+  }, [fileNoQuery, activeSearch, patients, onPatientSelect]);
 
   // Reset highlighted index when filtered patients change
   useEffect(() => {
@@ -154,7 +158,7 @@ export function PatientSearchSelect({
   };
 
   return (
-    <div ref={containerRef} className="space-y-2">
+    <div ref={containerRef} className="space-y-2 relative">
       {label && <Label>{label}</Label>}
       
       {/* Search Inputs */}
