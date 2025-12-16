@@ -85,6 +85,14 @@ export const usePrescriptionStore = () => {
 
   const addPrescription = async (prescription: Prescription) => {
     try {
+      console.log('Creating prescription with data:', {
+        prescription_number: prescription.prescription_number,
+        patient_id: prescription.patient_id,
+        patient_name: prescription.patient_name,
+        diagnosis: prescription.diagnosis,
+        appointment_id: prescription.appointment_id,
+      });
+
       const { data: prescriptionData, error: prescriptionError } = await supabase
         .from('prescriptions')
         .insert({
@@ -102,7 +110,12 @@ export const usePrescriptionStore = () => {
         .select()
         .single();
 
-      if (prescriptionError) throw prescriptionError;
+      if (prescriptionError) {
+        console.error('Prescription insert error:', prescriptionError);
+        throw prescriptionError;
+      }
+
+      console.log('Prescription created:', prescriptionData);
 
       if (prescription.items.length > 0) {
         const itemsToInsert = prescription.items.map(item => ({
@@ -112,14 +125,19 @@ export const usePrescriptionStore = () => {
           frequency: item.frequency,
           duration: item.duration,
           quantity: item.quantity,
-          instructions: item.instructions,
+          instructions: item.instructions || '',
         }));
+
+        console.log('Inserting prescription items:', itemsToInsert);
 
         const { error: itemsError } = await supabase
           .from('prescription_items')
           .insert(itemsToInsert);
 
-        if (itemsError) throw itemsError;
+        if (itemsError) {
+          console.error('Prescription items insert error:', itemsError);
+          throw itemsError;
+        }
       }
 
       toast({
@@ -130,9 +148,10 @@ export const usePrescriptionStore = () => {
       await loadPrescriptions();
       return prescriptionData.id;
     } catch (error: any) {
+      console.error('Full error object:', error);
       toast({
         title: "Error creating prescription",
-        description: error.message,
+        description: error.message || 'Unknown error occurred',
         variant: "destructive",
       });
       throw error;
