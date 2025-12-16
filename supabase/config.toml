@@ -1,1 +1,4 @@
 project_id = "kafzdrmvbdsyvsffrhes"
+
+[functions.create-prescription]
+verify_jwt = false

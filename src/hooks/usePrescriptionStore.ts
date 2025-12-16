@@ -98,9 +98,9 @@ export const usePrescriptionStore = () => {
 
   const addPrescription = async (prescription: Prescription) => {
     try {
-      const { data: prescriptionData, error: prescriptionError } = await supabase
-        .from("prescriptions")
-        .insert({
+      // Use edge function for server-side validation
+      const { data, error } = await supabase.functions.invoke("create-prescription", {
+        body: {
           prescription_number: prescription.prescription_number,
           patient_id: prescription.patient_id,
           patient_name: prescription.patient_name,
@@ -111,28 +111,16 @@ export const usePrescriptionStore = () => {
           prescription_date: prescription.prescription_date,
           status: prescription.status,
           appointment_id: prescription.appointment_id || null,
-        })
-        .select()
-        .single();
+          items: prescription.items,
+        },
+      });
 
-      if (prescriptionError) throw prescriptionError;
+      if (error) {
+        throw new Error(error.message || "Failed to create prescription");
+      }
 
-      if (prescription.items.length > 0) {
-        const itemsToInsert = prescription.items.map((item) => ({
-          prescription_id: prescriptionData.id,
-          medicine_name: item.medicine_name,
-          dosage: item.dosage,
-          frequency: item.frequency,
-          duration: item.duration,
-          quantity: item.quantity,
-          instructions: item.instructions || "",
-        }));
-
-        const { error: itemsError } = await supabase
-          .from("prescription_items")
-          .insert(itemsToInsert);
-
-        if (itemsError) throw itemsError;
+      if (!data.success) {
+        throw new Error(data.error || "Failed to create prescription");
       }
 
       toast({
@@ -141,7 +129,7 @@ export const usePrescriptionStore = () => {
       });
 
       await loadPrescriptions();
-      return prescriptionData.id;
+      return data.prescription_id;
     } catch (error: any) {
       toast({
         title: "Error creating prescription",
