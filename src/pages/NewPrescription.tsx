@@ -1,15 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Search } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PrescriptionForm from "@/components/forms/PrescriptionForm";
 import { usePrescriptionStore, PrescriptionItem } from "@/hooks/usePrescriptionStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 import { supabase } from "@/integrations/supabase/client";
+import { PatientSearchSelect } from "@/components/PatientSearchSelect";
 
 interface Patient {
   id: number;
@@ -34,7 +32,6 @@ export default function NewPrescription() {
   
   const [patients, setPatients] = useState<Patient[]>([]);
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     patient_id: 0,
     patient_name: '',
@@ -90,23 +87,6 @@ export default function NewPrescription() {
     }
   };
 
-  // Filter patients based on search query (ID, phone, name, file no, aadhar, govt id)
-  const filteredPatients = useMemo(() => {
-    if (!searchQuery.trim()) return patients;
-    
-    const query = searchQuery.toLowerCase().trim();
-    return patients.filter((patient) => {
-      const idMatch = patient.id.toString().includes(query);
-      const nameMatch = patient.patient_name?.toLowerCase().includes(query);
-      const phoneMatch = patient.phone?.toLowerCase().includes(query);
-      const fileNoMatch = patient.file_no?.toLowerCase().includes(query);
-      const aadharMatch = patient.aadhar_card?.toLowerCase().includes(query);
-      const govtIdMatch = patient.govt_id?.toLowerCase().includes(query);
-      
-      return idMatch || nameMatch || phoneMatch || fileNoMatch || aadharMatch || govtIdMatch;
-    });
-  }, [patients, searchQuery]);
-
   const loadAppointmentData = async (appointmentId: string) => {
     try {
       const { data, error } = await supabase
@@ -132,17 +112,14 @@ export default function NewPrescription() {
     }
   };
 
-  const handlePatientChange = (patientId: string) => {
-    const patient = patients.find(p => p.id === parseInt(patientId));
-    if (patient) {
-      setFormData(prev => ({
-        ...prev,
-        patient_id: patient.id,
-        patient_name: patient.patient_name,
-        patient_phone: patient.phone || '',
-        patient_age: patient.age || '',
-      }));
-    }
+  const handlePatientSelect = (patient: Patient) => {
+    setFormData(prev => ({
+      ...prev,
+      patient_id: patient.id,
+      patient_name: patient.patient_name,
+      patient_phone: patient.phone || '',
+      patient_age: patient.age || '',
+    }));
   };
 
   const handleFormChange = (field: string, value: string | number) => {
@@ -233,38 +210,12 @@ export default function NewPrescription() {
             <CardHeader>
               <CardTitle>Select Patient</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by Name, Phone, File No, Aadhar, or Govt ID..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-              <div>
-                <Label>Patient *</Label>
-                <Select onValueChange={handlePatientChange} value={formData.patient_id ? formData.patient_id.toString() : undefined}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a patient" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60 bg-background z-50">
-                    {filteredPatients.length === 0 ? (
-                      <div className="py-2 px-3 text-sm text-muted-foreground">No patients found</div>
-                    ) : (
-                      filteredPatients.map((patient) => (
-                        <SelectItem key={patient.id} value={patient.id.toString()}>
-                          <span className="font-medium">{patient.patient_name}</span>
-                          <span className="text-muted-foreground text-xs ml-2">
-                            ID: {patient.id} {patient.phone && `| Ph: ${patient.phone}`} {patient.file_no && `| File: ${patient.file_no}`}
-                          </span>
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+            <CardContent className="relative">
+              <PatientSearchSelect
+                patients={patients}
+                selectedPatientId={formData.patient_id || undefined}
+                onPatientSelect={handlePatientSelect}
+              />
             </CardContent>
           </Card>
         )}

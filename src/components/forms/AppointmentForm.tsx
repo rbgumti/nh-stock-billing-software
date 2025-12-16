@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,11 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Search } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PatientSearchSelect } from "@/components/PatientSearchSelect";
 
 const appointmentSchema = z.object({
   patient_id: z.number({ required_error: "Please select a patient" }),
@@ -58,7 +59,6 @@ interface AppointmentFormProps {
 export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps) {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     appointment ? new Date(appointment.appointment_date) : undefined
   );
@@ -108,23 +108,6 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     }
   };
 
-  // Filter patients based on search query (ID, phone, name, file no, aadhar, govt id)
-  const filteredPatients = useMemo(() => {
-    if (!searchQuery.trim()) return patients;
-    
-    const query = searchQuery.toLowerCase().trim();
-    return patients.filter((patient) => {
-      const idMatch = patient.id.toString().includes(query);
-      const nameMatch = patient.patient_name?.toLowerCase().includes(query);
-      const phoneMatch = patient.phone?.toLowerCase().includes(query);
-      const fileNoMatch = patient.file_no?.toLowerCase().includes(query);
-      const aadharMatch = patient.aadhar_card?.toLowerCase().includes(query);
-      const govtIdMatch = patient.govt_id?.toLowerCase().includes(query);
-      
-      return idMatch || nameMatch || phoneMatch || fileNoMatch || aadharMatch || govtIdMatch;
-    });
-  }, [patients, searchQuery]);
-
   const onSubmit = async (data: AppointmentFormData) => {
     setLoading(true);
     try {
@@ -173,50 +156,20 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     }
   };
 
-  const handlePatientChange = (patientId: string) => {
-    const patient = patients.find(p => p.id === parseInt(patientId));
-    if (patient) {
-      setValue('patient_id', patient.id);
-      setValue('patient_name', patient.patient_name);
-      setValue('patient_phone', patient.phone || '');
-    }
+  const handlePatientSelect = (patient: Patient) => {
+    setValue('patient_id', patient.id);
+    setValue('patient_name', patient.patient_name);
+    setValue('patient_phone', patient.phone || '');
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="patient">Patient *</Label>
-        <div className="relative mb-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by Name, Phone, File No, Aadhar, or Govt ID..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <Select
-          onValueChange={handlePatientChange}
-          defaultValue={appointment?.patient_id.toString()}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a patient" />
-          </SelectTrigger>
-          <SelectContent className="max-h-60">
-            {filteredPatients.length === 0 ? (
-              <div className="py-2 px-3 text-sm text-muted-foreground">No patients found</div>
-            ) : (
-              filteredPatients.map((patient) => (
-                <SelectItem key={patient.id} value={patient.id.toString()}>
-                  <span className="font-medium">{patient.patient_name}</span>
-                  <span className="text-muted-foreground text-xs ml-2">
-                    ID: {patient.id} {patient.phone && `| Ph: ${patient.phone}`} {patient.file_no && `| File: ${patient.file_no}`}
-                  </span>
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
+      <div className="space-y-2 relative">
+        <PatientSearchSelect
+          patients={patients}
+          selectedPatientId={appointment?.patient_id}
+          onPatientSelect={handlePatientSelect}
+        />
         {errors.patient_id && (
           <p className="text-sm text-destructive">{errors.patient_id.message}</p>
         )}
