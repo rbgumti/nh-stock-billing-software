@@ -16,6 +16,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PatientSearchSelect } from "@/components/PatientSearchSelect";
 import { loadAllPatients, Patient } from "@/lib/patientUtils";
+import { PATIENT_CATEGORIES } from "@/hooks/usePatientForm";
+
+// Get next available time slot (rounded to next 5 minutes)
+const getNextTimeSlot = (): string => {
+  const now = new Date();
+  const minutes = now.getMinutes();
+  const roundedMinutes = Math.ceil(minutes / 5) * 5;
+  now.setMinutes(roundedMinutes);
+  now.setSeconds(0);
+  if (roundedMinutes >= 60) {
+    now.setHours(now.getHours() + 1);
+    now.setMinutes(0);
+  }
+  return format(now, 'HH:mm');
+};
 
 const appointmentSchema = z.object({
   patient_id: z.number({ required_error: "Please select a patient" }),
@@ -52,7 +67,7 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    appointment ? new Date(appointment.appointment_date) : undefined
+    appointment ? new Date(appointment.appointment_date) : new Date()
   );
 
   const {
@@ -76,8 +91,10 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
           status: appointment.status,
         }
       : {
-          duration_minutes: 30,
-          status: "Scheduled",
+          appointment_date: new Date(),
+          appointment_time: getNextTimeSlot(),
+          duration_minutes: 2,
+          status: "Confirmed",
         },
   });
 
@@ -236,11 +253,19 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
 
       <div className="space-y-2">
         <Label htmlFor="reason">Reason for Visit *</Label>
-        <Input
-          id="reason"
-          placeholder="e.g., Annual checkup, Follow-up visit"
-          {...register('reason')}
-        />
+        <Select
+          onValueChange={(value) => setValue('reason', value)}
+          defaultValue={watch('reason')}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {PATIENT_CATEGORIES.map((cat) => (
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         {errors.reason && (
           <p className="text-sm text-destructive">{errors.reason.message}</p>
         )}
