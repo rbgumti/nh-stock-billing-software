@@ -164,6 +164,7 @@ export function PatientSearchSelect({
           <span className="font-medium">{selectedPatient.patient_name}</span>
           <span className="text-muted-foreground ml-2">
             ID: {selectedPatient.id}
+            {selectedPatient.file_no && ` | File: ${selectedPatient.file_no}`}
             {selectedPatient.phone && ` | Ph: ${selectedPatient.phone}`}
           </span>
         </div>
@@ -173,7 +174,7 @@ export function PatientSearchSelect({
       {isOpen && (
         <div 
           ref={listRef}
-          className="absolute z-50 w-full max-h-60 overflow-auto bg-background border rounded-md shadow-lg mt-1"
+          className="absolute z-50 w-full max-h-60 overflow-auto bg-popover/95 backdrop-blur-xl border rounded-xl shadow-glass mt-1"
           style={{ width: containerRef.current?.offsetWidth }}
         >
           {filteredPatients.length === 0 ? (
@@ -187,23 +188,26 @@ export function PatientSearchSelect({
                 className={cn(
                   "px-4 py-2.5 cursor-pointer transition-all duration-150 border-l-2",
                   index === highlightedIndex 
-                    ? "bg-primary/15 text-primary border-l-primary font-medium" 
-                    : "hover:bg-muted border-l-transparent"
+                    ? "bg-gold/15 text-foreground border-l-gold font-medium" 
+                    : "hover:bg-muted/50 border-l-transparent"
                 )}
                 onClick={() => handleSelect(patient)}
                 onMouseEnter={() => setHighlightedIndex(index)}
               >
-                <span className={cn(
-                  "font-medium",
-                  index === highlightedIndex && "text-primary"
-                )}>
-                  {patient.patient_name}
-                </span>
-                <span className="text-muted-foreground text-xs ml-2">
-                  ID: {patient.id}
-                  {patient.phone && ` | Ph: ${patient.phone}`}
-                  {patient.file_no && ` | File: ${patient.file_no}`}
-                </span>
+                <div className="flex flex-col">
+                  <span className={cn(
+                    "font-medium",
+                    index === highlightedIndex && "text-navy dark:text-gold"
+                  )}>
+                    {patient.patient_name}
+                  </span>
+                  <span className="text-muted-foreground text-xs flex flex-wrap gap-x-2">
+                    <span>ID: {patient.id}</span>
+                    {patient.file_no && <span className="text-gold font-medium">File: {patient.file_no}</span>}
+                    {patient.phone && <span>Ph: {patient.phone}</span>}
+                    {patient.aadhar_card && <span>Aadhar: {patient.aadhar_card}</span>}
+                  </span>
+                </div>
               </div>
             ))
           )}
