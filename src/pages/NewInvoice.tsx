@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, FileText, Hand } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
@@ -27,6 +28,7 @@ interface InvoiceItem {
   total: number;
   availableStock: number;
   stockAfterInvoice: number;
+  fromPrescription?: boolean;
 }
 
 export default function NewInvoice() {
@@ -120,7 +122,8 @@ export default function NewInvoice() {
               unitPrice: matchedMedicine.unitPrice,
               total: item.quantity * matchedMedicine.unitPrice,
               availableStock: matchedMedicine.currentStock,
-              stockAfterInvoice: matchedMedicine.currentStock - item.quantity
+              stockAfterInvoice: matchedMedicine.currentStock - item.quantity,
+              fromPrescription: true
             };
           }
           
@@ -136,7 +139,8 @@ export default function NewInvoice() {
             unitPrice: 0,
             total: 0,
             availableStock: 0,
-            stockAfterInvoice: 0
+            stockAfterInvoice: 0,
+            fromPrescription: true
           };
         });
         
@@ -386,8 +390,21 @@ export default function NewInvoice() {
                 <div key={item.id} className="p-4 border rounded-lg space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-2">
-                      <Label htmlFor={`medicine-${item.id}`}>Select Medicine *</Label>
-                      <Select 
+                      <div className="flex items-center gap-2 mb-1">
+                        <Label htmlFor={`medicine-${item.id}`}>Select Medicine *</Label>
+                        {item.fromPrescription ? (
+                          <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                            <FileText className="h-3 w-3 mr-1" />
+                            From Rx
+                          </Badge>
+                        ) : item.medicineId > 0 && (
+                          <Badge variant="outline" className="text-xs">
+                            <Hand className="h-3 w-3 mr-1" />
+                            Manual
+                          </Badge>
+                        )}
+                      </div>
+                      <Select
                         value={item.medicineId ? item.medicineId.toString() : undefined}
                         onValueChange={(value) => updateItem(item.id, "medicineId", parseInt(value))}
                       >
