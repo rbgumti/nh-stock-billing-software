@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Filter } from "lucide-react";
+import { Download, Calendar, Filter, RefreshCw } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -38,6 +38,7 @@ export default function DailyStockReport() {
   const [reportDate, setReportDate] = useState(new Date().toISOString().split('T')[0]);
   const [reportData, setReportData] = useState<StockReportItem[]>([]);
   const [showOnlyActive, setShowOnlyActive] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [cashDetails, setCashDetails] = useState<CashDenomination[]>([
     { denomination: 500, count: 0, amount: 0 },
     { denomination: 200, count: 0, amount: 0 },
@@ -146,6 +147,7 @@ export default function DailyStockReport() {
       .filter(item => !showOnlyActive || item.issuedToPatients > 0 || item.stockReceived > 0);
 
     setReportData(data);
+    setLastUpdated(new Date());
   };
 
   const updateCashCount = (index: number, count: number) => {
@@ -211,7 +213,15 @@ export default function DailyStockReport() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-navy">Daily Stock Report</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-navy">Daily Stock Report</h2>
+          {lastUpdated && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1 bg-muted px-2 py-1 rounded-full">
+              <RefreshCw className="h-3 w-3" />
+              Updated {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
+        </div>
         <div className="flex gap-4 items-center flex-wrap">
           <div className="flex items-center gap-2">
             <Switch
