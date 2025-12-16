@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SequentialNumbers {
   purchaseOrder: number;
@@ -98,23 +99,34 @@ export const useSequentialNumbers = () => {
     return grnNumber;
   };
 
-  const generatePrescriptionNumber = (): string => {
+  const generatePrescriptionNumber = async (): Promise<string> => {
     const now = new Date();
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     const day = now.getDate().toString().padStart(2, '0');
-    const prescriptionNum = sequentialStore.prescription ?? 1;
-    const paddedNumber = prescriptionNum.toString().padStart(3, '0');
-    const rxNumber = `RX${year}${month}${day}${paddedNumber}`;
+    const datePrefix = `RX${year}${month}${day}`;
     
-    // Increment for next use
-    const newNumbers = {
-      ...sequentialStore,
-      prescription: prescriptionNum + 1
-    };
-    setNumbers(newNumbers);
+    // Query database for highest prescription number with today's date prefix
+    const { data, error } = await supabase
+      .from('prescriptions')
+      .select('prescription_number')
+      .like('prescription_number', `${datePrefix}%`)
+      .order('prescription_number', { ascending: false })
+      .limit(1);
     
-    return rxNumber;
+    let nextNum = 1;
+    if (!error && data && data.length > 0) {
+      // Extract the numeric suffix from the last prescription number
+      const lastNumber = data[0].prescription_number;
+      const suffix = lastNumber.replace(datePrefix, '');
+      const parsed = parseInt(suffix, 10);
+      if (!isNaN(parsed)) {
+        nextNum = parsed + 1;
+      }
+    }
+    
+    const paddedNumber = nextNum.toString().padStart(3, '0');
+    return `${datePrefix}${paddedNumber}`;
   };
 
   const resetCounters = () => {
