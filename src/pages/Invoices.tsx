@@ -222,10 +222,62 @@ export default function Invoices() {
     doc.setFont("helvetica", "bold");
     doc.setTextColor(27, 53, 97);
     doc.text(`Total Amount: ₹${invoice.amount.toFixed(2)}`, pageWidth - margin, y, { align: "right" });
+    y += 15;
+
+    // Payment Terms & Bank Details Section
+    doc.setDrawColor(212, 175, 55);
+    doc.setLineWidth(0.3);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
+
+    // Two-column layout: Payment Terms (left) and Bank Details (right)
+    const colWidth = (pageWidth - margin * 2) / 2 - 5;
+    
+    // Payment Terms (left column)
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(27, 53, 97);
+    doc.text("Payment Terms:", margin, y);
+    y += 6;
+    
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(9);
+    const paymentTermsY = y;
+    doc.text("• Payment due within 7 days", margin, y);
+    y += 5;
+    doc.text("• Cash / UPI / Bank Transfer accepted", margin, y);
+    y += 5;
+    doc.text("• No refund on medicines dispensed", margin, y);
+    y += 5;
+    doc.text("• Keep this invoice for your records", margin, y);
+    
+    // Bank Details (right column)
+    const bankX = margin + colWidth + 10;
+    y = paymentTermsY - 6;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(27, 53, 97);
+    doc.text("Bank Details:", bankX, y);
+    y += 6;
+    
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(9);
+    doc.text("Bank: State Bank of India", bankX, y);
+    y += 5;
+    doc.text("A/C Name: Navjeevan Hospital", bankX, y);
+    y += 5;
+    doc.text("A/C No: XXXXXXXXXXXX", bankX, y);
+    y += 5;
+    doc.text("IFSC: SBIN0XXXXXX", bankX, y);
+    y += 5;
+    doc.text("UPI: navjeevan@sbi", bankX, y);
     
     // Footer
     y = doc.internal.pageSize.getHeight() - 25;
     doc.setDrawColor(212, 175, 55);
+    doc.setLineWidth(0.5);
     doc.line(margin, y, pageWidth - margin, y);
     y += 8;
     
