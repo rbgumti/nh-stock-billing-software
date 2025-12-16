@@ -53,7 +53,7 @@ export function PatientSearchSelect({
       const query = fileNoQuery.toLowerCase().trim();
       return patients.filter((patient) => {
         if (!patient || patient.id == null) return false;
-        return patient.file_no?.toLowerCase().includes(query);
+        return patient.file_no?.toLowerCase().trim().includes(query);
       });
     }
     
@@ -77,8 +77,8 @@ export function PatientSearchSelect({
   useEffect(() => {
     if (activeSearch === "fileNo" && fileNoQuery.trim().length >= 1) {
       const query = fileNoQuery.toLowerCase().trim();
-      // Only auto-select on EXACT match (case-insensitive)
-      const exactMatch = patients.find(p => p.file_no?.toLowerCase() === query);
+      // Only auto-select on EXACT match (case-insensitive, trimmed)
+      const exactMatch = patients.find(p => p.file_no?.toLowerCase().trim() === query);
       if (exactMatch) {
         onPatientSelect(exactMatch);
         setFileNoQuery("");
