@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 220 20% 97%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -36,36 +36,37 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
     --sidebar-background: 215 50% 12%;
-
     --sidebar-foreground: 0 0% 98%;
-
     --sidebar-primary: 45 85% 55%;
-
     --sidebar-primary-foreground: 215 50% 12%;
-
     --sidebar-accent: 215 45% 20%;
-
     --sidebar-accent-foreground: 45 85% 55%;
-
     --sidebar-border: 215 40% 25%;
-
     --sidebar-ring: 45 85% 55%;
     
     --gold: 45 85% 55%;
     --navy: 215 50% 12%;
+
+    /* Liquid Glass Design Tokens */
+    --glass-background: 0 0% 100% / 0.7;
+    --glass-border: 0 0% 100% / 0.3;
+    --glass-shadow: 220 60% 50% / 0.1;
+    --glass-highlight: 0 0% 100% / 0.5;
+    --glass-blur: 20px;
+    --glass-saturation: 180%;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222.2 50% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 50% 8%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 40% 98%;
@@ -97,6 +98,12 @@ All colors MUST be HSL.
     
     --gold: 45 85% 55%;
     --navy: 215 50% 12%;
+
+    /* Dark mode glass tokens */
+    --glass-background: 220 30% 10% / 0.6;
+    --glass-border: 220 30% 30% / 0.3;
+    --glass-shadow: 220 60% 10% / 0.3;
+    --glass-highlight: 220 30% 40% / 0.2;
   }
 }
 
@@ -107,6 +114,145 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background-image: 
+      radial-gradient(at 20% 20%, hsl(var(--gold) / 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 80%, hsl(var(--navy) / 0.06) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, hsl(220 60% 60% / 0.04) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Liquid Glass Card */
+  .glass {
+    background: hsl(var(--glass-background));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: 
+      0 8px 32px hsl(var(--glass-shadow)),
+      inset 0 1px 0 hsl(var(--glass-highlight));
+  }
+
+  .glass-subtle {
+    background: hsl(var(--glass-background));
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .glass-strong {
+    background: hsl(0 0% 100% / 0.85);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: 
+      0 12px 40px hsl(var(--glass-shadow)),
+      inset 0 2px 0 hsl(var(--glass-highlight)),
+      inset 0 -1px 0 hsl(0 0% 0% / 0.05);
+  }
+
+  .dark .glass-strong {
+    background: hsl(220 30% 12% / 0.8);
+  }
+
+  /* Glass Button Effect */
+  .glass-button {
+    @apply relative overflow-hidden transition-all duration-300;
+    background: hsl(var(--glass-background));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .glass-button:hover {
+    background: hsl(0 0% 100% / 0.9);
+    box-shadow: 0 8px 24px hsl(var(--glass-shadow));
+    transform: translateY(-2px);
+  }
+
+  .dark .glass-button:hover {
+    background: hsl(220 30% 15% / 0.8);
+  }
+
+  /* Liquid shine effect */
+  .liquid-shine {
+    @apply relative overflow-hidden;
+  }
+
+  .liquid-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(0 0% 100% / 0.3),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  .liquid-shine:hover::before {
+    left: 100%;
+  }
+
+  /* Glass Input */
+  .glass-input {
+    background: hsl(var(--glass-background));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid hsl(var(--glass-border));
+    transition: all 0.2s ease;
+  }
+
+  .glass-input:focus {
+    background: hsl(0 0% 100% / 0.9);
+    border-color: hsl(var(--gold));
+    box-shadow: 0 0 0 3px hsl(var(--gold) / 0.1);
+  }
+
+  .dark .glass-input:focus {
+    background: hsl(220 30% 15% / 0.9);
+  }
+
+  /* Floating orbs for background decoration */
+  .glass-orb {
+    @apply absolute rounded-full pointer-events-none;
+    background: radial-gradient(
+      circle at 30% 30%,
+      hsl(var(--gold) / 0.3),
+      hsl(var(--navy) / 0.1)
+    );
+    filter: blur(40px);
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-20px) scale(1.05);
+    }
+  }
+
+  /* Gradient border effect */
+  .gradient-border {
+    @apply relative;
+    background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+                linear-gradient(135deg, hsl(var(--gold)), hsl(var(--navy))) border-box;
+    border: 2px solid transparent;
+  }
+}
+
+@layer utilities {
+  .backdrop-blur-glass {
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
   }
 }
 
