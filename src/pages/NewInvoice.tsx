@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Plus, Trash2, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { usePatientStore } from "@/hooks/usePatientStore";
 import { useStockStore } from "@/hooks/useStockStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 import { usePrescriptionStore } from "@/hooks/usePrescriptionStore";
 import { supabase } from "@/integrations/supabase/client";
+
+interface Patient {
+  id: number;
+  patient_name: string;
+  phone: string;
+  file_no: string;
+  aadhar_card: string;
+  govt_id: string;
+}
 
 interface InvoiceItem {
   id: string;
@@ -31,14 +39,14 @@ interface InvoiceItem {
 export default function NewInvoice() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { patients, getPatient } = usePatientStore();
   const { getMedicines, getStockItem, reduceStock } = useStockStore();
   const { getNextInvoiceNumber } = useSequentialNumbers();
   const { getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
   
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState("");
-  const [patientSearchId, setPatientSearchId] = useState("");
-  const [foundPatient, setFoundPatient] = useState<any>(null);
+  const [patientSearchQuery, setPatientSearchQuery] = useState("");
+  const [foundPatient, setFoundPatient] = useState<Patient | null>(null);
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState("");
   const [prescriptionId, setPrescriptionId] = useState<string | null>(null);
@@ -60,20 +68,66 @@ export default function NewInvoice() {
 
   const medicines = getMedicines();
 
+  // Load patients on mount
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
+  const loadPatients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('id, patient_name, phone, file_no, aadhar_card, govt_id')
+        .order('patient_name');
+
+      if (error) throw error;
+      setPatients(data || []);
+    } catch (error) {
+      console.error('Error loading patients:', error);
+    }
+  };
+
+  // Filter patients based on search query (name, phone, file no, aadhar, govt id)
+  const filteredPatients = useMemo(() => {
+    if (!patientSearchQuery.trim()) return patients;
+    
+    const query = patientSearchQuery.toLowerCase().trim();
+    return patients.filter((patient) => {
+      const idMatch = patient.id.toString().includes(query);
+      const nameMatch = patient.patient_name?.toLowerCase().includes(query);
+      const phoneMatch = patient.phone?.toLowerCase().includes(query);
+      const fileNoMatch = patient.file_no?.toLowerCase().includes(query);
+      const aadharMatch = patient.aadhar_card?.toLowerCase().includes(query);
+      const govtIdMatch = patient.govt_id?.toLowerCase().includes(query);
+      
+      return idMatch || nameMatch || phoneMatch || fileNoMatch || aadharMatch || govtIdMatch;
+    });
+  }, [patients, patientSearchQuery]);
+
   // Load prescription data if prescriptionId is in URL
   useEffect(() => {
     const rxId = searchParams.get('prescriptionId');
-    if (rxId && medicines.length > 0) {
+    if (rxId && medicines.length > 0 && patients.length > 0) {
       const prescription = getPrescription(rxId);
       if (prescription) {
         setPrescriptionId(rxId);
-        setFoundPatient({
-          patientId: prescription.patient_id.toString(),
-          firstName: prescription.patient_name.split(' ')[0] || '',
-          lastName: prescription.patient_name.split(' ').slice(1).join(' ') || '',
-          phoneNumber: prescription.patient_phone || '',
-        });
-        setSelectedPatient(prescription.patient_id.toString());
+        // Find patient in loaded patients list
+        const patient = patients.find(p => p.id === prescription.patient_id);
+        if (patient) {
+          setFoundPatient(patient);
+          setSelectedPatient(patient.id.toString());
+        } else {
+          // Create a temporary patient object from prescription data
+          setFoundPatient({
+            id: prescription.patient_id,
+            patient_name: prescription.patient_name,
+            phone: prescription.patient_phone || '',
+            file_no: '',
+            aadhar_card: '',
+            govt_id: ''
+          });
+          setSelectedPatient(prescription.patient_id.toString());
+        }
         setNotes(prescription.notes || '');
         
         // Convert prescription items to invoice items and auto-match medicines from stock
@@ -118,35 +172,14 @@ export default function NewInvoice() {
         setItems(invoiceItems.length > 0 ? invoiceItems : items);
       }
     }
-  }, [searchParams, medicines]);
+  }, [searchParams, medicines, patients]);
 
-  // Search patient by ID
-  const handlePatientSearch = () => {
-    if (!patientSearchId.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a Patient ID to search.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const patient = getPatient(patientSearchId.trim());
+  // Handle patient selection
+  const handlePatientChange = (patientId: string) => {
+    const patient = patients.find(p => p.id === parseInt(patientId));
     if (patient) {
       setFoundPatient(patient);
-      setSelectedPatient(patient.patientId);
-      toast({
-        title: "Patient Found",
-        description: `${patient.firstName} ${patient.lastName} selected successfully!`
-      });
-    } else {
-      setFoundPatient(null);
-      setSelectedPatient("");
-      toast({
-        title: "Patient Not Found",
-        description: "No patient found with the provided ID.",
-        variant: "destructive"
-      });
+      setSelectedPatient(patient.id.toString());
     }
   };
 
@@ -261,7 +294,7 @@ export default function NewInvoice() {
           id: invoiceNumber,
           invoice_number: invoiceNumber,
           patient_id: selectedPatient,
-          patient_name: foundPatient ? `${foundPatient.firstName} ${foundPatient.lastName}` : selectedPatient,
+          patient_name: foundPatient?.patient_name || selectedPatient,
           patient_phone: foundPatient?.phone || '',
           invoice_date: invoiceDate,
           subtotal: subtotal,
@@ -333,32 +366,44 @@ export default function NewInvoice() {
           <CardContent className="space-y-4">
             {/* Patient Search */}
             <div className="space-y-4">
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <Label htmlFor="patientSearch">Search Patient by ID *</Label>
-                  <Input
-                    id="patientSearch"
-                    value={patientSearchId}
-                    onChange={(e) => setPatientSearchId(e.target.value)}
-                    placeholder="Enter Patient ID (e.g., PT001)"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button type="button" onClick={handlePatientSearch}>
-                    <Search className="h-4 w-4 mr-2" />
-                    Search
-                  </Button>
-                </div>
+              <Label>Select Patient *</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by Name, Phone, File No, Aadhar, or Govt ID..."
+                  value={patientSearchQuery}
+                  onChange={(e) => setPatientSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
               </div>
+              <Select onValueChange={handlePatientChange} value={selectedPatient || undefined}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a patient" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60 bg-background z-50">
+                  {filteredPatients.length === 0 ? (
+                    <div className="py-2 px-3 text-sm text-muted-foreground">No patients found</div>
+                  ) : (
+                    filteredPatients.map((patient) => (
+                      <SelectItem key={patient.id} value={patient.id.toString()}>
+                        <span className="font-medium">{patient.patient_name}</span>
+                        <span className="text-muted-foreground text-xs ml-2">
+                          ID: {patient.id} {patient.phone && `| Ph: ${patient.phone}`} {patient.file_no && `| File: ${patient.file_no}`}
+                        </span>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
               
               {foundPatient && (
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                   <h4 className="font-medium text-green-800">Patient Details:</h4>
                   <p className="text-sm text-green-700">
-                    <strong>Name:</strong> {foundPatient.firstName} {foundPatient.lastName}
+                    <strong>Name:</strong> {foundPatient.patient_name}
                   </p>
                   <p className="text-sm text-green-700">
-                    <strong>ID:</strong> {foundPatient.patientId}
+                    <strong>ID:</strong> {foundPatient.id}
                   </p>
                   <p className="text-sm text-green-700">
                     <strong>Phone:</strong> {foundPatient.phone}
