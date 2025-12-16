@@ -60,18 +60,10 @@ export function usePatientForm(isEditing: boolean = false) {
   });
 
   const handleInputChange = (field: string, value: string) => {
-    console.log(`[DEBUG] Updating field "${field}" with value:`, value);
-    console.log(`[DEBUG] Previous value for ${field}:`, formData[field as keyof PatientFormData]);
-    
-    setFormData(prev => {
-      const updated = {
-        ...prev,
-        [field]: value
-      };
-      console.log(`[DEBUG] Updated form data:`, updated);
-      console.log(`[DEBUG] Field ${field} changed from "${prev[field as keyof PatientFormData]}" to "${value}"`);
-      return updated;
-    });
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +99,6 @@ export function usePatientForm(isEditing: boolean = false) {
   };
 
   const loadPatientData = (patientData: PatientFormData) => {
-    console.log("Loading patient data:", patientData);
     // Convert numeric values to strings to ensure form compatibility
     const formattedData = {
       ...patientData,
@@ -130,7 +121,6 @@ export function usePatientForm(isEditing: boolean = false) {
       nextFollowUpDate: String(patientData.nextFollowUpDate || ''),
       category: String(patientData.category || '')
     };
-    console.log("Formatted patient data for form:", formattedData);
     setFormData(formattedData);
     setOriginalPatientId(String(patientData.patientId));
   };

@@ -48,7 +48,6 @@ export function usePatientStore() {
           .order('id', { ascending: true });
 
         if (error) {
-          console.error('Supabase error:', error);
           throw error;
         }
 
@@ -64,7 +63,6 @@ export function usePatientStore() {
       }
 
       if (allPatients.length === 0) {
-        console.warn('No patient data returned from Supabase');
         setPatients([]);
         return;
       }
@@ -94,7 +92,7 @@ export function usePatientStore() {
         category: String(p.category || '')
       }));
 
-      console.log(`Loaded ${formattedPatients.length} patients successfully`);
+      
       setPatients(formattedPatients);
     } catch (error) {
       console.error('Error loading patients:', error);
@@ -143,10 +141,6 @@ export function usePatientStore() {
 
   const updatePatient = async (patientId: string, updatedPatient: PatientFormData) => {
     try {
-      console.log('=== UPDATE PATIENT START ===');
-      console.log('Patient ID to update:', patientId, 'Type:', typeof patientId);
-      console.log('Update data:', updatedPatient);
-      
       // Prepare update data with all required fields
       const updateData = {
         patient_name: `${updatedPatient.firstName} ${updatedPatient.lastName}`.trim(),
@@ -163,26 +157,15 @@ export function usePatientStore() {
         category: updatedPatient.category || null
       };
       
-      console.log('Update payload:', updateData);
-      
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('patients')
         .update(updateData)
         .eq('id', parseInt(patientId))
         .select();
 
-      console.log('Update result:', { data, error });
-
       if (error) {
-        console.error('Supabase update error:', error);
-        console.error('Error details:', JSON.stringify(error, null, 2));
-        console.error('Error message:', error.message);
-        console.error('Error code:', error.code);
-        console.error('Error hint:', error.hint);
         throw error;
       }
-
-      console.log('=== UPDATE PATIENT SUCCESS ===');
       
       toast({
         title: "Success",
@@ -192,7 +175,6 @@ export function usePatientStore() {
       // Reload patients to reflect changes
       await loadPatients();
     } catch (error: any) {
-      console.error('=== UPDATE PATIENT ERROR ===', error);
       toast({
         title: "Error",
         description: error?.message || "Failed to update patient",
