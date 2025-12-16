@@ -73,16 +73,17 @@ export function PatientSearchSelect({
     });
   }, [patients, searchQuery, fileNoQuery, activeSearch]);
 
-  // Auto-select only when exactly 1 match is found (unique match)
+  // Auto-select only when exactly 1 match is found (with debounce to avoid interrupting typing)
   useEffect(() => {
     if (activeSearch === "fileNo" && fileNoQuery.trim().length >= 1 && filteredPatients.length === 1) {
-      const patient = filteredPatients[0];
-      onPatientSelect(patient);
-      // Clear after a tiny delay to avoid interrupting typing
-      setTimeout(() => {
+      const debounceTimer = setTimeout(() => {
+        const patient = filteredPatients[0];
+        onPatientSelect(patient);
         setFileNoQuery("");
         setIsOpen(false);
-      }, 50);
+      }, 400); // Wait 400ms after user stops typing
+      
+      return () => clearTimeout(debounceTimer);
     }
   }, [filteredPatients, activeSearch, fileNoQuery, onPatientSelect]);
 
