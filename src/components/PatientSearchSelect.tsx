@@ -40,6 +40,7 @@ export function PatientSearchSelect({
   const inputRef = useRef<HTMLInputElement>(null);
   const fileNoInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const fileNoAutoSelectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const selectedPatient = useMemo(() => 
     patients.find(p => p.id === selectedPatientId),
@@ -73,19 +74,40 @@ export function PatientSearchSelect({
     });
   }, [patients, searchQuery, fileNoQuery, activeSearch]);
 
-  // Auto-select only when exactly 1 match is found (with debounce to avoid interrupting typing)
+  // Auto-select only when there's an EXACT unique match (debounced, never clears mid-typing)
   useEffect(() => {
-    if (activeSearch === "fileNo" && fileNoQuery.trim().length >= 1 && filteredPatients.length === 1) {
-      const debounceTimer = setTimeout(() => {
-        const patient = filteredPatients[0];
-        onPatientSelect(patient);
-        setFileNoQuery("");
-        setIsOpen(false);
-      }, 400); // Wait 400ms after user stops typing
-      
-      return () => clearTimeout(debounceTimer);
+    // Always clear any pending timer when query changes
+    if (fileNoAutoSelectTimerRef.current) {
+      clearTimeout(fileNoAutoSelectTimerRef.current);
+      fileNoAutoSelectTimerRef.current = null;
     }
-  }, [filteredPatients, activeSearch, fileNoQuery, onPatientSelect]);
+
+    if (activeSearch !== "fileNo") return;
+
+    const query = fileNoQuery.toLowerCase().trim();
+    if (!query) return;
+
+    // Only auto-select for exact file number match (prevents selecting on a unique prefix)
+    const matches = patients.filter(
+      (p) => p.file_no?.toLowerCase().trim() === query
+    );
+    if (matches.length !== 1) return;
+
+    fileNoAutoSelectTimerRef.current = setTimeout(() => {
+      const patient = matches[0];
+      onPatientSelect(patient);
+      setSearchQuery("");
+      setFileNoQuery("");
+      setIsOpen(false);
+    }, 400);
+
+    return () => {
+      if (fileNoAutoSelectTimerRef.current) {
+        clearTimeout(fileNoAutoSelectTimerRef.current);
+        fileNoAutoSelectTimerRef.current = null;
+      }
+    };
+  }, [activeSearch, fileNoQuery, patients, onPatientSelect]);
 
   // Reset highlighted index when filtered patients change
   useEffect(() => {
