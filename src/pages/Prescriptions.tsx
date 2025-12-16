@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Plus, FileText, Calendar, User, Search } from "lucide-react";
+import { Plus, FileText, Calendar, User, Search, Pencil } from "lucide-react";
 import { usePrescriptionStore } from "@/hooks/usePrescriptionStore";
 import { format } from "date-fns";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
@@ -114,13 +114,20 @@ export default function Prescriptions() {
                   >
                     View
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate(`/prescriptions/edit/${prescription.id}`)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                   {prescription.status === 'Active' && (
                     <Button
                       size="sm"
                       onClick={() => navigate(`/invoices/new?prescriptionId=${prescription.id}`)}
                       className="flex-1"
                     >
-                      Generate Invoice
+                      Invoice
                     </Button>
                   )}
                 </div>
