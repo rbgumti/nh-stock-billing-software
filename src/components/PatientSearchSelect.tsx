@@ -1,0 +1,208 @@
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Search, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface Patient {
+  id: number;
+  patient_name: string;
+  phone: string;
+  file_no: string;
+  aadhar_card: string;
+  govt_id: string;
+  age?: string;
+}
+
+interface PatientSearchSelectProps {
+  patients: Patient[];
+  selectedPatientId?: number;
+  onPatientSelect: (patient: Patient) => void;
+  label?: string;
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+export function PatientSearchSelect({
+  patients,
+  selectedPatientId,
+  onPatientSelect,
+  label = "Patient *",
+  placeholder = "Search by Name, Phone, File No, Aadhar, or Govt ID...",
+  disabled = false,
+}: PatientSearchSelectProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const selectedPatient = useMemo(() => 
+    patients.find(p => p.id === selectedPatientId),
+    [patients, selectedPatientId]
+  );
+
+  // Filter patients based on search query
+  const filteredPatients = useMemo(() => {
+    if (!searchQuery.trim()) return patients;
+    
+    const query = searchQuery.toLowerCase().trim();
+    return patients.filter((patient) => {
+      const idMatch = patient.id.toString().includes(query);
+      const nameMatch = patient.patient_name?.toLowerCase().includes(query);
+      const phoneMatch = patient.phone?.toLowerCase().includes(query);
+      const fileNoMatch = patient.file_no?.toLowerCase().includes(query);
+      const aadharMatch = patient.aadhar_card?.toLowerCase().includes(query);
+      const govtIdMatch = patient.govt_id?.toLowerCase().includes(query);
+      
+      return idMatch || nameMatch || phoneMatch || fileNoMatch || aadharMatch || govtIdMatch;
+    });
+  }, [patients, searchQuery]);
+
+  // Reset highlighted index when filtered patients change
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [filteredPatients.length]);
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (isOpen && listRef.current) {
+      const highlightedItem = listRef.current.children[highlightedIndex] as HTMLElement;
+      if (highlightedItem) {
+        highlightedItem.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }, [highlightedIndex, isOpen]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter") {
+        setIsOpen(true);
+        e.preventDefault();
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev < filteredPatients.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setHighlightedIndex(prev => prev > 0 ? prev - 1 : 0);
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (filteredPatients[highlightedIndex]) {
+          handleSelect(filteredPatients[highlightedIndex]);
+        }
+        break;
+      case "Escape":
+        e.preventDefault();
+        setIsOpen(false);
+        break;
+      case "Tab":
+        setIsOpen(false);
+        break;
+    }
+  };
+
+  const handleSelect = (patient: Patient) => {
+    onPatientSelect(patient);
+    setSearchQuery("");
+    setIsOpen(false);
+  };
+
+  return (
+    <div ref={containerRef} className="space-y-2">
+      {label && <Label>{label}</Label>}
+      
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <Input
+          ref={inputRef}
+          placeholder={placeholder}
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={handleKeyDown}
+          className="pl-9 pr-9"
+          disabled={disabled}
+        />
+        <ChevronDown 
+          className={cn(
+            "absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-transform",
+            isOpen && "rotate-180"
+          )}
+        />
+      </div>
+
+      {/* Selected Patient Display */}
+      {selectedPatient && !isOpen && (
+        <div className="p-2 bg-muted/50 rounded-md text-sm">
+          <span className="font-medium">{selectedPatient.patient_name}</span>
+          <span className="text-muted-foreground ml-2">
+            ID: {selectedPatient.id}
+            {selectedPatient.phone && ` | Ph: ${selectedPatient.phone}`}
+          </span>
+        </div>
+      )}
+
+      {/* Dropdown */}
+      {isOpen && (
+        <div 
+          ref={listRef}
+          className="absolute z-50 w-full max-h-60 overflow-auto bg-background border rounded-md shadow-lg mt-1"
+          style={{ width: containerRef.current?.offsetWidth }}
+        >
+          {filteredPatients.length === 0 ? (
+            <div className="py-3 px-4 text-sm text-muted-foreground text-center">
+              No patients found
+            </div>
+          ) : (
+            filteredPatients.map((patient, index) => (
+              <div
+                key={patient.id}
+                className={cn(
+                  "px-4 py-2 cursor-pointer transition-colors",
+                  index === highlightedIndex 
+                    ? "bg-accent text-accent-foreground" 
+                    : "hover:bg-muted"
+                )}
+                onClick={() => handleSelect(patient)}
+                onMouseEnter={() => setHighlightedIndex(index)}
+              >
+                <span className="font-medium">{patient.patient_name}</span>
+                <span className="text-muted-foreground text-xs ml-2">
+                  ID: {patient.id}
+                  {patient.phone && ` | Ph: ${patient.phone}`}
+                  {patient.file_no && ` | File: ${patient.file_no}`}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
