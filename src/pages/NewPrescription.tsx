@@ -9,6 +9,7 @@ import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientSearchSelect } from "@/components/PatientSearchSelect";
 import { loadAllPatients, Patient } from "@/lib/patientUtils";
+import { toast } from "@/hooks/use-toast";
 
 interface StockItem {
   item_id: number;
@@ -137,17 +138,29 @@ export default function NewPrescription() {
     e.preventDefault();
 
     if (!formData.patient_id || formData.patient_id === 0) {
-      alert('Please select a patient');
+      toast({
+        title: "Patient Required",
+        description: "Please select a patient before creating a prescription",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!formData.diagnosis.trim()) {
-      alert('Please enter a diagnosis');
+      toast({
+        title: "Diagnosis Required",
+        description: "Please enter a diagnosis",
+        variant: "destructive",
+      });
       return;
     }
 
     if (items.length === 0) {
-      alert('Please add at least one medicine');
+      toast({
+        title: "Medicines Required",
+        description: "Please add at least one medicine to the prescription",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -156,7 +169,11 @@ export default function NewPrescription() {
       !item.medicine_name.trim() || !item.dosage.trim() || !item.frequency.trim() || !item.duration.trim()
     );
     if (invalidItems.length > 0) {
-      alert('Please fill in all required fields for each medicine (name, dosage, frequency, duration)');
+      toast({
+        title: "Incomplete Medicine Details",
+        description: "Please fill in all required fields for each medicine (name, dosage, frequency, duration)",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -189,7 +206,11 @@ export default function NewPrescription() {
       navigate('/prescriptions');
     } catch (error) {
       console.error('Error creating prescription:', error);
-      alert('Failed to create prescription. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to create prescription. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
