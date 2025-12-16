@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, FileText, Calendar, User, Search } from "lucide-react";
 import { usePrescriptionStore } from "@/hooks/usePrescriptionStore";
 import { format } from "date-fns";
+import { FloatingOrbs } from "@/components/ui/floating-orbs";
 
 export default function Prescriptions() {
   const navigate = useNavigate();
@@ -37,7 +38,8 @@ export default function Prescriptions() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 relative">
+      <FloatingOrbs />
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-navy">Prescriptions</h1>

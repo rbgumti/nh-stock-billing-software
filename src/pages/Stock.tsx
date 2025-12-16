@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { usePurchaseOrderStore } from "@/hooks/usePurchaseOrderStore";
 import jsPDF from "jspdf";
+import { FloatingOrbs } from "@/components/ui/floating-orbs";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -231,7 +231,8 @@ export default function Stock() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 relative">
+      <FloatingOrbs />
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-navy">Stock Management</h1>
