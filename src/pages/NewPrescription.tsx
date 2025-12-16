@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import PrescriptionForm from "@/components/forms/PrescriptionForm";
 import { usePrescriptionStore, PrescriptionItem } from "@/hooks/usePrescriptionStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
@@ -36,6 +37,7 @@ export default function NewPrescription() {
 
   const [items, setItems] = useState<PrescriptionItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Load patients and stock items on mount
   useEffect(() => {
@@ -153,31 +155,20 @@ export default function NewPrescription() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
 
     if (!formData.patient_id || formData.patient_id === 0) {
-      toast({
-        title: "Patient Required",
-        description: "Please select a patient before creating a prescription",
-        variant: "destructive",
-      });
+      setFormError("Please select a patient before creating a prescription");
       return;
     }
 
     if (!formData.diagnosis.trim()) {
-      toast({
-        title: "Diagnosis Required",
-        description: "Please enter a diagnosis",
-        variant: "destructive",
-      });
+      setFormError("Please enter a diagnosis");
       return;
     }
 
     if (items.length === 0) {
-      toast({
-        title: "Medicines Required",
-        description: "Please add at least one medicine to the prescription",
-        variant: "destructive",
-      });
+      setFormError("Please add at least one medicine to the prescription");
       return;
     }
 
@@ -186,11 +177,7 @@ export default function NewPrescription() {
       !item.medicine_name.trim() || !item.dosage.trim() || !item.frequency.trim() || !item.duration.trim()
     );
     if (invalidItems.length > 0) {
-      toast({
-        title: "Incomplete Medicine Details",
-        description: "Please fill in all required fields for each medicine (name, dosage, frequency, duration)",
-        variant: "destructive",
-      });
+      setFormError("Please fill in all required fields for each medicine (name, dosage, frequency, duration)");
       return;
     }
 
@@ -220,9 +207,14 @@ export default function NewPrescription() {
           .eq('id', formData.appointment_id);
       }
 
+      toast({
+        title: "Success",
+        description: "Prescription created successfully",
+      });
+
       navigate('/prescriptions');
-    } catch (error) {
-      // addPrescription() already shows a detailed toast error
+    } catch (error: any) {
+      setFormError(error?.message || "Failed to create prescription. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -268,6 +260,26 @@ export default function NewPrescription() {
           onRemoveItem={handleRemoveItem}
           onItemChange={handleItemChange}
         />
+
+        {/* Inline Error Banner */}
+        {formError && (
+          <Alert variant="destructive" className="mt-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>{formError}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-destructive/20"
+                onClick={() => setFormError(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex gap-4 mt-6">
           <Button type="submit" disabled={isSubmitting}>
