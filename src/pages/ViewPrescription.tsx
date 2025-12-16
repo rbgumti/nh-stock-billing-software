@@ -184,17 +184,15 @@ export default function ViewPrescription() {
               <Download className="mr-2 h-4 w-4" />
               Download PDF
             </Button>
+            <Button variant="outline" onClick={() => navigate(`/prescriptions/edit/${prescription.id}`)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
             {prescription.status === 'Active' && (
-              <>
-                <Button variant="outline" onClick={() => navigate(`/prescriptions/edit/${prescription.id}`)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Button>
-                <Button onClick={() => navigate(`/invoices/new?prescriptionId=${prescription.id}`)}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Generate Invoice
-                </Button>
-              </>
+              <Button onClick={() => navigate(`/invoices/new?prescriptionId=${prescription.id}`)}>
+                <FileText className="mr-2 h-4 w-4" />
+                Generate Invoice
+              </Button>
             )}
           </div>
         </div>
