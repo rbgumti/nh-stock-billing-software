@@ -17,7 +17,7 @@ interface StockItem {
 export default function EditPrescription() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getPrescription, updatePrescription } = usePrescriptionStore();
+  const { prescriptions, loading: storeLoading, getPrescription, updatePrescription } = usePrescriptionStore();
   
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [formData, setFormData] = useState({
@@ -33,42 +33,42 @@ export default function EditPrescription() {
   const [items, setItems] = useState<PrescriptionItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
-  // Load prescription data
+  // Load prescription data after store has loaded
   useEffect(() => {
-    if (id) {
-      const prescription = getPrescription(id);
-      if (prescription) {
-        setFormData({
-          patient_id: prescription.patient_id,
-          patient_name: prescription.patient_name,
-          patient_phone: prescription.patient_phone || '',
-          patient_age: prescription.patient_age || '',
-          diagnosis: prescription.diagnosis,
-          notes: prescription.notes || '',
-          appointment_id: prescription.appointment_id || '',
-        });
-        setItems(prescription.items.map(item => ({
-          id: item.id,
-          medicine_name: item.medicine_name,
-          dosage: item.dosage,
-          frequency: item.frequency,
-          duration: item.duration,
-          quantity: item.quantity,
-          instructions: item.instructions || '',
-        })));
-        setLoading(false);
-      } else {
-        toast({
-          title: "Error",
-          description: "Prescription not found",
-          variant: "destructive",
-        });
-        navigate('/prescriptions');
-      }
+    if (storeLoading || !id) return;
+    
+    const prescription = getPrescription(id);
+    if (prescription) {
+      setFormData({
+        patient_id: prescription.patient_id,
+        patient_name: prescription.patient_name,
+        patient_phone: prescription.patient_phone || '',
+        patient_age: prescription.patient_age || '',
+        diagnosis: prescription.diagnosis,
+        notes: prescription.notes || '',
+        appointment_id: prescription.appointment_id || '',
+      });
+      setItems(prescription.items.map(item => ({
+        id: item.id,
+        medicine_name: item.medicine_name,
+        dosage: item.dosage,
+        frequency: item.frequency,
+        duration: item.duration,
+        quantity: item.quantity,
+        instructions: item.instructions || '',
+      })));
+      setDataLoaded(true);
+    } else {
+      toast({
+        title: "Error",
+        description: "Prescription not found",
+        variant: "destructive",
+      });
+      navigate('/prescriptions');
     }
-  }, [id, getPrescription, navigate]);
+  }, [id, storeLoading, prescriptions, getPrescription, navigate]);
 
   // Load stock items
   useEffect(() => {
@@ -161,7 +161,7 @@ export default function EditPrescription() {
     }
   };
 
-  if (loading) {
+  if (storeLoading || !dataLoaded) {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center">Loading prescription...</div>
