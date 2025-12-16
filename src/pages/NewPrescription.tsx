@@ -18,6 +18,7 @@ interface Patient {
   age: string;
   file_no: string;
   aadhar_card: string;
+  govt_id: string;
 }
 
 interface StockItem {
@@ -65,7 +66,7 @@ export default function NewPrescription() {
     try {
       const { data, error } = await supabase
         .from('patients')
-        .select('id, patient_name, phone, age, file_no, aadhar_card')
+        .select('id, patient_name, phone, age, file_no, aadhar_card, govt_id')
         .order('patient_name');
 
       if (error) throw error;
@@ -89,7 +90,7 @@ export default function NewPrescription() {
     }
   };
 
-  // Filter patients based on search query (ID, phone, name, file no, aadhar)
+  // Filter patients based on search query (ID, phone, name, file no, aadhar, govt id)
   const filteredPatients = useMemo(() => {
     if (!searchQuery.trim()) return patients;
     
@@ -100,8 +101,9 @@ export default function NewPrescription() {
       const phoneMatch = patient.phone?.toLowerCase().includes(query);
       const fileNoMatch = patient.file_no?.toLowerCase().includes(query);
       const aadharMatch = patient.aadhar_card?.toLowerCase().includes(query);
+      const govtIdMatch = patient.govt_id?.toLowerCase().includes(query);
       
-      return idMatch || nameMatch || phoneMatch || fileNoMatch || aadharMatch;
+      return idMatch || nameMatch || phoneMatch || fileNoMatch || aadharMatch || govtIdMatch;
     });
   }, [patients, searchQuery]);
 
@@ -235,7 +237,7 @@ export default function NewPrescription() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by ID, Name, Phone, File No, or Aadhar..."
+                  placeholder="Search by Name, Phone, File No, Aadhar, or Govt ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
