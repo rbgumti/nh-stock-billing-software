@@ -73,25 +73,7 @@ export function PatientSearchSelect({
     });
   }, [patients, searchQuery, fileNoQuery, activeSearch]);
 
-  // Auto-select when exact file number match found
-  useEffect(() => {
-    if (activeSearch === "fileNo" && fileNoQuery.trim().length >= 1) {
-      const query = fileNoQuery.toLowerCase().trim();
-      console.log('[PatientSearchSelect] fileNoQuery:', query, '| patients count:', patients.length);
-      // Only auto-select on EXACT match (case-insensitive, trimmed)
-      const exactMatch = patients.find(p => {
-        const fileNo = p.file_no?.toLowerCase().trim();
-        console.log('[PatientSearchSelect] Comparing:', fileNo, '===', query, '| match:', fileNo === query);
-        return fileNo === query;
-      });
-      console.log('[PatientSearchSelect] exactMatch:', exactMatch?.patient_name || 'none');
-      if (exactMatch) {
-        onPatientSelect(exactMatch);
-        setFileNoQuery("");
-        setIsOpen(false);
-      }
-    }
-  }, [fileNoQuery, activeSearch, patients, onPatientSelect]);
+  // Exact File No selection happens on Enter to avoid interrupting typing
 
   // Reset highlighted index when filtered patients change
   useEffect(() => {
@@ -127,6 +109,19 @@ export function PatientSearchSelect({
         e.preventDefault();
       } else if (e.key === "Enter") {
         e.preventDefault();
+
+        // File No exact match selection (doesn't rely on dropdown ordering)
+        if (activeSearch === "fileNo" && fileNoQuery.trim()) {
+          const query = fileNoQuery.toLowerCase().trim();
+          const exactMatch = patients.find(
+            (p) => p.file_no?.toLowerCase().trim() === query
+          );
+          if (exactMatch) {
+            handleSelect(exactMatch);
+            return;
+          }
+        }
+
         // If there are filtered results, select the first one directly
         if (filteredPatients.length > 0) {
           handleSelect(filteredPatients[0]);
@@ -148,12 +143,26 @@ export function PatientSearchSelect({
         e.preventDefault();
         setHighlightedIndex(prev => prev > 0 ? prev - 1 : 0);
         break;
-      case "Enter":
+      case "Enter": {
         e.preventDefault();
+
+        // File No exact match selection (preferred)
+        if (activeSearch === "fileNo" && fileNoQuery.trim()) {
+          const query = fileNoQuery.toLowerCase().trim();
+          const exactMatch = patients.find(
+            (p) => p.file_no?.toLowerCase().trim() === query
+          );
+          if (exactMatch) {
+            handleSelect(exactMatch);
+            break;
+          }
+        }
+
         if (filteredPatients[highlightedIndex]) {
           handleSelect(filteredPatients[highlightedIndex]);
         }
         break;
+      }
       case "Escape":
         e.preventDefault();
         setIsOpen(false);
