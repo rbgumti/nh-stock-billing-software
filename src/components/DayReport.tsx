@@ -45,6 +45,7 @@ export default function DayReport() {
   const [reportId, setReportId] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [medicineDataUpdated, setMedicineDataUpdated] = useState<Date | null>(null);
+  const [isRefreshingMedicine, setIsRefreshingMedicine] = useState(false);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
   
@@ -286,6 +287,8 @@ export default function DayReport() {
   }, [reportDate, stockItems]);
 
   const loadMedicineData = async () => {
+    setIsRefreshingMedicine(true);
+    try {
     // Get invoice items for the selected date
     const { data: invoiceData } = await supabase
       .from('invoices')
@@ -372,6 +375,9 @@ export default function DayReport() {
     setPsychiatryMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'psychiatry'));
     setOtherMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'other'));
     setMedicineDataUpdated(new Date());
+    } finally {
+      setIsRefreshingMedicine(false);
+    }
   };
 
   const updateCashCount = (index: number, count: number) => {
@@ -592,9 +598,10 @@ export default function DayReport() {
             size="icon"
             className="h-8 w-8"
             onClick={() => loadMedicineData()}
+            disabled={isRefreshingMedicine}
             title="Refresh data"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className={`h-4 w-4 ${isRefreshingMedicine ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={exportToExcel} size="sm" className="bg-gold hover:bg-gold/90 text-navy">
             <Download className="h-4 w-4 mr-1" />

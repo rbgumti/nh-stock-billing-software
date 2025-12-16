@@ -39,6 +39,7 @@ export default function DailyStockReport() {
   const [reportData, setReportData] = useState<StockReportItem[]>([]);
   const [showOnlyActive, setShowOnlyActive] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [cashDetails, setCashDetails] = useState<CashDenomination[]>([
     { denomination: 500, count: 0, amount: 0 },
     { denomination: 200, count: 0, amount: 0 },
@@ -80,6 +81,8 @@ export default function DailyStockReport() {
   }, [reportDate, showOnlyActive, stockItems]);
 
   const loadReportData = async () => {
+    setIsRefreshing(true);
+    try {
     // Get invoice items for the selected date to calculate issued quantities
     const { data: invoiceData } = await supabase
       .from('invoices')
@@ -147,6 +150,9 @@ export default function DailyStockReport() {
 
     setReportData(data);
     setLastUpdated(new Date());
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const updateCashCount = (index: number, count: number) => {
@@ -245,9 +251,10 @@ export default function DailyStockReport() {
               variant="outline"
               size="icon"
               onClick={() => loadReportData()}
+              disabled={isRefreshing}
               title="Refresh data"
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
           <Button onClick={exportToExcel} className="bg-gold hover:bg-gold/90 text-navy">
