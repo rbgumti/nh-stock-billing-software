@@ -45,10 +45,11 @@ export function PatientSearchSelect({
 
   // Filter patients based on search query
   const filteredPatients = useMemo(() => {
-    if (!searchQuery.trim()) return patients;
+    if (!searchQuery.trim()) return patients.filter(p => p && p.id != null);
     
     const query = searchQuery.toLowerCase().trim();
     return patients.filter((patient) => {
+      if (!patient || patient.id == null) return false;
       const idMatch = patient.id.toString().includes(query);
       const nameMatch = patient.patient_name?.toLowerCase().includes(query);
       const phoneMatch = patient.phone?.toLowerCase().includes(query);
