@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Receipt, Download, Eye } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Search, Plus, Receipt, Download, Eye, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import jsPDF from 'jspdf';
 import { toast } from "@/hooks/use-toast";
@@ -15,6 +16,7 @@ export default function Invoices() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Load invoices from Supabase
   useEffect(() => {
@@ -215,6 +217,67 @@ export default function Invoices() {
     }
   };
 
+  const bulkMarkAsPaid = async () => {
+    const unpaidSelectedIds = Array.from(selectedIds).filter(id => {
+      const invoice = invoices.find(inv => inv.id === id);
+      return invoice && invoice.status !== "Paid";
+    });
+
+    if (unpaidSelectedIds.length === 0) {
+      toast({
+        title: "No action needed",
+        description: "All selected invoices are already paid.",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({ status: 'Paid' })
+        .in('id', unpaidSelectedIds);
+
+      if (error) throw error;
+
+      // Update local state
+      const updatedInvoices = invoices.map((inv: any) =>
+        unpaidSelectedIds.includes(inv.id) ? { ...inv, status: "Paid" } : inv
+      );
+      setInvoices(updatedInvoices);
+      setSelectedIds(new Set());
+
+      toast({
+        title: "Success",
+        description: `${unpaidSelectedIds.length} invoice(s) marked as paid!`
+      });
+    } catch (error: any) {
+      console.error("Error updating invoices:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update invoice status.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredInvoices.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredInvoices.map(inv => inv.id)));
+    }
+  };
+
   const viewInvoiceDetails = (invoice: any) => {
     // Create a detailed view modal or alert
     const itemsList = invoice.items.map((item: any, index: number) => 
@@ -316,12 +379,48 @@ export default function Invoices() {
         </CardContent>
       </Card>
 
+      {/* Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <Card className="bg-gold/10 border-gold">
+          <CardContent className="py-3 flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {selectedIds.size} invoice(s) selected
+            </span>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())}>
+                Clear Selection
+              </Button>
+              <Button size="sm" onClick={bulkMarkAsPaid} className="bg-gold hover:bg-gold/90 text-navy">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Mark as Paid
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Select All */}
+      {filteredInvoices.length > 0 && (
+        <div className="flex items-center gap-2">
+          <Checkbox
+            checked={selectedIds.size === filteredInvoices.length && filteredInvoices.length > 0}
+            onCheckedChange={toggleSelectAll}
+          />
+          <span className="text-sm text-muted-foreground">Select All</span>
+        </div>
+      )}
+
       {/* Invoice List */}
       <div className="space-y-4">
         {filteredInvoices.map((invoice: any) => (
           <Card key={invoice.id} className="hover:shadow-md transition-shadow">
             <CardContent className="pt-6">
-              <div className="flex justify-between items-start">
+              <div className="flex gap-4 items-start">
+                <Checkbox
+                  checked={selectedIds.has(invoice.id)}
+                  onCheckedChange={() => toggleSelect(invoice.id)}
+                  className="mt-1"
+                />
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-4">
                     <div>
