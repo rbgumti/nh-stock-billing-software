@@ -116,9 +116,17 @@ export function PatientSearchSelect({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
-      if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter") {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         setIsOpen(true);
         e.preventDefault();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        // If there are filtered results, select the first one directly
+        if (filteredPatients.length > 0) {
+          handleSelect(filteredPatients[0]);
+        } else {
+          setIsOpen(true);
+        }
       }
       return;
     }
