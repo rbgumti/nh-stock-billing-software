@@ -180,19 +180,40 @@ export default function ViewPrescription() {
       y += 5;
     });
 
+    // Doctor Signature Section
+    y = Math.max(y + 15, doc.internal.pageSize.getHeight() - 70);
+    
+    // Signature line on the right side
+    const signatureX = pageWidth - margin - 60;
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.line(signatureX, y, pageWidth - margin, y);
+    
+    y += 5;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text("Doctor's Signature", signatureX + 30, y, { align: "center" });
+    
+    y += 8;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(27, 53, 97);
+    doc.text("Navjeevan Hospital", signatureX + 30, y, { align: "center" });
+    
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text("Date: " + format(new Date(prescription.prescription_date), "dd/MM/yyyy"), signatureX + 30, y, { align: "center" });
+
     // Footer
-    y = doc.internal.pageSize.getHeight() - 35;
+    y = doc.internal.pageSize.getHeight() - 20;
     doc.setDrawColor(212, 175, 55); // Gold color
     doc.setLineWidth(0.5);
     doc.line(margin, y, pageWidth - margin, y);
-    y += 8;
+    y += 6;
     
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(27, 53, 97); // Navy color
-    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
-    y += 5;
-    
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
     doc.text("This is a computer-generated prescription.", pageWidth / 2, y, { align: "center" });
