@@ -28,6 +28,7 @@ interface PrescriptionFormProps {
   onAddItem: () => void;
   onRemoveItem: (index: number) => void;
   onItemChange: (index: number, field: string, value: string | number) => void;
+  hidePatientFields?: boolean;
 }
 
 const FREQUENCY_OPTIONS = [
@@ -46,6 +47,7 @@ export default function PrescriptionForm({
   onAddItem,
   onRemoveItem,
   onItemChange,
+  hidePatientFields = false,
 }: PrescriptionFormProps) {
   const [medicineSearches, setMedicineSearches] = useState<Record<number, string>>({});
 
@@ -88,36 +90,40 @@ export default function PrescriptionForm({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Patient Information</CardTitle>
+          <CardTitle>{hidePatientFields ? 'Prescription Details' : 'Patient Information'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="patient_name">Patient Name *</Label>
-              <Input
-                id="patient_name"
-                value={formData.patient_name}
-                onChange={(e) => onFormChange('patient_name', e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="patient_age">Age</Label>
-              <Input
-                id="patient_age"
-                value={formData.patient_age}
-                onChange={(e) => onFormChange('patient_age', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="patient_phone">Phone</Label>
-              <Input
-                id="patient_phone"
-                value={formData.patient_phone}
-                onChange={(e) => onFormChange('patient_phone', e.target.value)}
-              />
-            </div>
-            <div>
+            {!hidePatientFields && (
+              <>
+                <div>
+                  <Label htmlFor="patient_name">Patient Name *</Label>
+                  <Input
+                    id="patient_name"
+                    value={formData.patient_name}
+                    onChange={(e) => onFormChange('patient_name', e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="patient_age">Age</Label>
+                  <Input
+                    id="patient_age"
+                    value={formData.patient_age}
+                    onChange={(e) => onFormChange('patient_age', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="patient_phone">Phone</Label>
+                  <Input
+                    id="patient_phone"
+                    value={formData.patient_phone}
+                    onChange={(e) => onFormChange('patient_phone', e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+            <div className={hidePatientFields ? "col-span-2" : ""}>
               <Label htmlFor="diagnosis">Diagnosis *</Label>
               <Input
                 id="diagnosis"

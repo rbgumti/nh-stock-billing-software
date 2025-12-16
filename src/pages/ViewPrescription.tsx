@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, FileText, Printer } from "lucide-react";
+import { ArrowLeft, FileText, Printer, Pencil } from "lucide-react";
 import { usePrescriptionStore, Prescription } from "@/hooks/usePrescriptionStore";
 import { format } from "date-fns";
 
@@ -69,10 +69,16 @@ export default function ViewPrescription() {
               Print
             </Button>
             {prescription.status === 'Active' && (
-              <Button onClick={() => navigate(`/invoices/new?prescriptionId=${prescription.id}`)}>
-                <FileText className="mr-2 h-4 w-4" />
-                Generate Invoice
-              </Button>
+              <>
+                <Button variant="outline" onClick={() => navigate(`/prescriptions/edit/${prescription.id}`)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+                <Button onClick={() => navigate(`/invoices/new?prescriptionId=${prescription.id}`)}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Generate Invoice
+                </Button>
+              </>
             )}
           </div>
         </div>
