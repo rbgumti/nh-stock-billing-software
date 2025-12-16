@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Loader2, Check } from "lucide-react";
+import { Download, Calendar, Loader2, Check, RefreshCw } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -44,6 +44,7 @@ export default function DayReport() {
   const [loading, setLoading] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [medicineDataUpdated, setMedicineDataUpdated] = useState<Date | null>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
   
@@ -371,6 +372,7 @@ export default function DayReport() {
     setTapentadolMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'tapentadol'));
     setPsychiatryMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'psychiatry'));
     setOtherMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'other'));
+    setMedicineDataUpdated(new Date());
   };
 
   const updateCashCount = (index: number, count: number) => {
@@ -560,7 +562,7 @@ export default function DayReport() {
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div>
           <h2 className="text-xl font-bold text-navy">Day's Report - {formatDate(reportDate)}</h2>
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex items-center gap-3 text-xs">
             {saving ? (
               <span className="text-muted-foreground flex items-center gap-1">
                 <Loader2 className="h-3 w-3 animate-spin" /> Saving...
@@ -570,6 +572,12 @@ export default function DayReport() {
                 <Check className="h-3 w-3" /> Auto-saved
               </span>
             ) : null}
+            {medicineDataUpdated && (
+              <span className="text-muted-foreground flex items-center gap-1 bg-muted px-2 py-0.5 rounded-full">
+                <RefreshCw className="h-3 w-3" />
+                Data updated {medicineDataUpdated.toLocaleTimeString()}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex gap-2 items-center">
