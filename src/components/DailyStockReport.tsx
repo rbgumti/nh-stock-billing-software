@@ -55,6 +55,29 @@ export default function DailyStockReport() {
     loadReportData();
   }, [stockItems, reportDate, showOnlyActive]);
 
+  // Real-time subscriptions for invoices and purchase orders
+  useEffect(() => {
+    const channel = supabase
+      .channel('daily-stock-report-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, () => {
+        loadReportData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoice_items' }, () => {
+        loadReportData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchase_orders' }, () => {
+        loadReportData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchase_order_items' }, () => {
+        loadReportData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [reportDate, showOnlyActive]);
+
   const loadReportData = async () => {
     // Get invoice items for the selected date to calculate issued quantities
     const { data: invoiceData } = await supabase
