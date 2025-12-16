@@ -154,7 +154,7 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
       <div className="space-y-2 relative">
         <PatientSearchSelect
           patients={patients}
-          selectedPatientId={appointment?.patient_id}
+          selectedPatientId={watch("patient_id")}
           onPatientSelect={handlePatientSelect}
         />
         {errors.patient_id && (
