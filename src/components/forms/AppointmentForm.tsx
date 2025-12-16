@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PatientSearchSelect } from "@/components/PatientSearchSelect";
+import { loadAllPatients, Patient } from "@/lib/patientUtils";
 
 const appointmentSchema = z.object({
   patient_id: z.number({ required_error: "Please select a patient" }),
@@ -29,15 +30,6 @@ const appointmentSchema = z.object({
 });
 
 type AppointmentFormData = z.infer<typeof appointmentSchema>;
-
-interface Patient {
-  id: number;
-  patient_name: string;
-  phone: string;
-  file_no: string;
-  aadhar_card: string;
-  govt_id: string;
-}
 
 interface Appointment {
   id: string;
@@ -95,13 +87,8 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
 
   const loadPatients = async () => {
     try {
-      const { data, error } = await supabase
-        .from('patients')
-        .select('id, patient_name, phone, file_no, aadhar_card, govt_id')
-        .order('patient_name');
-
-      if (error) throw error;
-      setPatients(data || []);
+      const data = await loadAllPatients();
+      setPatients(data);
     } catch (error) {
       console.error('Error loading patients:', error);
       toast.error('Failed to load patients');

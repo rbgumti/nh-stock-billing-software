@@ -8,16 +8,7 @@ import { usePrescriptionStore, PrescriptionItem } from "@/hooks/usePrescriptionS
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientSearchSelect } from "@/components/PatientSearchSelect";
-
-interface Patient {
-  id: number;
-  patient_name: string;
-  phone: string;
-  age: string;
-  file_no: string;
-  aadhar_card: string;
-  govt_id: string;
-}
+import { loadAllPatients, Patient } from "@/lib/patientUtils";
 
 interface StockItem {
   item_id: number;
@@ -61,13 +52,8 @@ export default function NewPrescription() {
 
   const loadPatients = async () => {
     try {
-      const { data, error } = await supabase
-        .from('patients')
-        .select('id, patient_name, phone, age, file_no, aadhar_card, govt_id')
-        .order('patient_name');
-
-      if (error) throw error;
-      setPatients(data || []);
+      const data = await loadAllPatients();
+      setPatients(data);
     } catch (error) {
       console.error('Error loading patients:', error);
     }

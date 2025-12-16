@@ -13,15 +13,7 @@ import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 import { usePrescriptionStore } from "@/hooks/usePrescriptionStore";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientSearchSelect } from "@/components/PatientSearchSelect";
-
-interface Patient {
-  id: number;
-  patient_name: string;
-  phone: string;
-  file_no: string;
-  aadhar_card: string;
-  govt_id: string;
-}
+import { loadAllPatients, Patient } from "@/lib/patientUtils";
 
 interface InvoiceItem {
   id: string;
@@ -75,13 +67,8 @@ export default function NewInvoice() {
 
   const loadPatients = async () => {
     try {
-      const { data, error } = await supabase
-        .from('patients')
-        .select('id, patient_name, phone, file_no, aadhar_card, govt_id')
-        .order('patient_name');
-
-      if (error) throw error;
-      setPatients(data || []);
+      const data = await loadAllPatients();
+      setPatients(data);
     } catch (error) {
       console.error('Error loading patients:', error);
     }
