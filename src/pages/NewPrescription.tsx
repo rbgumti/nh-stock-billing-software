@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, AlertCircle, X } from "lucide-react";
+import { ArrowLeft, AlertCircle, X, FileStack } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import PrescriptionForm from "@/components/forms/PrescriptionForm";
 import { usePrescriptionStore, PrescriptionItem } from "@/hooks/usePrescriptionStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
@@ -11,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PatientSearchSelect } from "@/components/PatientSearchSelect";
 import { loadAllPatients, Patient } from "@/lib/patientUtils";
 import { toast } from "@/hooks/use-toast";
+import { prescriptionTemplates, calculateQuantity } from "@/lib/prescriptionTemplates";
 
 interface StockItem {
   item_id: number;
@@ -38,6 +41,7 @@ export default function NewPrescription() {
   const [items, setItems] = useState<PrescriptionItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
 
   // Load patients and stock items on mount
   useEffect(() => {
@@ -153,6 +157,41 @@ export default function NewPrescription() {
     ));
   };
 
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    
+    if (templateId === "none") {
+      return;
+    }
+
+    const template = prescriptionTemplates.find(t => t.id === templateId);
+    if (!template) return;
+
+    // Apply template
+    setFormData(prev => ({
+      ...prev,
+      diagnosis: template.diagnosis,
+      notes: template.notes || '',
+    }));
+
+    // Convert template items to prescription items with calculated quantities
+    const templateItems: PrescriptionItem[] = template.items.map(item => ({
+      medicine_name: item.medicine_name,
+      dosage: item.dosage,
+      frequency: item.frequency,
+      duration: item.duration,
+      quantity: calculateQuantity(item.frequency, item.duration),
+      instructions: item.instructions || '',
+    }));
+
+    setItems(templateItems);
+
+    toast({
+      title: "Template applied",
+      description: `"${template.name}" template has been applied. You can modify the details as needed.`,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
@@ -250,6 +289,37 @@ export default function NewPrescription() {
             </CardContent>
           </Card>
         )}
+
+        {/* Template Selector */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileStack className="h-5 w-5" />
+              Quick Templates
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label>Select a template to auto-fill diagnosis and medicines</Label>
+              <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a template (optional)" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50 max-h-60">
+                  <SelectItem value="none">-- No template --</SelectItem>
+                  {prescriptionTemplates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Templates provide a starting point. You can modify all fields after applying.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
         <PrescriptionForm
           formData={formData}
