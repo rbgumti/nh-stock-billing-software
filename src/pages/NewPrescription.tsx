@@ -14,7 +14,7 @@ import { PatientSearchSelect } from "@/components/PatientSearchSelect";
 import { loadAllPatients, Patient } from "@/lib/patientUtils";
 import { toast } from "@/hooks/use-toast";
 import { prescriptionTemplates, calculateQuantity } from "@/lib/prescriptionTemplates";
-
+import { prescriptionFormSchema, prescriptionItemsArraySchema } from "@/lib/validationSchemas";
 interface StockItem {
   item_id: number;
   name: string;
@@ -196,27 +196,19 @@ export default function NewPrescription() {
     e.preventDefault();
     setFormError(null);
 
-    if (!formData.patient_id || formData.patient_id === 0) {
-      setFormError("Please select a patient before creating a prescription");
+    // Validate form data with zod
+    const formValidation = prescriptionFormSchema.safeParse(formData);
+    if (!formValidation.success) {
+      const firstError = formValidation.error.errors[0];
+      setFormError(firstError.message);
       return;
     }
 
-    if (!formData.diagnosis.trim()) {
-      setFormError("Please enter a diagnosis");
-      return;
-    }
-
-    if (items.length === 0) {
-      setFormError("Please add at least one medicine to the prescription");
-      return;
-    }
-
-    // Validate all medicine items have required fields
-    const invalidItems = items.filter(item => 
-      !item.medicine_name.trim() || !item.dosage.trim() || !item.frequency.trim() || !item.duration.trim()
-    );
-    if (invalidItems.length > 0) {
-      setFormError("Please fill in all required fields for each medicine (name, dosage, frequency, duration)");
+    // Validate prescription items with zod
+    const itemsValidation = prescriptionItemsArraySchema.safeParse(items);
+    if (!itemsValidation.success) {
+      const firstError = itemsValidation.error.errors[0];
+      setFormError(firstError.message);
       return;
     }
 
