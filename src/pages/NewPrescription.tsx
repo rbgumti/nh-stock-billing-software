@@ -222,12 +222,7 @@ export default function NewPrescription() {
 
       navigate('/prescriptions');
     } catch (error) {
-      console.error('Error creating prescription:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create prescription. Please try again.",
-        variant: "destructive",
-      });
+      // addPrescription() already shows a detailed toast error
     } finally {
       setIsSubmitting(false);
     }
