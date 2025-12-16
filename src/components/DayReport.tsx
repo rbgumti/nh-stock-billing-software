@@ -587,6 +587,15 @@ export default function DayReport() {
             onChange={(e) => setReportDate(e.target.value)}
             className="w-auto h-8"
           />
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => loadMedicineData()}
+            title="Refresh data"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
           <Button onClick={exportToExcel} size="sm" className="bg-gold hover:bg-gold/90 text-navy">
             <Download className="h-4 w-4 mr-1" />
             Export
