@@ -261,6 +261,29 @@ export default function DayReport() {
     loadMedicineData();
   }, [stockItems, reportDate]);
 
+  // Real-time subscriptions for invoices and purchase orders
+  useEffect(() => {
+    const channel = supabase
+      .channel('day-report-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, () => {
+        loadMedicineData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoice_items' }, () => {
+        loadMedicineData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchase_orders' }, () => {
+        loadMedicineData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchase_order_items' }, () => {
+        loadMedicineData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [reportDate]);
+
   const loadMedicineData = async () => {
     // Get invoice items for the selected date
     const { data: invoiceData } = await supabase
