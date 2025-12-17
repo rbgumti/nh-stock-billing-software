@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
 import { GRNForm } from "@/components/forms/GRNForm";
@@ -169,6 +170,158 @@ export default function Stock() {
     toast({
       title: "Downloaded",
       description: `Purchase Order ${po.poNumber} has been downloaded.`
+    });
+  };
+
+  const downloadParbPharmaPO = (po: any) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    
+    // Format date as DD-MM-YYYY
+    const formatDate = (dateStr: string) => {
+      const date = new Date(dateStr);
+      return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+    };
+    
+    // Header - PO No and Date
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text(`P.O. NO. ${po.poNumber}`, margin, 20);
+    doc.text(`Date- ${formatDate(po.orderDate)}`, pageWidth - margin, 20, { align: "right" });
+    
+    // Supplier Address
+    let y = 35;
+    doc.setFont("helvetica", "normal");
+    doc.text("To", margin, y);
+    y += 7;
+    doc.setFont("helvetica", "bold");
+    doc.text("PARB PHARMACEUTICALS (P).LTD.", margin, y);
+    y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.text("307 GIDC, POR", margin, y);
+    y += 6;
+    doc.text("DISTT. VADODARA 391243", margin, y);
+    
+    // Subject
+    y += 12;
+    doc.setFont("helvetica", "bold");
+    doc.text("Subject: Purchase order.", margin, y);
+    
+    // Dear sir paragraph
+    y += 10;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    const introText = "We hereby placing a purchase order, Terms and conditions will remain same as our discussion on phonically. Payment of product shall be done through cheque to your bank account. The name and composition of product given below, Please do the supply earlier as possible.";
+    const splitIntro = doc.splitTextToSize(introText, pageWidth - (margin * 2));
+    doc.text("Dear sir,", margin, y);
+    y += 7;
+    doc.text(splitIntro, margin, y);
+    y += splitIntro.length * 5 + 8;
+    
+    // Table Header
+    const colWidths = [15, 45, 45, 25, 25, 20];
+    const headers = ["S. NO.", "Product Name", "Composition", "Box. Qty.", "Rate/Box", "Packing"];
+    
+    doc.setFillColor(240, 240, 240);
+    doc.rect(margin, y, pageWidth - (margin * 2), 8, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    
+    let xPos = margin + 2;
+    headers.forEach((header, idx) => {
+      doc.text(header, xPos, y + 5.5);
+      xPos += colWidths[idx];
+    });
+    
+    // Table border
+    doc.setDrawColor(0);
+    doc.rect(margin, y, pageWidth - (margin * 2), 8);
+    y += 8;
+    
+    // Table Rows
+    doc.setFont("helvetica", "normal");
+    po.items.forEach((item: any, index: number) => {
+      if (y > 200) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      const stockItem = stockItems.find(s => s.id === item.stockItemId);
+      const rowHeight = 8;
+      
+      doc.rect(margin, y, pageWidth - (margin * 2), rowHeight);
+      
+      xPos = margin + 2;
+      doc.text((index + 1).toString(), xPos, y + 5.5);
+      xPos += colWidths[0];
+      
+      // Product Name (truncate if too long)
+      const productName = item.stockItemName.length > 20 ? item.stockItemName.substring(0, 18) + ".." : item.stockItemName;
+      doc.text(productName, xPos, y + 5.5);
+      xPos += colWidths[1];
+      
+      // Composition - use category or leave blank
+      const composition = stockItem?.category || "-";
+      doc.text(composition, xPos, y + 5.5);
+      xPos += colWidths[2];
+      
+      // Box Qty
+      doc.text(item.quantity.toString(), xPos, y + 5.5);
+      xPos += colWidths[3];
+      
+      // Rate/Box
+      doc.text(`₹${item.unitPrice.toFixed(2)}`, xPos, y + 5.5);
+      xPos += colWidths[4];
+      
+      // Packing - use batch no or leave blank
+      const packing = stockItem?.batchNo || "-";
+      doc.text(packing.length > 8 ? packing.substring(0, 6) + ".." : packing, xPos, y + 5.5);
+      
+      y += rowHeight;
+    });
+    
+    // Empty row for additional entries
+    doc.rect(margin, y, pageWidth - (margin * 2), 8);
+    y += 15;
+    
+    // UNDERTAKING Section
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("UNDERTAKING", pageWidth / 2, y, { align: "center" });
+    y += 8;
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    
+    const undertakingText1 = `We hereby confirm that the Products which we intend to buy from PARB PHARMACEUTICALS (P).LTD. 307 GIDC, POR DISTT. VADODARA 391243 GUJARAT INDIA. Against Our P.O. NO ${po.poNumber} date ${formatDate(po.orderDate)}`;
+    const splitUndertaking1 = doc.splitTextToSize(undertakingText1, pageWidth - (margin * 2));
+    doc.text(splitUndertaking1, margin, y);
+    y += splitUndertaking1.length * 4 + 5;
+    
+    const undertakingText2 = "These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License. NO. ..............................";
+    const splitUndertaking2 = doc.splitTextToSize(undertakingText2, pageWidth - (margin * 2));
+    doc.text(splitUndertaking2, margin, y);
+    y += splitUndertaking2.length * 4 + 5;
+    
+    const undertakingText3 = "We are fully aware these products containing controlled substance as per Narcotic Drugs & Psychotropic substances Act 1985, and we will keep the relevant records of sale and purchase to us. Also, we assure our acknowledgement in form 6 (consignment note) for the receipt of above purchase item to supplier immediately on receipt of above controlled substances.";
+    const splitUndertaking3 = doc.splitTextToSize(undertakingText3, pageWidth - (margin * 2));
+    doc.text(splitUndertaking3, margin, y);
+    y += splitUndertaking3.length * 4 + 5;
+    
+    const undertakingText4 = "Further we undertake that we are taking the Products for sale of below mentioned formulation & for its sale within India only & not meant for export.";
+    const splitUndertaking4 = doc.splitTextToSize(undertakingText4, pageWidth - (margin * 2));
+    doc.text(splitUndertaking4, margin, y);
+    y += splitUndertaking4.length * 4 + 15;
+    
+    // Signature area
+    doc.text(`Date :- ${formatDate(po.orderDate)}`, margin, y);
+    doc.text("FOR NAVJEEVAN HOSPITAL", pageWidth - margin - 50, y);
+    
+    doc.save(`PO-ParbPharma-${po.poNumber}.pdf`);
+    toast({
+      title: "Downloaded",
+      description: `Parb Pharma PO ${po.poNumber} has been downloaded.`
     });
   };
 
@@ -485,12 +638,24 @@ export default function Stock() {
                           Process GRN
                         </Button>
                       )}
-                      <Button 
-                        variant="outline" 
-                        onClick={() => downloadPurchaseOrder(po)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline">
+                            <Download className="h-4 w-4 mr-1" />
+                            <ChevronDown className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => downloadPurchaseOrder(po)}>
+                            <FileText className="h-4 w-4 mr-2" />
+                            Standard PO
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => downloadParbPharmaPO(po)}>
+                            <FileText className="h-4 w-4 mr-2" />
+                            Parb Pharma Format
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </CardContent>
