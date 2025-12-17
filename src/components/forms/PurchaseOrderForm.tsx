@@ -19,6 +19,7 @@ interface PurchaseOrderFormProps {
 
 export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrderFormProps) {
   const { getNextPurchaseOrderNumber } = useSequentialNumbers();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     supplier: "",
@@ -67,21 +68,26 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
       return;
     }
 
-    const poNumber = await getNextPurchaseOrderNumber();
+    setIsSubmitting(true);
+    try {
+      const poNumber = await getNextPurchaseOrderNumber();
 
-    const purchaseOrder: PurchaseOrder = {
-      id: Date.now(),
-      poNumber,
-      supplier: formData.supplier,
-      orderDate: new Date().toISOString().split('T')[0],
-      expectedDelivery: formData.expectedDelivery,
-      status: 'Pending',
-      items,
-      totalAmount,
-      notes: formData.notes
-    };
+      const purchaseOrder: PurchaseOrder = {
+        id: Date.now(),
+        poNumber,
+        supplier: formData.supplier,
+        orderDate: new Date().toISOString().split('T')[0],
+        expectedDelivery: formData.expectedDelivery,
+        status: 'Pending',
+        items,
+        totalAmount,
+        notes: formData.notes
+      };
 
-    onSubmit(purchaseOrder);
+      onSubmit(purchaseOrder);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -224,11 +230,11 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
           </Card>
 
           <div className="flex justify-end space-x-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={items.length === 0}>
-              Create Purchase Order
+            <Button type="submit" disabled={items.length === 0 || isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Purchase Order"}
             </Button>
           </div>
         </form>
