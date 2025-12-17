@@ -25,7 +25,8 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
     expiryDate: "",
     batchNo: "",
     description: "",
-    composition: ""
+    composition: "",
+    packing: ""
   });
 
   // Populate form when editing
@@ -41,7 +42,8 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
         expiryDate: initialData.expiryDate === "N/A" ? "" : initialData.expiryDate || "",
         batchNo: initialData.batchNo || "",
         description: initialData.description || "",
-        composition: initialData.composition || ""
+        composition: initialData.composition || "",
+        packing: initialData.packing || ""
       });
     }
   }, [isEditing, initialData]);
@@ -69,7 +71,8 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
       expiryDate: formData.expiryDate || "N/A",
       batchNo: formData.batchNo || `BATCH${Date.now()}`,
       status: "In Stock",
-      composition: formData.composition || undefined
+      composition: formData.composition || undefined,
+      packing: formData.packing || undefined
     };
 
     onSubmit(stockItem);
@@ -189,6 +192,16 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
                 value={formData.composition}
                 onChange={(e) => handleInputChange("composition", e.target.value)}
                 placeholder="e.g., Paracetamol 500mg + Caffeine 65mg"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="packing">Packing</Label>
+              <Input
+                id="packing"
+                value={formData.packing}
+                onChange={(e) => handleInputChange("packing", e.target.value)}
+                placeholder="e.g., 10x10, 30 Tabs"
               />
             </div>
 

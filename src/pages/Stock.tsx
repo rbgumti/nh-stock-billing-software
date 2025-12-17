@@ -275,8 +275,8 @@ export default function Stock() {
       doc.text(`₹${item.unitPrice.toFixed(2)}`, xPos, y + 5.5);
       xPos += colWidths[4];
       
-      // Packing - use batch no or leave blank
-      const packing = stockItem?.batchNo || "-";
+      // Packing - use packing field
+      const packing = stockItem?.packing || "-";
       doc.text(packing.length > 8 ? packing.substring(0, 6) + ".." : packing, xPos, y + 5.5);
       
       y += rowHeight;

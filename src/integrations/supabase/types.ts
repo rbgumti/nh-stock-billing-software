@@ -746,6 +746,7 @@ export type Database = {
           minimum_stock: number
           mrp: number | null
           name: string
+          packing: string | null
           status: string | null
           supplier: string
           unit_price: number
@@ -762,6 +763,7 @@ export type Database = {
           minimum_stock?: number
           mrp?: number | null
           name: string
+          packing?: string | null
           status?: string | null
           supplier: string
           unit_price: number
@@ -778,6 +780,7 @@ export type Database = {
           minimum_stock?: number
           mrp?: number | null
           name?: string
+          packing?: string | null
           status?: string | null
           supplier?: string
           unit_price?: number
