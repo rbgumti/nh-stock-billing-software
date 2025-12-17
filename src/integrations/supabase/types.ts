@@ -738,6 +738,7 @@ export type Database = {
         Row: {
           batch_no: string
           category: string
+          composition: string | null
           created_at: string | null
           current_stock: number
           expiry_date: string
@@ -753,6 +754,7 @@ export type Database = {
         Insert: {
           batch_no: string
           category: string
+          composition?: string | null
           created_at?: string | null
           current_stock?: number
           expiry_date: string
@@ -768,6 +770,7 @@ export type Database = {
         Update: {
           batch_no?: string
           category?: string
+          composition?: string | null
           created_at?: string | null
           current_stock?: number
           expiry_date?: string

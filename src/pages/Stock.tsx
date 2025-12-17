@@ -261,9 +261,10 @@ export default function Stock() {
       doc.text(productName, xPos, y + 5.5);
       xPos += colWidths[1];
       
-      // Composition - use category or leave blank
-      const composition = stockItem?.category || "-";
-      doc.text(composition, xPos, y + 5.5);
+      // Composition - use actual composition field
+      const composition = stockItem?.composition || "-";
+      const compText = composition.length > 20 ? composition.substring(0, 18) + ".." : composition;
+      doc.text(compText, xPos, y + 5.5);
       xPos += colWidths[2];
       
       // Box Qty

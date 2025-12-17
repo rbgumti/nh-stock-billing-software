@@ -14,6 +14,7 @@ export interface StockItem {
   expiryDate: string;
   batchNo: string;
   status?: string;
+  composition?: string;
 }
 
 export function useStockStore() {
@@ -64,7 +65,8 @@ export function useStockStore() {
         supplier: item.supplier,
         expiryDate: item.expiry_date,
         batchNo: item.batch_no,
-        status: item.status || undefined
+        status: item.status || undefined,
+        composition: item.composition || undefined
       }));
 
       setStockItems(formattedItems);
@@ -94,7 +96,8 @@ export function useStockStore() {
           supplier: item.supplier,
           expiry_date: item.expiryDate,
           batch_no: item.batchNo,
-          status: item.status || null
+          status: item.status || null,
+          composition: item.composition || null
         });
 
       if (error) throw error;
@@ -123,7 +126,8 @@ export function useStockStore() {
           supplier: updatedItem.supplier,
           expiry_date: updatedItem.expiryDate,
           batch_no: updatedItem.batchNo,
-          status: updatedItem.status || null
+          status: updatedItem.status || null,
+          composition: updatedItem.composition || null
         })
         .eq('item_id', id);
 
