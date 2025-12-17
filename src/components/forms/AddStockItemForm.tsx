@@ -24,7 +24,8 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
     supplier: "",
     expiryDate: "",
     batchNo: "",
-    description: ""
+    description: "",
+    composition: ""
   });
 
   // Populate form when editing
@@ -39,7 +40,8 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
         supplier: initialData.supplier || "",
         expiryDate: initialData.expiryDate === "N/A" ? "" : initialData.expiryDate || "",
         batchNo: initialData.batchNo || "",
-        description: initialData.description || ""
+        description: initialData.description || "",
+        composition: initialData.composition || ""
       });
     }
   }, [isEditing, initialData]);
@@ -66,7 +68,8 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
       supplier: formData.supplier,
       expiryDate: formData.expiryDate || "N/A",
       batchNo: formData.batchNo || `BATCH${Date.now()}`,
-      status: "In Stock"
+      status: "In Stock",
+      composition: formData.composition || undefined
     };
 
     onSubmit(stockItem);
@@ -177,6 +180,16 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
                   onChange={(e) => handleInputChange("expiryDate", e.target.value)}
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="composition">Composition</Label>
+              <Input
+                id="composition"
+                value={formData.composition}
+                onChange={(e) => handleInputChange("composition", e.target.value)}
+                placeholder="e.g., Paracetamol 500mg + Caffeine 65mg"
+              />
             </div>
 
             <div>
