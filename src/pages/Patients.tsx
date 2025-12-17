@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Search, Plus, Phone, Users, Upload, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, LayoutGrid, List, Eye, Pencil, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { Search, Plus, Phone, Users, Upload, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, LayoutGrid, List, Eye, Pencil, ArrowUp, ArrowDown, ArrowUpDown, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PatientExcelImport } from "@/components/PatientExcelImport";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Patient {
   id: number;
@@ -65,6 +66,9 @@ const SortableHeader = ({ column, label, sortColumn, sortDirection, onSort, clas
 export default function Patients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [fileNoSearch, setFileNoSearch] = useState("");
+  const [debouncedFileNo, setDebouncedFileNo] = useState("");
+  const [searchTab, setSearchTab] = useState<"general" | "fileno">("general");
   const [showImport, setShowImport] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,6 +88,15 @@ export default function Patients() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Debounce file number search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFileNo(fileNoSearch);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [fileNoSearch]);
+
   // Load patients with pagination and search
   const loadPatients = useCallback(async () => {
     setLoading(true);
@@ -95,12 +108,14 @@ export default function Patients() {
         .from('patients')
         .select('*', { count: 'exact' });
 
-      // Apply search filter if there's a search term
-      if (debouncedSearch.trim()) {
+      // Apply search filter based on active tab
+      if (searchTab === "general" && debouncedSearch.trim()) {
         const search = debouncedSearch.trim();
         query = query.or(
           `patient_name.ilike.%${search}%,phone.ilike.%${search}%,file_no.ilike.%${search}%,aadhar_card.ilike.%${search}%,govt_id.ilike.%${search}%,new_govt_id.ilike.%${search}%`
         );
+      } else if (searchTab === "fileno" && debouncedFileNo.trim()) {
+        query = query.ilike('file_no', `%${debouncedFileNo.trim()}%`);
       }
 
       const { data, error, count } = await query
@@ -121,7 +136,7 @@ export default function Patients() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, debouncedSearch, sortColumn, sortDirection]);
+  }, [currentPage, pageSize, debouncedSearch, debouncedFileNo, searchTab, sortColumn, sortDirection]);
 
   useEffect(() => {
     loadPatients();
@@ -219,7 +234,8 @@ export default function Patients() {
           <h1 className="text-3xl font-bold text-navy">Patients</h1>
           <p className="text-muted-foreground mt-2">
             {loading ? "Loading patients..." : `${totalCount.toLocaleString()} patients total`}
-            {debouncedSearch && ` matching "${debouncedSearch}"`}
+            {searchTab === "general" && debouncedSearch && ` matching "${debouncedSearch}"`}
+            {searchTab === "fileno" && debouncedFileNo && ` with file no. "${debouncedFileNo}"`}
           </p>
         </div>
         <div className="flex gap-2">
@@ -246,39 +262,66 @@ export default function Patients() {
       {/* Search */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex gap-4 items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search patients by name, phone, file no., Aadhar, or govt ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <Tabs value={searchTab} onValueChange={(v) => setSearchTab(v as "general" | "fileno")}>
+            <div className="flex items-center justify-between mb-4">
+              <TabsList>
+                <TabsTrigger value="general" className="gap-2">
+                  <Search className="h-4 w-4" />
+                  General Search
+                </TabsTrigger>
+                <TabsTrigger value="fileno" className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  File No. Search
+                </TabsTrigger>
+              </TabsList>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">Per page:</span>
+                  <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="12">12</SelectItem>
+                      <SelectItem value="24">24</SelectItem>
+                      <SelectItem value="48">48</SelectItem>
+                      <SelectItem value="96">96</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as ViewMode)}>
+                  <ToggleGroupItem value="grid" aria-label="Grid view">
+                    <LayoutGrid className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="table" aria-label="Table view">
+                    <List className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground whitespace-nowrap">Per page:</span>
-              <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
-                <SelectTrigger className="w-20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="12">12</SelectItem>
-                  <SelectItem value="24">24</SelectItem>
-                  <SelectItem value="48">48</SelectItem>
-                  <SelectItem value="96">96</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as ViewMode)}>
-              <ToggleGroupItem value="grid" aria-label="Grid view">
-                <LayoutGrid className="h-4 w-4" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="table" aria-label="Table view">
-                <List className="h-4 w-4" />
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
+            <TabsContent value="general" className="mt-0">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search patients by name, phone, file no., Aadhar, or govt ID..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="fileno" className="mt-0">
+              <div className="relative">
+                <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Enter file number to search..."
+                  value={fileNoSearch}
+                  onChange={(e) => setFileNoSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -497,7 +540,7 @@ export default function Patients() {
             <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No patients found</h3>
             <p className="text-gray-500 mb-4">
-              {searchTerm ? "Try adjusting your search terms" : "Get started by adding your first patient"}
+              {(searchTerm || fileNoSearch) ? "Try adjusting your search terms" : "Get started by adding your first patient"}
             </p>
             <Button asChild>
               <Link to="/patients/new">
