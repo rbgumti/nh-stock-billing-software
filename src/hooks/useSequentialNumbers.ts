@@ -45,22 +45,33 @@ export const useSequentialNumbers = () => {
     sequentialStore = numbers;
   }, [numbers]);
 
-  const getNextPurchaseOrderNumber = (): string => {
+  const getNextPurchaseOrderNumber = async (): Promise<string> => {
     const now = new Date();
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     const day = now.getDate().toString().padStart(2, '0');
-    const paddedNumber = sequentialStore.purchaseOrder.toString().padStart(3, '0');
-    const poNumber = `PO${year}${month}${day}${paddedNumber}`;
+    const datePrefix = `PO${year}${month}${day}`;
     
-    // Increment for next use
-    const newNumbers = {
-      ...sequentialStore,
-      purchaseOrder: sequentialStore.purchaseOrder + 1
-    };
-    setNumbers(newNumbers);
+    // Query database for highest PO number with today's date prefix
+    const { data, error } = await supabase
+      .from('purchase_orders')
+      .select('po_number')
+      .like('po_number', `${datePrefix}%`)
+      .order('po_number', { ascending: false })
+      .limit(1);
     
-    return poNumber;
+    let nextNum = 1;
+    if (!error && data && data.length > 0) {
+      const lastNumber = data[0].po_number;
+      const suffix = lastNumber.replace(datePrefix, '');
+      const parsed = parseInt(suffix, 10);
+      if (!isNaN(parsed)) {
+        nextNum = parsed + 1;
+      }
+    }
+    
+    const paddedNumber = nextNum.toString().padStart(3, '0');
+    return `${datePrefix}${paddedNumber}`;
   };
 
   const getNextInvoiceNumber = (): string => {

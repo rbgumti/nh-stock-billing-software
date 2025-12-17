@@ -60,16 +60,18 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
 
   const totalAmount = items.reduce((sum, item) => sum + item.totalPrice, 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.supplier || !formData.expectedDelivery || items.length === 0) {
       return;
     }
 
+    const poNumber = await getNextPurchaseOrderNumber();
+
     const purchaseOrder: PurchaseOrder = {
       id: Date.now(),
-      poNumber: getNextPurchaseOrderNumber(),
+      poNumber,
       supplier: formData.supplier,
       orderDate: new Date().toISOString().split('T')[0],
       expectedDelivery: formData.expectedDelivery,
