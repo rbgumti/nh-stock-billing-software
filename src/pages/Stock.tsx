@@ -116,55 +116,114 @@ export default function Stock() {
 
   const downloadPurchaseOrder = (po: any) => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
     
-    // Header
-    doc.setFontSize(20);
-    doc.text("PURCHASE ORDER", 105, 20, { align: "center" });
+    // Hospital Logo and Header
+    const img = new Image();
+    img.src = "/NH_LOGO.png";
+    
+    // Add logo placeholder (centered)
+    try {
+      doc.addImage(img, "PNG", pageWidth / 2 - 15, 10, 30, 30);
+    } catch (e) {
+      // Logo not available, continue without it
+    }
+    
+    // Hospital Name
+    doc.setTextColor(0, 51, 102); // Navy color
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, 48, { align: "center" });
+    
+    // Tagline
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("De-Addiction & Rehabilitation Centre", pageWidth / 2, 55, { align: "center" });
+    
+    // Address
+    doc.setFontSize(9);
+    doc.text("Near Bus Stand, Main Road, Mansa, Punjab - 151505", pageWidth / 2, 61, { align: "center" });
+    doc.text("Phone: +91-9876543210 | Email: info@navjeevanhospital.com", pageWidth / 2, 67, { align: "center" });
+    
+    // Gold divider line
+    doc.setDrawColor(212, 175, 55); // Gold color
+    doc.setLineWidth(0.5);
+    doc.line(margin, 72, pageWidth - margin, 72);
+    
+    // Purchase Order Title
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("PURCHASE ORDER", pageWidth / 2, 82, { align: "center" });
     
     // PO Details
-    doc.setFontSize(12);
-    doc.text(`PO Number: ${po.poNumber}`, 20, 40);
-    doc.text(`Date: ${po.orderDate}`, 20, 50);
-    doc.text(`Supplier: ${po.supplier}`, 20, 60);
-    doc.text(`Expected Delivery: ${po.expectedDelivery}`, 20, 70);
-    doc.text(`Status: ${po.status}`, 20, 80);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`PO Number: ${po.poNumber}`, margin, 95);
+    doc.text(`Date: ${po.orderDate}`, pageWidth - margin, 95, { align: "right" });
+    doc.text(`Supplier: ${po.supplier}`, margin, 103);
+    doc.text(`Expected Delivery: ${po.expectedDelivery}`, pageWidth - margin, 103, { align: "right" });
+    doc.text(`Status: ${po.status}`, margin, 111);
     
     // Items Table Header
+    let yPos = 125;
+    doc.setFillColor(240, 240, 240);
+    doc.rect(margin, yPos - 5, pageWidth - (margin * 2), 8, 'F');
     doc.setFontSize(10);
-    doc.text("Item Name", 20, 95);
-    doc.text("Quantity", 100, 95);
-    doc.text("Unit Price", 130, 95);
-    doc.text("Total", 165, 95);
-    doc.line(20, 97, 190, 97);
+    doc.setFont("helvetica", "bold");
+    doc.text("Item Name", margin + 2, yPos);
+    doc.text("Quantity", 100, yPos);
+    doc.text("Unit Price", 130, yPos);
+    doc.text("Total", 165, yPos);
+    doc.rect(margin, yPos - 5, pageWidth - (margin * 2), 8);
+    yPos += 8;
     
     // Items
-    let yPos = 105;
+    doc.setFont("helvetica", "normal");
     po.items.forEach((item: any, index: number) => {
-      if (yPos > 270) {
+      if (yPos > 260) {
         doc.addPage();
         yPos = 20;
       }
-      doc.text(item.stockItemName, 20, yPos);
+      doc.rect(margin, yPos - 5, pageWidth - (margin * 2), 8);
+      doc.text(item.stockItemName.length > 35 ? item.stockItemName.substring(0, 33) + ".." : item.stockItemName, margin + 2, yPos);
       doc.text(item.quantity.toString(), 100, yPos);
       doc.text(`₹${item.unitPrice.toFixed(2)}`, 130, yPos);
       doc.text(`₹${item.totalPrice.toFixed(2)}`, 165, yPos);
-      yPos += 10;
+      yPos += 8;
     });
     
     // Total
-    doc.line(20, yPos, 190, yPos);
-    yPos += 10;
+    yPos += 5;
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
-    doc.text(`Total Amount: ₹${po.totalAmount.toFixed(2)}`, 20, yPos);
+    doc.text(`Total Amount: ₹${po.totalAmount.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     
     // Notes
     if (po.notes) {
       yPos += 15;
       doc.setFontSize(10);
-      doc.text("Notes:", 20, yPos);
+      doc.setFont("helvetica", "bold");
+      doc.text("Notes:", margin, yPos);
+      doc.setFont("helvetica", "normal");
       yPos += 7;
-      doc.text(po.notes, 20, yPos);
+      const splitNotes = doc.splitTextToSize(po.notes, pageWidth - (margin * 2));
+      doc.text(splitNotes, margin, yPos);
     }
+    
+    // Footer
+    const footerY = doc.internal.pageSize.getHeight() - 15;
+    doc.setDrawColor(212, 175, 55);
+    doc.setLineWidth(0.5);
+    doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
+    doc.setFontSize(8);
+    doc.setTextColor(0, 51, 102);
+    doc.setFont("helvetica", "bold");
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, footerY, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text("Thank you for your business", pageWidth / 2, footerY + 5, { align: "center" });
     
     doc.save(`PO-${po.poNumber}.pdf`);
     toast({
@@ -184,14 +243,50 @@ export default function Stock() {
       return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
     };
     
+    // Hospital Logo and Header
+    const img = new Image();
+    img.src = "/NH_LOGO.png";
+    
+    // Add logo placeholder (centered)
+    try {
+      doc.addImage(img, "PNG", pageWidth / 2 - 15, 8, 30, 30);
+    } catch (e) {
+      // Logo not available, continue without it
+    }
+    
+    // Hospital Name
+    doc.setTextColor(0, 51, 102); // Navy color
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, 45, { align: "center" });
+    
+    // Tagline
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text("De-Addiction & Rehabilitation Centre", pageWidth / 2, 51, { align: "center" });
+    
+    // Address
+    doc.setFontSize(8);
+    doc.text("Near Bus Stand, Main Road, Mansa, Punjab - 151505", pageWidth / 2, 56, { align: "center" });
+    doc.text("Phone: +91-9876543210 | Email: info@navjeevanhospital.com", pageWidth / 2, 61, { align: "center" });
+    
+    // Gold divider line
+    doc.setDrawColor(212, 175, 55); // Gold color
+    doc.setLineWidth(0.5);
+    doc.line(margin, 65, pageWidth - margin, 65);
+    
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+    
     // Header - PO No and Date
+    let y = 75;
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text(`P.O. NO. ${po.poNumber}`, margin, 20);
-    doc.text(`Date- ${formatDate(po.orderDate)}`, pageWidth - margin, 20, { align: "right" });
+    doc.text(`P.O. NO. ${po.poNumber}`, margin, y);
+    doc.text(`Date- ${formatDate(po.orderDate)}`, pageWidth - margin, y, { align: "right" });
     
     // Supplier Address
-    let y = 35;
+    y += 12;
     doc.setFont("helvetica", "normal");
     doc.text("To", margin, y);
     y += 7;
