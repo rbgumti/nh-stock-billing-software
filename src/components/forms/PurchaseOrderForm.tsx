@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder, PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
@@ -234,7 +234,14 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
               Cancel
             </Button>
             <Button type="submit" disabled={items.length === 0 || isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Purchase Order"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Purchase Order"
+              )}
             </Button>
           </div>
         </form>
