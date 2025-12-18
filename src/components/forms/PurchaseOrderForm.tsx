@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Plus, Trash2, Loader2 } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder, PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
+import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
 
 interface PurchaseOrderFormProps {
   onClose: () => void;
@@ -19,9 +20,12 @@ interface PurchaseOrderFormProps {
 
 export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrderFormProps) {
   const { getNextPurchaseOrderNumber } = useSequentialNumbers();
+  const { suppliers, loading: suppliersLoading } = useSupplierStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   
   const [formData, setFormData] = useState({
+    supplierId: "",
     supplier: "",
     expectedDelivery: "",
     notes: ""
@@ -33,6 +37,19 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
     quantity: "",
     unitPrice: ""
   });
+
+  // Update selected supplier when supplierId changes
+  useEffect(() => {
+    if (formData.supplierId) {
+      const supplier = suppliers.find(s => s.id.toString() === formData.supplierId);
+      setSelectedSupplier(supplier || null);
+      if (supplier) {
+        setFormData(prev => ({ ...prev, supplier: supplier.name }));
+      }
+    } else {
+      setSelectedSupplier(null);
+    }
+  }, [formData.supplierId, suppliers]);
 
   const addItem = () => {
     if (!currentItem.stockItemId || !currentItem.quantity || !currentItem.unitPrice) return;
@@ -101,13 +118,31 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="supplier">Supplier *</Label>
-              <Input
-                id="supplier"
-                value={formData.supplier}
-                onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
-                placeholder="Enter supplier name"
-                required
-              />
+              {suppliers.length > 0 ? (
+                <Select 
+                  value={formData.supplierId} 
+                  onValueChange={(value) => setFormData({ ...formData, supplierId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select supplier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id.toString()}>
+                        {supplier.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id="supplier"
+                  value={formData.supplier}
+                  onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+                  placeholder="Enter supplier name"
+                  required
+                />
+              )}
             </div>
 
             <div className="space-y-2">
@@ -121,6 +156,32 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
               />
             </div>
           </div>
+
+          {/* Show supplier details if selected */}
+          {selectedSupplier && (selectedSupplier.payment_terms || selectedSupplier.bank_name) && (
+            <Card className="bg-muted/50">
+              <CardContent className="pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  {selectedSupplier.payment_terms && (
+                    <div>
+                      <span className="font-medium text-muted-foreground">Payment Terms:</span>
+                      <p className="mt-1">{selectedSupplier.payment_terms}</p>
+                    </div>
+                  )}
+                  {selectedSupplier.bank_name && (
+                    <div>
+                      <span className="font-medium text-muted-foreground">Bank Details:</span>
+                      <p className="mt-1">
+                        {selectedSupplier.bank_name}
+                        {selectedSupplier.account_number && ` - A/C: ${selectedSupplier.account_number}`}
+                        {selectedSupplier.ifsc_code && ` (${selectedSupplier.ifsc_code})`}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
@@ -192,7 +253,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                 <div className="space-y-2">
                   <h4 className="font-medium">Order Items</h4>
                   <div className="border rounded-lg">
-                    <div className="grid grid-cols-5 gap-4 p-3 bg-gray-50 font-medium text-sm">
+                    <div className="grid grid-cols-5 gap-4 p-3 bg-muted/50 font-medium text-sm">
                       <div>Item</div>
                       <div>Quantity</div>
                       <div>Unit Price</div>
@@ -217,7 +278,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                         </div>
                       </div>
                     ))}
-                    <div className="p-3 border-t bg-gray-50">
+                    <div className="p-3 border-t bg-muted/50">
                       <div className="flex justify-between font-bold">
                         <span>Total Amount:</span>
                         <span>₹{totalAmount.toFixed(2)}</span>
@@ -233,7 +294,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={items.length === 0 || isSubmitting}>
+            <Button type="submit" disabled={items.length === 0 || isSubmitting || (!formData.supplier && !formData.supplierId)}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
