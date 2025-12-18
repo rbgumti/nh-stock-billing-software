@@ -4,14 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
 import { GRNForm } from "@/components/forms/GRNForm";
+import { SupplierForm } from "@/components/forms/SupplierForm";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { usePurchaseOrderStore } from "@/hooks/usePurchaseOrderStore";
+import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
 import jsPDF from "jspdf";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 
@@ -23,8 +25,12 @@ export default function Stock() {
   const [showPOForm, setShowPOForm] = useState(false);
   const [showGRNForm, setShowGRNForm] = useState(false);
   const [selectedPO, setSelectedPO] = useState<any>(null);
+  const [showSupplierForm, setShowSupplierForm] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
   const { stockItems, addStockItem, updateStockItem, subscribe } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
+  const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
 
   // Force re-render when stock items and purchase orders are updated
   useEffect(() => {
@@ -41,6 +47,12 @@ export default function Stock() {
   }, [subscribe, subscribePO]);
 
   const categories = ["all", "Medication", "Medical Supplies", "Equipment"];
+  
+  const filteredSuppliers = suppliers.filter(supplier =>
+    supplier.name.toLowerCase().includes(supplierSearchTerm.toLowerCase()) ||
+    supplier.phone?.toLowerCase().includes(supplierSearchTerm.toLowerCase()) ||
+    supplier.email?.toLowerCase().includes(supplierSearchTerm.toLowerCase())
+  );
 
   const filteredItems = stockItems.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -114,10 +126,66 @@ export default function Stock() {
     });
   };
 
+  const handleAddSupplier = async (supplierData: Omit<Supplier, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      await addSupplier(supplierData);
+      toast({
+        title: "Success",
+        description: "Supplier has been added successfully!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add supplier",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const handleEditSupplier = async (supplierData: Omit<Supplier, 'id' | 'created_at' | 'updated_at'>) => {
+    if (!editingSupplier) return;
+    try {
+      await updateSupplier(editingSupplier.id, supplierData);
+      setEditingSupplier(null);
+      toast({
+        title: "Success",
+        description: "Supplier has been updated successfully!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update supplier",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const handleDeleteSupplier = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this supplier?")) return;
+    try {
+      await deleteSupplier(id);
+      toast({
+        title: "Success",
+        description: "Supplier has been deleted successfully!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete supplier",
+        variant: "destructive"
+      });
+    }
+  };
+
   const downloadPurchaseOrder = (po: any) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
+    
+    // Get supplier details
+    const supplier = getSupplierByName(po.supplier);
     
     // Hospital Logo and Header
     const img = new Image();
@@ -182,7 +250,7 @@ export default function Stock() {
     // Items
     doc.setFont("helvetica", "normal");
     po.items.forEach((item: any, index: number) => {
-      if (yPos > 260) {
+      if (yPos > 200) {
         doc.addPage();
         yPos = 20;
       }
@@ -210,6 +278,76 @@ export default function Stock() {
       yPos += 7;
       const splitNotes = doc.splitTextToSize(po.notes, pageWidth - (margin * 2));
       doc.text(splitNotes, margin, yPos);
+      yPos += splitNotes.length * 5;
+    }
+    
+    // Payment Terms & Bank Details Section
+    if (supplier && (supplier.payment_terms || supplier.bank_name)) {
+      yPos += 15;
+      
+      // Check if we need a new page
+      if (yPos > 230) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      // Section title
+      doc.setDrawColor(212, 175, 55);
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 8;
+      
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 51, 102);
+      doc.text("PAYMENT TERMS & BANK DETAILS", margin, yPos);
+      yPos += 10;
+      
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(9);
+      
+      // Two column layout
+      const leftCol = margin;
+      const rightCol = pageWidth / 2 + 10;
+      
+      // Payment Terms (left column)
+      if (supplier.payment_terms) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Payment Terms:", leftCol, yPos);
+        doc.setFont("helvetica", "normal");
+        yPos += 5;
+        const splitTerms = doc.splitTextToSize(supplier.payment_terms, (pageWidth / 2) - margin - 10);
+        doc.text(splitTerms, leftCol, yPos);
+      }
+      
+      // Bank Details (right column)
+      let bankY = yPos - 5;
+      if (supplier.bank_name || supplier.account_number || supplier.ifsc_code || supplier.upi_id) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Bank Details:", rightCol, bankY);
+        doc.setFont("helvetica", "normal");
+        bankY += 5;
+        
+        if (supplier.bank_name) {
+          doc.text(`Bank: ${supplier.bank_name}`, rightCol, bankY);
+          bankY += 4;
+        }
+        if (supplier.account_name) {
+          doc.text(`Account Name: ${supplier.account_name}`, rightCol, bankY);
+          bankY += 4;
+        }
+        if (supplier.account_number) {
+          doc.text(`Account No: ${supplier.account_number}`, rightCol, bankY);
+          bankY += 4;
+        }
+        if (supplier.ifsc_code) {
+          doc.text(`IFSC: ${supplier.ifsc_code}`, rightCol, bankY);
+          bankY += 4;
+        }
+        if (supplier.upi_id) {
+          doc.text(`UPI: ${supplier.upi_id}`, rightCol, bankY);
+        }
+      }
     }
     
     // Footer
@@ -501,10 +639,11 @@ export default function Stock() {
 
       {/* Tabs for different sections */}
       <Tabs defaultValue="stock" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="stock">Stock Items</TabsTrigger>
           <TabsTrigger value="purchase-orders">Purchase Orders</TabsTrigger>
           <TabsTrigger value="grn">Goods Receipt</TabsTrigger>
+          <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
         </TabsList>
 
         <TabsContent value="stock" className="space-y-6">
@@ -833,6 +972,112 @@ export default function Stock() {
             </Card>
           )}
         </TabsContent>
+
+        <TabsContent value="suppliers" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Suppliers</h2>
+            <Button onClick={() => setShowSupplierForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Supplier
+            </Button>
+          </div>
+
+          {/* Search */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search suppliers by name, phone, or email..."
+                  value={supplierSearchTerm}
+                  onChange={(e) => setSupplierSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredSuppliers.map((supplier) => (
+              <Card key={supplier.id} className="hover:shadow-md transition-shadow">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg">{supplier.name}</CardTitle>
+                      {supplier.phone && <p className="text-sm text-gray-500">{supplier.phone}</p>}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingSupplier(supplier)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteSupplier(supplier.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    {supplier.email && (
+                      <div>
+                        <p className="text-gray-500">Email</p>
+                        <p className="font-medium">{supplier.email}</p>
+                      </div>
+                    )}
+                    {supplier.address && (
+                      <div>
+                        <p className="text-gray-500">Address</p>
+                        <p className="font-medium">{supplier.address}</p>
+                      </div>
+                    )}
+                    {supplier.payment_terms && (
+                      <div>
+                        <p className="text-gray-500">Payment Terms</p>
+                        <p className="font-medium">{supplier.payment_terms}</p>
+                      </div>
+                    )}
+                    {supplier.bank_name && (
+                      <div>
+                        <p className="text-gray-500">Bank Details</p>
+                        <p className="font-medium">
+                          {supplier.bank_name}
+                          {supplier.account_number && ` - ${supplier.account_number}`}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {filteredSuppliers.length === 0 && (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No suppliers found</h3>
+                <p className="text-gray-500 mb-4">
+                  {supplierSearchTerm 
+                    ? "Try adjusting your search criteria" 
+                    : "Get started by adding your first supplier"
+                  }
+                </p>
+                <Button onClick={() => setShowSupplierForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Supplier
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
       </Tabs>
 
       {showAddForm && (
@@ -868,6 +1113,21 @@ export default function Stock() {
           onSubmit={handleGRN}
           purchaseOrder={selectedPO}
           stockItems={stockItems}
+        />
+      )}
+
+      {showSupplierForm && (
+        <SupplierForm
+          onClose={() => setShowSupplierForm(false)}
+          onSubmit={handleAddSupplier}
+        />
+      )}
+
+      {editingSupplier && (
+        <SupplierForm
+          onClose={() => setEditingSupplier(null)}
+          onSubmit={handleEditSupplier}
+          initialData={editingSupplier}
         />
       )}
     </div>

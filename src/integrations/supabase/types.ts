@@ -788,6 +788,57 @@ export type Database = {
         }
         Relationships: []
       }
+      suppliers: {
+        Row: {
+          account_name: string | null
+          account_number: string | null
+          address: string | null
+          bank_name: string | null
+          created_at: string | null
+          email: string | null
+          id: number
+          ifsc_code: string | null
+          name: string
+          notes: string | null
+          payment_terms: string | null
+          phone: string | null
+          updated_at: string | null
+          upi_id: string | null
+        }
+        Insert: {
+          account_name?: string | null
+          account_number?: string | null
+          address?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: number
+          ifsc_code?: string | null
+          name: string
+          notes?: string | null
+          payment_terms?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          upi_id?: string | null
+        }
+        Update: {
+          account_name?: string | null
+          account_number?: string | null
+          address?: string | null
+          bank_name?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: number
+          ifsc_code?: string | null
+          name?: string
+          notes?: string | null
+          payment_terms?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          upi_id?: string | null
+        }
+        Relationships: []
+      }
       tags: {
         Row: {
           id: string
