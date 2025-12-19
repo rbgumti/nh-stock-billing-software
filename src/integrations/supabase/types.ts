@@ -700,6 +700,11 @@ export type Database = {
           id: number
           notes: string | null
           order_date: string
+          payment_amount: number | null
+          payment_date: string | null
+          payment_due_date: string | null
+          payment_notes: string | null
+          payment_status: string | null
           po_number: string
           status: string
           supplier: string
@@ -713,6 +718,11 @@ export type Database = {
           id?: number
           notes?: string | null
           order_date: string
+          payment_amount?: number | null
+          payment_date?: string | null
+          payment_due_date?: string | null
+          payment_notes?: string | null
+          payment_status?: string | null
           po_number: string
           status: string
           supplier: string
@@ -726,6 +736,11 @@ export type Database = {
           id?: number
           notes?: string | null
           order_date?: string
+          payment_amount?: number | null
+          payment_date?: string | null
+          payment_due_date?: string | null
+          payment_notes?: string | null
+          payment_status?: string | null
           po_number?: string
           status?: string
           supplier?: string
@@ -787,6 +802,66 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      supplier_payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          due_date: string | null
+          id: number
+          notes: string | null
+          payment_date: string
+          payment_method: string | null
+          purchase_order_id: number | null
+          reference_number: string | null
+          status: string | null
+          supplier_id: number
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          due_date?: string | null
+          id?: number
+          notes?: string | null
+          payment_date: string
+          payment_method?: string | null
+          purchase_order_id?: number | null
+          reference_number?: string | null
+          status?: string | null
+          supplier_id: number
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          due_date?: string | null
+          id?: number
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+          purchase_order_id?: number | null
+          reference_number?: string | null
+          status?: string | null
+          supplier_id?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_payments_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_payments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppliers: {
         Row: {

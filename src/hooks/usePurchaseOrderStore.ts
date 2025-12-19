@@ -21,6 +21,12 @@ export interface PurchaseOrder {
   totalAmount: number;
   grnDate?: string;
   notes?: string;
+  // Payment tracking fields
+  paymentStatus?: 'Pending' | 'Partial' | 'Paid' | 'Overdue';
+  paymentDueDate?: string;
+  paymentDate?: string;
+  paymentAmount?: number;
+  paymentNotes?: string;
 }
 
 export function usePurchaseOrderStore() {
@@ -87,7 +93,12 @@ export function usePurchaseOrderStore() {
           items: poItems,
           totalAmount: Number(po.total_amount),
           grnDate: po.grn_date || undefined,
-          notes: po.notes || undefined
+          notes: po.notes || undefined,
+          paymentStatus: (po.payment_status as 'Pending' | 'Partial' | 'Paid' | 'Overdue') || 'Pending',
+          paymentDueDate: po.payment_due_date || undefined,
+          paymentDate: po.payment_date || undefined,
+          paymentAmount: po.payment_amount ? Number(po.payment_amount) : undefined,
+          paymentNotes: po.payment_notes || undefined
         };
       });
 
@@ -116,7 +127,12 @@ export function usePurchaseOrderStore() {
           status: po.status,
           total_amount: po.totalAmount,
           grn_date: po.grnDate || null,
-          notes: po.notes || null
+          notes: po.notes || null,
+          payment_status: po.paymentStatus || 'Pending',
+          payment_due_date: po.paymentDueDate || null,
+          payment_date: po.paymentDate || null,
+          payment_amount: po.paymentAmount || null,
+          payment_notes: po.paymentNotes || null
         })
         .select()
         .single();
@@ -161,7 +177,12 @@ export function usePurchaseOrderStore() {
           status: updatedPO.status,
           total_amount: updatedPO.totalAmount,
           grn_date: updatedPO.grnDate || null,
-          notes: updatedPO.notes || null
+          notes: updatedPO.notes || null,
+          payment_status: updatedPO.paymentStatus || 'Pending',
+          payment_due_date: updatedPO.paymentDueDate || null,
+          payment_date: updatedPO.paymentDate || null,
+          payment_amount: updatedPO.paymentAmount || null,
+          payment_notes: updatedPO.paymentNotes || null
         })
         .eq('id', id);
 

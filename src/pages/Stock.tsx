@@ -4,16 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2 } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
 import { GRNForm } from "@/components/forms/GRNForm";
 import { SupplierForm } from "@/components/forms/SupplierForm";
+import { SupplierPaymentForm } from "@/components/forms/SupplierPaymentForm";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { usePurchaseOrderStore } from "@/hooks/usePurchaseOrderStore";
 import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
+import { useSupplierPaymentStore, SupplierPayment } from "@/hooks/useSupplierPaymentStore";
 import jsPDF from "jspdf";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 
@@ -28,9 +30,12 @@ export default function Stock() {
   const [showSupplierForm, setShowSupplierForm] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<SupplierPayment | null>(null);
   const { stockItems, addStockItem, updateStockItem, subscribe } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
+  const { payments, addPayment, updatePayment, deletePayment, getOutstandingPayments, getUpcomingPayments } = useSupplierPaymentStore();
 
   // Force re-render when stock items and purchase orders are updated
   useEffect(() => {
@@ -178,6 +183,100 @@ export default function Stock() {
       });
     }
   };
+
+  const handleAddPayment = async (paymentData: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>) => {
+    try {
+      await addPayment(paymentData);
+      toast({
+        title: "Success",
+        description: "Payment has been recorded successfully!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to record payment",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const handleEditPayment = async (paymentData: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>) => {
+    if (!editingPayment) return;
+    try {
+      await updatePayment(editingPayment.id, paymentData);
+      setEditingPayment(null);
+      toast({
+        title: "Success",
+        description: "Payment has been updated successfully!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update payment",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const handleDeletePayment = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this payment record?")) return;
+    try {
+      await deletePayment(id);
+      toast({
+        title: "Success",
+        description: "Payment has been deleted successfully!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete payment",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdatePOPayment = async (poId: number, paymentStatus: string) => {
+    const po = purchaseOrders.find(p => p.id === poId);
+    if (!po) return;
+    
+    try {
+      await updatePurchaseOrder(poId, {
+        ...po,
+        paymentStatus: paymentStatus as 'Pending' | 'Partial' | 'Paid' | 'Overdue',
+        paymentDate: paymentStatus === 'Paid' ? new Date().toISOString().split('T')[0] : po.paymentDate
+      });
+      toast({
+        title: "Success",
+        description: "Payment status updated!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update payment status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getPaymentStatusBadge = (status?: string) => {
+    switch (status) {
+      case 'Paid':
+        return <Badge variant="default" className="bg-green-600">Paid</Badge>;
+      case 'Partial':
+        return <Badge variant="secondary" className="bg-yellow-500 text-white">Partial</Badge>;
+      case 'Overdue':
+        return <Badge variant="destructive">Overdue</Badge>;
+      default:
+        return <Badge variant="outline">Pending</Badge>;
+    }
+  };
+
+  const outstandingPayments = getOutstandingPayments();
+  const upcomingPayments = getUpcomingPayments();
+  const totalOutstanding = payments.filter(p => p.status !== 'Completed').reduce((sum, p) => sum + p.amount, 0);
+  const unpaidPOs = purchaseOrders.filter(po => po.paymentStatus !== 'Paid');
 
   const downloadPurchaseOrder = (po: any) => {
     const doc = new jsPDF();
@@ -639,10 +738,11 @@ export default function Stock() {
 
       {/* Tabs for different sections */}
       <Tabs defaultValue="stock" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="stock">Stock Items</TabsTrigger>
           <TabsTrigger value="purchase-orders">Purchase Orders</TabsTrigger>
           <TabsTrigger value="grn">Goods Receipt</TabsTrigger>
+          <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
         </TabsList>
 
@@ -973,6 +1073,187 @@ export default function Stock() {
           )}
         </TabsContent>
 
+        <TabsContent value="payments" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Supplier Payments</h2>
+            <Button onClick={() => setShowPaymentForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Record Payment
+            </Button>
+          </div>
+
+          {/* Payment Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Outstanding</p>
+                    <p className="text-2xl font-bold text-red-600">₹{totalOutstanding.toFixed(2)}</p>
+                  </div>
+                  <DollarSign className="h-8 w-8 text-red-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Overdue Payments</p>
+                    <p className="text-2xl font-bold text-orange-600">{outstandingPayments.length}</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Upcoming Payments</p>
+                    <p className="text-2xl font-bold text-blue-600">{upcomingPayments.length}</p>
+                  </div>
+                  <Calendar className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Unpaid POs</p>
+                    <p className="text-2xl font-bold">{unpaidPOs.length}</p>
+                  </div>
+                  <FileText className="h-8 w-8 text-gray-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Unpaid Purchase Orders */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Purchase Order Payment Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {unpaidPOs.length > 0 ? (
+                <div className="space-y-3">
+                  {unpaidPOs.map((po) => (
+                    <div key={po.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium">PO #{po.poNumber}</span>
+                          {getPaymentStatusBadge(po.paymentStatus)}
+                        </div>
+                        <p className="text-sm text-gray-500">{po.supplier}</p>
+                      </div>
+                      <div className="text-right mr-4">
+                        <p className="font-semibold">₹{po.totalAmount.toFixed(2)}</p>
+                        {po.paymentDueDate && (
+                          <p className="text-xs text-gray-500">Due: {po.paymentDueDate}</p>
+                        )}
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            Update Status
+                            <ChevronDown className="h-3 w-3 ml-1" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleUpdatePOPayment(po.id, 'Pending')}>
+                            Mark as Pending
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleUpdatePOPayment(po.id, 'Partial')}>
+                            Mark as Partial
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleUpdatePOPayment(po.id, 'Paid')}>
+                            Mark as Paid
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleUpdatePOPayment(po.id, 'Overdue')}>
+                            Mark as Overdue
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-gray-500 py-4">All purchase orders are paid</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Payment Records */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Payment Records</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {payments.length > 0 ? (
+                <div className="space-y-3">
+                  {payments.map((payment) => (
+                    <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium">{payment.supplier_name}</span>
+                          <Badge variant={payment.status === 'Completed' ? 'default' : payment.status === 'Overdue' ? 'destructive' : 'outline'}>
+                            {payment.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {payment.payment_method && `${payment.payment_method} • `}
+                          {payment.po_number && `PO #${payment.po_number} • `}
+                          {payment.reference_number && `Ref: ${payment.reference_number}`}
+                        </p>
+                      </div>
+                      <div className="text-right mr-4">
+                        <p className="font-semibold">₹{payment.amount.toFixed(2)}</p>
+                        <p className="text-xs text-gray-500">
+                          {payment.payment_date}
+                          {payment.due_date && ` (Due: ${payment.due_date})`}
+                        </p>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingPayment(payment)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeletePayment(payment.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No payment records</h3>
+                  <p className="text-gray-500 mb-4">Start tracking supplier payments</p>
+                  <Button onClick={() => setShowPaymentForm(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Record Payment
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="suppliers" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Suppliers</h2>
@@ -1128,6 +1409,25 @@ export default function Stock() {
           onClose={() => setEditingSupplier(null)}
           onSubmit={handleEditSupplier}
           initialData={editingSupplier}
+        />
+      )}
+
+      {showPaymentForm && (
+        <SupplierPaymentForm
+          onClose={() => setShowPaymentForm(false)}
+          onSubmit={handleAddPayment}
+          suppliers={suppliers}
+          purchaseOrders={purchaseOrders}
+        />
+      )}
+
+      {editingPayment && (
+        <SupplierPaymentForm
+          onClose={() => setEditingPayment(null)}
+          onSubmit={handleEditPayment}
+          suppliers={suppliers}
+          purchaseOrders={purchaseOrders}
+          initialData={editingPayment}
         />
       )}
     </div>
