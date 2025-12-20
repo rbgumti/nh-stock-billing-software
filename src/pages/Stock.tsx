@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
@@ -1249,42 +1249,84 @@ export default function Stock() {
               {payments.length > 0 ? (
                 <div className="space-y-3">
                   {payments.map((payment) => (
-                    <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium">{payment.supplier_name}</span>
-                          <Badge variant={payment.status === 'Completed' ? 'default' : payment.status === 'Overdue' ? 'destructive' : 'outline'}>
-                            {payment.status}
-                          </Badge>
+                    <div key={payment.id} className="p-4 border rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-1">
+                            <span className="font-medium">{payment.supplier_name}</span>
+                            <Badge variant={payment.status === 'Completed' ? 'default' : payment.status === 'Overdue' ? 'destructive' : 'outline'}>
+                              {payment.status}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-gray-600 mt-2">
+                            <div>
+                              <span className="text-gray-400">Date:</span> {payment.payment_date}
+                            </div>
+                            {payment.payment_method && (
+                              <div>
+                                <span className="text-gray-400">Method:</span> {payment.payment_method}
+                              </div>
+                            )}
+                            {payment.utr_number && (
+                              <div>
+                                <span className="text-gray-400">UTR:</span> {payment.utr_number}
+                              </div>
+                            )}
+                            {payment.reference_number && (
+                              <div>
+                                <span className="text-gray-400">Ref:</span> {payment.reference_number}
+                              </div>
+                            )}
+                            {payment.bank_reference && (
+                              <div>
+                                <span className="text-gray-400">Bank Ref:</span> {payment.bank_reference}
+                              </div>
+                            )}
+                            {payment.po_number && (
+                              <div>
+                                <span className="text-gray-400">PO:</span> #{payment.po_number}
+                              </div>
+                            )}
+                            {payment.due_date && (
+                              <div>
+                                <span className="text-gray-400">Due:</span> {payment.due_date}
+                              </div>
+                            )}
+                          </div>
+                          {payment.notes && (
+                            <p className="text-xs text-gray-500 mt-2 italic">{payment.notes}</p>
+                          )}
                         </div>
-                        <p className="text-sm text-gray-500">
-                          {payment.payment_method && `${payment.payment_method} • `}
-                          {payment.po_number && `PO #${payment.po_number} • `}
-                          {payment.reference_number && `Ref: ${payment.reference_number}`}
-                        </p>
-                      </div>
-                      <div className="text-right mr-4">
-                        <p className="font-semibold">₹{payment.amount.toFixed(2)}</p>
-                        <p className="text-xs text-gray-500">
-                          {payment.payment_date}
-                          {payment.due_date && ` (Due: ${payment.due_date})`}
-                        </p>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setEditingPayment(payment)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeletePayment(payment.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="text-right ml-4">
+                          <p className="font-semibold text-lg">₹{payment.amount.toFixed(2)}</p>
+                          <div className="flex items-center gap-1 mt-2">
+                            {payment.receipt_url && (
+                              <a 
+                                href={payment.receipt_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                                Receipt
+                              </a>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditingPayment(payment)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeletePayment(payment.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}

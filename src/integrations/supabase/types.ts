@@ -806,6 +806,7 @@ export type Database = {
       supplier_payments: {
         Row: {
           amount: number
+          bank_reference: string | null
           created_at: string | null
           due_date: string | null
           id: number
@@ -813,13 +814,16 @@ export type Database = {
           payment_date: string
           payment_method: string | null
           purchase_order_id: number | null
+          receipt_url: string | null
           reference_number: string | null
           status: string | null
           supplier_id: number
           updated_at: string | null
+          utr_number: string | null
         }
         Insert: {
           amount: number
+          bank_reference?: string | null
           created_at?: string | null
           due_date?: string | null
           id?: number
@@ -827,13 +831,16 @@ export type Database = {
           payment_date: string
           payment_method?: string | null
           purchase_order_id?: number | null
+          receipt_url?: string | null
           reference_number?: string | null
           status?: string | null
           supplier_id: number
           updated_at?: string | null
+          utr_number?: string | null
         }
         Update: {
           amount?: number
+          bank_reference?: string | null
           created_at?: string | null
           due_date?: string | null
           id?: number
@@ -841,10 +848,12 @@ export type Database = {
           payment_date?: string
           payment_method?: string | null
           purchase_order_id?: number | null
+          receipt_url?: string | null
           reference_number?: string | null
           status?: string | null
           supplier_id?: number
           updated_at?: string | null
+          utr_number?: string | null
         }
         Relationships: [
           {
