@@ -11,6 +11,9 @@ export interface SupplierPayment {
   due_date?: string;
   payment_method?: string;
   reference_number?: string;
+  utr_number?: string;
+  bank_reference?: string;
+  receipt_url?: string;
   status: string;
   notes?: string;
   created_at?: string;
@@ -61,6 +64,9 @@ export function useSupplierPaymentStore() {
         due_date: p.due_date,
         payment_method: p.payment_method,
         reference_number: p.reference_number,
+        utr_number: p.utr_number,
+        bank_reference: p.bank_reference,
+        receipt_url: p.receipt_url,
         status: p.status,
         notes: p.notes,
         created_at: p.created_at,
@@ -93,6 +99,9 @@ export function useSupplierPaymentStore() {
         due_date: payment.due_date || null,
         payment_method: payment.payment_method || null,
         reference_number: payment.reference_number || null,
+        utr_number: payment.utr_number || null,
+        bank_reference: payment.bank_reference || null,
+        receipt_url: payment.receipt_url || null,
         status: payment.status,
         notes: payment.notes || null
       })
@@ -118,6 +127,9 @@ export function useSupplierPaymentStore() {
         due_date: payment.due_date || null,
         payment_method: payment.payment_method || null,
         reference_number: payment.reference_number || null,
+        utr_number: payment.utr_number || null,
+        bank_reference: payment.bank_reference || null,
+        receipt_url: payment.receipt_url || null,
         status: payment.status,
         notes: payment.notes || null
       })

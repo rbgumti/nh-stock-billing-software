@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SupplierPayment } from "@/hooks/useSupplierPaymentStore";
 import { Supplier } from "@/hooks/useSupplierStore";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
+import { supabase } from "@/integrations/supabase/client";
+import { Upload, X, FileText } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface SupplierPaymentFormProps {
   onClose: () => void;
@@ -26,15 +29,77 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
     due_date: initialData?.due_date || "",
     payment_method: initialData?.payment_method || "",
     reference_number: initialData?.reference_number || "",
+    utr_number: initialData?.utr_number || "",
+    bank_reference: initialData?.bank_reference || "",
+    receipt_url: initialData?.receipt_url || "",
     status: initialData?.status || "Pending",
     notes: initialData?.notes || ""
   });
+  
+  const [uploading, setUploading] = useState(false);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select a file smaller than 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      setReceiptFile(file);
+    }
+  };
+
+  const uploadReceipt = async (): Promise<string | null> => {
+    if (!receiptFile) return formData.receipt_url || null;
+    
+    setUploading(true);
+    try {
+      const fileExt = receiptFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `receipts/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('payment-receipts')
+        .upload(filePath, receiptFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('payment-receipts')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading receipt:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload receipt. Please try again.",
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.supplier_id || !formData.amount || !formData.payment_date) {
       return;
+    }
+
+    let receiptUrl = formData.receipt_url;
+    if (receiptFile) {
+      const uploadedUrl = await uploadReceipt();
+      if (uploadedUrl) {
+        receiptUrl = uploadedUrl;
+      }
     }
 
     onSubmit({
@@ -45,6 +110,9 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
       due_date: formData.due_date || undefined,
       payment_method: formData.payment_method || undefined,
       reference_number: formData.reference_number || undefined,
+      utr_number: formData.utr_number || undefined,
+      bank_reference: formData.bank_reference || undefined,
+      receipt_url: receiptUrl || undefined,
       status: formData.status,
       notes: formData.notes || undefined
     });
@@ -58,9 +126,14 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
       })
     : [];
 
+  const removeReceipt = () => {
+    setReceiptFile(null);
+    setFormData({ ...formData, receipt_url: "" });
+  };
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{initialData ? 'Edit Payment' : 'Record Payment'}</DialogTitle>
         </DialogHeader>
@@ -172,13 +245,16 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
                   <SelectItem value="Cash">Cash</SelectItem>
                   <SelectItem value="Cheque">Cheque</SelectItem>
                   <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                  <SelectItem value="NEFT">NEFT</SelectItem>
+                  <SelectItem value="RTGS">RTGS</SelectItem>
+                  <SelectItem value="IMPS">IMPS</SelectItem>
                   <SelectItem value="UPI">UPI</SelectItem>
                   <SelectItem value="Credit">Credit</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="reference_number">Reference No.</Label>
+              <Label htmlFor="reference_number">Reference/Cheque No.</Label>
               <Input
                 id="reference_number"
                 value={formData.reference_number}
@@ -186,6 +262,71 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
                 placeholder="Cheque/Transaction No."
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="utr_number">UTR Number</Label>
+              <Input
+                id="utr_number"
+                value={formData.utr_number}
+                onChange={(e) => setFormData({ ...formData, utr_number: e.target.value })}
+                placeholder="UTR/Transaction ID"
+              />
+            </div>
+            <div>
+              <Label htmlFor="bank_reference">Bank Reference</Label>
+              <Input
+                id="bank_reference"
+                value={formData.bank_reference}
+                onChange={(e) => setFormData({ ...formData, bank_reference: e.target.value })}
+                placeholder="Bank ref. number"
+              />
+            </div>
+          </div>
+
+          {/* Receipt Upload */}
+          <div>
+            <Label>Payment Receipt</Label>
+            {(receiptFile || formData.receipt_url) ? (
+              <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/50">
+                <FileText className="h-5 w-5 text-muted-foreground" />
+                <span className="flex-1 text-sm truncate">
+                  {receiptFile ? receiptFile.name : 'Receipt uploaded'}
+                </span>
+                {formData.receipt_url && !receiptFile && (
+                  <a 
+                    href={formData.receipt_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    View
+                  </a>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={removeReceipt}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-1">
+                <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-md cursor-pointer hover:border-primary/50 transition-colors">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Click to upload receipt (PDF, Image - max 5MB)</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    onChange={handleFileChange}
+                  />
+                </label>
+              </div>
+            )}
           </div>
 
           <div>
@@ -202,8 +343,8 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
-              {initialData ? 'Update' : 'Record'} Payment
+            <Button type="submit" disabled={uploading}>
+              {uploading ? 'Uploading...' : (initialData ? 'Update' : 'Record')} Payment
             </Button>
           </div>
         </form>
