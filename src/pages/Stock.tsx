@@ -51,6 +51,56 @@ export default function Stock() {
     };
   }, [subscribe, subscribePO]);
 
+  // Show payment reminder notifications on page load
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Check for overdue payments
+    const overduePayments = payments.filter(p => 
+      p.status !== 'Completed' && p.due_date && p.due_date < today
+    );
+    
+    const overduePOs = purchaseOrders.filter(po => 
+      po.paymentStatus !== 'Paid' && po.paymentDueDate && po.paymentDueDate < today
+    );
+    
+    const totalOverdueCount = overduePayments.length + overduePOs.length;
+    const totalOverdueAmount = overduePayments.reduce((sum, p) => sum + p.amount, 0) +
+      overduePOs.reduce((sum, po) => sum + po.totalAmount, 0);
+
+    // Check for upcoming payments (next 3 days)
+    const threeDaysFromNow = new Date();
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+    const upcomingDate = threeDaysFromNow.toISOString().split('T')[0];
+    
+    const upcomingPayments = payments.filter(p => 
+      p.status !== 'Completed' && p.due_date && p.due_date >= today && p.due_date <= upcomingDate
+    );
+    
+    const upcomingPOs = purchaseOrders.filter(po =>
+      po.paymentStatus !== 'Paid' && po.paymentDueDate && 
+      po.paymentDueDate >= today && po.paymentDueDate <= upcomingDate
+    );
+    
+    const totalUpcomingCount = upcomingPayments.length + upcomingPOs.length;
+
+    // Show notifications
+    if (totalOverdueCount > 0) {
+      toast({
+        title: "⚠️ Overdue Payments",
+        description: `You have ${totalOverdueCount} overdue payment(s) totaling ₹${totalOverdueAmount.toFixed(2)}`,
+        variant: "destructive",
+      });
+    }
+    
+    if (totalUpcomingCount > 0) {
+      toast({
+        title: "📅 Upcoming Payments",
+        description: `${totalUpcomingCount} payment(s) due in the next 3 days`,
+      });
+    }
+  }, [payments.length, purchaseOrders.length]); // Only run when data loads
+
   const categories = ["all", "Medication", "Medical Supplies", "Equipment"];
   
   const filteredSuppliers = suppliers.filter(supplier =>
