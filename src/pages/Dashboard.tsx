@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
+import { PaymentReminders } from "@/components/PaymentReminders";
 
 interface Invoice {
   id: string;
@@ -166,6 +167,9 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Payment Reminders Widget */}
+      <PaymentReminders />
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
