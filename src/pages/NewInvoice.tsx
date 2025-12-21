@@ -96,7 +96,9 @@ export default function NewInvoice() {
             phone: prescription.patient_phone || '',
             file_no: '',
             aadhar_card: '',
-            govt_id: ''
+            govt_id: '',
+            new_govt_id: '',
+            address: ''
           });
           setSelectedPatient(prescription.patient_id.toString());
         }

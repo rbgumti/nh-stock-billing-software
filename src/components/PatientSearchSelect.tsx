@@ -11,6 +11,8 @@ interface Patient {
   file_no: string;
   aadhar_card: string;
   govt_id: string;
+  new_govt_id: string;
+  address: string;
   age?: string;
 }
 
@@ -242,13 +244,38 @@ export function PatientSearchSelect({
 
       {/* Selected Patient Display */}
       {selectedPatient && !isOpen && (
-        <div className="p-2 bg-muted/50 rounded-md text-sm">
-          <span className="font-medium">{selectedPatient.patient_name}</span>
-          <span className="text-muted-foreground ml-2">
-            ID: {selectedPatient.id}
-            {selectedPatient.file_no && ` | File: ${selectedPatient.file_no}`}
-            {selectedPatient.phone && ` | Ph: ${selectedPatient.phone}`}
-          </span>
+        <div className="p-3 bg-muted/50 rounded-md text-sm space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-base">{selectedPatient.patient_name}</span>
+            <span className="text-muted-foreground">
+              (ID: {selectedPatient.id})
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            {selectedPatient.file_no && (
+              <span><span className="font-medium text-gold">File No:</span> {selectedPatient.file_no}</span>
+            )}
+            {selectedPatient.phone && (
+              <span><span className="font-medium">Phone:</span> {selectedPatient.phone}</span>
+            )}
+            {selectedPatient.govt_id && (
+              <span><span className="font-medium">Govt ID:</span> {selectedPatient.govt_id}</span>
+            )}
+            {selectedPatient.new_govt_id && (
+              <span><span className="font-medium">New Govt ID:</span> {selectedPatient.new_govt_id}</span>
+            )}
+            {selectedPatient.aadhar_card && (
+              <span><span className="font-medium">Aadhar:</span> {selectedPatient.aadhar_card}</span>
+            )}
+            {selectedPatient.age && (
+              <span><span className="font-medium">Age:</span> {selectedPatient.age}</span>
+            )}
+          </div>
+          {selectedPatient.address && (
+            <div className="text-xs text-muted-foreground pt-1 border-t border-border/50">
+              <span className="font-medium">Address:</span> {selectedPatient.address}
+            </div>
+          )}
         </div>
       )}
 
