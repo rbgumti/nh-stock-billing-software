@@ -37,6 +37,9 @@ const FREQUENCY_OPTIONS = [
   { value: "TDS", label: "TDS (Three times daily)", multiplier: 3 },
   { value: "4 Times a day", label: "4 Times a day", multiplier: 4 },
   { value: "5 Times a day", label: "5 Times a day", multiplier: 5 },
+  { value: "6 Times a day", label: "6 Times a day", multiplier: 6 },
+  { value: "7 Times a day", label: "7 Times a day", multiplier: 7 },
+  { value: "8 Times a day", label: "8 Times a day", multiplier: 8 },
 ];
 
 export default function PrescriptionForm({
