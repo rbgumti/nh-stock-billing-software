@@ -7,6 +7,8 @@ export interface Patient {
   file_no: string;
   aadhar_card: string;
   govt_id: string;
+  new_govt_id: string;
+  address: string;
   age?: string;
 }
 
@@ -22,7 +24,7 @@ export async function loadAllPatients(): Promise<Patient[]> {
   while (hasMore) {
     const { data, error } = await supabase
       .from('patients')
-      .select('id, patient_name, phone, file_no, aadhar_card, govt_id, age')
+      .select('id, patient_name, phone, file_no, aadhar_card, govt_id, new_govt_id, address, age')
       .range(from, from + batchSize - 1)
       .order('patient_name', { ascending: true });
 
