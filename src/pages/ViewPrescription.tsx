@@ -12,24 +12,41 @@ import hospitalLogo from "@/assets/NH_LOGO.png";
 export default function ViewPrescription() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
+  const { prescriptions, loading, getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
   const [prescription, setPrescription] = useState<Prescription | null>(null);
+  const [localLoading, setLocalLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
+    if (!id) {
+      navigate('/prescriptions');
+      return;
+    }
+
+    // Wait for prescriptions to load, then find the one we need
+    if (!loading) {
       const data = getPrescription(id);
       if (data) {
         setPrescription(data);
+        setLocalLoading(false);
       } else {
+        // Prescription not found after loading completed
         navigate('/prescriptions');
       }
     }
-  }, [id, getPrescription, navigate]);
+  }, [id, loading, prescriptions, getPrescription, navigate]);
+
+  if (loading || localLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center">Loading prescription...</div>
+      </div>
+    );
+  }
 
   if (!prescription) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-center">Loading prescription...</div>
+        <div className="text-center">Prescription not found</div>
       </div>
     );
   }
