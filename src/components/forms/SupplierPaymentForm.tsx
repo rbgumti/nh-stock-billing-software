@@ -162,13 +162,13 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
             <Label htmlFor="purchase_order">Link to Purchase Order (Optional)</Label>
             <Select
               value={formData.purchase_order_id}
-              onValueChange={(value) => setFormData({ ...formData, purchase_order_id: value })}
+              onValueChange={(value) => setFormData({ ...formData, purchase_order_id: value === "none" ? "" : value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select PO (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
                 {filteredPOs.map((po) => (
                   <SelectItem key={po.id} value={po.id.toString()}>
                     PO #{po.poNumber} - ₹{po.totalAmount.toFixed(2)}
