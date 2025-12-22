@@ -43,6 +43,15 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
     unitPrice: ""
   });
 
+  // Auto-generate PO number on load
+  useEffect(() => {
+    const generatePONumber = async () => {
+      const poNumber = await getNextPurchaseOrderNumber();
+      setFormData(prev => ({ ...prev, poNumber }));
+    };
+    generatePONumber();
+  }, []);
+
   // Update selected supplier when supplierId changes
   useEffect(() => {
     if (formData.supplierId) {

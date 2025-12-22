@@ -56,35 +56,32 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
 
   const [notes, setNotes] = useState("");
 
-  // Generate sequential GRN number on load
+  // Generate sequential GRN number on load with NH/GRN- prefix
   useEffect(() => {
     const generateGRNNumber = async () => {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = (now.getMonth() + 1).toString().padStart(2, '0');
-      const day = now.getDate().toString().padStart(2, '0');
-      const datePrefix = `GRN${year}${month}${day}`;
+      const prefix = 'NH/GRN-';
       
-      // Query database for highest GRN number with today's date prefix
+      // Query database for highest GRN number with this prefix
       const { data, error } = await supabase
         .from('purchase_orders')
         .select('grn_number')
-        .like('grn_number', `${datePrefix}%`)
+        .like('grn_number', `${prefix}%`)
+        .not('grn_number', 'is', null)
         .order('grn_number', { ascending: false })
         .limit(1);
       
       let nextNum = 1;
       if (!error && data && data.length > 0 && data[0].grn_number) {
         const lastNumber = data[0].grn_number;
-        const suffix = lastNumber.replace(datePrefix, '');
+        const suffix = lastNumber.replace(prefix, '');
         const parsed = parseInt(suffix, 10);
         if (!isNaN(parsed)) {
           nextNum = parsed + 1;
         }
       }
       
-      const paddedNumber = nextNum.toString().padStart(3, '0');
-      setGrnNumber(`${datePrefix}${paddedNumber}`);
+      const paddedNumber = nextNum.toString().padStart(4, '0');
+      setGrnNumber(`${prefix}${paddedNumber}`);
     };
 
     generateGRNNumber();

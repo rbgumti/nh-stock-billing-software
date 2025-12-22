@@ -46,32 +46,56 @@ export const useSequentialNumbers = () => {
   }, [numbers]);
 
   const getNextPurchaseOrderNumber = async (): Promise<string> => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const datePrefix = `PO${year}${month}${day}`;
+    // Format: NH/PO-XXXX (sequential across all POs)
+    const prefix = 'NH/PO-';
     
-    // Query database for highest PO number with today's date prefix
+    // Query database for highest PO number with this prefix
     const { data, error } = await supabase
       .from('purchase_orders')
       .select('po_number')
-      .like('po_number', `${datePrefix}%`)
+      .like('po_number', `${prefix}%`)
       .order('po_number', { ascending: false })
       .limit(1);
     
     let nextNum = 1;
     if (!error && data && data.length > 0) {
       const lastNumber = data[0].po_number;
-      const suffix = lastNumber.replace(datePrefix, '');
+      const suffix = lastNumber.replace(prefix, '');
       const parsed = parseInt(suffix, 10);
       if (!isNaN(parsed)) {
         nextNum = parsed + 1;
       }
     }
     
-    const paddedNumber = nextNum.toString().padStart(3, '0');
-    return `${datePrefix}${paddedNumber}`;
+    const paddedNumber = nextNum.toString().padStart(4, '0');
+    return `${prefix}${paddedNumber}`;
+  };
+
+  const getNextGoodsReceiptNumber = async (): Promise<string> => {
+    // Format: NH/GRN-XXXX (sequential across all GRNs)
+    const prefix = 'NH/GRN-';
+    
+    // Query database for highest GRN number with this prefix
+    const { data, error } = await supabase
+      .from('purchase_orders')
+      .select('grn_number')
+      .like('grn_number', `${prefix}%`)
+      .not('grn_number', 'is', null)
+      .order('grn_number', { ascending: false })
+      .limit(1);
+    
+    let nextNum = 1;
+    if (!error && data && data.length > 0 && data[0].grn_number) {
+      const lastNumber = data[0].grn_number;
+      const suffix = lastNumber.replace(prefix, '');
+      const parsed = parseInt(suffix, 10);
+      if (!isNaN(parsed)) {
+        nextNum = parsed + 1;
+      }
+    }
+    
+    const paddedNumber = nextNum.toString().padStart(4, '0');
+    return `${prefix}${paddedNumber}`;
   };
 
   const getNextInvoiceNumber = (): string => {
@@ -92,7 +116,8 @@ export const useSequentialNumbers = () => {
     return invoiceNumber;
   };
 
-  const getNextGoodsReceiptNumber = (): string => {
+  // Legacy function - kept for backward compatibility
+  const getNextGoodsReceiptNumberLegacy = (): string => {
     const now = new Date();
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
