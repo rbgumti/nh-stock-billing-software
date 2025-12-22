@@ -24,6 +24,7 @@ interface MedicineReportItem {
   opening: number;
   stockReceived: number;
   closing: number;
+  isFromSnapshot: boolean;
 }
 
 interface CashDenomination {
@@ -365,6 +366,7 @@ export default function DayReport() {
             
             // Use opening from stock_snapshot (captured at 00:00 IST), fallback to current stock
             const snapshotData = stockSnapshot[item.name];
+            const isFromSnapshot = snapshotData?.opening !== undefined;
             const opening = snapshotData?.opening ?? item.currentStock;
             const closing = opening - sold + received;
 
@@ -376,6 +378,7 @@ export default function DayReport() {
               opening,
               stockReceived: received,
               closing,
+              isFromSnapshot,
             };
           })
           .filter(item => item.qtySold > 0 || item.stockReceived > 0);
@@ -525,7 +528,15 @@ export default function DayReport() {
               <TableHead className="font-bold text-navy text-right">Qty sold</TableHead>
               <TableHead className="font-bold text-navy text-right">Rate</TableHead>
               <TableHead className="font-bold text-navy text-right">Amount</TableHead>
-              <TableHead className="font-bold text-navy text-right">Opening</TableHead>
+              <TableHead className="font-bold text-navy text-right">
+                <span className="flex items-center justify-end gap-1">
+                  Opening
+                  <span className="text-[10px] font-normal text-muted-foreground">(
+                    <span className="inline-block w-2 h-2 rounded-full bg-green-500 align-middle" /> snapshot
+                    <span className="inline-block w-2 h-2 rounded-full bg-amber-500 align-middle ml-1" /> live
+                  )</span>
+                </span>
+              </TableHead>
               <TableHead className="font-bold text-navy text-right">Stock Received</TableHead>
               <TableHead className="font-bold text-navy text-right">Closing</TableHead>
             </TableRow>
@@ -545,7 +556,15 @@ export default function DayReport() {
                     <TableCell className="text-right py-1">{item.qtySold}</TableCell>
                     <TableCell className="text-right py-1">₹{item.rate}</TableCell>
                     <TableCell className="text-right py-1 font-semibold">₹{item.amount}</TableCell>
-                    <TableCell className="text-right py-1">{item.opening}</TableCell>
+                    <TableCell className="text-right py-1">
+                      <span className="flex items-center justify-end gap-1">
+                        {item.opening}
+                        <span 
+                          className={`inline-block w-2 h-2 rounded-full ${item.isFromSnapshot ? 'bg-green-500' : 'bg-amber-500'}`}
+                          title={item.isFromSnapshot ? 'From 00:00 IST snapshot' : 'Fallback to current stock'}
+                        />
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right py-1 text-green-600">{item.stockReceived}</TableCell>
                     <TableCell className="text-right py-1">{item.closing}</TableCell>
                   </TableRow>
