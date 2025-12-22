@@ -20,6 +20,9 @@ export interface PurchaseOrder {
   items: PurchaseOrderItem[];
   totalAmount: number;
   grnDate?: string;
+  grnNumber?: string;
+  invoiceNumber?: string;
+  invoiceDate?: string;
   notes?: string;
   // Payment tracking fields
   paymentStatus?: 'Pending' | 'Partial' | 'Paid' | 'Overdue';
@@ -93,6 +96,9 @@ export function usePurchaseOrderStore() {
           items: poItems,
           totalAmount: Number(po.total_amount),
           grnDate: po.grn_date || undefined,
+          grnNumber: po.grn_number || undefined,
+          invoiceNumber: po.invoice_number || undefined,
+          invoiceDate: po.invoice_date || undefined,
           notes: po.notes || undefined,
           paymentStatus: (po.payment_status as 'Pending' | 'Partial' | 'Paid' | 'Overdue') || 'Pending',
           paymentDueDate: po.payment_due_date || undefined,
@@ -127,6 +133,9 @@ export function usePurchaseOrderStore() {
           status: po.status,
           total_amount: po.totalAmount,
           grn_date: po.grnDate || null,
+          grn_number: po.grnNumber || null,
+          invoice_number: po.invoiceNumber || null,
+          invoice_date: po.invoiceDate || null,
           notes: po.notes || null,
           payment_status: po.paymentStatus || 'Pending',
           payment_due_date: po.paymentDueDate || null,
@@ -177,6 +186,9 @@ export function usePurchaseOrderStore() {
           status: updatedPO.status,
           total_amount: updatedPO.totalAmount,
           grn_date: updatedPO.grnDate || null,
+          grn_number: updatedPO.grnNumber || null,
+          invoice_number: updatedPO.invoiceNumber || null,
+          invoice_date: updatedPO.invoiceDate || null,
           notes: updatedPO.notes || null,
           payment_status: updatedPO.paymentStatus || 'Pending',
           payment_due_date: updatedPO.paymentDueDate || null,

@@ -700,7 +700,10 @@ export type Database = {
           created_at: string | null
           expected_delivery: string
           grn_date: string | null
+          grn_number: string | null
           id: number
+          invoice_date: string | null
+          invoice_number: string | null
           notes: string | null
           order_date: string
           payment_amount: number | null
@@ -718,7 +721,10 @@ export type Database = {
           created_at?: string | null
           expected_delivery: string
           grn_date?: string | null
+          grn_number?: string | null
           id?: number
+          invoice_date?: string | null
+          invoice_number?: string | null
           notes?: string | null
           order_date: string
           payment_amount?: number | null
@@ -736,7 +742,10 @@ export type Database = {
           created_at?: string | null
           expected_delivery?: string
           grn_date?: string | null
+          grn_number?: string | null
           id?: number
+          invoice_date?: string | null
+          invoice_number?: string | null
           notes?: string | null
           order_date?: string
           payment_amount?: number | null

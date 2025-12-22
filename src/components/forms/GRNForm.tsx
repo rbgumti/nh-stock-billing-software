@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
-import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GRNItem {
   stockItemId: number;
@@ -23,19 +23,28 @@ interface GRNItem {
 
 interface GRNFormProps {
   onClose: () => void;
-  onSubmit: (grnData: { grnNumber: string; purchaseOrderId: number; items: GRNItem[]; notes?: string }) => void;
+  onSubmit: (grnData: { 
+    grnNumber: string; 
+    purchaseOrderId: number; 
+    items: GRNItem[]; 
+    notes?: string;
+    invoiceNumber?: string;
+    invoiceDate?: string;
+  }) => void;
   purchaseOrder: PurchaseOrder;
   stockItems: StockItem[];
 }
 
 export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFormProps) {
-  const { getNextGoodsReceiptNumber } = useSequentialNumbers();
+  const [grnNumber, setGrnNumber] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   
   const [grnItems, setGRNItems] = useState<GRNItem[]>(
     purchaseOrder.items.map(item => ({
       stockItemId: item.stockItemId,
       orderedQuantity: item.quantity,
-      receivedQuantity: item.quantity, // Default to ordered quantity
+      receivedQuantity: item.quantity,
       batchNo: "",
       expiryDate: "",
       mrp: 0,
@@ -44,6 +53,40 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
   );
 
   const [notes, setNotes] = useState("");
+
+  // Generate sequential GRN number on load
+  useEffect(() => {
+    const generateGRNNumber = async () => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      const day = now.getDate().toString().padStart(2, '0');
+      const datePrefix = `GRN${year}${month}${day}`;
+      
+      // Query database for highest GRN number with today's date prefix
+      const { data, error } = await supabase
+        .from('purchase_orders')
+        .select('grn_number')
+        .like('grn_number', `${datePrefix}%`)
+        .order('grn_number', { ascending: false })
+        .limit(1);
+      
+      let nextNum = 1;
+      if (!error && data && data.length > 0 && data[0].grn_number) {
+        const lastNumber = data[0].grn_number;
+        const suffix = lastNumber.replace(datePrefix, '');
+        const parsed = parseInt(suffix, 10);
+        if (!isNaN(parsed)) {
+          nextNum = parsed + 1;
+        }
+      }
+      
+      const paddedNumber = nextNum.toString().padStart(3, '0');
+      setGrnNumber(`${datePrefix}${paddedNumber}`);
+    };
+
+    generateGRNNumber();
+  }, []);
 
   const updateReceivedQuantity = (index: number, quantity: string) => {
     const newItems = [...grnItems];
@@ -85,13 +128,13 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const grnNumber = getNextGoodsReceiptNumber();
-    
     onSubmit({
       grnNumber,
       purchaseOrderId: purchaseOrder.id,
       items: grnItems,
-      notes
+      notes,
+      invoiceNumber,
+      invoiceDate
     });
   };
 
@@ -105,7 +148,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Goods Receipt Note - PO #{purchaseOrder.poNumber}</DialogTitle>
-          <p className="text-sm text-gray-500">Generate GRN for received goods</p>
+          <p className="text-sm text-muted-foreground">Generate GRN for received goods</p>
         </DialogHeader>
 
         <div className="mb-6">
@@ -116,25 +159,64 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-500">Supplier</p>
+                  <p className="text-muted-foreground">Supplier</p>
                   <p className="font-medium">{purchaseOrder.supplier}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Order Date</p>
+                  <p className="text-muted-foreground">Order Date</p>
                   <p className="font-medium">{purchaseOrder.orderDate}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Expected Delivery</p>
+                  <p className="text-muted-foreground">Expected Delivery</p>
                   <p className="font-medium">{purchaseOrder.expectedDelivery}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Total Amount</p>
+                  <p className="text-muted-foreground">Total Amount</p>
                   <p className="font-medium">₹{purchaseOrder.totalAmount.toFixed(2)}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* GRN Details Section */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg">GRN Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="grnNumber">GRN Number *</Label>
+                <Input
+                  id="grnNumber"
+                  value={grnNumber}
+                  onChange={(e) => setGrnNumber(e.target.value)}
+                  placeholder="Auto-generated"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="invoiceNumber">Invoice Number</Label>
+                <Input
+                  id="invoiceNumber"
+                  value={invoiceNumber}
+                  onChange={(e) => setInvoiceNumber(e.target.value)}
+                  placeholder="Enter supplier invoice no."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="invoiceDate">Invoice Date</Label>
+                <Input
+                  id="invoiceDate"
+                  type="date"
+                  value={invoiceDate}
+                  onChange={(e) => setInvoiceDate(e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>

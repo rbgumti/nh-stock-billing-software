@@ -152,7 +152,7 @@ export default function Stock() {
     });
   };
 
-  const handleGRN = (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string }) => {
+  const handleGRN = (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (po) {
       // Update stock levels based on GRN
@@ -166,11 +166,14 @@ export default function Stock() {
         }
       });
 
-      // Update PO status
+      // Update PO status with GRN number, invoice number and date
       updatePurchaseOrder(po.id, {
         ...po,
         status: 'Received',
-        grnDate: formatLocalISODate()
+        grnDate: formatLocalISODate(),
+        grnNumber: grnData.grnNumber,
+        invoiceNumber: grnData.invoiceNumber,
+        invoiceDate: grnData.invoiceDate
       });
     }
     
