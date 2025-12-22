@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
@@ -104,36 +104,44 @@ export default function Stock() {
 
   const categories = ["all", "BNX", "TPN", "PSHY"];
 
-  // Category color coding
-  const getCategoryColor = (category: string) => {
+  // Category color coding with icons
+  const getCategoryStyle = (category: string) => {
     switch (category.toUpperCase()) {
       case 'BNX':
         return {
           bg: 'bg-blue-100 dark:bg-blue-900/30',
           text: 'text-blue-700 dark:text-blue-300',
           border: 'border-l-blue-500',
-          badge: 'bg-blue-500 text-white'
+          badge: 'bg-blue-500 text-white',
+          iconBg: 'bg-blue-500',
+          Icon: Pill
         };
       case 'TPN':
         return {
           bg: 'bg-amber-100 dark:bg-amber-900/30',
           text: 'text-amber-700 dark:text-amber-300',
           border: 'border-l-amber-500',
-          badge: 'bg-amber-500 text-white'
+          badge: 'bg-amber-500 text-white',
+          iconBg: 'bg-amber-500',
+          Icon: Droplets
         };
       case 'PSHY':
         return {
           bg: 'bg-purple-100 dark:bg-purple-900/30',
           text: 'text-purple-700 dark:text-purple-300',
           border: 'border-l-purple-500',
-          badge: 'bg-purple-500 text-white'
+          badge: 'bg-purple-500 text-white',
+          iconBg: 'bg-purple-500',
+          Icon: Brain
         };
       default:
         return {
           bg: 'bg-gray-100 dark:bg-gray-800',
           text: 'text-gray-700 dark:text-gray-300',
           border: 'border-l-gray-500',
-          badge: 'bg-gray-500 text-white'
+          badge: 'bg-gray-500 text-white',
+          iconBg: 'bg-gray-500',
+          Icon: Package
         };
     }
   };
@@ -917,17 +925,23 @@ export default function Stock() {
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredItems.map((item) => {
           const stockStatus = getStockStatus(item.currentStock, item.minimumStock);
-          const categoryColor = getCategoryColor(item.category);
+          const categoryStyle = getCategoryStyle(item.category);
+          const CategoryIcon = categoryStyle.Icon;
           
           return (
-            <Card key={item.id} className={`hover:shadow-md transition-shadow border-l-4 ${categoryColor.border}`}>
-              <CardHeader className={categoryColor.bg}>
+            <Card key={item.id} className={`hover:shadow-md transition-shadow border-l-4 ${categoryStyle.border}`}>
+              <CardHeader className={categoryStyle.bg}>
                 <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg">{item.name}</CardTitle>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${categoryColor.badge}`}>
-                      {item.category}
-                    </span>
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg ${categoryStyle.iconBg}`}>
+                      <CategoryIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{item.name}</CardTitle>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${categoryStyle.badge}`}>
+                        {item.category}
+                      </span>
+                    </div>
                   </div>
                   <Badge variant={stockStatus.variant}>
                     {stockStatus.label}
