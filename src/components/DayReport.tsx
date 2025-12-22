@@ -367,7 +367,7 @@ export default function DayReport() {
             // Use opening from stock_snapshot (captured at 00:00 IST), fallback to current stock
             const snapshotData = stockSnapshot[item.name];
             const isFromSnapshot = snapshotData?.opening !== undefined;
-            const opening = snapshotData?.opening ?? item.currentStock;
+            const opening = isFromSnapshot ? snapshotData.opening : item.currentStock;
             const closing = opening - sold + received;
 
             return {
@@ -381,7 +381,7 @@ export default function DayReport() {
               isFromSnapshot,
             };
           })
-          .filter(item => item.qtySold > 0 || item.stockReceived > 0);
+          .filter(item => item.qtySold > 0 || item.stockReceived > 0 || item.isFromSnapshot);
       };
 
       const allMedicineData = createMedicineData(stockItems);
