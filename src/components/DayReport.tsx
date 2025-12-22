@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Loader2, Check, RefreshCw } from "lucide-react";
+import { Download, Calendar, Loader2, Check, RefreshCw, ToggleLeft, ToggleRight } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ interface MedicineReportItem {
   rate: number;
   amount: number;
   opening: number;
+  liveStock: number;
   stockReceived: number;
   closing: number;
   isFromSnapshot: boolean;
@@ -60,6 +61,7 @@ export default function DayReport() {
   const [tapentadolMedicines, setTapentadolMedicines] = useState<MedicineReportItem[]>([]);
   const [psychiatryMedicines, setPsychiatryMedicines] = useState<MedicineReportItem[]>([]);
   const [otherMedicines, setOtherMedicines] = useState<MedicineReportItem[]>([]);
+  const [showLiveStock, setShowLiveStock] = useState(false);
   
   // Cash management
   const [cashPreviousDay, setCashPreviousDay] = useState(0);
@@ -366,10 +368,11 @@ export default function DayReport() {
           .map(item => {
             const sold = soldQuantitiesById[item.id] ?? soldQuantitiesByName[item.name] ?? 0;
             const received = receivedQuantitiesById[item.id] ?? receivedQuantitiesByName[item.name] ?? 0;
-            // Use opening from stock_snapshot (captured at 00:00 IST), fallback to current stock
+            // Use opening from stock_snapshot (captured at 00:01 IST), fallback to current stock
             const snapshotData = stockSnapshot[item.name];
             const isFromSnapshot = snapshotData?.opening !== undefined;
             const opening = isFromSnapshot ? snapshotData.opening : item.currentStock;
+            const liveStock = item.currentStock;
             const closing = opening - sold + received;
 
             return {
@@ -378,6 +381,7 @@ export default function DayReport() {
               rate: item.mrp || item.unitPrice,
               amount: sold * (item.mrp || item.unitPrice),
               opening,
+              liveStock,
               stockReceived: received,
               closing,
               isFromSnapshot,
@@ -531,13 +535,7 @@ export default function DayReport() {
               <TableHead className="font-bold text-navy text-right">Rate</TableHead>
               <TableHead className="font-bold text-navy text-right">Amount</TableHead>
               <TableHead className="font-bold text-navy text-right">
-                <span className="flex items-center justify-end gap-1">
-                  Opening
-                  <span className="text-[10px] font-normal text-muted-foreground">(
-                    <span className="inline-block w-2 h-2 rounded-full bg-primary align-middle" /> snapshot
-                    <span className="inline-block w-2 h-2 rounded-full bg-accent align-middle ml-1" /> live
-                  )</span>
-                </span>
+                {showLiveStock ? 'Live Stock' : 'Opening (00:01)'}
               </TableHead>
               <TableHead className="font-bold text-navy text-right">Stock Received</TableHead>
               <TableHead className="font-bold text-navy text-right">Closing</TableHead>
@@ -560,15 +558,17 @@ export default function DayReport() {
                     <TableCell className="text-right py-1 font-semibold">₹{item.amount}</TableCell>
                     <TableCell className="text-right py-1">
                       <span className="flex items-center justify-end gap-1">
-                        {item.opening}
-                        <span 
-                          className={`inline-block w-2 h-2 rounded-full ${item.isFromSnapshot ? 'bg-primary' : 'bg-accent'}`}
-                          title={item.isFromSnapshot ? 'From 00:00 IST snapshot' : 'Fallback to current stock'}
-                        />
+                        {showLiveStock ? item.liveStock : item.opening}
+                        {!showLiveStock && !item.isFromSnapshot && (
+                          <span 
+                            className="inline-block w-2 h-2 rounded-full bg-accent"
+                            title="No snapshot available - showing current stock"
+                          />
+                        )}
                       </span>
                     </TableCell>
                     <TableCell className="text-right py-1 text-green-600">{item.stockReceived}</TableCell>
-                    <TableCell className="text-right py-1">{item.closing}</TableCell>
+                    <TableCell className="text-right py-1">{showLiveStock ? item.liveStock : item.closing}</TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="bg-gold/20 font-bold text-xs">
@@ -619,7 +619,17 @@ export default function DayReport() {
             )}
           </div>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center flex-wrap">
+          {/* Toggle for Opening vs Live Stock */}
+          <Button
+            variant={showLiveStock ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowLiveStock(!showLiveStock)}
+            className="flex items-center gap-2 h-8"
+          >
+            {showLiveStock ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+            {showLiveStock ? 'Live' : 'Opening'}
+          </Button>
           <Calendar className="h-4 w-4 text-navy" />
           <Input
             type="date"
