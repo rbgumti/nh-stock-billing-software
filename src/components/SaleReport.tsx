@@ -137,9 +137,9 @@ export default function SaleReport() {
         };
       });
 
-      // Filter to show only items with activity or from snapshot
+      // Filter to show items with stock or activity (so Opening Stock is always visible)
       const filteredItems = items.filter(
-        item => item.saleQty > 0 || item.stockReceived > 0 || item.isFromSnapshot
+        item => item.openingStock > 0 || item.saleQty > 0 || item.stockReceived > 0 || item.isFromSnapshot
       );
 
       // Re-number after filtering
@@ -267,8 +267,8 @@ export default function SaleReport() {
                 <span className="flex items-center justify-end gap-1">
                   Opening
                   <span className="text-[10px] font-normal text-muted-foreground">(
-                    <span className="inline-block w-2 h-2 rounded-full bg-green-500 align-middle" /> snapshot
-                    <span className="inline-block w-2 h-2 rounded-full bg-amber-500 align-middle ml-1" /> live
+                    <span className="inline-block w-2 h-2 rounded-full bg-primary align-middle" /> snapshot
+                    <span className="inline-block w-2 h-2 rounded-full bg-accent align-middle ml-1" /> live
                   )</span>
                 </span>
               </TableHead>
@@ -295,7 +295,7 @@ export default function SaleReport() {
                     <span className="flex items-center justify-end gap-1">
                       {item.openingStock}
                       <span 
-                        className={`inline-block w-2 h-2 rounded-full ${item.isFromSnapshot ? 'bg-green-500' : 'bg-amber-500'}`}
+                        className={`inline-block w-2 h-2 rounded-full ${item.isFromSnapshot ? 'bg-primary' : 'bg-accent'}`}
                         title={item.isFromSnapshot ? 'From 00:00 IST snapshot' : 'Fallback to current stock'}
                       />
                     </span>

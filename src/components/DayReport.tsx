@@ -381,7 +381,7 @@ export default function DayReport() {
               isFromSnapshot,
             };
           })
-          .filter(item => item.qtySold > 0 || item.stockReceived > 0 || item.isFromSnapshot);
+          .filter(item => item.opening > 0 || item.qtySold > 0 || item.stockReceived > 0 || item.isFromSnapshot);
       };
 
       const allMedicineData = createMedicineData(stockItems);
@@ -532,8 +532,8 @@ export default function DayReport() {
                 <span className="flex items-center justify-end gap-1">
                   Opening
                   <span className="text-[10px] font-normal text-muted-foreground">(
-                    <span className="inline-block w-2 h-2 rounded-full bg-green-500 align-middle" /> snapshot
-                    <span className="inline-block w-2 h-2 rounded-full bg-amber-500 align-middle ml-1" /> live
+                    <span className="inline-block w-2 h-2 rounded-full bg-primary align-middle" /> snapshot
+                    <span className="inline-block w-2 h-2 rounded-full bg-accent align-middle ml-1" /> live
                   )</span>
                 </span>
               </TableHead>
@@ -560,7 +560,7 @@ export default function DayReport() {
                       <span className="flex items-center justify-end gap-1">
                         {item.opening}
                         <span 
-                          className={`inline-block w-2 h-2 rounded-full ${item.isFromSnapshot ? 'bg-green-500' : 'bg-amber-500'}`}
+                          className={`inline-block w-2 h-2 rounded-full ${item.isFromSnapshot ? 'bg-primary' : 'bg-accent'}`}
                           title={item.isFromSnapshot ? 'From 00:00 IST snapshot' : 'Fallback to current stock'}
                         />
                       </span>
