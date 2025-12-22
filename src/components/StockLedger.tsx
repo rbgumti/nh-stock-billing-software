@@ -27,6 +27,7 @@ import {
   Filter
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import * as XLSX from "xlsx";
 import { StockItem } from "@/hooks/useStockStore";
 
 interface StockLedgerProps {
@@ -244,6 +245,45 @@ export function StockLedger({ stockItem, onClose }: StockLedgerProps) {
     }
   };
 
+  const exportToExcel = () => {
+    const exportData = filteredEntries.map(entry => ({
+      'Date': formatDate(entry.date),
+      'Type': entry.referenceType === 'Opening' ? 'Opening' : entry.type,
+      'Reference': entry.reference,
+      'Reference Type': entry.referenceType,
+      'Patient/Supplier': entry.details.patientName || entry.details.supplier || '-',
+      'Phone': entry.details.patientPhone || '-',
+      'PO Number': entry.details.poNumber || '-',
+      'GRN Number': entry.details.grnNumber || '-',
+      'In Qty': entry.type === 'IN' ? entry.quantity : '',
+      'Out Qty': entry.type === 'OUT' ? entry.quantity : '',
+      'Balance': entry.balance
+    }));
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 12 }, // Date
+      { wch: 8 },  // Type
+      { wch: 15 }, // Reference
+      { wch: 12 }, // Reference Type
+      { wch: 25 }, // Patient/Supplier
+      { wch: 12 }, // Phone
+      { wch: 12 }, // PO Number
+      { wch: 12 }, // GRN Number
+      { wch: 8 },  // In Qty
+      { wch: 8 },  // Out Qty
+      { wch: 10 }, // Balance
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Stock Ledger');
+
+    const fileName = `Stock_Ledger_${stockItem.name.replace(/\s+/g, '_')}_${dateFrom}_to_${dateTo}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -350,6 +390,17 @@ export function StockLedger({ stockItem, onClose }: StockLedgerProps) {
             >
               <ArrowUpCircle className="h-4 w-4 mr-1" />
               Issued
+            </Button>
+          </div>
+          <div className="ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportToExcel}
+              disabled={filteredEntries.length === 0}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export Excel
             </Button>
           </div>
         </div>
