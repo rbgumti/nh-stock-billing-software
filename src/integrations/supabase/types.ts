@@ -159,6 +159,7 @@ export type Database = {
           psychiatry_collection: number | null
           psychiatry_patients: number | null
           report_date: string
+          stock_snapshot: Json | null
           tapentadol_patients: number | null
           updated_at: string | null
         }
@@ -183,6 +184,7 @@ export type Database = {
           psychiatry_collection?: number | null
           psychiatry_patients?: number | null
           report_date: string
+          stock_snapshot?: Json | null
           tapentadol_patients?: number | null
           updated_at?: string | null
         }
@@ -207,6 +209,7 @@ export type Database = {
           psychiatry_collection?: number | null
           psychiatry_patients?: number | null
           report_date?: string
+          stock_snapshot?: Json | null
           tapentadol_patients?: number | null
           updated_at?: string | null
         }
@@ -1043,6 +1046,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      recompute_day_report_closing_for_item: {
+        Args: { item_name: string; target_date: string }
+        Returns: undefined
+      }
+      snapshot_opening_at_1am_ist: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "staff" | "user"
