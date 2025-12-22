@@ -289,92 +289,105 @@ export default function DayReport() {
   const loadMedicineData = async () => {
     setIsRefreshingMedicine(true);
     try {
-    // Get invoice items for the selected date
-    const { data: invoiceData } = await supabase
-      .from('invoices')
-      .select('id, invoice_date')
-      .like('invoice_date', `${reportDate}%`);
+      // Get the day report's stock_snapshot for opening stock at 00:00 IST
+      const { data: dayReportData } = await supabase
+        .from('day_reports')
+        .select('stock_snapshot')
+        .eq('report_date', reportDate)
+        .maybeSingle();
 
-    const invoiceIds = invoiceData?.map(inv => inv.id) || [];
+      const stockSnapshot: Record<string, { opening?: number; sold?: number; closing?: number }> = 
+        (dayReportData?.stock_snapshot as Record<string, { opening?: number; sold?: number; closing?: number }>) || {};
 
-    let soldQuantities: Record<string, number> = {};
-    
-    if (invoiceIds.length > 0) {
-      const { data: invoiceItems } = await supabase
-        .from('invoice_items')
-        .select('medicine_name, quantity')
-        .in('invoice_id', invoiceIds);
+      // Get invoice items for the selected date
+      const { data: invoiceData } = await supabase
+        .from('invoices')
+        .select('id, invoice_date')
+        .like('invoice_date', `${reportDate}%`);
 
-      soldQuantities = (invoiceItems || []).reduce((acc: Record<string, number>, item) => {
-        acc[item.medicine_name] = (acc[item.medicine_name] || 0) + item.quantity;
-        return acc;
-      }, {});
-    }
+      const invoiceIds = invoiceData?.map(inv => inv.id) || [];
 
-    // Get stock received from GRN
-    const { data: grnOrders } = await supabase
-      .from('purchase_orders')
-      .select('id')
-      .like('grn_date', `${reportDate}%`)
-      .eq('status', 'Received');
+      let soldQuantities: Record<string, number> = {};
+      
+      if (invoiceIds.length > 0) {
+        const { data: invoiceItems } = await supabase
+          .from('invoice_items')
+          .select('medicine_name, quantity')
+          .in('invoice_id', invoiceIds);
 
-    const grnOrderIds = grnOrders?.map(po => po.id) || [];
-    
-    let receivedQuantities: Record<string, number> = {};
-    
-    if (grnOrderIds.length > 0) {
-      const { data: poItems } = await supabase
-        .from('purchase_order_items')
-        .select('stock_item_name, quantity')
-        .in('purchase_order_id', grnOrderIds);
+        soldQuantities = (invoiceItems || []).reduce((acc: Record<string, number>, item) => {
+          acc[item.medicine_name] = (acc[item.medicine_name] || 0) + item.quantity;
+          return acc;
+        }, {});
+      }
 
-      receivedQuantities = (poItems || []).reduce((acc: Record<string, number>, item) => {
-        acc[item.stock_item_name] = (acc[item.stock_item_name] || 0) + item.quantity;
-        return acc;
-      }, {});
-    }
+      // Get stock received from GRN
+      const { data: grnOrders } = await supabase
+        .from('purchase_orders')
+        .select('id')
+        .like('grn_date', `${reportDate}%`)
+        .eq('status', 'Received');
 
-    // Categorize medicines
-    const bnxKeywords = ['addnok', 'buset', 'boquit', 'ari-rok'];
-    const tapentadolKeywords = ['tapyad', 'tapentadol', 'winam', 'wilcid', 'laxwin', 'quetianpine', 'emega'];
-    const psychiatryKeywords = ['aftin', 'amitri', 'divshor', 'donakem', 'esctolpram', 'ewin', 'heprox', 'lithtash', 'clonidine', 'nepz', 'ojopine', 'pilo', 'pregabalin', 'proxy', 'santrol', 'depwin', 'winforce', 'ispro', 'quit'];
+      const grnOrderIds = grnOrders?.map(po => po.id) || [];
+      
+      let receivedQuantities: Record<string, number> = {};
+      
+      if (grnOrderIds.length > 0) {
+        const { data: poItems } = await supabase
+          .from('purchase_order_items')
+          .select('stock_item_name, quantity')
+          .in('purchase_order_id', grnOrderIds);
 
-    const categorizeItem = (name: string): string => {
-      const lowerName = name.toLowerCase();
-      if (bnxKeywords.some(k => lowerName.includes(k))) return 'bnx';
-      if (tapentadolKeywords.some(k => lowerName.includes(k))) return 'tapentadol';
-      if (psychiatryKeywords.some(k => lowerName.includes(k))) return 'psychiatry';
-      return 'other';
-    };
+        receivedQuantities = (poItems || []).reduce((acc: Record<string, number>, item) => {
+          acc[item.stock_item_name] = (acc[item.stock_item_name] || 0) + item.quantity;
+          return acc;
+        }, {});
+      }
 
-    const createMedicineData = (items: typeof stockItems): MedicineReportItem[] => {
-      return items
-        .map(item => {
-          const sold = soldQuantities[item.name] || 0;
-          const received = receivedQuantities[item.name] || 0;
-          const opening = item.currentStock;
-          const closing = opening - sold + received;
+      // Categorize medicines
+      const bnxKeywords = ['addnok', 'buset', 'boquit', 'ari-rok'];
+      const tapentadolKeywords = ['tapyad', 'tapentadol', 'winam', 'wilcid', 'laxwin', 'quetianpine', 'emega'];
+      const psychiatryKeywords = ['aftin', 'amitri', 'divshor', 'donakem', 'esctolpram', 'ewin', 'heprox', 'lithtash', 'clonidine', 'nepz', 'ojopine', 'pilo', 'pregabalin', 'proxy', 'santrol', 'depwin', 'winforce', 'ispro', 'quit'];
 
-          return {
-            brand: item.name,
-            qtySold: sold,
-            rate: item.mrp || item.unitPrice,
-            amount: sold * (item.mrp || item.unitPrice),
-            opening,
-            stockReceived: received,
-            closing,
-          };
-        })
-        .filter(item => item.qtySold > 0 || item.stockReceived > 0);
-    };
+      const categorizeItem = (name: string): string => {
+        const lowerName = name.toLowerCase();
+        if (bnxKeywords.some(k => lowerName.includes(k))) return 'bnx';
+        if (tapentadolKeywords.some(k => lowerName.includes(k))) return 'tapentadol';
+        if (psychiatryKeywords.some(k => lowerName.includes(k))) return 'psychiatry';
+        return 'other';
+      };
 
-    const allMedicineData = createMedicineData(stockItems);
-    
-    setBnxMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'bnx'));
-    setTapentadolMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'tapentadol'));
-    setPsychiatryMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'psychiatry'));
-    setOtherMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'other'));
-    setMedicineDataUpdated(new Date());
+      const createMedicineData = (items: typeof stockItems): MedicineReportItem[] => {
+        return items
+          .map(item => {
+            const sold = soldQuantities[item.name] || 0;
+            const received = receivedQuantities[item.name] || 0;
+            
+            // Use opening from stock_snapshot (captured at 00:00 IST), fallback to current stock
+            const snapshotData = stockSnapshot[item.name];
+            const opening = snapshotData?.opening ?? item.currentStock;
+            const closing = opening - sold + received;
+
+            return {
+              brand: item.name,
+              qtySold: sold,
+              rate: item.mrp || item.unitPrice,
+              amount: sold * (item.mrp || item.unitPrice),
+              opening,
+              stockReceived: received,
+              closing,
+            };
+          })
+          .filter(item => item.qtySold > 0 || item.stockReceived > 0);
+      };
+
+      const allMedicineData = createMedicineData(stockItems);
+      
+      setBnxMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'bnx'));
+      setTapentadolMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'tapentadol'));
+      setPsychiatryMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'psychiatry'));
+      setOtherMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'other'));
+      setMedicineDataUpdated(new Date());
     } finally {
       setIsRefreshingMedicine(false);
     }
