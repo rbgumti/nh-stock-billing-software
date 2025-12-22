@@ -166,6 +166,8 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     setValue('patient_phone', patient.phone || '');
   };
 
+  const selectedPatient = patients.find(p => p.id === watch('patient_id'));
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2 relative">
@@ -178,6 +180,19 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
           <p className="text-sm text-destructive">{errors.patient_id.message}</p>
         )}
       </div>
+
+      {selectedPatient && (
+        <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1 border">
+          <div className="font-medium text-foreground">{selectedPatient.patient_name}</div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
+            <div><span className="font-medium">S/O, D/O:</span> {selectedPatient.father_name || '-'}</div>
+            <div><span className="font-medium">Age:</span> {selectedPatient.age || '-'}</div>
+            <div><span className="font-medium">Phone:</span> {selectedPatient.phone || '-'}</div>
+            <div><span className="font-medium">Category:</span> {selectedPatient.category || '-'}</div>
+            <div className="col-span-2"><span className="font-medium">Address:</span> {selectedPatient.address || '-'}</div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
