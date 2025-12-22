@@ -103,6 +103,40 @@ export default function Stock() {
   }, [payments.length, purchaseOrders.length]); // Only run when data loads
 
   const categories = ["all", "BNX", "TPN", "PSHY"];
+
+  // Category color coding
+  const getCategoryColor = (category: string) => {
+    switch (category.toUpperCase()) {
+      case 'BNX':
+        return {
+          bg: 'bg-blue-100 dark:bg-blue-900/30',
+          text: 'text-blue-700 dark:text-blue-300',
+          border: 'border-l-blue-500',
+          badge: 'bg-blue-500 text-white'
+        };
+      case 'TPN':
+        return {
+          bg: 'bg-amber-100 dark:bg-amber-900/30',
+          text: 'text-amber-700 dark:text-amber-300',
+          border: 'border-l-amber-500',
+          badge: 'bg-amber-500 text-white'
+        };
+      case 'PSHY':
+        return {
+          bg: 'bg-purple-100 dark:bg-purple-900/30',
+          text: 'text-purple-700 dark:text-purple-300',
+          border: 'border-l-purple-500',
+          badge: 'bg-purple-500 text-white'
+        };
+      default:
+        return {
+          bg: 'bg-gray-100 dark:bg-gray-800',
+          text: 'text-gray-700 dark:text-gray-300',
+          border: 'border-l-gray-500',
+          badge: 'bg-gray-500 text-white'
+        };
+    }
+  };
   
   const filteredSuppliers = suppliers.filter(supplier =>
     supplier.name.toLowerCase().includes(supplierSearchTerm.toLowerCase()) ||
@@ -883,52 +917,55 @@ export default function Stock() {
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredItems.map((item) => {
           const stockStatus = getStockStatus(item.currentStock, item.minimumStock);
+          const categoryColor = getCategoryColor(item.category);
           
           return (
-            <Card key={item.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
+            <Card key={item.id} className={`hover:shadow-md transition-shadow border-l-4 ${categoryColor.border}`}>
+              <CardHeader className={categoryColor.bg}>
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">{item.name}</CardTitle>
-                    <p className="text-sm text-gray-500">{item.category}</p>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${categoryColor.badge}`}>
+                      {item.category}
+                    </span>
                   </div>
                   <Badge variant={stockStatus.variant}>
                     {stockStatus.label}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-gray-500">Current Stock</p>
+                      <p className="text-muted-foreground">Current Stock</p>
                       <p className="font-semibold">{item.currentStock}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Minimum Stock</p>
+                      <p className="text-muted-foreground">Minimum Stock</p>
                       <p className="font-semibold">{item.minimumStock}</p>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-gray-500">Unit Price</p>
+                      <p className="text-muted-foreground">Unit Price</p>
                       <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Total Value</p>
+                      <p className="text-muted-foreground">Total Value</p>
                       <p className="font-semibold">₹{(item.currentStock * item.unitPrice).toFixed(2)}</p>
                     </div>
                   </div>
 
                   <div className="text-sm">
-                    <p className="text-gray-500">Supplier</p>
+                    <p className="text-muted-foreground">Supplier</p>
                     <p className="font-medium">{item.supplier}</p>
                   </div>
 
                   {item.expiryDate !== "N/A" && (
                     <div className="text-sm">
-                      <p className="text-gray-500">Expiry Date</p>
+                      <p className="text-muted-foreground">Expiry Date</p>
                       <p className="font-medium">{item.expiryDate}</p>
                     </div>
                   )}
@@ -956,9 +993,9 @@ export default function Stock() {
           {filteredItems.length === 0 && (
             <Card>
               <CardContent className="text-center py-12">
-                <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
-                <p className="text-gray-500 mb-4">
+                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No items found</h3>
+                <p className="text-muted-foreground mb-4">
                   {searchTerm || filterCategory !== "all" 
                     ? "Try adjusting your search or filter criteria" 
                     : "Get started by adding your first stock item"
