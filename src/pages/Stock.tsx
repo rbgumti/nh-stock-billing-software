@@ -1005,7 +1005,12 @@ export default function Stock() {
                       >
                         Edit
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => setShowPOForm(true)}
+                      >
                         Reorder
                       </Button>
                     </div>
