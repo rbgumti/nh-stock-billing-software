@@ -14,6 +14,7 @@ import { Download, Calendar, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { formatLocalISODate } from "@/lib/dateUtils";
 
 interface SaleReportItem {
   sNo: number;
@@ -29,7 +30,7 @@ interface SaleReportItem {
 }
 
 export default function SaleReport() {
-  const [reportDate, setReportDate] = useState(new Date().toISOString().split('T')[0]);
+  const [reportDate, setReportDate] = useState(() => formatLocalISODate());
   const [loading, setLoading] = useState(false);
   const [reportItems, setReportItems] = useState<SaleReportItem[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -63,18 +64,21 @@ export default function SaleReport() {
 
       const invoiceIds = invoiceData?.map(inv => inv.id) || [];
 
-      let soldQuantities: Record<string, number> = {};
-      
+      let soldQuantitiesByName: Record<string, number> = {};
+      let soldQuantitiesById: Record<number, number> = {};
+
       if (invoiceIds.length > 0) {
         const { data: invoiceItems } = await supabase
           .from('invoice_items')
-          .select('medicine_name, quantity')
+          .select('medicine_id, medicine_name, quantity')
           .in('invoice_id', invoiceIds);
 
-        soldQuantities = (invoiceItems || []).reduce((acc: Record<string, number>, item) => {
-          acc[item.medicine_name] = (acc[item.medicine_name] || 0) + item.quantity;
-          return acc;
-        }, {});
+        (invoiceItems || []).forEach((it) => {
+          // name-based (legacy)
+          soldQuantitiesByName[it.medicine_name] = (soldQuantitiesByName[it.medicine_name] || 0) + it.quantity;
+          // id-based (robust)
+          soldQuantitiesById[it.medicine_id] = (soldQuantitiesById[it.medicine_id] || 0) + it.quantity;
+        });
       }
 
       // 4. Get stock received from processed GRN
@@ -85,19 +89,22 @@ export default function SaleReport() {
         .eq('status', 'Received');
 
       const grnOrderIds = grnOrders?.map(po => po.id) || [];
-      
-      let receivedQuantities: Record<string, number> = {};
-      
+
+      let receivedQuantitiesByName: Record<string, number> = {};
+      let receivedQuantitiesById: Record<number, number> = {};
+
       if (grnOrderIds.length > 0) {
         const { data: poItems } = await supabase
           .from('purchase_order_items')
-          .select('stock_item_name, quantity')
+          .select('stock_item_id, stock_item_name, quantity')
           .in('purchase_order_id', grnOrderIds);
 
-        receivedQuantities = (poItems || []).reduce((acc: Record<string, number>, item) => {
-          acc[item.stock_item_name] = (acc[item.stock_item_name] || 0) + item.quantity;
-          return acc;
-        }, {});
+        (poItems || []).forEach((it) => {
+          // name-based (legacy)
+          receivedQuantitiesByName[it.stock_item_name] = (receivedQuantitiesByName[it.stock_item_name] || 0) + it.quantity;
+          // id-based (robust)
+          receivedQuantitiesById[it.stock_item_id] = (receivedQuantitiesById[it.stock_item_id] || 0) + it.quantity;
+        });
       }
 
       // 5. Build report data
@@ -109,7 +116,7 @@ export default function SaleReport() {
         const openingStock = isFromSnapshot ? snapshotData.opening! : item.current_stock;
         
         // Sales quantity from invoices
-        const saleQty = soldQuantities[item.name] || 0;
+        const saleQty = soldQuantitiesById[item.item_id] ?? soldQuantitiesByName[item.name] ?? 0;
         
         // Rate from stock
         const rate = item.mrp || item.unit_price || 0;
@@ -118,7 +125,7 @@ export default function SaleReport() {
         const value = saleQty * rate;
         
         // Stock received from GRN
-        const stockReceived = receivedQuantities[item.name] || 0;
+        const stockReceived = receivedQuantitiesById[item.item_id] ?? receivedQuantitiesByName[item.name] ?? 0;
         
         // Closing stock = opening - sold + received
         const closingStock = openingStock - saleQty + stockReceived;

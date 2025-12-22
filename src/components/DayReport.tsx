@@ -15,6 +15,7 @@ import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { formatLocalISODate } from "@/lib/dateUtils";
 
 interface MedicineReportItem {
   brand: string;
@@ -40,7 +41,7 @@ interface ExpenseItem {
 
 export default function DayReport() {
   const { stockItems } = useStockStore();
-  const [reportDate, setReportDate] = useState(new Date().toISOString().split('T')[0]);
+  const [reportDate, setReportDate] = useState(() => formatLocalISODate());
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
@@ -308,18 +309,19 @@ export default function DayReport() {
 
       const invoiceIds = invoiceData?.map(inv => inv.id) || [];
 
-      let soldQuantities: Record<string, number> = {};
-      
+      let soldQuantitiesByName: Record<string, number> = {};
+      let soldQuantitiesById: Record<number, number> = {};
+
       if (invoiceIds.length > 0) {
         const { data: invoiceItems } = await supabase
           .from('invoice_items')
-          .select('medicine_name, quantity')
+          .select('medicine_id, medicine_name, quantity')
           .in('invoice_id', invoiceIds);
 
-        soldQuantities = (invoiceItems || []).reduce((acc: Record<string, number>, item) => {
-          acc[item.medicine_name] = (acc[item.medicine_name] || 0) + item.quantity;
-          return acc;
-        }, {});
+        (invoiceItems || []).forEach((it) => {
+          soldQuantitiesByName[it.medicine_name] = (soldQuantitiesByName[it.medicine_name] || 0) + it.quantity;
+          soldQuantitiesById[it.medicine_id] = (soldQuantitiesById[it.medicine_id] || 0) + it.quantity;
+        });
       }
 
       // Get stock received from GRN
@@ -330,19 +332,20 @@ export default function DayReport() {
         .eq('status', 'Received');
 
       const grnOrderIds = grnOrders?.map(po => po.id) || [];
-      
-      let receivedQuantities: Record<string, number> = {};
-      
+
+      let receivedQuantitiesByName: Record<string, number> = {};
+      let receivedQuantitiesById: Record<number, number> = {};
+
       if (grnOrderIds.length > 0) {
         const { data: poItems } = await supabase
           .from('purchase_order_items')
-          .select('stock_item_name, quantity')
+          .select('stock_item_id, stock_item_name, quantity')
           .in('purchase_order_id', grnOrderIds);
 
-        receivedQuantities = (poItems || []).reduce((acc: Record<string, number>, item) => {
-          acc[item.stock_item_name] = (acc[item.stock_item_name] || 0) + item.quantity;
-          return acc;
-        }, {});
+        (poItems || []).forEach((it) => {
+          receivedQuantitiesByName[it.stock_item_name] = (receivedQuantitiesByName[it.stock_item_name] || 0) + it.quantity;
+          receivedQuantitiesById[it.stock_item_id] = (receivedQuantitiesById[it.stock_item_id] || 0) + it.quantity;
+        });
       }
 
       // Categorize medicines
@@ -361,9 +364,8 @@ export default function DayReport() {
       const createMedicineData = (items: typeof stockItems): MedicineReportItem[] => {
         return items
           .map(item => {
-            const sold = soldQuantities[item.name] || 0;
-            const received = receivedQuantities[item.name] || 0;
-            
+            const sold = soldQuantitiesById[item.id] ?? soldQuantitiesByName[item.name] ?? 0;
+            const received = receivedQuantitiesById[item.id] ?? receivedQuantitiesByName[item.name] ?? 0;
             // Use opening from stock_snapshot (captured at 00:00 IST), fallback to current stock
             const snapshotData = stockSnapshot[item.name];
             const isFromSnapshot = snapshotData?.opening !== undefined;

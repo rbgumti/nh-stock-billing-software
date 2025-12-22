@@ -18,6 +18,7 @@ import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
 import { useSupplierPaymentStore, SupplierPayment } from "@/hooks/useSupplierPaymentStore";
 import jsPDF from "jspdf";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
+import { formatLocalISODate } from "@/lib/dateUtils";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -169,7 +170,7 @@ export default function Stock() {
       updatePurchaseOrder(po.id, {
         ...po,
         status: 'Received',
-        grnDate: new Date().toISOString().split('T')[0]
+        grnDate: formatLocalISODate()
       });
     }
     
