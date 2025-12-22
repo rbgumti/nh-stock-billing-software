@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, Printer } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { supabase } from "@/integrations/supabase/client";
+import { PrintableGRN } from "./PrintableGRN";
 
 interface GRNItem {
   stockItemId: number;
@@ -39,6 +40,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
   const [grnNumber, setGrnNumber] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
   
   const [grnItems, setGRNItems] = useState<GRNItem[]>(
     purchaseOrder.items.map(item => ({
@@ -323,16 +325,42 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
             />
           </div>
 
-          <div className="flex justify-end space-x-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+          <div className="flex justify-between">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowPrintPreview(true)}
+              className="flex items-center gap-2"
+              disabled={!grnNumber}
+            >
+              <Printer className="h-4 w-4" />
+              Preview GRN
             </Button>
-            <Button type="submit">
-              Process GRN & Update Stock
-            </Button>
+            <div className="flex space-x-4">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                Process GRN & Update Stock
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>
+
+      {/* Printable GRN Preview */}
+      {showPrintPreview && (
+        <PrintableGRN
+          grnNumber={grnNumber}
+          invoiceNumber={invoiceNumber}
+          invoiceDate={invoiceDate}
+          purchaseOrder={purchaseOrder}
+          grnItems={grnItems}
+          stockItems={stockItems}
+          notes={notes}
+          onClose={() => setShowPrintPreview(false)}
+        />
+      )}
     </Dialog>
   );
 }
