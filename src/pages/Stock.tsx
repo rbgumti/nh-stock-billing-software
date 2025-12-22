@@ -102,7 +102,7 @@ export default function Stock() {
     }
   }, [payments.length, purchaseOrders.length]); // Only run when data loads
 
-  const categories = ["all", "Medication", "Medical Supplies", "Equipment"];
+  const categories = ["all", "BNX", "TPN", "PSHY"];
   
   const filteredSuppliers = suppliers.filter(supplier =>
     supplier.name.toLowerCase().includes(supplierSearchTerm.toLowerCase()) ||
