@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, Printer } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder, PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
+import { RusanPharmaPO } from "./RusanPharmaPO";
 
 interface PurchaseOrderFormProps {
   onClose: () => void;
@@ -27,9 +28,13 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
   const [formData, setFormData] = useState({
     supplierId: "",
     supplier: "",
+    poDate: new Date().toISOString().split('T')[0],
+    poNumber: "",
     expectedDelivery: "",
     notes: ""
   });
+  const [showRusanFormat, setShowRusanFormat] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
 
   const [items, setItems] = useState<PurchaseOrderItem[]>([]);
   const [currentItem, setCurrentItem] = useState({
@@ -89,11 +94,14 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
     try {
       const poNumber = await getNextPurchaseOrderNumber();
 
+      // Use manually entered PO number if provided, otherwise use generated one
+      const finalPoNumber = formData.poNumber || poNumber;
+
       const purchaseOrder: PurchaseOrder = {
         id: Date.now(),
-        poNumber,
+        poNumber: finalPoNumber,
         supplier: formData.supplier,
-        orderDate: new Date().toISOString().split('T')[0],
+        orderDate: formData.poDate,
         expectedDelivery: formData.expectedDelivery,
         status: 'Pending',
         items,
@@ -115,7 +123,29 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="poNumber">PO Number *</Label>
+              <Input
+                id="poNumber"
+                value={formData.poNumber}
+                onChange={(e) => setFormData({ ...formData, poNumber: e.target.value })}
+                placeholder="e.g., NH-25-26-203"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="poDate">PO Date *</Label>
+              <Input
+                id="poDate"
+                type="date"
+                value={formData.poDate}
+                onChange={(e) => setFormData({ ...formData, poDate: e.target.value })}
+                required
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="supplier">Supplier *</Label>
               {suppliers.length > 0 ? (
@@ -146,7 +176,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="expectedDelivery">Expected Delivery Date *</Label>
+              <Label htmlFor="expectedDelivery">Expected Delivery *</Label>
               <Input
                 id="expectedDelivery"
                 type="date"
@@ -156,6 +186,19 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
               />
             </div>
           </div>
+
+          {/* Rusan Pharma Format Button */}
+          {formData.supplier.toLowerCase().includes('rusan') && items.length > 0 && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowRusanFormat(true)}
+              className="flex items-center gap-2"
+            >
+              <Printer className="h-4 w-4" />
+              Preview Rusan Pharma PO Format
+            </Button>
+          )}
 
           {/* Show supplier details if selected */}
           {selectedSupplier && (selectedSupplier.payment_terms || selectedSupplier.bank_name) && (
@@ -294,7 +337,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={items.length === 0 || isSubmitting || (!formData.supplier && !formData.supplierId)}>
+            <Button type="submit" disabled={items.length === 0 || isSubmitting || (!formData.supplier && !formData.supplierId) || !formData.poNumber}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -307,6 +350,17 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
           </div>
         </form>
       </DialogContent>
+
+      {/* Rusan Pharma PO Format Modal */}
+      {showRusanFormat && (
+        <RusanPharmaPO
+          poNumber={formData.poNumber}
+          poDate={formData.poDate}
+          items={items}
+          stockItems={stockItems}
+          onClose={() => setShowRusanFormat(false)}
+        />
+      )}
     </Dialog>
   );
 }
