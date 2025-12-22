@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 interface Patient {
   id: number;
   patient_name: string;
+  father_name?: string;
   phone: string;
   file_no: string;
   aadhar_card: string;
@@ -308,6 +309,9 @@ export function PatientSearchSelect({
                     "font-medium",
                     index === highlightedIndex && "text-navy dark:text-gold"
                   )}>
+                    {patient.father_name && (
+                      <span className="text-muted-foreground font-normal text-xs mr-2">S/o {patient.father_name}</span>
+                    )}
                     {patient.patient_name}
                   </span>
                   <span className="text-muted-foreground text-xs flex flex-wrap gap-x-2">
