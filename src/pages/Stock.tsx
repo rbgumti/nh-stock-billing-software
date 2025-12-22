@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
 import { GRNForm } from "@/components/forms/GRNForm";
 import { SupplierForm } from "@/components/forms/SupplierForm";
 import { SupplierPaymentForm } from "@/components/forms/SupplierPaymentForm";
+import { StockLedger } from "@/components/StockLedger";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { usePurchaseOrderStore } from "@/hooks/usePurchaseOrderStore";
@@ -33,6 +34,7 @@ export default function Stock() {
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState<SupplierPayment | null>(null);
+  const [showLedgerItem, setShowLedgerItem] = useState<any>(null);
   const { stockItems, addStockItem, updateStockItem, subscribe } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
@@ -984,18 +986,29 @@ export default function Stock() {
                     </div>
                   )}
 
-                  <div className="flex space-x-2 pt-2">
+                  <div className="flex flex-col gap-2 pt-2">
                     <Button 
-                      variant="outline" 
+                      variant="default" 
                       size="sm" 
-                      className="flex-1"
-                      onClick={() => setEditingItem(item)}
+                      className="w-full"
+                      onClick={() => setShowLedgerItem(item)}
                     >
-                      Edit
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Stock Ledger
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Reorder
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => setEditingItem(item)}
+                      >
+                        Edit
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        Reorder
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -1575,6 +1588,13 @@ export default function Stock() {
           suppliers={suppliers}
           purchaseOrders={purchaseOrders}
           initialData={editingPayment}
+        />
+      )}
+
+      {showLedgerItem && (
+        <StockLedger
+          stockItem={showLedgerItem}
+          onClose={() => setShowLedgerItem(null)}
         />
       )}
     </div>
