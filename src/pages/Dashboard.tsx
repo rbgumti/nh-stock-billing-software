@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Package, Receipt, TrendingUp, DollarSign, Clock, RefreshCw, Activity, AlertCircle, Bell, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, Package, Receipt, TrendingUp, DollarSign, Clock, RefreshCw, Activity, AlertCircle, Bell, ArrowUpRight, ArrowDownRight, Plus, FileText, UserPlus, ClipboardPlus, Stethoscope } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -48,6 +50,7 @@ interface RealtimeUpdate {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -312,6 +315,69 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {/* Quick Actions Panel */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Card className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-primary/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Plus className="h-5 w-5 text-primary" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all group"
+                onClick={() => navigate('/invoices/new')}
+              >
+                <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30 group-hover:bg-primary-foreground/20">
+                  <FileText className="h-5 w-5 text-green-600 dark:text-green-400 group-hover:text-primary-foreground" />
+                </div>
+                <span className="font-medium text-sm">New Invoice</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all group"
+                onClick={() => navigate('/patients/new')}
+              >
+                <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30 group-hover:bg-primary-foreground/20">
+                  <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:text-primary-foreground" />
+                </div>
+                <span className="font-medium text-sm">New Patient</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all group"
+                onClick={() => navigate('/prescriptions/new')}
+              >
+                <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30 group-hover:bg-primary-foreground/20">
+                  <Stethoscope className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:text-primary-foreground" />
+                </div>
+                <span className="font-medium text-sm">New Prescription</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all group"
+                onClick={() => navigate('/stock')}
+              >
+                <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 group-hover:bg-primary-foreground/20">
+                  <Package className="h-5 w-5 text-amber-600 dark:text-amber-400 group-hover:text-primary-foreground" />
+                </div>
+                <span className="font-medium text-sm">Manage Stock</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Quick Stats - Today */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
