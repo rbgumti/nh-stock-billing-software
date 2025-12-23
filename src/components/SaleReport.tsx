@@ -37,6 +37,9 @@ export default function SaleReport() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [showLiveStock, setShowLiveStock] = useState(false);
 
+  // Check if report date is today
+  const isToday = reportDate === formatLocalISODate();
+
   const loadReportData = useCallback(async () => {
     setLoading(true);
     try {
@@ -265,6 +268,25 @@ export default function SaleReport() {
     toast.success('Report exported successfully');
   };
 
+  // For today: "Current Available Stock" = opening stock from snapshot (00:01 IST)
+  // For other dates: "Current Available Stock" = live current stock
+  const getDisplayStock = (item: SaleReportItem) => {
+    if (isToday) {
+      // For today, show opening stock as current available (captured at 00:01 IST)
+      return showLiveStock ? item.liveStock : item.openingStock;
+    } else {
+      // For other dates, show based on toggle
+      return showLiveStock ? item.liveStock : item.openingStock;
+    }
+  };
+
+  const getStockColumnLabel = () => {
+    if (isToday && !showLiveStock) {
+      return 'Current Available Stock';
+    }
+    return showLiveStock ? 'Live Stock' : 'Opening (00:01)';
+  };
+
   const renderCategoryTable = (items: SaleReportItem[], categoryLabel: string, totalQty: number, totalValue: number) => (
     <div className="space-y-2">
       <h3 className="font-semibold text-lg text-foreground">{categoryLabel}</h3>
@@ -276,7 +298,7 @@ export default function SaleReport() {
               <TableHead className="font-bold">Medicine Name</TableHead>
               <TableHead className="text-right font-bold">
                 <span className="flex items-center justify-end gap-1">
-                  {showLiveStock ? 'Live Stock' : 'Opening (00:01)'}
+                  {getStockColumnLabel()}
                   <span 
                     className={`inline-block w-2 h-2 rounded-full ${showLiveStock ? 'bg-accent' : 'bg-primary'}`}
                   />
@@ -303,7 +325,7 @@ export default function SaleReport() {
                   <TableCell className="py-1 font-medium">{item.medicineName}</TableCell>
                   <TableCell className="text-right py-1">
                     <span className="flex items-center justify-end gap-1">
-                      {showLiveStock ? item.liveStock : item.openingStock}
+                      {getDisplayStock(item)}
                       {!showLiveStock && !item.isFromSnapshot && (
                         <span 
                           className="inline-block w-2 h-2 rounded-full bg-accent"
@@ -339,7 +361,9 @@ export default function SaleReport() {
         <div>
           <CardTitle className="text-2xl font-bold">Sale Report</CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            {showLiveStock ? 'Showing current live stock' : 'Opening from 00:01 IST snapshot'}
+            {isToday 
+              ? (showLiveStock ? 'Showing current live stock' : 'Current Available Stock from 00:01 IST snapshot')
+              : (showLiveStock ? 'Showing current live stock' : 'Opening from 00:01 IST snapshot')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -351,7 +375,7 @@ export default function SaleReport() {
             className="flex items-center gap-2"
           >
             {showLiveStock ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-            {showLiveStock ? 'Live Stock' : 'Opening (00:01)'}
+            {showLiveStock ? 'Live Stock' : (isToday ? 'Current Available' : 'Opening (00:01)')}
           </Button>
           {lastUpdated && (
             <span className="text-xs text-muted-foreground">
