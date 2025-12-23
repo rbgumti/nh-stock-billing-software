@@ -1,0 +1,41 @@
+
+-- One-time update: Set opening stock equal to current stock for today's report
+UPDATE day_reports 
+SET stock_snapshot = jsonb_build_object(
+  'Addnok N 0.4 mg', jsonb_build_object('opening', 13688, 'closing', 13688, 'sold', 0),
+  'Addnok N 2 mg', jsonb_build_object('opening', 3403, 'closing', 3403, 'sold', 0),
+  'AFTIN', jsonb_build_object('opening', 610, 'closing', 610, 'sold', 0),
+  'AMITRI-10', jsonb_build_object('opening', 130, 'closing', 130, 'sold', 0),
+  'Ari-Rok N', jsonb_build_object('opening', 1578, 'closing', 1578, 'sold', 0),
+  'Boquit Plus', jsonb_build_object('opening', 25914, 'closing', 25914, 'sold', 0),
+  'Buset Plus ', jsonb_build_object('opening', 3211, 'closing', 3211, 'sold', 0),
+  'CLONAZEPAM 2 MG', jsonb_build_object('opening', 171, 'closing', 171, 'sold', 0),
+  'CLONIDINE 0.1 MG TAB', jsonb_build_object('opening', 186, 'closing', 186, 'sold', 0),
+  'Cyptor syrup ', jsonb_build_object('opening', 12, 'closing', 12, 'sold', 0),
+  'DIVSHOR-ER-250', jsonb_build_object('opening', 200, 'closing', 200, 'sold', 0),
+  'DONAKEM-M ', jsonb_build_object('opening', 140, 'closing', 140, 'sold', 0),
+  'EMEGA-4G', jsonb_build_object('opening', 266, 'closing', 266, 'sold', 0),
+  'ESCTOLPRAM-10', jsonb_build_object('opening', 218, 'closing', 218, 'sold', 0),
+  'ESCTOLPRAM-20', jsonb_build_object('opening', 118, 'closing', 118, 'sold', 0),
+  'Ewin 0.5', jsonb_build_object('opening', 94, 'closing', 94, 'sold', 0),
+  'ISPRO 2', jsonb_build_object('opening', 100, 'closing', 100, 'sold', 0),
+  'Laxwin ', jsonb_build_object('opening', 13, 'closing', 13, 'sold', 0),
+  'NEPZ-2', jsonb_build_object('opening', 262, 'closing', 262, 'sold', 0),
+  'OJOPINE 10', jsonb_build_object('opening', 51, 'closing', 51, 'sold', 0),
+  'PILO-20', jsonb_build_object('opening', 69, 'closing', 69, 'sold', 0),
+  'PREGABALIN M', jsonb_build_object('opening', 115, 'closing', 115, 'sold', 0),
+  'PROXY -CR 25', jsonb_build_object('opening', 143, 'closing', 143, 'sold', 0),
+  'QUETIANPINE 100 MG', jsonb_build_object('opening', 109, 'closing', 109, 'sold', 0),
+  'S-DEPWIN PLUS', jsonb_build_object('opening', 182, 'closing', 182, 'sold', 0),
+  'SANTROL-50', jsonb_build_object('opening', 190, 'closing', 190, 'sold', 0),
+  'Tapyad 100 MG', jsonb_build_object('opening', 151, 'closing', 151, 'sold', 0),
+  'V-QUIT 50', jsonb_build_object('opening', 226, 'closing', 226, 'sold', 0),
+  'WILCID  DSR', jsonb_build_object('opening', 27, 'closing', 27, 'sold', 0),
+  'WILLRICH-P', jsonb_build_object('opening', 0, 'closing', 0, 'sold', 0),
+  'WINAC INJ', jsonb_build_object('opening', 16, 'closing', 16, 'sold', 0),
+  'WINAM 1', jsonb_build_object('opening', 110, 'closing', 110, 'sold', 0),
+  'WINAM-0.5', jsonb_build_object('opening', 251, 'closing', 251, 'sold', 0),
+  'WINFORCE-D', jsonb_build_object('opening', 68, 'closing', 68, 'sold', 0)
+),
+updated_at = now()
+WHERE report_date = '2025-12-23';
