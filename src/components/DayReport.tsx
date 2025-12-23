@@ -61,6 +61,7 @@ export default function DayReport() {
   const [bnxMedicines, setBnxMedicines] = useState<MedicineReportItem[]>([]);
   const [tpnMedicines, setTpnMedicines] = useState<MedicineReportItem[]>([]);
   const [pshyMedicines, setPshyMedicines] = useState<MedicineReportItem[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [showLiveStock, setShowLiveStock] = useState(false);
   
   // Cash management
@@ -509,10 +510,24 @@ export default function DayReport() {
     XLSX.writeFile(workbook, `Day_Report_${reportDate}.xlsx`);
   };
 
-  const MedicineTable = ({ data, title, total }: { data: MedicineReportItem[], title: string, total: number }) => (
+  const MedicineTable = ({ data, title, total }: { data: MedicineReportItem[], title: string, total: number }) => {
+    const filteredData = categoryFilter ? data.filter(item => item.category === categoryFilter) : data;
+    const filteredTotal = filteredData.reduce((sum, item) => sum + item.amount, 0);
+    
+    return (
     <Card className="mb-4">
-      <CardHeader className="bg-navy text-white py-2 rounded-t-lg">
+      <CardHeader className="bg-navy text-white py-2 rounded-t-lg flex flex-row items-center justify-between">
         <CardTitle className="text-sm">{title}</CardTitle>
+        {categoryFilter && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setCategoryFilter(null)}
+            className="text-white hover:text-white hover:bg-white/20 h-6 px-2 text-xs"
+          >
+            Clear Filter
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="p-0">
         <Table>
@@ -530,28 +545,31 @@ export default function DayReport() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.length === 0 ? (
+            {filteredData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-4 text-muted-foreground text-sm">
-                  No data
+                  {categoryFilter ? `No ${categoryFilter} medicines` : 'No data'}
                 </TableCell>
               </TableRow>
             ) : (
               <>
-                {data.map((item, index) => (
+                {filteredData.map((item, index) => (
                   <TableRow key={index} className="text-xs">
                     <TableCell className="font-medium py-1">
                       <span className="flex items-center gap-2">
                         {item.brand}
-                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                          item.category === 'BNX' 
-                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' 
-                            : item.category === 'TPN' 
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                        }`}>
+                        <button
+                          onClick={() => setCategoryFilter(categoryFilter === item.category ? null : item.category)}
+                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold cursor-pointer transition-all hover:scale-105 ${
+                            item.category === 'BNX' 
+                              ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 hover:bg-orange-200' 
+                              : item.category === 'TPN' 
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200'
+                                : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 hover:bg-purple-200'
+                          } ${categoryFilter === item.category ? 'ring-2 ring-offset-1 ring-current' : ''}`}
+                        >
                           {item.category}
-                        </span>
+                        </button>
                       </span>
                     </TableCell>
                     <TableCell className="text-right py-1">{item.qtySold}</TableCell>
@@ -573,10 +591,10 @@ export default function DayReport() {
                   </TableRow>
                 ))}
                 <TableRow className="bg-gold/20 font-bold text-xs">
-                  <TableCell>Total</TableCell>
-                  <TableCell className="text-right">{data.reduce((s, i) => s + i.qtySold, 0)}</TableCell>
+                  <TableCell>Total {categoryFilter && `(${categoryFilter})`}</TableCell>
+                  <TableCell className="text-right">{filteredData.reduce((s, i) => s + i.qtySold, 0)}</TableCell>
                   <TableCell></TableCell>
-                  <TableCell className="text-right">₹{total}</TableCell>
+                  <TableCell className="text-right">₹{filteredTotal}</TableCell>
                   <TableCell colSpan={3}></TableCell>
                 </TableRow>
               </>
@@ -586,6 +604,7 @@ export default function DayReport() {
       </CardContent>
     </Card>
   );
+  };
 
   if (loading) {
     return (
