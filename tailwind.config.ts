@@ -64,6 +64,12 @@ export default {
 				},
 				gold: 'hsl(var(--gold))',
 				navy: 'hsl(var(--navy))',
+				purple: 'hsl(var(--purple))',
+				cyan: 'hsl(var(--cyan))',
+				pink: 'hsl(var(--pink))',
+				teal: 'hsl(var(--teal))',
+				orange: 'hsl(var(--orange))',
+				emerald: 'hsl(var(--emerald))',
 				glass: {
 					DEFAULT: 'hsl(var(--glass-background))',
 					border: 'hsl(var(--glass-border))',
@@ -79,9 +85,13 @@ export default {
 			},
 			boxShadow: {
 				'glass': '0 8px 32px hsl(var(--glass-shadow)), inset 0 1px 0 hsl(var(--glass-highlight))',
-				'glass-lg': '0 12px 40px hsl(var(--glass-shadow)), inset 0 2px 0 hsl(var(--glass-highlight))',
-				'glow': '0 0 20px hsl(var(--gold) / 0.3)',
-				'glow-lg': '0 0 40px hsl(var(--gold) / 0.4)'
+				'glass-lg': '0 16px 48px hsl(var(--glass-shadow)), inset 0 2px 0 hsl(var(--glass-highlight))',
+				'glow': '0 0 25px hsl(var(--purple) / 0.35)',
+				'glow-lg': '0 0 50px hsl(var(--purple) / 0.45)',
+				'glow-gold': '0 0 30px hsl(var(--gold) / 0.4)',
+				'glow-cyan': '0 0 30px hsl(var(--cyan) / 0.35)',
+				'glow-pink': '0 0 30px hsl(var(--pink) / 0.35)',
+				'colorful': '0 10px 40px -10px hsl(var(--purple) / 0.3), 0 8px 20px -8px hsl(var(--cyan) / 0.2)'
 			},
 			keyframes: {
 				'accordion-down': {
