@@ -291,24 +291,26 @@ export default function Dashboard() {
       {/* Header with Real-time indicator */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-navy">Dashboard</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+            Dashboard
+          </h1>
           <p className="text-muted-foreground mt-1">Real-time business insights and analytics</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground glass-subtle px-3 py-1.5 rounded-full">
             <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald"></span>
             </span>
             Live updates
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground glass-subtle px-3 py-1.5 rounded-full">
             Last updated: {lastUpdated.toLocaleTimeString()}
           </div>
           <button
             onClick={handleManualRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-primary text-sm font-medium disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple to-cyan text-white hover:shadow-glow transition-all duration-300 text-sm font-medium disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
@@ -322,55 +324,58 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <Card className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-primary/20">
-          <CardHeader className="pb-3">
+        <Card className="glass-strong border-0 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-cyan/5 to-pink/5" />
+          <CardHeader className="pb-3 relative">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Plus className="h-5 w-5 text-primary" />
+              <div className="p-1.5 rounded-lg bg-gradient-to-r from-purple to-cyan">
+                <Plus className="h-4 w-4 text-white" />
+              </div>
               Quick Actions
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Button
                 variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all group"
+                className="h-auto py-5 flex flex-col items-center gap-3 border-emerald/30 hover:border-emerald hover:bg-emerald/10 hover:shadow-lg transition-all group"
                 onClick={() => navigate('/invoices/new')}
               >
-                <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30 group-hover:bg-primary-foreground/20">
-                  <FileText className="h-5 w-5 text-green-600 dark:text-green-400 group-hover:text-primary-foreground" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-emerald to-teal shadow-lg group-hover:scale-110 transition-transform">
+                  <FileText className="h-5 w-5 text-white" />
                 </div>
                 <span className="font-medium text-sm">New Invoice</span>
               </Button>
 
               <Button
                 variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all group"
+                className="h-auto py-5 flex flex-col items-center gap-3 border-cyan/30 hover:border-cyan hover:bg-cyan/10 hover:shadow-lg transition-all group"
                 onClick={() => navigate('/patients/new')}
               >
-                <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30 group-hover:bg-primary-foreground/20">
-                  <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:text-primary-foreground" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-cyan to-purple shadow-lg group-hover:scale-110 transition-transform">
+                  <UserPlus className="h-5 w-5 text-white" />
                 </div>
                 <span className="font-medium text-sm">New Patient</span>
               </Button>
 
               <Button
                 variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all group"
+                className="h-auto py-5 flex flex-col items-center gap-3 border-purple/30 hover:border-purple hover:bg-purple/10 hover:shadow-lg transition-all group"
                 onClick={() => navigate('/prescriptions/new')}
               >
-                <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30 group-hover:bg-primary-foreground/20">
-                  <Stethoscope className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:text-primary-foreground" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-purple to-pink shadow-lg group-hover:scale-110 transition-transform">
+                  <Stethoscope className="h-5 w-5 text-white" />
                 </div>
                 <span className="font-medium text-sm">New Prescription</span>
               </Button>
 
               <Button
                 variant="outline"
-                className="h-auto py-4 flex flex-col items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all group"
+                className="h-auto py-5 flex flex-col items-center gap-3 border-gold/30 hover:border-gold hover:bg-gold/10 hover:shadow-lg transition-all group"
                 onClick={() => navigate('/stock')}
               >
-                <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 group-hover:bg-primary-foreground/20">
-                  <Package className="h-5 w-5 text-amber-600 dark:text-amber-400 group-hover:text-primary-foreground" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-gold to-orange shadow-lg group-hover:scale-110 transition-transform">
+                  <Package className="h-5 w-5 text-white" />
                 </div>
                 <span className="font-medium text-sm">Manage Stock</span>
               </Button>
@@ -386,13 +391,17 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Card className="border-l-4 border-l-green-500 hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald/20 to-teal/10" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald/30 to-transparent rounded-bl-full" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
               <CardTitle className="text-sm font-medium">Today's Revenue</CardTitle>
-              <ArrowUpRight className="h-4 w-4 text-green-500" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-emerald to-teal">
+                <ArrowUpRight className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-navy">Rs.{todayRevenue.toLocaleString()}</div>
+            <CardContent className="relative">
+              <div className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">Rs.{todayRevenue.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground mt-1">{todayInvoices.length} invoices today</p>
             </CardContent>
           </Card>
@@ -403,13 +412,17 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Card className="border-l-4 border-l-gold hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-gold transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-gold/20 to-orange/10" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-gold/30 to-transparent rounded-bl-full" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-gold" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-gold to-orange">
+                <DollarSign className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-navy">Rs.{totalRevenue.toLocaleString()}</div>
+            <CardContent className="relative">
+              <div className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">Rs.{totalRevenue.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground mt-1">All time</p>
             </CardContent>
           </Card>
@@ -420,13 +433,17 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-cyan transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan/20 to-purple/10" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-cyan/30 to-transparent rounded-bl-full" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
               <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-              <Users className="h-4 w-4 text-blue-500" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-cyan to-purple">
+                <Users className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-navy">{patients.length}</div>
+            <CardContent className="relative">
+              <div className="text-2xl font-bold bg-gradient-to-r from-cyan to-purple bg-clip-text text-transparent">{patients.length}</div>
               <p className="text-xs text-muted-foreground mt-1">Registered</p>
             </CardContent>
           </Card>
@@ -437,13 +454,17 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.3 }}
         >
-          <Card className="border-l-4 border-l-purple-500 hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple/20 to-pink/10" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple/30 to-transparent rounded-bl-full" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
               <CardTitle className="text-sm font-medium">Stock Items</CardTitle>
-              <Package className="h-4 w-4 text-purple-500" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple to-pink">
+                <Package className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-navy">{stockItems.length}</div>
+            <CardContent className="relative">
+              <div className="text-2xl font-bold bg-gradient-to-r from-purple to-pink bg-clip-text text-transparent">{stockItems.length}</div>
               <p className="text-xs text-muted-foreground mt-1">In inventory</p>
             </CardContent>
           </Card>
@@ -454,13 +475,17 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.4 }}
         >
-          <Card className={`border-l-4 hover:shadow-lg transition-shadow ${lowStockItems.length > 0 ? 'border-l-red-500 bg-red-50/50 dark:bg-red-900/10' : 'border-l-green-500'}`}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className={`glass-strong border-0 overflow-hidden relative group transition-all duration-300 ${lowStockItems.length > 0 ? 'hover:shadow-pink' : 'hover:shadow-glow'}`}>
+            <div className={`absolute inset-0 ${lowStockItems.length > 0 ? 'bg-gradient-to-br from-pink/20 to-destructive/10' : 'bg-gradient-to-br from-emerald/20 to-teal/10'}`} />
+            <div className={`absolute top-0 right-0 w-24 h-24 rounded-bl-full ${lowStockItems.length > 0 ? 'bg-gradient-to-br from-pink/30 to-transparent' : 'bg-gradient-to-br from-emerald/30 to-transparent'}`} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
               <CardTitle className="text-sm font-medium">Low Stock Alerts</CardTitle>
-              <AlertCircle className={`h-4 w-4 ${lowStockItems.length > 0 ? 'text-red-500' : 'text-green-500'}`} />
+              <div className={`p-2 rounded-lg ${lowStockItems.length > 0 ? 'bg-gradient-to-br from-pink to-destructive' : 'bg-gradient-to-br from-emerald to-teal'}`}>
+                <AlertCircle className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${lowStockItems.length > 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <CardContent className="relative">
+              <div className={`text-2xl font-bold bg-clip-text text-transparent ${lowStockItems.length > 0 ? 'bg-gradient-to-r from-pink to-destructive' : 'bg-gradient-to-r from-emerald to-teal'}`}>
                 {lowStockItems.length}
               </div>
               <p className="text-xs text-muted-foreground mt-1">Items need reorder</p>
@@ -472,14 +497,17 @@ export default function Dashboard() {
       {/* Real-time Activity Feed & Payment Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Live Activity Feed */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="pb-3">
+        <Card className="lg:col-span-1 glass-strong border-0 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-purple/5 to-transparent" />
+          <CardHeader className="pb-3 relative">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-r from-purple to-cyan">
+                  <Activity className="h-4 w-4 text-white" />
+                </div>
                 Live Activity
               </CardTitle>
-              <Badge variant="outline" className="text-xs">
+              <Badge className="text-xs bg-gradient-to-r from-purple to-cyan text-white border-0">
                 {realtimeUpdates.length} updates
               </Badge>
             </div>
@@ -518,36 +546,52 @@ export default function Dashboard() {
         </Card>
 
         {/* Payment Summary */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Payment Overview</CardTitle>
+        <Card className="lg:col-span-2 glass-strong border-0 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-cyan/5" />
+          <CardHeader className="relative">
+            <CardTitle className="bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">Payment Overview</CardTitle>
             <p className="text-sm text-muted-foreground">Revenue breakdown and pending amounts</p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  <span className="font-medium text-green-700 dark:text-green-400">Paid</span>
+              <div className="p-4 rounded-xl glass-subtle border-0 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald/20 to-teal/10" />
+                <div className="relative">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-1.5 rounded-lg bg-gradient-to-r from-emerald to-teal">
+                      <TrendingUp className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium text-emerald">Paid</span>
+                  </div>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">Rs.{paidAmount.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">{paidInvoices.length} invoices</p>
                 </div>
-                <p className="text-2xl font-bold text-green-600">Rs.{paidAmount.toLocaleString()}</p>
-                <p className="text-sm text-green-600/70">{paidInvoices.length} invoices</p>
               </div>
-              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="h-5 w-5 text-amber-600" />
-                  <span className="font-medium text-amber-700 dark:text-amber-400">Pending</span>
+              <div className="p-4 rounded-xl glass-subtle border-0 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                <div className="absolute inset-0 bg-gradient-to-br from-gold/20 to-orange/10" />
+                <div className="relative">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-1.5 rounded-lg bg-gradient-to-r from-gold to-orange">
+                      <Clock className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gold">Pending</span>
+                  </div>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">Rs.{pendingAmount.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">{pendingInvoices.length} invoices</p>
                 </div>
-                <p className="text-2xl font-bold text-amber-600">Rs.{pendingAmount.toLocaleString()}</p>
-                <p className="text-sm text-amber-600/70">{pendingInvoices.length} invoices</p>
               </div>
-              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                <div className="flex items-center gap-2 mb-2">
-                  <Receipt className="h-5 w-5 text-blue-600" />
-                  <span className="font-medium text-blue-700 dark:text-blue-400">Total</span>
+              <div className="p-4 rounded-xl glass-subtle border-0 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan/20 to-purple/10" />
+                <div className="relative">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-1.5 rounded-lg bg-gradient-to-r from-cyan to-purple">
+                      <Receipt className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium text-cyan">Total</span>
+                  </div>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-cyan to-purple bg-clip-text text-transparent">Rs.{totalRevenue.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">{invoices.length} invoices</p>
                 </div>
-                <p className="text-2xl font-bold text-blue-600">Rs.{totalRevenue.toLocaleString()}</p>
-                <p className="text-sm text-blue-600/70">{invoices.length} invoices</p>
               </div>
             </div>
             <ChartContainer config={chartConfig} className="h-[200px]">
@@ -623,9 +667,10 @@ export default function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Trend Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue Trend</CardTitle>
+        <Card className="glass-strong border-0 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-orange/5" />
+          <CardHeader className="relative">
+            <CardTitle className="bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">Revenue Trend</CardTitle>
             <p className="text-sm text-muted-foreground">Monthly revenue over the last 6 months</p>
           </CardHeader>
           <CardContent>
@@ -660,9 +705,10 @@ export default function Dashboard() {
         </Card>
 
         {/* Stock Category Breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Stock by Category</CardTitle>
+        <Card className="glass-strong border-0 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple/5 to-pink/5" />
+          <CardHeader className="relative">
+            <CardTitle className="bg-gradient-to-r from-purple to-pink bg-clip-text text-transparent">Stock by Category</CardTitle>
             <p className="text-sm text-muted-foreground">Distribution of inventory items</p>
           </CardHeader>
           <CardContent>
@@ -691,9 +737,10 @@ export default function Dashboard() {
       </div>
 
       {/* Monthly Comparison Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Monthly Comparison</CardTitle>
+      <Card className="glass-strong border-0 overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 via-transparent to-purple/5" />
+        <CardHeader className="relative">
+          <CardTitle className="bg-gradient-to-r from-cyan to-purple bg-clip-text text-transparent">Monthly Comparison</CardTitle>
           <p className="text-sm text-muted-foreground">Invoice count and revenue comparison</p>
         </CardHeader>
         <CardContent>
@@ -740,11 +787,12 @@ export default function Dashboard() {
       </Card>
 
       {/* Recent Invoices Table */}
-      <Card>
-        <CardHeader>
+      <Card className="glass-strong border-0 overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald/5 to-teal/5" />
+        <CardHeader className="relative">
           <div className="flex items-center justify-between">
-            <CardTitle>Recent Invoices</CardTitle>
-            <Badge variant="outline">{invoices.length} total</Badge>
+            <CardTitle className="bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">Recent Invoices</CardTitle>
+            <Badge className="bg-gradient-to-r from-emerald to-teal text-white border-0">{invoices.length} total</Badge>
           </div>
         </CardHeader>
         <CardContent>
