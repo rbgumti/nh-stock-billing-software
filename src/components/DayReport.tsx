@@ -56,11 +56,10 @@ export default function DayReport() {
   const [newPatients, setNewPatients] = useState(0);
   const [followUpPatients, setFollowUpPatients] = useState(0);
   
-  // Medicine data by category
+  // Medicine data by category (BNX, TPN, PSHY)
   const [bnxMedicines, setBnxMedicines] = useState<MedicineReportItem[]>([]);
-  const [tapentadolMedicines, setTapentadolMedicines] = useState<MedicineReportItem[]>([]);
-  const [psychiatryMedicines, setPsychiatryMedicines] = useState<MedicineReportItem[]>([]);
-  const [otherMedicines, setOtherMedicines] = useState<MedicineReportItem[]>([]);
+  const [tpnMedicines, setTpnMedicines] = useState<MedicineReportItem[]>([]);
+  const [pshyMedicines, setPshyMedicines] = useState<MedicineReportItem[]>([]);
   const [showLiveStock, setShowLiveStock] = useState(false);
   
   // Cash management
@@ -350,20 +349,8 @@ export default function DayReport() {
         });
       }
 
-      // Categorize medicines
-      const bnxKeywords = ['addnok', 'buset', 'boquit', 'ari-rok'];
-      const tapentadolKeywords = ['tapyad', 'tapentadol', 'winam', 'wilcid', 'laxwin', 'quetianpine', 'emega'];
-      const psychiatryKeywords = ['aftin', 'amitri', 'divshor', 'donakem', 'esctolpram', 'ewin', 'heprox', 'lithtash', 'clonidine', 'nepz', 'ojopine', 'pilo', 'pregabalin', 'proxy', 'santrol', 'depwin', 'winforce', 'ispro', 'quit'];
-
-      const categorizeItem = (name: string): string => {
-        const lowerName = name.toLowerCase();
-        if (bnxKeywords.some(k => lowerName.includes(k))) return 'bnx';
-        if (tapentadolKeywords.some(k => lowerName.includes(k))) return 'tapentadol';
-        if (psychiatryKeywords.some(k => lowerName.includes(k))) return 'psychiatry';
-        return 'other';
-      };
-
-      const createMedicineData = (items: typeof stockItems): MedicineReportItem[] => {
+      // Create medicine data with category from stock item
+      const createMedicineData = (items: typeof stockItems): (MedicineReportItem & { category: string })[] => {
         return items
           .map(item => {
             const sold = soldQuantitiesById[item.id] ?? soldQuantitiesByName[item.name] ?? 0;
@@ -385,6 +372,7 @@ export default function DayReport() {
               stockReceived: received,
               closing,
               isFromSnapshot,
+              category: item.category.toUpperCase(),
             };
           })
           .filter(item => item.opening > 0 || item.qtySold > 0 || item.stockReceived > 0 || item.isFromSnapshot);
@@ -392,10 +380,10 @@ export default function DayReport() {
 
       const allMedicineData = createMedicineData(stockItems);
       
-      setBnxMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'bnx'));
-      setTapentadolMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'tapentadol'));
-      setPsychiatryMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'psychiatry'));
-      setOtherMedicines(allMedicineData.filter(m => categorizeItem(m.brand) === 'other'));
+      // Categorize by actual category field (BNX, TPN, PSHY)
+      setBnxMedicines(allMedicineData.filter(m => m.category === 'BNX'));
+      setTpnMedicines(allMedicineData.filter(m => m.category === 'TPN'));
+      setPshyMedicines(allMedicineData.filter(m => m.category === 'PSHY'));
       setMedicineDataUpdated(new Date());
     } finally {
       setIsRefreshingMedicine(false);
@@ -421,14 +409,13 @@ export default function DayReport() {
 
   // Calculations
   const bnxTotal = bnxMedicines.reduce((sum, item) => sum + item.amount, 0);
-  const tapentadolTotal = tapentadolMedicines.reduce((sum, item) => sum + item.amount, 0);
-  const psychiatryTotal = psychiatryMedicines.reduce((sum, item) => sum + item.amount, 0);
-  const otherTotal = otherMedicines.reduce((sum, item) => sum + item.amount, 0);
+  const tpnTotal = tpnMedicines.reduce((sum, item) => sum + item.amount, 0);
+  const pshyTotal = pshyMedicines.reduce((sum, item) => sum + item.amount, 0);
   
   const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
   const totalCash = cashDetails.reduce((sum, item) => sum + item.amount, 0);
   
-  const totalSale = bnxTotal + tapentadolTotal + psychiatryTotal + otherTotal + fees + labCollection;
+  const totalSale = bnxTotal + tpnTotal + pshyTotal + fees + labCollection;
   const todaysCollection = totalSale;
   const cashLeftInHand = cashPreviousDay + todaysCollection + looseBalance - totalExpenses - depositInBank - paytmGpay - cashHandoverAmarjeet - cashHandoverMandeep - cashHandoverSir + adjustments;
   
@@ -476,30 +463,30 @@ export default function DayReport() {
     reportData.push(['Cash left in hand (Today)', cashLeftInHand]);
     reportData.push([]);
 
-    if (tapentadolMedicines.length > 0) {
-      reportData.push(['Tapentadol Medicines']);
+    if (tpnMedicines.length > 0) {
+      reportData.push(['TPN Medicines']);
       reportData.push(['Brand', 'Qty sold', 'Rate', 'Amount', 'Opening', 'Stock Received', 'Closing']);
-      tapentadolMedicines.forEach(m => {
+      tpnMedicines.forEach(m => {
         reportData.push([m.brand, m.qtySold, m.rate, m.amount, m.opening, m.stockReceived, m.closing]);
       });
-      reportData.push(['Total', '', '', tapentadolTotal]);
+      reportData.push(['Total', '', '', tpnTotal]);
       reportData.push([]);
     }
 
-    if (psychiatryMedicines.length > 0) {
-      reportData.push(['Psychiatry Medicines']);
+    if (pshyMedicines.length > 0) {
+      reportData.push(['PSHY Medicines']);
       reportData.push(['Brand', 'Qty sold', 'Rate', 'Amount', 'Opening', 'Stock Received', 'Closing']);
-      psychiatryMedicines.forEach(m => {
+      pshyMedicines.forEach(m => {
         reportData.push([m.brand, m.qtySold, m.rate, m.amount, m.opening, m.stockReceived, m.closing]);
       });
-      reportData.push(['Total', '', '', psychiatryTotal]);
+      reportData.push(['Total', '', '', pshyTotal]);
       reportData.push([]);
     }
 
     reportData.push(['Summary']);
     reportData.push(['BNX Collection', bnxTotal]);
-    reportData.push(['Tapentadol Collection', tapentadolTotal]);
-    reportData.push(['Psychiatry Collection', psychiatryTotal]);
+    reportData.push(['TPN Collection', tpnTotal]);
+    reportData.push(['PSHY Collection', pshyTotal]);
     reportData.push(['Fees', fees]);
     reportData.push(['Lab Collection', labCollection]);
     reportData.push(['Total Sale', totalSale]);
@@ -693,16 +680,11 @@ export default function DayReport() {
           {/* BNX Medicines */}
           <MedicineTable data={bnxMedicines} title="BNX Medicines" total={bnxTotal} />
 
-          {/* Tapentadol Medicines */}
-          <MedicineTable data={tapentadolMedicines} title="Tapentadol Medicines" total={tapentadolTotal} />
+          {/* TPN Medicines */}
+          <MedicineTable data={tpnMedicines} title="TPN Medicines" total={tpnTotal} />
 
-          {/* Psychiatry Medicines */}
-          <MedicineTable data={psychiatryMedicines} title="Psychiatry Medicines" total={psychiatryTotal} />
-
-          {/* Other Medicines */}
-          {otherMedicines.length > 0 && (
-            <MedicineTable data={otherMedicines} title="Other Medicines" total={otherTotal} />
-          )}
+          {/* PSHY Medicines */}
+          <MedicineTable data={pshyMedicines} title="PSHY Medicines" total={pshyTotal} />
         </div>
 
         {/* Right Column - Cash & Expenses */}
@@ -954,14 +936,14 @@ export default function DayReport() {
         </Card>
         <Card className="border-l-4 border-l-blue-500">
           <CardContent className="pt-4 pb-3">
-            <p className="text-xs text-muted-foreground">Tapentadol Collection</p>
-            <p className="text-lg font-bold text-navy">₹{tapentadolTotal}</p>
+            <p className="text-xs text-muted-foreground">TPN Collection</p>
+            <p className="text-lg font-bold text-navy">₹{tpnTotal}</p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-purple-500">
           <CardContent className="pt-4 pb-3">
-            <p className="text-xs text-muted-foreground">Psychiatry Collection</p>
-            <p className="text-lg font-bold text-navy">₹{psychiatryTotal}</p>
+            <p className="text-xs text-muted-foreground">PSHY Collection</p>
+            <p className="text-lg font-bold text-navy">₹{pshyTotal}</p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-green-500">
