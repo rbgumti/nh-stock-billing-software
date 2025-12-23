@@ -27,6 +27,7 @@ interface SaleReportItem {
   value: number;
   stockReceived: number;
   closingStock: number;
+  discrepancy: number;
   isFromSnapshot: boolean;
 }
 
@@ -134,6 +135,9 @@ export default function SaleReport() {
         
         // Closing stock = opening + received - sold
         const closingStock = openingStock + stockReceived - saleQty;
+        
+        // Discrepancy = Closing - Current (positive means missing stock, negative means extra)
+        const discrepancy = closingStock - currentStock;
 
         return {
           sNo: index + 1,
@@ -146,6 +150,7 @@ export default function SaleReport() {
           value,
           stockReceived,
           closingStock,
+          discrepancy,
           isFromSnapshot,
         };
       });
@@ -223,7 +228,7 @@ export default function SaleReport() {
     const data: any[][] = [
       [`Sale Report - ${formatDate(reportDate)}`],
       [],
-      ['S. No.', 'Medicine Name', 'Medicine Category', 'Opening Stock', 'Current Stock', 'Sale Qty', 'Rate', 'Value', 'Stock Received', 'Closing Stock'],
+      ['S. No.', 'Medicine Name', 'Medicine Category', 'Opening Stock', 'Current Stock', 'Sale Qty', 'Rate', 'Value', 'Stock Received', 'Closing Stock', 'Discrepancy'],
     ];
 
     allSorted.forEach(item => {
@@ -238,15 +243,16 @@ export default function SaleReport() {
         item.value,
         item.stockReceived,
         item.closingStock,
+        item.discrepancy,
       ]);
     });
 
     // Add totals
     data.push([]);
-    data.push(['TOTAL SALE (BNX)', '', 'BNX', '', '', bnxTotalQty, '', bnxTotalValue, '', '']);
-    data.push(['TOTAL SALE (TPN)', '', 'TPN', '', '', tpnTotalQty, '', tpnTotalValue, '', '']);
-    data.push(['TOTAL SALE (PSHY)', '', 'PSHY', '', '', pshyTotalQty, '', pshyTotalValue, '', '']);
-    data.push(['GRAND TOTAL', '', 'BNX+TPN+PSHY', '', '', '', '', grandTotalValue, '', '']);
+    data.push(['TOTAL SALE (BNX)', '', 'BNX', '', '', bnxTotalQty, '', bnxTotalValue, '', '', '']);
+    data.push(['TOTAL SALE (TPN)', '', 'TPN', '', '', tpnTotalQty, '', tpnTotalValue, '', '', '']);
+    data.push(['TOTAL SALE (PSHY)', '', 'PSHY', '', '', pshyTotalQty, '', pshyTotalValue, '', '', '']);
+    data.push(['GRAND TOTAL', '', 'BNX+TPN+PSHY', '', '', '', '', grandTotalValue, '', '', '']);
 
     const worksheet = XLSX.utils.aoa_to_sheet(data);
     
@@ -262,6 +268,7 @@ export default function SaleReport() {
       { wch: 12 },  // Value
       { wch: 14 },  // Stock Received
       { wch: 14 },  // Closing
+      { wch: 12 },  // Discrepancy
     ];
 
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sale Report');
@@ -285,12 +292,13 @@ export default function SaleReport() {
               <TableHead className="text-right font-bold">Value</TableHead>
               <TableHead className="text-right font-bold">Stock Received</TableHead>
               <TableHead className="text-right font-bold">Closing</TableHead>
+              <TableHead className="text-right font-bold">Discrepancy</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center text-muted-foreground py-4">
+                <TableCell colSpan={10} className="text-center text-muted-foreground py-4">
                   No data for this category
                 </TableCell>
               </TableRow>
@@ -316,6 +324,15 @@ export default function SaleReport() {
                   <TableCell className="text-right py-1 font-medium">₹{item.value.toFixed(2)}</TableCell>
                   <TableCell className="text-right py-1">{item.stockReceived}</TableCell>
                   <TableCell className="text-right py-1">{item.closingStock}</TableCell>
+                  <TableCell className={`text-right py-1 font-medium ${
+                    item.discrepancy !== 0 
+                      ? item.discrepancy > 0 
+                        ? 'text-amber-600 dark:text-amber-400' 
+                        : 'text-red-600 dark:text-red-400'
+                      : 'text-green-600 dark:text-green-400'
+                  }`}>
+                    {item.discrepancy !== 0 ? (item.discrepancy > 0 ? '+' : '') + item.discrepancy : '✓'}
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -324,7 +341,7 @@ export default function SaleReport() {
               <TableCell className="text-right py-2">{totalQty}</TableCell>
               <TableCell></TableCell>
               <TableCell className="text-right py-2">₹{totalValue.toFixed(2)}</TableCell>
-              <TableCell colSpan={2}></TableCell>
+              <TableCell colSpan={3}></TableCell>
             </TableRow>
           </TableBody>
         </Table>
