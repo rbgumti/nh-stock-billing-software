@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Loader2, RefreshCw, ToggleLeft, ToggleRight } from "lucide-react";
+import { Download, Calendar, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -21,7 +21,7 @@ interface SaleReportItem {
   medicineName: string;
   category: string;
   openingStock: number;
-  liveStock: number;
+  currentStock: number;
   saleQty: number;
   rate: number;
   value: number;
@@ -35,7 +35,6 @@ export default function SaleReport() {
   const [loading, setLoading] = useState(false);
   const [reportItems, setReportItems] = useState<SaleReportItem[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [showLiveStock, setShowLiveStock] = useState(false);
 
   // Check if report date is today
   const isToday = reportDate === formatLocalISODate();
@@ -118,8 +117,8 @@ export default function SaleReport() {
         const isFromSnapshot = snapshotData?.opening !== undefined;
         
         // Opening stock: from snapshot (00:01 IST) or fallback to current
-        const snapshotOpening = isFromSnapshot ? snapshotData.opening! : item.current_stock;
-        const liveStock = item.current_stock;
+        const openingStock = isFromSnapshot ? snapshotData.opening! : item.current_stock;
+        const currentStock = item.current_stock;
         
         // Sales quantity from invoices
         const saleQty = soldQuantitiesById[item.item_id] ?? soldQuantitiesByName[item.name] ?? 0;
@@ -133,15 +132,15 @@ export default function SaleReport() {
         // Stock received from GRN
         const stockReceived = receivedQuantitiesById[item.item_id] ?? receivedQuantitiesByName[item.name] ?? 0;
         
-        // Closing stock = opening - sold + received
-        const closingStock = snapshotOpening - saleQty + stockReceived;
+        // Closing stock = opening + received - sold
+        const closingStock = openingStock + stockReceived - saleQty;
 
         return {
           sNo: index + 1,
           medicineName: item.name,
           category: item.category,
-          openingStock: snapshotOpening,
-          liveStock,
+          openingStock,
+          currentStock,
           saleQty,
           rate,
           value,
@@ -224,7 +223,7 @@ export default function SaleReport() {
     const data: any[][] = [
       [`Sale Report - ${formatDate(reportDate)}`],
       [],
-      ['S. No.', 'Medicine Name', 'Medicine Category', 'Stock Opening', 'Sale Qty', 'Rate', 'Value', 'Stock Received', 'Closing Stock'],
+      ['S. No.', 'Medicine Name', 'Medicine Category', 'Opening Stock', 'Current Stock', 'Sale Qty', 'Rate', 'Value', 'Stock Received', 'Closing Stock'],
     ];
 
     allSorted.forEach(item => {
@@ -233,6 +232,7 @@ export default function SaleReport() {
         item.medicineName,
         item.category,
         item.openingStock,
+        item.currentStock,
         item.saleQty,
         item.rate,
         item.value,
@@ -243,10 +243,10 @@ export default function SaleReport() {
 
     // Add totals
     data.push([]);
-    data.push(['TOTAL SALE (BNX)', '', 'BNX', '', bnxTotalQty, '', bnxTotalValue, '', '']);
-    data.push(['TOTAL SALE (TPN)', '', 'TPN', '', tpnTotalQty, '', tpnTotalValue, '', '']);
-    data.push(['TOTAL SALE (PSHY)', '', 'PSHY', '', pshyTotalQty, '', pshyTotalValue, '', '']);
-    data.push(['GRAND TOTAL', '', 'BNX+TPN+PSHY', '', '', '', grandTotalValue, '', '']);
+    data.push(['TOTAL SALE (BNX)', '', 'BNX', '', '', bnxTotalQty, '', bnxTotalValue, '', '']);
+    data.push(['TOTAL SALE (TPN)', '', 'TPN', '', '', tpnTotalQty, '', tpnTotalValue, '', '']);
+    data.push(['TOTAL SALE (PSHY)', '', 'PSHY', '', '', pshyTotalQty, '', pshyTotalValue, '', '']);
+    data.push(['GRAND TOTAL', '', 'BNX+TPN+PSHY', '', '', '', '', grandTotalValue, '', '']);
 
     const worksheet = XLSX.utils.aoa_to_sheet(data);
     
@@ -256,6 +256,7 @@ export default function SaleReport() {
       { wch: 25 },  // Medicine Name
       { wch: 18 },  // Category
       { wch: 14 },  // Opening
+      { wch: 14 },  // Current
       { wch: 10 },  // Sale Qty
       { wch: 8 },   // Rate
       { wch: 12 },  // Value
@@ -268,25 +269,6 @@ export default function SaleReport() {
     toast.success('Report exported successfully');
   };
 
-  // For today: "Current Available Stock" = opening stock from snapshot (00:01 IST)
-  // For other dates: "Current Available Stock" = live current stock
-  const getDisplayStock = (item: SaleReportItem) => {
-    if (isToday) {
-      // For today, show opening stock as current available (captured at 00:01 IST)
-      return showLiveStock ? item.liveStock : item.openingStock;
-    } else {
-      // For other dates, show based on toggle
-      return showLiveStock ? item.liveStock : item.openingStock;
-    }
-  };
-
-  const getStockColumnLabel = () => {
-    if (isToday && !showLiveStock) {
-      return 'Current Available Stock';
-    }
-    return showLiveStock ? 'Live Stock' : 'Opening (00:01)';
-  };
-
   const renderCategoryTable = (items: SaleReportItem[], categoryLabel: string, totalQty: number, totalValue: number) => (
     <div className="space-y-2">
       <h3 className="font-semibold text-lg text-foreground">{categoryLabel}</h3>
@@ -296,14 +278,8 @@ export default function SaleReport() {
             <TableRow className="bg-muted/50">
               <TableHead className="w-16 font-bold">S. No.</TableHead>
               <TableHead className="font-bold">Medicine Name</TableHead>
-              <TableHead className="text-right font-bold">
-                <span className="flex items-center justify-end gap-1">
-                  {getStockColumnLabel()}
-                  <span 
-                    className={`inline-block w-2 h-2 rounded-full ${showLiveStock ? 'bg-accent' : 'bg-primary'}`}
-                  />
-                </span>
-              </TableHead>
+              <TableHead className="text-right font-bold">Opening Stock</TableHead>
+              <TableHead className="text-right font-bold">Current Stock</TableHead>
               <TableHead className="text-right font-bold">Sale Qty</TableHead>
               <TableHead className="text-right font-bold">Rate</TableHead>
               <TableHead className="text-right font-bold">Value</TableHead>
@@ -314,7 +290,7 @@ export default function SaleReport() {
           <TableBody>
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground py-4">
+                <TableCell colSpan={9} className="text-center text-muted-foreground py-4">
                   No data for this category
                 </TableCell>
               </TableRow>
@@ -325,25 +301,26 @@ export default function SaleReport() {
                   <TableCell className="py-1 font-medium">{item.medicineName}</TableCell>
                   <TableCell className="text-right py-1">
                     <span className="flex items-center justify-end gap-1">
-                      {getDisplayStock(item)}
-                      {!showLiveStock && !item.isFromSnapshot && (
+                      {item.openingStock}
+                      {!item.isFromSnapshot && (
                         <span 
-                          className="inline-block w-2 h-2 rounded-full bg-accent"
-                          title="No snapshot available - showing current stock"
+                          className="inline-block w-2 h-2 rounded-full bg-amber-500"
+                          title="No snapshot available - showing current stock as opening"
                         />
                       )}
                     </span>
                   </TableCell>
+                  <TableCell className="text-right py-1">{item.currentStock}</TableCell>
                   <TableCell className="text-right py-1">{item.saleQty}</TableCell>
                   <TableCell className="text-right py-1">₹{item.rate.toFixed(2)}</TableCell>
                   <TableCell className="text-right py-1 font-medium">₹{item.value.toFixed(2)}</TableCell>
                   <TableCell className="text-right py-1">{item.stockReceived}</TableCell>
-                  <TableCell className="text-right py-1">{showLiveStock ? item.liveStock : item.closingStock}</TableCell>
+                  <TableCell className="text-right py-1">{item.closingStock}</TableCell>
                 </TableRow>
               ))
             )}
             <TableRow className="bg-primary/10 font-bold">
-              <TableCell colSpan={3} className="py-2">TOTAL ({categoryLabel})</TableCell>
+              <TableCell colSpan={4} className="py-2">TOTAL ({categoryLabel})</TableCell>
               <TableCell className="text-right py-2">{totalQty}</TableCell>
               <TableCell></TableCell>
               <TableCell className="text-right py-2">₹{totalValue.toFixed(2)}</TableCell>
@@ -361,22 +338,10 @@ export default function SaleReport() {
         <div>
           <CardTitle className="text-2xl font-bold">Sale Report</CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            {isToday 
-              ? (showLiveStock ? 'Showing current live stock' : 'Current Available Stock from 00:01 IST snapshot')
-              : (showLiveStock ? 'Showing current live stock' : 'Opening from 00:01 IST snapshot')}
+            Opening Stock from 00:01 IST snapshot | Closing = Opening + Received - Sold
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* Toggle for Opening vs Live Stock */}
-          <Button
-            variant={showLiveStock ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowLiveStock(!showLiveStock)}
-            className="flex items-center gap-2"
-          >
-            {showLiveStock ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
-            {showLiveStock ? 'Live Stock' : (isToday ? 'Current Available' : 'Opening (00:01)')}
-          </Button>
           {lastUpdated && (
             <span className="text-xs text-muted-foreground">
               Updated: {lastUpdated.toLocaleTimeString()}
