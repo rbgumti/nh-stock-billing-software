@@ -19,6 +19,7 @@ import { formatLocalISODate } from "@/lib/dateUtils";
 
 interface MedicineReportItem {
   brand: string;
+  category: string;
   qtySold: number;
   rate: number;
   amount: number;
@@ -350,7 +351,7 @@ export default function DayReport() {
       }
 
       // Create medicine data with category from stock item
-      const createMedicineData = (items: typeof stockItems): (MedicineReportItem & { category: string })[] => {
+      const createMedicineData = (items: typeof stockItems): MedicineReportItem[] => {
         return items
           .map(item => {
             const sold = soldQuantitiesById[item.id] ?? soldQuantitiesByName[item.name] ?? 0;
@@ -539,7 +540,20 @@ export default function DayReport() {
               <>
                 {data.map((item, index) => (
                   <TableRow key={index} className="text-xs">
-                    <TableCell className="font-medium py-1">{item.brand}</TableCell>
+                    <TableCell className="font-medium py-1">
+                      <span className="flex items-center gap-2">
+                        {item.brand}
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                          item.category === 'BNX' 
+                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' 
+                            : item.category === 'TPN' 
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                        }`}>
+                          {item.category}
+                        </span>
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right py-1">{item.qtySold}</TableCell>
                     <TableCell className="text-right py-1">₹{item.rate}</TableCell>
                     <TableCell className="text-right py-1 font-semibold">₹{item.amount}</TableCell>
