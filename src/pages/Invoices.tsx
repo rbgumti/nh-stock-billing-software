@@ -402,7 +402,12 @@ export default function Invoices() {
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <p className="text-lg text-gray-600">Loading invoices...</p>
+        <div className="text-center">
+          <div className="p-4 rounded-full bg-gradient-to-r from-purple/10 to-cyan/10 w-fit mx-auto mb-4 animate-pulse">
+            <Receipt className="h-8 w-8 text-purple" />
+          </div>
+          <p className="text-lg text-muted-foreground">Loading invoices...</p>
+        </div>
       </div>
     );
   }
@@ -412,10 +417,12 @@ export default function Invoices() {
       <FloatingOrbs />
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-navy">Invoices</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+            Invoices
+          </h1>
           <p className="text-muted-foreground mt-2">Manage billing and payments</p>
         </div>
-        <Button asChild className="bg-gold hover:bg-gold/90 text-navy">
+        <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
           <Link to="/invoices/new">
             <Plus className="h-4 w-4 mr-2" />
             Create Invoice
@@ -425,54 +432,79 @@ export default function Invoices() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Invoices</p>
-              <p className="text-2xl font-bold">{filteredInvoices.length}</p>
+        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-cyan">
+                <Receipt className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{filteredInvoices.length}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="pt-6">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Amount</p>
-              <p className="text-2xl font-bold">₹{totalAmount.toFixed(2)}</p>
+        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-gold to-orange">
+                <Receipt className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{totalAmount.toFixed(2)}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Paid</p>
-              <p className="text-2xl font-bold text-green-600">₹{paidAmount.toFixed(2)}</p>
+        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 via-transparent to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-emerald to-teal">
+                <CheckCircle className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Paid</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">₹{paidAmount.toFixed(2)}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-orange-600">₹{pendingAmount.toFixed(2)}</p>
+        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-pink">
+                <Receipt className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">₹{pendingAmount.toFixed(2)}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Search and Filter */}
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="glass-strong border-0 overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-transparent to-cyan/5" />
+        <CardContent className="pt-6 relative">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-purple" />
               <Input
                 placeholder="Search by invoice ID or patient name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 glass-subtle border-purple/20 focus:border-purple/40"
               />
             </div>
             <div className="flex gap-2">
@@ -482,6 +514,10 @@ export default function Invoices() {
                   variant={statusFilter === status ? "default" : "outline"}
                   size="sm"
                   onClick={() => setStatusFilter(status)}
+                  className={statusFilter === status 
+                    ? "bg-gradient-to-r from-purple to-cyan text-white border-0" 
+                    : "glass-subtle border-purple/20 hover:border-purple/40"
+                  }
                 >
                   {status === "all" ? "All Status" : status}
                 </Button>
@@ -493,16 +529,17 @@ export default function Invoices() {
 
       {/* Bulk Action Bar */}
       {selectedIds.size > 0 && (
-        <Card className="bg-gold/10 border-gold">
-          <CardContent className="py-3 flex items-center justify-between">
-            <span className="text-sm font-medium">
+        <Card className="glass-strong border-0 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-gold/10 via-transparent to-orange/10" />
+          <CardContent className="py-3 flex items-center justify-between relative">
+            <span className="text-sm font-medium text-gold">
               {selectedIds.size} invoice(s) selected
             </span>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())}>
+              <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())} className="glass-subtle border-purple/20 hover:border-purple/40">
                 Clear Selection
               </Button>
-              <Button size="sm" onClick={bulkMarkAsPaid} className="bg-gold hover:bg-gold/90 text-navy">
+              <Button size="sm" onClick={bulkMarkAsPaid} className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white">
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Mark as Paid
               </Button>
@@ -524,24 +561,34 @@ export default function Invoices() {
 
       {/* Invoice List */}
       <div className="space-y-4">
-        {filteredInvoices.map((invoice: any) => (
-          <Card key={invoice.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="pt-6">
+        {filteredInvoices.map((invoice: any, index: number) => (
+          <Card key={invoice.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+            <div className={`absolute inset-0 bg-gradient-to-br ${
+              index % 4 === 0 ? 'from-purple/5 via-transparent to-cyan/5' :
+              index % 4 === 1 ? 'from-cyan/5 via-transparent to-teal/5' :
+              index % 4 === 2 ? 'from-gold/5 via-transparent to-orange/5' :
+              'from-pink/5 via-transparent to-purple/5'
+            } opacity-50 group-hover:opacity-100 transition-opacity`} />
+            <CardContent className="pt-6 relative">
               <div className="flex gap-4 items-start">
                 <Checkbox
                   checked={selectedIds.has(invoice.id)}
                   onCheckedChange={() => toggleSelect(invoice.id)}
-                  className="mt-1"
+                  className="mt-1 border-purple/40 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple data-[state=checked]:to-cyan"
                 />
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold">{invoice.id}</h3>
-                      <p className="text-gray-600">{invoice.patientName}</p>
+                      <h3 className="text-lg font-semibold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{invoice.id}</h3>
+                      <p className="text-muted-foreground">{invoice.patientName}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold">₹{invoice.amount.toFixed(2)}</p>
-                      <Badge variant={getStatusVariant(invoice.status)}>
+                      <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{invoice.amount.toFixed(2)}</p>
+                      <Badge className={`${
+                        invoice.status === 'Paid' ? 'bg-gradient-to-r from-emerald to-teal text-white border-0' :
+                        invoice.status === 'Pending' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
+                        'bg-gradient-to-r from-pink to-destructive text-white border-0'
+                      }`}>
                         {invoice.status}
                       </Badge>
                     </div>
@@ -549,16 +596,16 @@ export default function Invoices() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <p className="text-sm text-gray-500">Date</p>
+                      <p className="text-sm text-muted-foreground">Date</p>
                       <p className="font-medium">{invoice.date}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Items</p>
+                      <p className="text-sm text-muted-foreground">Items</p>
                       <div className="text-sm">
-                        {invoice.items.map((item: any, index: number) => (
-                          <span key={index}>
+                        {invoice.items.map((item: any, idx: number) => (
+                          <span key={idx} className="text-foreground">
                             {item.name}
-                            {index < invoice.items.length - 1 && ", "}
+                            {idx < invoice.items.length - 1 && ", "}
                           </span>
                         ))}
                       </div>
@@ -566,16 +613,17 @@ export default function Invoices() {
                   </div>
 
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => viewInvoiceDetails(invoice)}>
-                      <Eye className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" onClick={() => viewInvoiceDetails(invoice)} className="glass-subtle border-cyan/20 hover:border-cyan/40 hover:bg-cyan/5">
+                      <Eye className="h-4 w-4 mr-2 text-cyan" />
                       View Details
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => generatePDF(invoice)}>
-                      <Download className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" onClick={() => generatePDF(invoice)} className="glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5">
+                      <Download className="h-4 w-4 mr-2 text-purple" />
                       Download PDF
                     </Button>
                     {invoice.status !== "Paid" && (
-                      <Button size="sm" onClick={() => markAsPaid(invoice.id)}>
+                      <Button size="sm" onClick={() => markAsPaid(invoice.id)} className="bg-gradient-to-r from-emerald to-teal hover:shadow-lg text-white">
+                        <CheckCircle className="h-4 w-4 mr-2" />
                         Mark as Paid
                       </Button>
                     )}
@@ -588,17 +636,20 @@ export default function Invoices() {
       </div>
 
       {filteredInvoices.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-12">
-            <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No invoices found</h3>
-            <p className="text-gray-500 mb-4">
+        <Card className="glass-strong border-0 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple/5 via-transparent to-cyan/5" />
+          <CardContent className="text-center py-12 relative">
+            <div className="p-4 rounded-full bg-gradient-to-r from-purple/10 to-cyan/10 w-fit mx-auto mb-4">
+              <Receipt className="h-12 w-12 text-purple" />
+            </div>
+            <h3 className="text-lg font-medium mb-2">No invoices found</h3>
+            <p className="text-muted-foreground mb-4">
               {searchTerm || statusFilter !== "all" 
                 ? "Try adjusting your search or filter criteria" 
                 : "Get started by creating your first invoice"
               }
             </p>
-            <Button asChild>
+            <Button asChild className="bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white">
               <Link to="/invoices/new">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Invoice
