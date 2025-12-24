@@ -231,7 +231,9 @@ export default function Patients() {
       <FloatingOrbs />
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-navy">Patients</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+            Patients
+          </h1>
           <p className="text-muted-foreground mt-2">
             {loading ? "Loading patients..." : `${totalCount.toLocaleString()} patients total`}
             {searchTab === "general" && debouncedSearch && ` matching "${debouncedSearch}"`}
@@ -239,11 +241,11 @@ export default function Patients() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowImport(!showImport)}>
-            <Upload className="h-4 w-4 mr-2" />
+          <Button variant="outline" onClick={() => setShowImport(!showImport)} className="glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5">
+            <Upload className="h-4 w-4 mr-2 text-purple" />
             Import Excel
           </Button>
-          <Button asChild className="bg-gold hover:bg-gold/90 text-navy">
+          <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
             <Link to="/patients/new">
               <Plus className="h-4 w-4 mr-2" />
               Add Patient
@@ -260,16 +262,17 @@ export default function Patients() {
       </Collapsible>
 
       {/* Search */}
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="glass-strong border-0 overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-transparent to-cyan/5" />
+        <CardContent className="pt-6 relative">
           <Tabs value={searchTab} onValueChange={(v) => setSearchTab(v as "general" | "fileno")}>
             <div className="flex items-center justify-between mb-4">
-              <TabsList>
-                <TabsTrigger value="general" className="gap-2">
+              <TabsList className="glass-subtle border-purple/20">
+                <TabsTrigger value="general" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple data-[state=active]:to-cyan data-[state=active]:text-white">
                   <Search className="h-4 w-4" />
                   General Search
                 </TabsTrigger>
-                <TabsTrigger value="fileno" className="gap-2">
+                <TabsTrigger value="fileno" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan data-[state=active]:to-teal data-[state=active]:text-white">
                   <FileText className="h-4 w-4" />
                   File No. Search
                 </TabsTrigger>
@@ -369,59 +372,72 @@ export default function Patients() {
       {/* Patients Grid View */}
       {!loading && viewMode === 'grid' && patients.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {patients.map((patient) => (
-            <Card key={patient.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
+          {patients.map((patient, index) => (
+            <Card key={patient.id} className="glass-strong border-0 overflow-hidden relative hover:shadow-glow transition-all duration-300 group">
+              <div className={`absolute inset-0 bg-gradient-to-br ${
+                index % 4 === 0 ? 'from-purple/10 via-transparent to-cyan/10' :
+                index % 4 === 1 ? 'from-cyan/10 via-transparent to-teal/10' :
+                index % 4 === 2 ? 'from-gold/10 via-transparent to-orange/10' :
+                'from-pink/10 via-transparent to-purple/10'
+              } opacity-50 group-hover:opacity-100 transition-opacity`} />
+              <CardHeader className="relative">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg">{patient.patient_name}</CardTitle>
-                    <p className="text-sm text-gray-500">{patient.age ? `${patient.age} years old` : 'Age not specified'}</p>
+                    <CardTitle className="text-lg bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">{patient.patient_name}</CardTitle>
+                    <p className="text-sm text-muted-foreground">{patient.age ? `${patient.age} years old` : 'Age not specified'}</p>
                   </div>
                   <div className="flex flex-col gap-1 items-end">
                     {patient.category && (
-                      <Badge variant="outline" className="bg-gold/10 text-navy border-gold">
+                      <Badge className={`${
+                        patient.category === 'BNX' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
+                        patient.category === 'TPN' ? 'bg-gradient-to-r from-cyan to-teal text-white border-0' :
+                        patient.category === 'PSHY' ? 'bg-gradient-to-r from-purple to-pink text-white border-0' :
+                        'bg-gradient-to-r from-emerald to-teal text-white border-0'
+                      }`}>
                         {patient.category}
                       </Badge>
                     )}
-                    <Badge variant="default">Active</Badge>
+                    <Badge className="bg-gradient-to-r from-emerald to-teal text-white border-0">Active</Badge>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative">
                 <div className="space-y-3">
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Patient ID:</span> {patient.id}
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Patient ID:</span> {patient.id}
                   </div>
                   {patient.file_no && (
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium">File No.:</span> {patient.file_no}
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">File No.:</span> {patient.file_no}
                     </div>
                   )}
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Phone className="h-4 w-4 mr-2" />
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Phone className="h-4 w-4 mr-2 text-cyan" />
                     {patient.phone || 'N/A'}
                   </div>
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Aadhar:</span> {patient.aadhar_card || 'N/A'}
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Aadhar:</span> {patient.aadhar_card || 'N/A'}
                   </div>
                   <div className="flex space-x-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Button variant="outline" size="sm" className="flex-1 glass-subtle border-cyan/20 hover:border-cyan/40 hover:bg-cyan/5" asChild>
                       <Link to={`/patients/view/${patient.id}`}>
-                        View Details
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
                       </Link>
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Button variant="outline" size="sm" className="flex-1 glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5" asChild>
                       <Link to={`/patients/edit/${patient.id}`}>
+                        <Pencil className="h-3 w-3 mr-1" />
                         Edit
                       </Link>
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
+                        <Button variant="outline" size="sm" className="glass-subtle border-pink/20 hover:border-pink/40 hover:bg-pink/5">
+                          <Trash2 className="h-4 w-4 text-pink" />
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="glass-strong border-0">
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Patient</AlertDialogTitle>
                           <AlertDialogDescription>
@@ -429,9 +445,9 @@ export default function Patients() {
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel className="glass-subtle">Cancel</AlertDialogCancel>
                           <AlertDialogAction 
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-gradient-to-r from-pink to-destructive text-white hover:shadow-lg"
                             onClick={() => deletePatient(patient.id)}
                           >
                             Delete
@@ -449,26 +465,26 @@ export default function Patients() {
 
       {/* Patients Table View */}
       {!loading && viewMode === 'table' && patients.length > 0 && (
-        <Card>
+        <Card className="glass-strong border-0 overflow-hidden">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <SortableHeader column="id" label="ID" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="w-16" />
-                  <SortableHeader column="file_no" label="File No." sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="w-20" />
-                  <SortableHeader column="patient_name" label="Name" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
-                  <SortableHeader column="phone" label="Phone" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
-                  <SortableHeader column="aadhar_card" label="Aadhar" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
-                  <SortableHeader column="govt_id" label="Govt ID" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
-                  <SortableHeader column="category" label="Category" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="w-20" />
-                  <TableHead className="w-32 text-right">Actions</TableHead>
+                <TableRow className="bg-gradient-to-r from-purple/10 via-cyan/10 to-teal/10 border-b border-purple/20">
+                  <SortableHeader column="id" label="ID" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="w-16 text-purple font-semibold" />
+                  <SortableHeader column="file_no" label="File No." sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="w-20 text-cyan font-semibold" />
+                  <SortableHeader column="patient_name" label="Name" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="text-foreground font-semibold" />
+                  <SortableHeader column="phone" label="Phone" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="text-foreground font-semibold" />
+                  <SortableHeader column="aadhar_card" label="Aadhar" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="text-foreground font-semibold" />
+                  <SortableHeader column="govt_id" label="Govt ID" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="text-foreground font-semibold" />
+                  <SortableHeader column="category" label="Category" sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} className="w-20 text-foreground font-semibold" />
+                  <TableHead className="w-32 text-right text-foreground font-semibold">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {patients.map((patient) => (
-                  <TableRow key={patient.id}>
-                    <TableCell className="font-medium">{patient.id}</TableCell>
-                    <TableCell>{patient.file_no || '-'}</TableCell>
+                {patients.map((patient, index) => (
+                  <TableRow key={patient.id} className={`hover:bg-gradient-to-r hover:from-purple/5 hover:via-transparent hover:to-cyan/5 transition-all ${index % 2 === 0 ? 'bg-background/50' : 'bg-muted/20'}`}>
+                    <TableCell className="font-medium text-purple">{patient.id}</TableCell>
+                    <TableCell className="text-cyan font-mono">{patient.file_no || '-'}</TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium">{patient.patient_name}</div>
@@ -482,30 +498,35 @@ export default function Patients() {
                     <TableCell className="font-mono text-xs">{patient.govt_id || '-'}</TableCell>
                     <TableCell>
                       {patient.category && (
-                        <Badge variant="outline" className="bg-gold/10 text-navy border-gold text-xs">
+                        <Badge className={`text-xs ${
+                          patient.category === 'BNX' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
+                          patient.category === 'TPN' ? 'bg-gradient-to-r from-cyan to-teal text-white border-0' :
+                          patient.category === 'PSHY' ? 'bg-gradient-to-r from-purple to-pink text-white border-0' :
+                          'bg-gradient-to-r from-emerald to-teal text-white border-0'
+                        }`}>
                           {patient.category}
                         </Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="sm" asChild>
+                        <Button variant="ghost" size="sm" className="hover:bg-cyan/10 hover:text-cyan" asChild>
                           <Link to={`/patients/view/${patient.id}`}>
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
-                        <Button variant="ghost" size="sm" asChild>
+                        <Button variant="ghost" size="sm" className="hover:bg-purple/10 hover:text-purple" asChild>
                           <Link to={`/patients/edit/${patient.id}`}>
                             <Pencil className="h-4 w-4" />
                           </Link>
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4 text-destructive" />
+                            <Button variant="ghost" size="sm" className="hover:bg-pink/10">
+                              <Trash2 className="h-4 w-4 text-pink" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent className="glass-strong border-0">
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Patient</AlertDialogTitle>
                               <AlertDialogDescription>
@@ -513,9 +534,9 @@ export default function Patients() {
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel className="glass-subtle">Cancel</AlertDialogCancel>
                               <AlertDialogAction 
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="bg-gradient-to-r from-pink to-destructive text-white hover:shadow-lg"
                                 onClick={() => deletePatient(patient.id)}
                               >
                                 Delete
@@ -535,14 +556,17 @@ export default function Patients() {
 
       {/* Empty State */}
       {!loading && patients.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-12">
-            <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No patients found</h3>
-            <p className="text-gray-500 mb-4">
+        <Card className="glass-strong border-0 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple/5 via-transparent to-cyan/5" />
+          <CardContent className="text-center py-12 relative">
+            <div className="p-4 rounded-full bg-gradient-to-r from-purple/10 to-cyan/10 w-fit mx-auto mb-4">
+              <Users className="h-12 w-12 text-purple" />
+            </div>
+            <h3 className="text-lg font-medium mb-2">No patients found</h3>
+            <p className="text-muted-foreground mb-4">
               {(searchTerm || fileNoSearch) ? "Try adjusting your search terms" : "Get started by adding your first patient"}
             </p>
-            <Button asChild>
+            <Button asChild className="bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white">
               <Link to="/patients/new">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Patient
@@ -554,11 +578,12 @@ export default function Patients() {
 
       {/* Pagination Controls */}
       {!loading && totalPages > 1 && (
-        <Card>
-          <CardContent className="py-4">
+        <Card className="glass-strong border-0 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-transparent to-cyan/5" />
+          <CardContent className="py-4 relative">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount.toLocaleString()} patients
+                Showing <span className="text-purple font-medium">{((currentPage - 1) * pageSize) + 1}</span> to <span className="text-purple font-medium">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="text-cyan font-medium">{totalCount.toLocaleString()}</span> patients
               </p>
               <div className="flex items-center gap-1">
                 <Button
@@ -566,6 +591,7 @@ export default function Patients() {
                   size="sm"
                   onClick={() => goToPage(1)}
                   disabled={currentPage === 1}
+                  className="glass-subtle border-purple/20 hover:border-purple/40 disabled:opacity-50"
                 >
                   <ChevronsLeft className="h-4 w-4" />
                 </Button>
@@ -574,6 +600,7 @@ export default function Patients() {
                   size="sm"
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
+                  className="glass-subtle border-purple/20 hover:border-purple/40 disabled:opacity-50"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -585,7 +612,7 @@ export default function Patients() {
                       variant={currentPage === page ? "default" : "outline"}
                       size="sm"
                       onClick={() => goToPage(page)}
-                      className="min-w-[36px]"
+                      className={`min-w-[36px] ${currentPage === page ? 'bg-gradient-to-r from-purple to-cyan text-white border-0 shadow-glow' : 'glass-subtle border-purple/20 hover:border-purple/40'}`}
                     >
                       {page}
                     </Button>
@@ -599,6 +626,7 @@ export default function Patients() {
                   size="sm"
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
+                  className="glass-subtle border-cyan/20 hover:border-cyan/40 disabled:opacity-50"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -607,6 +635,7 @@ export default function Patients() {
                   size="sm"
                   onClick={() => goToPage(totalPages)}
                   disabled={currentPage === totalPages}
+                  className="glass-subtle border-cyan/20 hover:border-cyan/40 disabled:opacity-50"
                 >
                   <ChevronsRight className="h-4 w-4" />
                 </Button>
