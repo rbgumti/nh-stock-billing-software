@@ -819,15 +819,17 @@ export default function Stock() {
       <FloatingOrbs />
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-navy">Stock Management</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+            Stock Management
+          </h1>
           <p className="text-muted-foreground mt-2">Monitor and manage your inventory, purchase orders, and goods receipt</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setShowAddForm(true)} className="bg-gold hover:bg-gold/90 text-navy">
+          <Button onClick={() => setShowAddForm(true)} className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
             <Plus className="h-4 w-4 mr-2" />
             Add Stock Item
           </Button>
-          <Button onClick={() => setShowPOForm(true)} variant="outline">
+          <Button onClick={() => setShowPOForm(true)} variant="outline" className="glass-subtle border-purple/20 hover:border-purple/40">
             <FileText className="h-4 w-4 mr-2" />
             Create PO
           </Button>
@@ -836,75 +838,94 @@ export default function Stock() {
 
       {/* Tabs for different sections */}
       <Tabs defaultValue="stock" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="stock">Stock Items</TabsTrigger>
-          <TabsTrigger value="purchase-orders">Purchase Orders</TabsTrigger>
-          <TabsTrigger value="grn">Goods Receipt</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
-          <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 glass-strong border-0 p-1">
+          <TabsTrigger value="stock" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple data-[state=active]:to-cyan data-[state=active]:text-white">Stock Items</TabsTrigger>
+          <TabsTrigger value="purchase-orders" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan data-[state=active]:to-teal data-[state=active]:text-white">Purchase Orders</TabsTrigger>
+          <TabsTrigger value="grn" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-emerald data-[state=active]:text-white">Goods Receipt</TabsTrigger>
+          <TabsTrigger value="payments" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gold data-[state=active]:to-orange data-[state=active]:text-white">Payments</TabsTrigger>
+          <TabsTrigger value="suppliers" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink data-[state=active]:to-purple data-[state=active]:text-white">Suppliers</TabsTrigger>
         </TabsList>
 
         <TabsContent value="stock" className="space-y-6">
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Items</p>
-                    <p className="text-2xl font-bold">{stockItems.length}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Total Items</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{stockItems.length}</p>
                   </div>
-                  <Package className="h-8 w-8 text-blue-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-cyan">
+                    <Package className="h-5 w-5 text-white" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
-                    <p className="text-2xl font-bold text-red-600">
+                    <p className="text-sm font-medium text-muted-foreground">Low Stock Items</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">
                       {stockItems.filter(item => item.currentStock <= item.minimumStock).length}
                     </p>
                   </div>
-                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-pink">
+                    <AlertTriangle className="h-5 w-5 text-white" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Value</p>
-                  <p className="text-2xl font-bold">
-                    ₹{stockItems.reduce((total, item) => total + (item.currentStock * item.unitPrice), 0).toFixed(2)}
-                  </p>
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">
+                      ₹{stockItems.reduce((total, item) => total + (item.currentStock * item.unitPrice), 0).toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-gold to-orange">
+                    <DollarSign className="h-5 w-5 text-white" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Categories</p>
-                  <p className="text-2xl font-bold">{categories.length - 1}</p>
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 via-transparent to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Categories</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">{categories.length - 1}</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-emerald to-teal">
+                    <Package className="h-5 w-5 text-white" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Search and Filter */}
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="glass-strong border-0 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-transparent to-cyan/5" />
+            <CardContent className="pt-6 relative">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by name, category, or supplier..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 glass-subtle border-purple/20"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -914,6 +935,10 @@ export default function Stock() {
                       variant={filterCategory === category ? "default" : "outline"}
                       size="sm"
                       onClick={() => setFilterCategory(category)}
+                      className={filterCategory === category 
+                        ? "bg-gradient-to-r from-purple to-cyan text-white" 
+                        : "glass-subtle border-purple/20 hover:border-purple/40"
+                      }
                     >
                       {category === "all" ? "All Categories" : category}
                     </Button>
@@ -925,32 +950,52 @@ export default function Stock() {
 
           {/* Stock Items */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredItems.map((item) => {
+        {filteredItems.map((item, index) => {
           const stockStatus = getStockStatus(item.currentStock, item.minimumStock);
           const categoryStyle = getCategoryStyle(item.category);
           const CategoryIcon = categoryStyle.Icon;
           
           return (
-            <Card key={item.id} className={`hover:shadow-md transition-shadow border-l-4 ${categoryStyle.border}`}>
-              <CardHeader className={categoryStyle.bg}>
+            <Card key={item.id} className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 border-l-4 ${categoryStyle.border}`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${
+                index % 4 === 0 ? 'from-purple/5 via-transparent to-cyan/5' :
+                index % 4 === 1 ? 'from-cyan/5 via-transparent to-teal/5' :
+                index % 4 === 2 ? 'from-gold/5 via-transparent to-orange/5' :
+                'from-pink/5 via-transparent to-purple/5'
+              } opacity-50 group-hover:opacity-100 transition-opacity`} />
+              <CardHeader className="relative">
                 <div className="flex justify-between items-start">
                   <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${categoryStyle.iconBg}`}>
+                    <div className={`p-2 rounded-lg bg-gradient-to-r ${
+                      item.category === 'BNX' ? 'from-blue-500 to-cyan' :
+                      item.category === 'TPN' ? 'from-amber-500 to-orange' :
+                      item.category === 'PSHY' ? 'from-purple to-pink' :
+                      'from-gray-500 to-gray-600'
+                    }`}>
                       <CategoryIcon className="h-5 w-5 text-white" />
                     </div>
                     <div>
                       <CardTitle className="text-lg">{item.name}</CardTitle>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${categoryStyle.badge}`}>
+                      <Badge className={`${
+                        item.category === 'BNX' ? 'bg-gradient-to-r from-blue-500 to-cyan text-white border-0' :
+                        item.category === 'TPN' ? 'bg-gradient-to-r from-amber-500 to-orange text-white border-0' :
+                        item.category === 'PSHY' ? 'bg-gradient-to-r from-purple to-pink text-white border-0' :
+                        'bg-gray-500 text-white border-0'
+                      }`}>
                         {item.category}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
-                  <Badge variant={stockStatus.variant}>
+                  <Badge className={`${
+                    stockStatus.label === 'Critical' ? 'bg-gradient-to-r from-destructive to-pink text-white border-0' :
+                    stockStatus.label === 'Low Stock' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
+                    'bg-gradient-to-r from-emerald to-teal text-white border-0'
+                  }`}>
                     {stockStatus.label}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="pt-4">
+              <CardContent className="pt-4 relative">
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -970,7 +1015,7 @@ export default function Stock() {
                     </div>
                     <div>
                       <p className="text-muted-foreground">Total Value</p>
-                      <p className="font-semibold">₹{(item.currentStock * item.unitPrice).toFixed(2)}</p>
+                      <p className="font-semibold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{(item.currentStock * item.unitPrice).toFixed(2)}</p>
                     </div>
                   </div>
 
@@ -988,9 +1033,8 @@ export default function Stock() {
 
                   <div className="flex flex-col gap-2 pt-2">
                     <Button 
-                      variant="default" 
                       size="sm" 
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white"
                       onClick={() => setShowLedgerItem(item)}
                     >
                       <BookOpen className="h-4 w-4 mr-2" />
@@ -1000,7 +1044,7 @@ export default function Stock() {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="flex-1"
+                        className="flex-1 glass-subtle border-cyan/20 hover:border-cyan/40"
                         onClick={() => setEditingItem(item)}
                       >
                         Edit
@@ -1008,7 +1052,7 @@ export default function Stock() {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="flex-1"
+                        className="flex-1 glass-subtle border-gold/20 hover:border-gold/40"
                         onClick={() => setShowPOForm(true)}
                       >
                         Reorder
@@ -1023,9 +1067,12 @@ export default function Stock() {
           </div>
 
           {filteredItems.length === 0 && (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/5 via-transparent to-cyan/5" />
+              <CardContent className="text-center py-12 relative">
+                <div className="p-4 rounded-full bg-gradient-to-r from-purple/10 to-cyan/10 w-fit mx-auto mb-4">
+                  <Package className="h-12 w-12 text-purple" />
+                </div>
                 <h3 className="text-lg font-medium mb-2">No items found</h3>
                 <p className="text-muted-foreground mb-4">
                   {searchTerm || filterCategory !== "all" 
@@ -1033,7 +1080,7 @@ export default function Stock() {
                     : "Get started by adding your first stock item"
                   }
                 </p>
-                <Button onClick={() => setShowAddForm(true)}>
+                <Button onClick={() => setShowAddForm(true)} className="bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Stock Item
                 </Button>
@@ -1044,49 +1091,59 @@ export default function Stock() {
 
         <TabsContent value="purchase-orders" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Purchase Orders</h2>
-            <Button onClick={() => setShowPOForm(true)}>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">Purchase Orders</h2>
+            <Button onClick={() => setShowPOForm(true)} className="bg-gradient-to-r from-cyan to-teal hover:shadow-glow text-white">
               <Plus className="h-4 w-4 mr-2" />
               Create Purchase Order
             </Button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {purchaseOrders.map((po) => (
-              <Card key={po.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
+            {purchaseOrders.map((po, index) => (
+              <Card key={po.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+                <div className={`absolute inset-0 bg-gradient-to-br ${
+                  index % 4 === 0 ? 'from-cyan/5 via-transparent to-teal/5' :
+                  index % 4 === 1 ? 'from-purple/5 via-transparent to-cyan/5' :
+                  index % 4 === 2 ? 'from-gold/5 via-transparent to-orange/5' :
+                  'from-pink/5 via-transparent to-purple/5'
+                } opacity-50 group-hover:opacity-100 transition-opacity`} />
+                <CardHeader className="relative">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">PO #{po.poNumber}</CardTitle>
-                      <p className="text-sm text-gray-500">{po.supplier}</p>
+                      <CardTitle className="text-lg bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">PO #{po.poNumber}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{po.supplier}</p>
                     </div>
-                    <Badge variant={po.status === 'Pending' ? 'secondary' : po.status === 'Received' ? 'default' : 'outline'}>
+                    <Badge className={`${
+                      po.status === 'Pending' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
+                      po.status === 'Received' ? 'bg-gradient-to-r from-emerald to-teal text-white border-0' :
+                      'glass-subtle border-purple/20'
+                    }`}>
                       {po.status}
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="relative">
                   <div className="space-y-3">
                     <div className="text-sm">
-                      <p className="text-gray-500">Order Date</p>
+                      <p className="text-muted-foreground">Order Date</p>
                       <p className="font-medium">{po.orderDate}</p>
                     </div>
                     <div className="text-sm">
-                      <p className="text-gray-500">Expected Delivery</p>
+                      <p className="text-muted-foreground">Expected Delivery</p>
                       <p className="font-medium">{po.expectedDelivery}</p>
                     </div>
                     <div className="text-sm">
-                      <p className="text-gray-500">Total Amount</p>
-                      <p className="font-semibold text-lg">₹{po.totalAmount.toFixed(2)}</p>
+                      <p className="text-muted-foreground">Total Amount</p>
+                      <p className="font-semibold text-lg bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{po.totalAmount.toFixed(2)}</p>
                     </div>
                     <div className="text-sm">
-                      <p className="text-gray-500">Items</p>
+                      <p className="text-muted-foreground">Items</p>
                       <p className="font-medium">{po.items.length} item(s)</p>
                     </div>
                     <div className="flex gap-2 mt-4">
                       {po.status === 'Pending' && (
                         <Button 
-                          className="flex-1" 
+                          className="flex-1 bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white" 
                           onClick={() => {
                             setSelectedPO(po);
                             setShowGRNForm(true);
@@ -1098,12 +1155,12 @@ export default function Stock() {
                       )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline">
+                          <Button variant="outline" className="glass-subtle border-purple/20 hover:border-purple/40">
                             <Download className="h-4 w-4 mr-1" />
                             <ChevronDown className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="glass-strong border-0">
                           <DropdownMenuItem onClick={() => downloadPurchaseOrder(po)}>
                             <FileText className="h-4 w-4 mr-2" />
                             Standard PO
@@ -1122,12 +1179,15 @@ export default function Stock() {
           </div>
 
           {purchaseOrders.length === 0 && (
-            <Card>
-              <CardContent className="text-center py-12">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No purchase orders</h3>
-                <p className="text-gray-500 mb-4">Create your first purchase order to start tracking orders</p>
-                <Button onClick={() => setShowPOForm(true)}>
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 via-transparent to-teal/5" />
+              <CardContent className="text-center py-12 relative">
+                <div className="p-4 rounded-full bg-gradient-to-r from-cyan/10 to-teal/10 w-fit mx-auto mb-4">
+                  <FileText className="h-12 w-12 text-cyan" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No purchase orders</h3>
+                <p className="text-muted-foreground mb-4">Create your first purchase order to start tracking orders</p>
+                <Button onClick={() => setShowPOForm(true)} className="bg-gradient-to-r from-cyan to-teal hover:shadow-glow text-white">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Purchase Order
                 </Button>
@@ -1138,45 +1198,50 @@ export default function Stock() {
 
         <TabsContent value="grn" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Goods Receipt Notes</h2>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-teal to-emerald bg-clip-text text-transparent">Goods Receipt Notes</h2>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {purchaseOrders.filter(po => po.status === 'Received').map((po) => (
-              <Card key={po.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
+            {purchaseOrders.filter(po => po.status === 'Received').map((po, index) => (
+              <Card key={po.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+                <div className={`absolute inset-0 bg-gradient-to-br ${
+                  index % 3 === 0 ? 'from-teal/5 via-transparent to-emerald/5' :
+                  index % 3 === 1 ? 'from-emerald/5 via-transparent to-cyan/5' :
+                  'from-cyan/5 via-transparent to-teal/5'
+                } opacity-50 group-hover:opacity-100 transition-opacity`} />
+                <CardHeader className="relative">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">GRN - PO #{po.poNumber}</CardTitle>
-                      <p className="text-sm text-gray-500">{po.supplier}</p>
+                      <CardTitle className="text-lg bg-gradient-to-r from-teal to-emerald bg-clip-text text-transparent">GRN - PO #{po.poNumber}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{po.supplier}</p>
                     </div>
-                    <Badge variant="default">Received</Badge>
+                    <Badge className="bg-gradient-to-r from-emerald to-teal text-white border-0">Received</Badge>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="relative">
                   <div className="space-y-3">
                     <div className="text-sm">
-                      <p className="text-gray-500">Order Date</p>
+                      <p className="text-muted-foreground">Order Date</p>
                       <p className="font-medium">{po.orderDate}</p>
                     </div>
                     <div className="text-sm">
-                      <p className="text-gray-500">GRN Date</p>
+                      <p className="text-muted-foreground">GRN Date</p>
                       <p className="font-medium">{po.grnDate}</p>
                     </div>
                     <div className="text-sm">
-                      <p className="text-gray-500">Total Amount</p>
-                      <p className="font-semibold text-lg">₹{po.totalAmount.toFixed(2)}</p>
+                      <p className="text-muted-foreground">Total Amount</p>
+                      <p className="font-semibold text-lg bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{po.totalAmount.toFixed(2)}</p>
                     </div>
                     <div className="text-sm">
-                      <p className="text-gray-500">Items Received</p>
+                      <p className="text-muted-foreground">Items Received</p>
                       <p className="font-medium">{po.items.length} item(s)</p>
                     </div>
                     <Button 
                       variant="outline" 
-                      className="w-full mt-4"
+                      className="w-full mt-4 glass-subtle border-teal/20 hover:border-teal/40"
                       onClick={() => downloadGRN(po)}
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className="h-4 w-4 mr-2 text-teal" />
                       Download GRN
                     </Button>
                   </div>
@@ -1186,11 +1251,14 @@ export default function Stock() {
           </div>
 
           {purchaseOrders.filter(po => po.status === 'Received').length === 0 && (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Truck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No goods receipts</h3>
-                <p className="text-gray-500 mb-4">Process GRN against purchase orders to see them here</p>
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-teal/5 via-transparent to-emerald/5" />
+              <CardContent className="text-center py-12 relative">
+                <div className="p-4 rounded-full bg-gradient-to-r from-teal/10 to-emerald/10 w-fit mx-auto mb-4">
+                  <Truck className="h-12 w-12 text-teal" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No goods receipts</h3>
+                <p className="text-muted-foreground mb-4">Process GRN against purchase orders to see them here</p>
               </CardContent>
             </Card>
           )}
@@ -1198,8 +1266,8 @@ export default function Stock() {
 
         <TabsContent value="payments" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Supplier Payments</h2>
-            <Button onClick={() => setShowPaymentForm(true)}>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">Supplier Payments</h2>
+            <Button onClick={() => setShowPaymentForm(true)} className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white">
               <Plus className="h-4 w-4 mr-2" />
               Record Payment
             </Button>
@@ -1207,89 +1275,104 @@ export default function Stock() {
 
           {/* Payment Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink/10 via-transparent to-destructive/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Outstanding</p>
-                    <p className="text-2xl font-bold text-red-600">₹{totalOutstanding.toFixed(2)}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Total Outstanding</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-pink to-destructive bg-clip-text text-transparent">₹{totalOutstanding.toFixed(2)}</p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-red-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-pink to-destructive">
+                    <DollarSign className="h-5 w-5 text-white" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-gold/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Overdue Payments</p>
-                    <p className="text-2xl font-bold text-orange-600">{outstandingPayments.length}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Overdue Payments</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-orange to-gold bg-clip-text text-transparent">{outstandingPayments.length}</p>
                   </div>
-                  <AlertTriangle className="h-8 w-8 text-orange-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-gold">
+                    <AlertTriangle className="h-5 w-5 text-white" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-purple/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Upcoming Payments</p>
-                    <p className="text-2xl font-bold text-blue-600">{upcomingPayments.length}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Upcoming Payments</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-cyan to-purple bg-clip-text text-transparent">{upcomingPayments.length}</p>
                   </div>
-                  <Calendar className="h-8 w-8 text-blue-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-cyan to-purple">
+                    <Calendar className="h-5 w-5 text-white" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Unpaid POs</p>
-                    <p className="text-2xl font-bold">{unpaidPOs.length}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Unpaid POs</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-purple to-pink bg-clip-text text-transparent">{unpaidPOs.length}</p>
                   </div>
-                  <FileText className="h-8 w-8 text-gray-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-pink">
+                    <FileText className="h-5 w-5 text-white" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Unpaid Purchase Orders */}
-          <Card>
-            <CardHeader>
+          <Card className="glass-strong border-0 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-orange/5" />
+            <CardHeader className="relative">
               <CardTitle className="text-lg flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Purchase Order Payment Status
+                <div className="p-1.5 rounded-lg bg-gradient-to-r from-gold to-orange">
+                  <CreditCard className="h-4 w-4 text-white" />
+                </div>
+                <span className="bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">Purchase Order Payment Status</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative">
               {unpaidPOs.length > 0 ? (
                 <div className="space-y-3">
                   {unpaidPOs.map((po) => (
-                    <div key={po.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div key={po.id} className="flex items-center justify-between p-3 glass-subtle rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
                           <span className="font-medium">PO #{po.poNumber}</span>
                           {getPaymentStatusBadge(po.paymentStatus)}
                         </div>
-                        <p className="text-sm text-gray-500">{po.supplier}</p>
+                        <p className="text-sm text-muted-foreground">{po.supplier}</p>
                       </div>
                       <div className="text-right mr-4">
-                        <p className="font-semibold">₹{po.totalAmount.toFixed(2)}</p>
+                        <p className="font-semibold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{po.totalAmount.toFixed(2)}</p>
                         {po.paymentDueDate && (
-                          <p className="text-xs text-gray-500">Due: {po.paymentDueDate}</p>
+                          <p className="text-xs text-muted-foreground">Due: {po.paymentDueDate}</p>
                         )}
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="glass-subtle border-gold/20 hover:border-gold/40">
                             Update Status
                             <ChevronDown className="h-3 w-3 ml-1" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="glass-strong border-0">
                           <DropdownMenuItem onClick={() => handleUpdatePOPayment(po.id, 'Pending')}>
                             Mark as Pending
                           </DropdownMenuItem>
@@ -1308,77 +1391,82 @@ export default function Stock() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 py-4">All purchase orders are paid</p>
+                <p className="text-center text-muted-foreground py-4">All purchase orders are paid</p>
               )}
             </CardContent>
           </Card>
 
           {/* Payment Records */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Payment Records</CardTitle>
+          <Card className="glass-strong border-0 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-transparent to-pink/5" />
+            <CardHeader className="relative">
+              <CardTitle className="text-lg bg-gradient-to-r from-purple to-pink bg-clip-text text-transparent">Payment Records</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative">
               {payments.length > 0 ? (
                 <div className="space-y-3">
                   {payments.map((payment) => (
-                    <div key={payment.id} className="p-4 border rounded-lg">
+                    <div key={payment.id} className="p-4 glass-subtle rounded-lg">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-1">
                             <span className="font-medium">{payment.supplier_name}</span>
-                            <Badge variant={payment.status === 'Completed' ? 'default' : payment.status === 'Overdue' ? 'destructive' : 'outline'}>
+                            <Badge className={`${
+                              payment.status === 'Completed' ? 'bg-gradient-to-r from-emerald to-teal text-white border-0' :
+                              payment.status === 'Overdue' ? 'bg-gradient-to-r from-pink to-destructive text-white border-0' :
+                              'glass-subtle border-purple/20'
+                            }`}>
                               {payment.status}
                             </Badge>
                           </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-gray-600 mt-2">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground mt-2">
                             <div>
-                              <span className="text-gray-400">Date:</span> {payment.payment_date}
+                              <span className="text-muted-foreground/60">Date:</span> {payment.payment_date}
                             </div>
                             {payment.payment_method && (
                               <div>
-                                <span className="text-gray-400">Method:</span> {payment.payment_method}
+                                <span className="text-muted-foreground/60">Method:</span> {payment.payment_method}
                               </div>
                             )}
                             {payment.utr_number && (
                               <div>
-                                <span className="text-gray-400">UTR:</span> {payment.utr_number}
+                                <span className="text-muted-foreground/60">UTR:</span> {payment.utr_number}
                               </div>
                             )}
                             {payment.reference_number && (
                               <div>
-                                <span className="text-gray-400">Ref:</span> {payment.reference_number}
+                                <span className="text-muted-foreground/60">Ref:</span> {payment.reference_number}
                               </div>
                             )}
                             {payment.bank_reference && (
                               <div>
-                                <span className="text-gray-400">Bank Ref:</span> {payment.bank_reference}
+                                <span className="text-muted-foreground/60">Bank Ref:</span> {payment.bank_reference}
                               </div>
                             )}
                             {payment.po_number && (
                               <div>
-                                <span className="text-gray-400">PO:</span> #{payment.po_number}
+                                <span className="text-muted-foreground/60">PO:</span> #{payment.po_number}
                               </div>
                             )}
                             {payment.due_date && (
                               <div>
-                                <span className="text-gray-400">Due:</span> {payment.due_date}
+                                <span className="text-muted-foreground/60">Due:</span> {payment.due_date}
                               </div>
                             )}
                           </div>
                           {payment.notes && (
-                            <p className="text-xs text-gray-500 mt-2 italic">{payment.notes}</p>
+                            <p className="text-xs text-muted-foreground mt-2 italic">{payment.notes}</p>
                           )}
                         </div>
                         <div className="text-right ml-4">
-                          <p className="font-semibold text-lg">₹{payment.amount.toFixed(2)}</p>
+                          <p className="font-semibold text-lg bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{payment.amount.toFixed(2)}</p>
                           <div className="flex items-center gap-1 mt-2">
                             {payment.receipt_url && (
                               <a 
                                 href={payment.receipt_url} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                                className="inline-flex items-center gap-1 text-xs text-cyan hover:underline"
                               >
                                 <ExternalLink className="h-3 w-3" />
                                 Receipt
@@ -1388,13 +1476,15 @@ export default function Stock() {
                               variant="ghost"
                               size="sm"
                               onClick={() => setEditingPayment(payment)}
+                              className="hover:bg-purple/10"
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Pencil className="h-4 w-4 text-purple" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeletePayment(payment.id)}
+                              className="hover:bg-destructive/10"
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
@@ -1406,10 +1496,12 @@ export default function Stock() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No payment records</h3>
-                  <p className="text-gray-500 mb-4">Start tracking supplier payments</p>
-                  <Button onClick={() => setShowPaymentForm(true)}>
+                  <div className="p-4 rounded-full bg-gradient-to-r from-purple/10 to-pink/10 w-fit mx-auto mb-4">
+                    <CreditCard className="h-12 w-12 text-purple" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No payment records</h3>
+                  <p className="text-muted-foreground mb-4">Start tracking supplier payments</p>
+                  <Button onClick={() => setShowPaymentForm(true)} className="bg-gradient-to-r from-purple to-pink hover:shadow-glow text-white">
                     <Plus className="h-4 w-4 mr-2" />
                     Record Payment
                   </Button>
@@ -1421,78 +1513,87 @@ export default function Stock() {
 
         <TabsContent value="suppliers" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Suppliers</h2>
-            <Button onClick={() => setShowSupplierForm(true)}>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-pink to-purple bg-clip-text text-transparent">Suppliers</h2>
+            <Button onClick={() => setShowSupplierForm(true)} className="bg-gradient-to-r from-pink to-purple hover:shadow-glow text-white">
               <Plus className="h-4 w-4 mr-2" />
               Add Supplier
             </Button>
           </div>
 
           {/* Search */}
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="glass-strong border-0 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-pink/5 via-transparent to-purple/5" />
+            <CardContent className="pt-6 relative">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search suppliers by name, phone, or email..."
                   value={supplierSearchTerm}
                   onChange={(e) => setSupplierSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 glass-subtle border-pink/20"
                 />
               </div>
             </CardContent>
           </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredSuppliers.map((supplier) => (
-              <Card key={supplier.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
+            {filteredSuppliers.map((supplier, index) => (
+              <Card key={supplier.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+                <div className={`absolute inset-0 bg-gradient-to-br ${
+                  index % 4 === 0 ? 'from-pink/5 via-transparent to-purple/5' :
+                  index % 4 === 1 ? 'from-purple/5 via-transparent to-cyan/5' :
+                  index % 4 === 2 ? 'from-cyan/5 via-transparent to-teal/5' :
+                  'from-teal/5 via-transparent to-pink/5'
+                } opacity-50 group-hover:opacity-100 transition-opacity`} />
+                <CardHeader className="relative">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">{supplier.name}</CardTitle>
-                      {supplier.phone && <p className="text-sm text-gray-500">{supplier.phone}</p>}
+                      <CardTitle className="text-lg bg-gradient-to-r from-pink to-purple bg-clip-text text-transparent">{supplier.name}</CardTitle>
+                      {supplier.phone && <p className="text-sm text-muted-foreground">{supplier.phone}</p>}
                     </div>
                     <div className="flex gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setEditingSupplier(supplier)}
+                        className="hover:bg-purple/10"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-4 w-4 text-purple" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteSupplier(supplier.id)}
+                        className="hover:bg-destructive/10"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="relative">
                   <div className="space-y-3 text-sm">
                     {supplier.email && (
                       <div>
-                        <p className="text-gray-500">Email</p>
+                        <p className="text-muted-foreground">Email</p>
                         <p className="font-medium">{supplier.email}</p>
                       </div>
                     )}
                     {supplier.address && (
                       <div>
-                        <p className="text-gray-500">Address</p>
+                        <p className="text-muted-foreground">Address</p>
                         <p className="font-medium">{supplier.address}</p>
                       </div>
                     )}
                     {supplier.payment_terms && (
                       <div>
-                        <p className="text-gray-500">Payment Terms</p>
+                        <p className="text-muted-foreground">Payment Terms</p>
                         <p className="font-medium">{supplier.payment_terms}</p>
                       </div>
                     )}
                     {supplier.bank_name && (
                       <div>
-                        <p className="text-gray-500">Bank Details</p>
+                        <p className="text-muted-foreground">Bank Details</p>
                         <p className="font-medium">
                           {supplier.bank_name}
                           {supplier.account_number && ` - ${supplier.account_number}`}
@@ -1506,17 +1607,20 @@ export default function Stock() {
           </div>
 
           {filteredSuppliers.length === 0 && (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No suppliers found</h3>
-                <p className="text-gray-500 mb-4">
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink/5 via-transparent to-purple/5" />
+              <CardContent className="text-center py-12 relative">
+                <div className="p-4 rounded-full bg-gradient-to-r from-pink/10 to-purple/10 w-fit mx-auto mb-4">
+                  <Users className="h-12 w-12 text-pink" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No suppliers found</h3>
+                <p className="text-muted-foreground mb-4">
                   {supplierSearchTerm 
                     ? "Try adjusting your search criteria" 
                     : "Get started by adding your first supplier"
                   }
                 </p>
-                <Button onClick={() => setShowSupplierForm(true)}>
+                <Button onClick={() => setShowSupplierForm(true)} className="bg-gradient-to-r from-pink to-purple hover:shadow-glow text-white">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Supplier
                 </Button>
