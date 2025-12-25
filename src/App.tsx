@@ -15,6 +15,7 @@ import ViewPatient from "./pages/ViewPatient";
 import Stock from "./pages/Stock";
 import Invoices from "./pages/Invoices";
 import NewInvoice from "./pages/NewInvoice";
+import EditInvoice from "./pages/EditInvoice";
 import Reports from "./pages/Reports";
 import PatientAnalytics from "./pages/PatientAnalytics";
 import Appointments from "./pages/Appointments";
@@ -50,6 +51,7 @@ const App = () => (
                   <Route path="/stock" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
                   <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
                   <Route path="/invoices/new" element={<ProtectedRoute><NewInvoice /></ProtectedRoute>} />
+                  <Route path="/invoices/edit/:id" element={<ProtectedRoute><EditInvoice /></ProtectedRoute>} />
                   <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
                   <Route path="/analytics/patients" element={<ProtectedRoute><PatientAnalytics /></ProtectedRoute>} />
                   <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />

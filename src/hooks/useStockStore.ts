@@ -171,6 +171,30 @@ export function useStockStore() {
     }
   };
 
+  const increaseStock = async (id: number, quantity: number) => {
+    try {
+      const item = stockItems.find(item => item.id === id);
+      if (!item) return;
+
+      const newStock = item.currentStock + quantity;
+      
+      const { error } = await supabase
+        .from('stock_items')
+        .update({ current_stock: newStock })
+        .eq('item_id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error increasing stock:', error);
+      toast({
+        title: "Error",
+        description: "Failed to increase stock",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   const getMedicines = () => {
     // Return all stock items as medicines (categories are BNX, TPN, PSHY, etc.)
     return stockItems;
@@ -191,6 +215,7 @@ export function useStockStore() {
     addStockItem,
     updateStockItem,
     reduceStock,
+    increaseStock,
     getMedicines,
     getStockItem,
     subscribe

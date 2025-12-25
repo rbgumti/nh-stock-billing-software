@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Plus, Receipt, Download, Eye, CheckCircle } from "lucide-react";
+import { Search, Plus, Receipt, Download, Eye, CheckCircle, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
 import jsPDF from 'jspdf';
 import { toast } from "@/hooks/use-toast";
@@ -617,11 +617,17 @@ export default function Invoices() {
                       <Eye className="h-4 w-4 mr-2 text-cyan" />
                       View Details
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => generatePDF(invoice)} className="glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5">
-                      <Download className="h-4 w-4 mr-2 text-purple" />
+                    <Button variant="outline" size="sm" asChild className="glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5">
+                      <Link to={`/invoices/edit/${invoice.id}`}>
+                        <Pencil className="h-4 w-4 mr-2 text-purple" />
+                        Edit
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => generatePDF(invoice)} className="glass-subtle border-teal/20 hover:border-teal/40 hover:bg-teal/5">
+                      <Download className="h-4 w-4 mr-2 text-teal" />
                       Download PDF
                     </Button>
-                    {invoice.status !== "Paid" && (
+                    {invoice.status !== "Paid" && invoice.status !== "Returned" && (
                       <Button size="sm" onClick={() => markAsPaid(invoice.id)} className="bg-gradient-to-r from-emerald to-teal hover:shadow-lg text-white">
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Mark as Paid
