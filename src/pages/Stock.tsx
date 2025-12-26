@@ -8,10 +8,13 @@ import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, Chevro
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
+import { EditPurchaseOrderForm } from "@/components/forms/EditPurchaseOrderForm";
 import { GRNForm } from "@/components/forms/GRNForm";
+import { EditGRNForm } from "@/components/forms/EditGRNForm";
 import { SupplierForm } from "@/components/forms/SupplierForm";
 import { SupplierPaymentForm } from "@/components/forms/SupplierPaymentForm";
 import { StockLedger } from "@/components/StockLedger";
+import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { usePurchaseOrderStore } from "@/hooks/usePurchaseOrderStore";
@@ -29,6 +32,8 @@ export default function Stock() {
   const [showPOForm, setShowPOForm] = useState(false);
   const [showGRNForm, setShowGRNForm] = useState(false);
   const [selectedPO, setSelectedPO] = useState<any>(null);
+  const [editingPO, setEditingPO] = useState<PurchaseOrder | null>(null);
+  const [editingGRN, setEditingGRN] = useState<PurchaseOrder | null>(null);
   const [showSupplierForm, setShowSupplierForm] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
@@ -227,6 +232,40 @@ export default function Stock() {
       title: "Success",
       description: `GRN ${grnData.grnNumber} has been processed successfully! Stock levels updated.`
     });
+  };
+
+  const handleEditPO = async (updatedPO: PurchaseOrder) => {
+    try {
+      await updatePurchaseOrder(updatedPO.id, updatedPO);
+      setEditingPO(null);
+      toast({
+        title: "Success",
+        description: "Purchase order has been updated successfully!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update purchase order",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEditGRN = async (updatedPO: PurchaseOrder) => {
+    try {
+      await updatePurchaseOrder(updatedPO.id, updatedPO);
+      setEditingGRN(null);
+      toast({
+        title: "Success",
+        description: "GRN has been updated successfully!"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update GRN",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleAddSupplier = async (supplierData: Omit<Supplier, 'id' | 'created_at' | 'updated_at'>) => {
@@ -1142,16 +1181,27 @@ export default function Stock() {
                     </div>
                     <div className="flex gap-2 mt-4">
                       {po.status === 'Pending' && (
-                        <Button 
-                          className="flex-1 bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white" 
-                          onClick={() => {
-                            setSelectedPO(po);
-                            setShowGRNForm(true);
-                          }}
-                        >
-                          <Truck className="h-4 w-4 mr-2" />
-                          Process GRN
-                        </Button>
+                        <>
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            className="glass-subtle border-purple/20 hover:border-purple/40"
+                            onClick={() => setEditingPO(po)}
+                          >
+                            <Pencil className="h-4 w-4 mr-1 text-purple" />
+                            Edit
+                          </Button>
+                          <Button 
+                            className="flex-1 bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white" 
+                            onClick={() => {
+                              setSelectedPO(po);
+                              setShowGRNForm(true);
+                            }}
+                          >
+                            <Truck className="h-4 w-4 mr-2" />
+                            Process GRN
+                          </Button>
+                        </>
                       )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -1236,14 +1286,25 @@ export default function Stock() {
                       <p className="text-muted-foreground">Items Received</p>
                       <p className="font-medium">{po.items.length} item(s)</p>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      className="w-full mt-4 glass-subtle border-teal/20 hover:border-teal/40"
-                      onClick={() => downloadGRN(po)}
-                    >
-                      <Download className="h-4 w-4 mr-2 text-teal" />
-                      Download GRN
-                    </Button>
+                    <div className="flex gap-2 mt-4">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="glass-subtle border-purple/20 hover:border-purple/40"
+                        onClick={() => setEditingGRN(po)}
+                      >
+                        <Pencil className="h-4 w-4 mr-1 text-purple" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 glass-subtle border-teal/20 hover:border-teal/40"
+                        onClick={() => downloadGRN(po)}
+                      >
+                        <Download className="h-4 w-4 mr-2 text-teal" />
+                        Download GRN
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -1654,6 +1715,15 @@ export default function Stock() {
         />
       )}
 
+      {editingPO && (
+        <EditPurchaseOrderForm
+          purchaseOrder={editingPO}
+          onClose={() => setEditingPO(null)}
+          onSubmit={handleEditPO}
+          stockItems={stockItems}
+        />
+      )}
+
       {showGRNForm && selectedPO && (
         <GRNForm
           onClose={() => {
@@ -1663,6 +1733,15 @@ export default function Stock() {
           onSubmit={handleGRN}
           purchaseOrder={selectedPO}
           stockItems={stockItems}
+        />
+      )}
+
+      {editingGRN && (
+        <EditGRNForm
+          purchaseOrder={editingGRN}
+          stockItems={stockItems}
+          onClose={() => setEditingGRN(null)}
+          onSubmit={handleEditGRN}
         />
       )}
 
