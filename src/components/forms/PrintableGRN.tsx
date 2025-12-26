@@ -1,9 +1,10 @@
 import { useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, Download } from "lucide-react";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
+import jsPDF from "jspdf";
 
 interface GRNItem {
   stockItemId: number;
@@ -49,6 +50,174 @@ export function PrintableGRN({
 
   const totalReceivedQty = grnItems.reduce((sum, item) => sum + item.receivedQuantity, 0);
   const totalOrderedQty = grnItems.reduce((sum, item) => sum + item.orderedQuantity, 0);
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPos = 15;
+
+    // Header
+    doc.setFontSize(8);
+    doc.text("Regd. Govt of Punjab", 14, yPos);
+    doc.text("Mob_ 6284942412", pageWidth - 14, yPos, { align: "right" });
+    yPos += 8;
+
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, yPos, { align: "center" });
+    yPos += 6;
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib    Dr.metali Bhatti", pageWidth / 2, yPos, { align: "center" });
+    yPos += 5;
+
+    doc.setFontSize(8);
+    doc.text("Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024", pageWidth / 2, yPos, { align: "center" });
+    yPos += 3;
+
+    doc.setLineWidth(0.5);
+    doc.line(14, yPos, pageWidth - 14, yPos);
+    yPos += 10;
+
+    // GRN Title
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("GOODS RECEIPT NOTE", pageWidth / 2, yPos, { align: "center" });
+    yPos += 10;
+
+    // GRN Info
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("GRN Number:", 14, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(grnNumber, 50, yPos);
+    doc.setFont("helvetica", "bold");
+    doc.text("GRN Date:", pageWidth / 2, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(formatDate(new Date().toISOString()), pageWidth / 2 + 30, yPos);
+    yPos += 6;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("PO Number:", 14, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(purchaseOrder.poNumber, 50, yPos);
+    doc.setFont("helvetica", "bold");
+    doc.text("PO Date:", pageWidth / 2, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(formatDate(purchaseOrder.orderDate), pageWidth / 2 + 30, yPos);
+    yPos += 6;
+
+    if (invoiceNumber) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Invoice Number:", 14, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(invoiceNumber, 50, yPos);
+      if (invoiceDate) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Invoice Date:", pageWidth / 2, yPos);
+        doc.setFont("helvetica", "normal");
+        doc.text(formatDate(invoiceDate), pageWidth / 2 + 30, yPos);
+      }
+      yPos += 6;
+    }
+    yPos += 4;
+
+    // Supplier Box
+    doc.setDrawColor(0);
+    doc.rect(14, yPos, pageWidth - 28, 12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Supplier Details:", 16, yPos + 5);
+    doc.setFont("helvetica", "normal");
+    doc.text(purchaseOrder.supplier, 50, yPos + 5);
+    yPos += 18;
+
+    // Items Table Header
+    const colWidths = [10, 45, 25, 22, 22, 18, 18, 22];
+    const headers = ["Sr.", "Item Name", "Batch No.", "Expiry", "MRP (₹)", "Ord.", "Recv.", "Remarks"];
+    
+    doc.setFillColor(240, 240, 240);
+    doc.rect(14, yPos, pageWidth - 28, 8, "F");
+    doc.setDrawColor(0);
+    doc.rect(14, yPos, pageWidth - 28, 8);
+    
+    let xPos = 14;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    headers.forEach((header, i) => {
+      doc.text(header, xPos + 2, yPos + 5);
+      xPos += colWidths[i];
+    });
+    yPos += 8;
+
+    // Items Rows
+    doc.setFont("helvetica", "normal");
+    grnItems.forEach((item, index) => {
+      const stockItem = getStockItemDetails(item.stockItemId);
+      const rowData = [
+        (index + 1).toString(),
+        stockItem?.name?.substring(0, 20) || 'Unknown',
+        item.batchNo || '-',
+        item.expiryDate ? formatDate(item.expiryDate) : '-',
+        item.mrp ? `₹${item.mrp.toFixed(0)}` : '-',
+        item.orderedQuantity.toString(),
+        item.receivedQuantity.toString(),
+        item.remarks?.substring(0, 10) || '-'
+      ];
+
+      doc.rect(14, yPos, pageWidth - 28, 7);
+      xPos = 14;
+      rowData.forEach((data, i) => {
+        doc.text(data, xPos + 2, yPos + 5);
+        xPos += colWidths[i];
+      });
+      yPos += 7;
+    });
+
+    // Total Row
+    doc.setFillColor(240, 240, 240);
+    doc.rect(14, yPos, pageWidth - 28, 7, "F");
+    doc.rect(14, yPos, pageWidth - 28, 7);
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL", 16, yPos + 5);
+    xPos = 14 + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4];
+    doc.text(totalOrderedQty.toString(), xPos + 2, yPos + 5);
+    doc.text(totalReceivedQty.toString(), xPos + colWidths[5] + 2, yPos + 5);
+    yPos += 15;
+
+    // Notes
+    if (notes) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Notes:", 14, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(notes, 14, yPos + 5);
+      yPos += 15;
+    }
+
+    // Signatures
+    yPos = Math.max(yPos, 220);
+    doc.setLineWidth(0.3);
+    doc.line(14, yPos, 50, yPos);
+    doc.line(85, yPos, 121, yPos);
+    doc.line(156, yPos, 192, yPos);
+    yPos += 5;
+    doc.setFontSize(9);
+    doc.text("Received By", 14, yPos);
+    doc.text("Checked By", 85, yPos);
+    doc.text("Authorized Signatory", 156, yPos);
+
+    // Footer
+    yPos = 275;
+    doc.setLineWidth(0.2);
+    doc.line(14, yPos, pageWidth - 14, yPos);
+    yPos += 5;
+    doc.setFontSize(8);
+    doc.text("This is a computer generated document. For queries contact: 6284942412", pageWidth / 2, yPos, { align: "center" });
+    yPos += 4;
+    doc.text("NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Pb.)", pageWidth / 2, yPos, { align: "center" });
+
+    doc.save(`GRN-${grnNumber}.pdf`);
+  };
 
   const handlePrint = () => {
     const printContent = printRef.current;
@@ -113,10 +282,16 @@ export function PrintableGRN({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Goods Receipt Note Preview</span>
-            <Button onClick={handlePrint} size="sm" className="flex items-center gap-2">
-              <Printer className="h-4 w-4" />
-              Print
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Download PDF
+              </Button>
+              <Button onClick={handlePrint} size="sm" className="flex items-center gap-2">
+                <Printer className="h-4 w-4" />
+                Print
+              </Button>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
