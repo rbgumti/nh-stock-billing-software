@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { MedicineSearchSelect } from "@/components/MedicineSearchSelect";
 import { ArrowLeft, Plus, Trash2, FileText, Hand } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
@@ -420,21 +420,12 @@ export default function NewInvoice() {
                           </Badge>
                         )}
                       </div>
-                      <Select
-                        value={item.medicineId ? item.medicineId.toString() : undefined}
-                        onValueChange={(value) => updateItem(item.id, "medicineId", parseInt(value))}
-                      >
-                        <SelectTrigger ref={(el) => { selectRefs.current[item.id] = el; }}>
-                          <SelectValue placeholder="Choose medicine" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-background z-50 max-h-60">
-                          {medicines.map((medicine) => (
-                            <SelectItem key={medicine.id} value={medicine.id.toString()}>
-                              {medicine.name} - Batch: {medicine.batchNo} (Stock: {medicine.currentStock})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <MedicineSearchSelect
+                        medicines={medicines}
+                        value={item.medicineId || undefined}
+                        onValueChange={(value) => updateItem(item.id, "medicineId", value)}
+                        triggerRef={(el) => { selectRefs.current[item.id] = el; }}
+                      />
                     </div>
                     <div>
                       <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
