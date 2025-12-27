@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,8 @@ export default function NewInvoice() {
       stockAfterInvoice: 0
     }
   ]);
+  const [newItemId, setNewItemId] = useState<string | null>(null);
+  const selectRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const medicines = getMedicines();
 
@@ -158,8 +160,9 @@ export default function NewInvoice() {
   };
 
   const addItem = () => {
+    const itemId = Date.now().toString();
     const newItem: InvoiceItem = {
-      id: Date.now().toString(),
+      id: itemId,
       medicineId: 0,
       medicineName: "",
       batchNo: "",
@@ -172,7 +175,18 @@ export default function NewInvoice() {
       stockAfterInvoice: 0
     };
     setItems([newItem, ...items]);
+    setNewItemId(itemId);
   };
+
+  // Auto-focus the new item's select dropdown
+  useEffect(() => {
+    if (newItemId && selectRefs.current[newItemId]) {
+      setTimeout(() => {
+        selectRefs.current[newItemId]?.focus();
+        setNewItemId(null);
+      }, 100);
+    }
+  }, [newItemId, items]);
 
   const removeItem = (id: string) => {
     if (items.length > 1) {
@@ -410,7 +424,7 @@ export default function NewInvoice() {
                         value={item.medicineId ? item.medicineId.toString() : undefined}
                         onValueChange={(value) => updateItem(item.id, "medicineId", parseInt(value))}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger ref={(el) => { selectRefs.current[item.id] = el; }}>
                           <SelectValue placeholder="Choose medicine" />
                         </SelectTrigger>
                         <SelectContent className="bg-background z-50 max-h-60">
