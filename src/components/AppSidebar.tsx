@@ -42,18 +42,18 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0`} collapsible="icon">
-      <SidebarContent className="bg-gradient-to-b from-purple via-purple/95 to-purple/90 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-20 left-0 w-24 h-24 bg-cyan/10 rounded-full blur-2xl -translate-x-1/2" />
-        <div className="absolute bottom-0 right-0 w-20 h-20 bg-pink/10 rounded-full blur-2xl translate-y-1/2" />
+      <SidebarContent className="glass-strong relative overflow-hidden border-r border-border/50">
+        {/* Decorative glass orbs */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-20 left-0 w-24 h-24 bg-accent/10 rounded-full blur-2xl -translate-x-1/2" />
+        <div className="absolute bottom-0 right-0 w-20 h-20 bg-secondary/10 rounded-full blur-2xl translate-y-1/2" />
         
         {/* Header */}
-        <div className="relative p-4 border-b border-white/10">
+        <div className="relative p-4 border-b border-border/30">
           {!collapsed ? (
             <div className="flex flex-col items-center gap-3">
               <div className="relative">
-                <div className="absolute inset-0 bg-gold/20 rounded-full blur-xl animate-pulse" />
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
                 <img 
                   src={navjeevanLogo} 
                   alt="Navjeevan Hospital Logo" 
@@ -61,18 +61,18 @@ export function AppSidebar() {
                 />
               </div>
               <div className="text-center">
-                <h2 className="text-xl font-bold text-white tracking-wider flex items-center gap-2 justify-center">
-                  <Sparkles className="w-4 h-4 text-gold" />
+                <h2 className="text-xl font-bold text-foreground tracking-wider flex items-center gap-2 justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
                   NAVJEEVAN
-                  <Sparkles className="w-4 h-4 text-gold" />
+                  <Sparkles className="w-4 h-4 text-primary" />
                 </h2>
-                <p className="text-sm text-gold font-medium tracking-wide">Hospital Sirhind</p>
+                <p className="text-sm text-primary font-medium tracking-wide">Hospital Sirhind</p>
               </div>
             </div>
           ) : (
             <div className="flex justify-center">
               <div className="relative">
-                <div className="absolute inset-0 bg-gold/30 rounded-full blur-md" />
+                <div className="absolute inset-0 bg-primary/30 rounded-full blur-md" />
                 <img 
                   src={navjeevanLogo} 
                   alt="NH Logo" 
@@ -85,7 +85,7 @@ export function AppSidebar() {
         
         {/* Navigation */}
         <SidebarGroup className="relative z-10">
-          <SidebarGroupLabel className="text-white/50 uppercase text-[10px] tracking-widest font-semibold mb-1">
+          <SidebarGroupLabel className="text-muted-foreground uppercase text-[10px] tracking-widest font-semibold mb-1">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -95,9 +95,11 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
-                      className={`${getNavClass(item.url)} rounded-lg mx-1 group`}
+                      className={`${isActive(item.url) 
+                        ? "glass bg-primary/10 text-primary border-l-2 border-primary font-semibold shadow-sm" 
+                        : "hover:bg-muted/50 text-foreground/80 hover:text-foreground transition-all duration-200"} rounded-lg mx-1 group`}
                     >
-                      <item.icon className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${isActive(item.url) ? 'text-gold' : ''}`} />
+                      <item.icon className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${isActive(item.url) ? 'text-primary' : ''}`} />
                       {!collapsed && <span className="ml-3">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -109,7 +111,7 @@ export function AppSidebar() {
 
         {/* Quick Actions */}
         <SidebarGroup className="relative z-10 mt-2">
-          <SidebarGroupLabel className="text-white/50 uppercase text-[10px] tracking-widest font-semibold mb-1">
+          <SidebarGroupLabel className="text-muted-foreground uppercase text-[10px] tracking-widest font-semibold mb-1">
             Quick Actions
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -118,7 +120,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink 
                     to="/patients/new" 
-                    className="text-gold hover:bg-gold/10 rounded-lg mx-1 transition-all duration-200 group border border-gold/20 hover:border-gold/40"
+                    className="text-primary hover:bg-primary/10 rounded-lg mx-1 transition-all duration-200 group glass-subtle border border-primary/20 hover:border-primary/40"
                   >
                     <Plus className="h-5 w-5 transition-transform duration-200 group-hover:rotate-90" />
                     {!collapsed && <span className="ml-3 font-medium">Add Patient</span>}
@@ -129,7 +131,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink 
                     to="/prescriptions/new" 
-                    className="text-cyan hover:bg-cyan/10 rounded-lg mx-1 transition-all duration-200 group border border-cyan/20 hover:border-cyan/40"
+                    className="text-accent-foreground hover:bg-accent/10 rounded-lg mx-1 transition-all duration-200 group glass-subtle border border-accent/20 hover:border-accent/40"
                   >
                     <Plus className="h-5 w-5 transition-transform duration-200 group-hover:rotate-90" />
                     {!collapsed && <span className="ml-3 font-medium">New Prescription</span>}
@@ -140,7 +142,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <NavLink 
                     to="/invoices/new" 
-                    className="text-pink hover:bg-pink/10 rounded-lg mx-1 transition-all duration-200 group border border-pink/20 hover:border-pink/40"
+                    className="text-secondary-foreground hover:bg-secondary/10 rounded-lg mx-1 transition-all duration-200 group glass-subtle border border-secondary/20 hover:border-secondary/40"
                   >
                     <Plus className="h-5 w-5 transition-transform duration-200 group-hover:rotate-90" />
                     {!collapsed && <span className="ml-3 font-medium">New Invoice</span>}
@@ -155,8 +157,8 @@ export function AppSidebar() {
         <div className="mt-auto p-4 relative z-10">
           {!collapsed && (
             <div className="text-center">
-              <div className="h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent mb-3" />
-              <p className="text-[10px] text-white/40 tracking-wide">Powered by Lovable</p>
+              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-3" />
+              <p className="text-[10px] text-muted-foreground tracking-wide">Powered by Lovable</p>
             </div>
           )}
         </div>
