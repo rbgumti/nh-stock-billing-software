@@ -171,7 +171,7 @@ export default function NewInvoice() {
       availableStock: 0,
       stockAfterInvoice: 0
     };
-    setItems([...items, newItem]);
+    setItems([newItem, ...items]);
   };
 
   const removeItem = (id: string) => {
