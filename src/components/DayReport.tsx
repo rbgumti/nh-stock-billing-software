@@ -99,6 +99,98 @@ export default function DayReport() {
     { denomination: 1, count: 0, amount: 0 },
   ]);
 
+  // Helper function to calculate cash left in hand for a given report
+  const calculateCashLeftInHand = (report: any, bnxAmt: number, tpnAmt: number, pshyAmt: number) => {
+    const prevDayCash = Number(report.cash_previous_day) || 0;
+    const looseB = Number(report.loose_balance) || 5000;
+    const depositBank = Number(report.deposit_in_bank) || 0;
+    const paytm = Number(report.paytm_gpay) || 0;
+    const handoverA = Number(report.cash_handover_amarjeet) || 0;
+    const handoverM = Number(report.cash_handover_mandeep) || 0;
+    const handoverS = Number(report.cash_handover_sir) || 0;
+    const adj = Number(report.adjustments) || 0;
+    const feesAmt = Number(report.fees) || 0;
+    const labAmt = Number(report.lab_collection) || 0;
+    const expensesArr = (report.expenses as ExpenseItem[]) || [];
+    const totalExp = expensesArr.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+    
+    const totalSaleAmt = bnxAmt + tpnAmt + pshyAmt + feesAmt + labAmt;
+    const todaysColl = totalSaleAmt;
+    
+    return prevDayCash + todaysColl + looseB - totalExp - depositBank - paytm - handoverA - handoverM - handoverS + adj;
+  };
+
+  const fetchPreviousDayCashLeftInHand = async (currentDate: string): Promise<number> => {
+    try {
+      // Calculate previous day date
+      const current = new Date(currentDate);
+      current.setDate(current.getDate() - 1);
+      const previousDate = formatLocalISODate(current);
+
+      // Fetch previous day's report
+      const { data: prevReport, error } = await supabase
+        .from('day_reports')
+        .select('*')
+        .eq('report_date', previousDate)
+        .maybeSingle();
+
+      if (error || !prevReport) return 0;
+
+      // We need to calculate the medicine totals for the previous day
+      // Get invoice items for the previous date
+      const { data: invoiceData } = await supabase
+        .from('invoices')
+        .select('id, invoice_date')
+        .like('invoice_date', `${previousDate}%`);
+
+      const invoiceIds = invoiceData?.map(inv => inv.id) || [];
+
+      let soldAmountsByCategory: Record<string, number> = { BNX: 0, TPN: 0, PSHY: 0 };
+
+      if (invoiceIds.length > 0) {
+        const { data: invoiceItems } = await supabase
+          .from('invoice_items')
+          .select('medicine_id, medicine_name, quantity, mrp, unit_price')
+          .in('invoice_id', invoiceIds);
+
+        // Get stock items to map medicine categories
+        const medicineIds = [...new Set((invoiceItems || []).map(it => it.medicine_id))];
+        
+        if (medicineIds.length > 0) {
+          const { data: stockItemsData } = await supabase
+            .from('stock_items')
+            .select('item_id, category, mrp, unit_price')
+            .in('item_id', medicineIds);
+
+          const stockItemMap = new Map((stockItemsData || []).map(s => [s.item_id, s]));
+
+          (invoiceItems || []).forEach((it) => {
+            const stockItem = stockItemMap.get(it.medicine_id);
+            const category = stockItem?.category?.toUpperCase() || 'BNX';
+            const price = it.mrp || it.unit_price || stockItem?.mrp || stockItem?.unit_price || 0;
+            const amount = it.quantity * price;
+            
+            if (category === 'BNX' || category === 'TPN' || category === 'PSHY') {
+              soldAmountsByCategory[category] += amount;
+            } else {
+              soldAmountsByCategory['BNX'] += amount; // Default to BNX
+            }
+          });
+        }
+      }
+
+      return calculateCashLeftInHand(
+        prevReport, 
+        soldAmountsByCategory['BNX'], 
+        soldAmountsByCategory['TPN'], 
+        soldAmountsByCategory['PSHY']
+      );
+    } catch (error) {
+      console.error('Error fetching previous day cash:', error);
+      return 0;
+    }
+  };
+
   const loadSavedReport = useCallback(async () => {
     setLoading(true);
     try {
@@ -141,7 +233,11 @@ export default function DayReport() {
         setReportId(null);
         setNewPatients(0);
         setFollowUpPatients(0);
-        setCashPreviousDay(0);
+        
+        // Fetch previous day's cash left in hand for the new report
+        const previousDayCash = await fetchPreviousDayCashLeftInHand(reportDate);
+        setCashPreviousDay(previousDayCash);
+        
         setLooseBalance(5000);
         setDepositInBank(0);
         setPaytmGpay(0);
