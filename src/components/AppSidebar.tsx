@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, Sparkles, ChevronRight } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, Sparkles, ChevronRight, ChevronLeft, PanelLeftClose, PanelLeft } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +12,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
+import { Button } from "@/components/ui/button";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600" },
@@ -31,7 +32,7 @@ const quickActions = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
@@ -182,10 +183,42 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Footer decoration */}
-        <div className="mt-auto p-4 relative z-10">
+        {/* Toggle Button & Footer */}
+        <div className="mt-auto relative z-10">
+          {/* Collapse Toggle Button */}
+          <div className={`px-3 py-2 ${collapsed ? 'flex justify-center' : ''}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSidebar}
+              className={`group relative overflow-hidden rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 ${
+                collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
+              }`}
+            >
+              {/* Animated gradient background on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-cyan-500/0 to-violet-500/0 group-hover:from-violet-500/10 group-hover:via-cyan-500/10 group-hover:to-violet-500/10 transition-all duration-500" />
+              
+              {!collapsed && (
+                <span className="text-slate-400 text-xs font-medium group-hover:text-white transition-colors duration-300 relative z-10">
+                  Collapse
+                </span>
+              )}
+              
+              <div className={`relative flex items-center justify-center transition-all duration-500 ${
+                collapsed ? '' : 'bg-gradient-to-br from-violet-500/20 to-cyan-500/20 rounded-lg p-1.5'
+              }`}>
+                {collapsed ? (
+                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-white transition-all duration-300 group-hover:scale-110" />
+                ) : (
+                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-white transition-all duration-300 group-hover:scale-110" />
+                )}
+              </div>
+            </Button>
+          </div>
+
+          {/* Footer decoration */}
           {!collapsed && (
-            <div className="text-center">
+            <div className="text-center px-4 pb-4">
               <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-3" />
               <p className="text-[10px] text-slate-600 tracking-wide">Powered by Lovable</p>
             </div>
