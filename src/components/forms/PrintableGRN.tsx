@@ -5,7 +5,7 @@ import { Printer, Download } from "lucide-react";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
-
+import navjeevanLogo from "@/assets/NH_LOGO.png";
 interface GRNItem {
   stockItemId: number;
   orderedQuantity: number;
@@ -51,112 +51,161 @@ export function PrintableGRN({
   const totalReceivedQty = grnItems.reduce((sum, item) => sum + item.receivedQuantity, 0);
   const totalOrderedQty = grnItems.reduce((sum, item) => sum + item.orderedQuantity, 0);
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    let yPos = 15;
+    let yPos = 20;
 
-    // Header
-    doc.setFontSize(8);
-    doc.text("Regd. Govt of Punjab", 14, yPos);
-    doc.text("Mob_ 6284942412", pageWidth - 14, yPos, { align: "right" });
-    yPos += 8;
+    // Load and add logo
+    try {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = navjeevanLogo;
+      });
+      // Add logo centered at top
+      const logoWidth = 25;
+      const logoHeight = 25;
+      doc.addImage(img, 'PNG', (pageWidth - logoWidth) / 2, yPos - 5, logoWidth, logoHeight);
+      yPos += 22;
+    } catch (e) {
+      console.log('Logo loading failed', e);
+    }
 
-    doc.setFontSize(18);
+    // Hospital Name with decorative styling
+    doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 51, 102); // Dark blue
     doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, yPos, { align: "center" });
+    yPos += 7;
+
+    // Tagline
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(100, 100, 100);
+    doc.text("Healthcare with Compassion", pageWidth / 2, yPos, { align: "center" });
     yPos += 6;
 
-    doc.setFontSize(10);
+    // Address
+    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text("Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib    Dr.metali Bhatti", pageWidth / 2, yPos, { align: "center" });
+    doc.setTextColor(60, 60, 60);
+    doc.text("Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)", pageWidth / 2, yPos, { align: "center" });
     yPos += 5;
 
+    // Contact and License
     doc.setFontSize(8);
-    doc.text("Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024", pageWidth / 2, yPos, { align: "center" });
-    yPos += 3;
+    doc.text("Phone: 6284942412 | Dr. Metali Bhatti", pageWidth / 2, yPos, { align: "center" });
+    yPos += 4;
+    doc.text("Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab", pageWidth / 2, yPos, { align: "center" });
+    yPos += 6;
 
-    doc.setLineWidth(0.5);
+    // Decorative line
+    doc.setDrawColor(0, 51, 102);
+    doc.setLineWidth(1);
     doc.line(14, yPos, pageWidth - 14, yPos);
-    yPos += 10;
+    doc.setLineWidth(0.3);
+    doc.line(14, yPos + 2, pageWidth - 14, yPos + 2);
+    yPos += 12;
 
-    // GRN Title
-    doc.setFontSize(14);
+    // GRN Title with box
+    doc.setFillColor(0, 51, 102);
+    doc.roundedRect(pageWidth / 2 - 40, yPos - 5, 80, 10, 2, 2, 'F');
+    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("GOODS RECEIPT NOTE", pageWidth / 2, yPos, { align: "center" });
-    yPos += 10;
+    doc.setTextColor(255, 255, 255);
+    doc.text("GOODS RECEIPT NOTE", pageWidth / 2, yPos + 2, { align: "center" });
+    yPos += 14;
 
-    // GRN Info
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("GRN Number:", 14, yPos);
-    doc.setFont("helvetica", "normal");
-    doc.text(grnNumber, 50, yPos);
-    doc.setFont("helvetica", "bold");
-    doc.text("GRN Date:", pageWidth / 2, yPos);
-    doc.setFont("helvetica", "normal");
-    doc.text(formatDate(new Date().toISOString()), pageWidth / 2 + 30, yPos);
-    yPos += 6;
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+
+    // Info box with rounded corners
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(200, 200, 200);
+    doc.roundedRect(14, yPos, pageWidth - 28, 28, 3, 3, 'FD');
+    
+    doc.setFontSize(9);
+    const col1X = 20;
+    const col2X = pageWidth / 2 + 10;
+    let infoY = yPos + 7;
 
     doc.setFont("helvetica", "bold");
-    doc.text("PO Number:", 14, yPos);
+    doc.text("GRN Number:", col1X, infoY);
     doc.setFont("helvetica", "normal");
-    doc.text(purchaseOrder.poNumber, 50, yPos);
+    doc.text(grnNumber, col1X + 28, infoY);
+
     doc.setFont("helvetica", "bold");
-    doc.text("PO Date:", pageWidth / 2, yPos);
+    doc.text("GRN Date:", col2X, infoY);
     doc.setFont("helvetica", "normal");
-    doc.text(formatDate(purchaseOrder.orderDate), pageWidth / 2 + 30, yPos);
-    yPos += 6;
+    doc.text(formatDate(new Date().toISOString()), col2X + 22, infoY);
+    infoY += 7;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("PO Number:", col1X, infoY);
+    doc.setFont("helvetica", "normal");
+    doc.text(purchaseOrder.poNumber, col1X + 28, infoY);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("PO Date:", col2X, infoY);
+    doc.setFont("helvetica", "normal");
+    doc.text(formatDate(purchaseOrder.orderDate), col2X + 22, infoY);
+    infoY += 7;
 
     if (invoiceNumber) {
       doc.setFont("helvetica", "bold");
-      doc.text("Invoice Number:", 14, yPos);
+      doc.text("Invoice No:", col1X, infoY);
       doc.setFont("helvetica", "normal");
-      doc.text(invoiceNumber, 50, yPos);
-      if (invoiceDate) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Invoice Date:", pageWidth / 2, yPos);
-        doc.setFont("helvetica", "normal");
-        doc.text(formatDate(invoiceDate), pageWidth / 2 + 30, yPos);
-      }
-      yPos += 6;
+      doc.text(invoiceNumber, col1X + 28, infoY);
     }
-    yPos += 4;
+    if (invoiceDate) {
+      doc.setFont("helvetica", "bold");
+      doc.text("Invoice Date:", col2X, infoY);
+      doc.setFont("helvetica", "normal");
+      doc.text(formatDate(invoiceDate), col2X + 28, infoY);
+    }
+    yPos += 34;
 
     // Supplier Box
-    doc.setDrawColor(0);
-    doc.rect(14, yPos, pageWidth - 28, 12);
+    doc.setFillColor(240, 247, 255);
+    doc.setDrawColor(0, 102, 204);
+    doc.roundedRect(14, yPos, pageWidth - 28, 14, 2, 2, 'FD');
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.text("Supplier Details:", 16, yPos + 5);
+    doc.setTextColor(0, 51, 102);
+    doc.text("SUPPLIER:", 18, yPos + 9);
     doc.setFont("helvetica", "normal");
-    doc.text(purchaseOrder.supplier, 50, yPos + 5);
-    yPos += 18;
+    doc.setTextColor(0, 0, 0);
+    doc.text(purchaseOrder.supplier, 45, yPos + 9);
+    yPos += 20;
 
     // Items Table Header
-    const colWidths = [10, 45, 25, 22, 22, 18, 18, 22];
+    const colWidths = [12, 50, 28, 26, 24, 18, 18, 22];
     const headers = ["Sr.", "Item Name", "Batch No.", "Expiry", "MRP (₹)", "Ord.", "Recv.", "Remarks"];
     
-    doc.setFillColor(240, 240, 240);
-    doc.rect(14, yPos, pageWidth - 28, 8, "F");
-    doc.setDrawColor(0);
-    doc.rect(14, yPos, pageWidth - 28, 8);
+    doc.setFillColor(0, 51, 102);
+    doc.rect(14, yPos, pageWidth - 28, 9, "F");
     
     let xPos = 14;
     doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
     headers.forEach((header, i) => {
-      doc.text(header, xPos + 2, yPos + 5);
+      doc.text(header, xPos + 2, yPos + 6);
       xPos += colWidths[i];
     });
-    yPos += 8;
+    yPos += 9;
 
-    // Items Rows
+    // Items Rows with alternating colors
+    doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "normal");
     grnItems.forEach((item, index) => {
       const stockItem = getStockItemDetails(item.stockItemId);
       const rowData = [
         (index + 1).toString(),
-        stockItem?.name?.substring(0, 20) || 'Unknown',
+        stockItem?.name?.substring(0, 22) || 'Unknown',
         item.batchNo || '-',
         item.expiryDate ? formatDate(item.expiryDate) : '-',
         item.mrp ? `₹${item.mrp.toFixed(0)}` : '-',
@@ -165,7 +214,14 @@ export function PrintableGRN({
         item.remarks?.substring(0, 10) || '-'
       ];
 
+      // Alternating row colors
+      if (index % 2 === 0) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(14, yPos, pageWidth - 28, 7, "F");
+      }
+      doc.setDrawColor(200, 200, 200);
       doc.rect(14, yPos, pageWidth - 28, 7);
+
       xPos = 14;
       rowData.forEach((data, i) => {
         doc.text(data, xPos + 2, yPos + 5);
@@ -175,46 +231,64 @@ export function PrintableGRN({
     });
 
     // Total Row
-    doc.setFillColor(240, 240, 240);
-    doc.rect(14, yPos, pageWidth - 28, 7, "F");
-    doc.rect(14, yPos, pageWidth - 28, 7);
+    doc.setFillColor(0, 51, 102);
+    doc.rect(14, yPos, pageWidth - 28, 8, "F");
     doc.setFont("helvetica", "bold");
-    doc.text("TOTAL", 16, yPos + 5);
+    doc.setTextColor(255, 255, 255);
+    doc.text("TOTAL", 18, yPos + 5.5);
     xPos = 14 + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4];
-    doc.text(totalOrderedQty.toString(), xPos + 2, yPos + 5);
-    doc.text(totalReceivedQty.toString(), xPos + colWidths[5] + 2, yPos + 5);
-    yPos += 15;
+    doc.text(totalOrderedQty.toString(), xPos + 2, yPos + 5.5);
+    doc.text(totalReceivedQty.toString(), xPos + colWidths[5] + 2, yPos + 5.5);
+    yPos += 14;
 
     // Notes
+    doc.setTextColor(0, 0, 0);
     if (notes) {
+      doc.setFillColor(255, 253, 240);
+      doc.setDrawColor(200, 180, 100);
+      doc.roundedRect(14, yPos, pageWidth - 28, 16, 2, 2, 'FD');
       doc.setFont("helvetica", "bold");
-      doc.text("Notes:", 14, yPos);
+      doc.setFontSize(9);
+      doc.text("Notes:", 18, yPos + 6);
       doc.setFont("helvetica", "normal");
-      doc.text(notes, 14, yPos + 5);
-      yPos += 15;
+      doc.text(notes.substring(0, 80), 35, yPos + 6);
+      yPos += 20;
     }
 
     // Signatures
-    yPos = Math.max(yPos, 220);
-    doc.setLineWidth(0.3);
-    doc.line(14, yPos, 50, yPos);
-    doc.line(85, yPos, 121, yPos);
-    doc.line(156, yPos, 192, yPos);
-    yPos += 5;
+    yPos = Math.max(yPos + 10, 230);
     doc.setFontSize(9);
-    doc.text("Received By", 14, yPos);
-    doc.text("Checked By", 85, yPos);
-    doc.text("Authorized Signatory", 156, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    
+    const sig1X = 30;
+    const sig2X = pageWidth / 2;
+    const sig3X = pageWidth - 45;
+    
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.5);
+    doc.line(sig1X - 15, yPos, sig1X + 25, yPos);
+    doc.line(sig2X - 20, yPos, sig2X + 20, yPos);
+    doc.line(sig3X - 20, yPos, sig3X + 25, yPos);
+    
+    yPos += 5;
+    doc.text("Received By", sig1X - 5, yPos);
+    doc.text("Checked By", sig2X - 10, yPos);
+    doc.text("Authorized Signatory", sig3X - 15, yPos);
 
     // Footer
-    yPos = 275;
-    doc.setLineWidth(0.2);
+    yPos = 272;
+    doc.setDrawColor(0, 51, 102);
+    doc.setLineWidth(0.5);
     doc.line(14, yPos, pageWidth - 14, yPos);
     yPos += 5;
-    doc.setFontSize(8);
-    doc.text("This is a computer generated document. For queries contact: 6284942412", pageWidth / 2, yPos, { align: "center" });
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.text("This is a computer generated document | For queries contact: 6284942412", pageWidth / 2, yPos, { align: "center" });
     yPos += 4;
-    doc.text("NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Pb.)", pageWidth / 2, yPos, { align: "center" });
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 51, 102);
+    doc.text("NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)", pageWidth / 2, yPos, { align: "center" });
 
     doc.save(`GRN-${grnNumber}.pdf`);
   };
@@ -295,130 +369,175 @@ export function PrintableGRN({
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-4 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
-          {/* Header */}
-          <div className="text-center mb-4 border-b-2 border-black pb-3">
-            <div className="flex justify-between text-xs mb-2">
-              <span>Regd. Govt of Punjab</span>
-              <span>Mob_ 6284942412</span>
+        <div ref={printRef} className="p-6 bg-white text-black" style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}>
+          {/* Header with Logo */}
+          <div className="text-center mb-6 pb-4 border-b-4 border-blue-900" style={{ borderBottomStyle: 'double' }}>
+            {/* Logo */}
+            <div className="flex justify-center mb-3">
+              <img 
+                src={navjeevanLogo} 
+                alt="Navjeevan Hospital Logo" 
+                className="w-20 h-20 object-contain"
+                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+              />
             </div>
-            <h1 className="text-2xl font-bold mb-2">NAVJEEVAN HOSPITAL</h1>
-            <p className="text-sm mb-1">Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;Dr.metali Bhatti</p>
-            <p className="text-xs">Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024</p>
+            
+            {/* Hospital Name */}
+            <h1 className="text-3xl font-bold mb-1" style={{ color: '#003366', letterSpacing: '2px' }}>
+              NAVJEEVAN HOSPITAL
+            </h1>
+            <p className="text-sm italic text-gray-500 mb-2">Healthcare with Compassion</p>
+            
+            {/* Address */}
+            <p className="text-sm text-gray-700 mb-1">
+              Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
+            </p>
+            <p className="text-xs text-gray-600">
+              Phone: 6284942412 | Dr. Metali Bhatti
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab
+            </p>
           </div>
 
-          {/* GRN Title */}
-          <h2 className="text-lg font-bold underline text-center my-4">GOODS RECEIPT NOTE</h2>
+          {/* GRN Title Badge */}
+          <div className="flex justify-center mb-6">
+            <div 
+              className="px-8 py-2 rounded-lg text-white font-bold text-lg tracking-wide"
+              style={{ backgroundColor: '#003366' }}
+            >
+              GOODS RECEIPT NOTE
+            </div>
+          </div>
 
           {/* GRN Info Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+          <div 
+            className="grid grid-cols-2 gap-4 mb-5 p-4 rounded-lg"
+            style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
+          >
             <div className="flex">
-              <span className="font-bold min-w-[120px]">GRN Number:</span>
-              <span>{grnNumber}</span>
+              <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>GRN Number:</span>
+              <span className="font-semibold">{grnNumber}</span>
             </div>
             <div className="flex">
-              <span className="font-bold min-w-[120px]">GRN Date:</span>
+              <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>GRN Date:</span>
               <span>{formatDate(new Date().toISOString())}</span>
             </div>
             <div className="flex">
-              <span className="font-bold min-w-[120px]">PO Number:</span>
+              <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>PO Number:</span>
               <span>{purchaseOrder.poNumber}</span>
             </div>
             <div className="flex">
-              <span className="font-bold min-w-[120px]">PO Date:</span>
+              <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>PO Date:</span>
               <span>{formatDate(purchaseOrder.orderDate)}</span>
             </div>
             {invoiceNumber && (
               <div className="flex">
-                <span className="font-bold min-w-[120px]">Invoice Number:</span>
+                <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>Invoice Number:</span>
                 <span>{invoiceNumber}</span>
               </div>
             )}
             {invoiceDate && (
               <div className="flex">
-                <span className="font-bold min-w-[120px]">Invoice Date:</span>
+                <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>Invoice Date:</span>
                 <span>{formatDate(invoiceDate)}</span>
               </div>
             )}
           </div>
 
           {/* Supplier Box */}
-          <div className="border border-black p-3 mb-4">
-            <p className="font-bold mb-1">Supplier Details:</p>
-            <p className="text-sm">{purchaseOrder.supplier}</p>
+          <div 
+            className="p-4 mb-5 rounded-lg"
+            style={{ backgroundColor: '#f0f7ff', border: '2px solid #0066cc' }}
+          >
+            <span className="font-bold text-sm" style={{ color: '#003366' }}>SUPPLIER: </span>
+            <span className="font-semibold text-gray-800">{purchaseOrder.supplier}</span>
           </div>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-4 text-xs">
+          <table className="w-full border-collapse mb-5 text-xs" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-black p-2 text-left">Sr.</th>
-                <th className="border border-black p-2 text-left">Item Name</th>
-                <th className="border border-black p-2 text-left">Batch No.</th>
-                <th className="border border-black p-2 text-left">Expiry Date</th>
-                <th className="border border-black p-2 text-right">MRP (₹)</th>
-                <th className="border border-black p-2 text-right">Ordered Qty</th>
-                <th className="border border-black p-2 text-right">Received Qty</th>
-                <th className="border border-black p-2 text-left">Remarks</th>
+              <tr style={{ backgroundColor: '#003366' }}>
+                <th className="p-2 text-left text-white font-bold border border-gray-300">Sr.</th>
+                <th className="p-2 text-left text-white font-bold border border-gray-300">Item Name</th>
+                <th className="p-2 text-left text-white font-bold border border-gray-300">Batch No.</th>
+                <th className="p-2 text-left text-white font-bold border border-gray-300">Expiry Date</th>
+                <th className="p-2 text-right text-white font-bold border border-gray-300">MRP (₹)</th>
+                <th className="p-2 text-right text-white font-bold border border-gray-300">Ordered</th>
+                <th className="p-2 text-right text-white font-bold border border-gray-300">Received</th>
+                <th className="p-2 text-left text-white font-bold border border-gray-300">Remarks</th>
               </tr>
             </thead>
             <tbody>
               {grnItems.map((item, index) => {
                 const stockItem = getStockItemDetails(item.stockItemId);
                 return (
-                  <tr key={index}>
-                    <td className="border border-black p-2">{index + 1}</td>
-                    <td className="border border-black p-2">{stockItem?.name || 'Unknown'}</td>
-                    <td className="border border-black p-2">{item.batchNo || '-'}</td>
-                    <td className="border border-black p-2">{item.expiryDate ? formatDate(item.expiryDate) : '-'}</td>
-                    <td className="border border-black p-2 text-right">{item.mrp ? `₹${item.mrp.toFixed(2)}` : '-'}</td>
-                    <td className="border border-black p-2 text-right">{item.orderedQuantity}</td>
-                    <td className="border border-black p-2 text-right">{item.receivedQuantity}</td>
-                    <td className="border border-black p-2">{item.remarks || '-'}</td>
+                  <tr 
+                    key={index} 
+                    style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}
+                  >
+                    <td className="border border-gray-300 p-2">{index + 1}</td>
+                    <td className="border border-gray-300 p-2 font-medium">{stockItem?.name || 'Unknown'}</td>
+                    <td className="border border-gray-300 p-2">{item.batchNo || '-'}</td>
+                    <td className="border border-gray-300 p-2">{item.expiryDate ? formatDate(item.expiryDate) : '-'}</td>
+                    <td className="border border-gray-300 p-2 text-right">{item.mrp ? `₹${item.mrp.toFixed(2)}` : '-'}</td>
+                    <td className="border border-gray-300 p-2 text-right">{item.orderedQuantity}</td>
+                    <td className="border border-gray-300 p-2 text-right font-semibold">{item.receivedQuantity}</td>
+                    <td className="border border-gray-300 p-2">{item.remarks || '-'}</td>
                   </tr>
                 );
               })}
               {/* Summary Row */}
-              <tr className="bg-gray-100 font-bold">
-                <td className="border border-black p-2" colSpan={5}>TOTAL</td>
-                <td className="border border-black p-2 text-right">{totalOrderedQty}</td>
-                <td className="border border-black p-2 text-right">{totalReceivedQty}</td>
-                <td className="border border-black p-2"></td>
+              <tr style={{ backgroundColor: '#003366' }}>
+                <td className="border border-gray-300 p-2 text-white font-bold" colSpan={5}>TOTAL</td>
+                <td className="border border-gray-300 p-2 text-right text-white font-bold">{totalOrderedQty}</td>
+                <td className="border border-gray-300 p-2 text-right text-white font-bold">{totalReceivedQty}</td>
+                <td className="border border-gray-300 p-2 text-white"></td>
               </tr>
             </tbody>
           </table>
 
           {/* Notes Section */}
           {notes && (
-            <div className="border border-gray-400 p-3 mb-4">
-              <p className="font-bold mb-1">Notes:</p>
-              <p className="text-sm">{notes}</p>
+            <div 
+              className="p-4 mb-5 rounded-lg"
+              style={{ backgroundColor: '#fffdf0', border: '1px solid #e6d69c' }}
+            >
+              <p className="font-bold mb-1" style={{ color: '#8b7700' }}>📝 Notes:</p>
+              <p className="text-sm text-gray-700">{notes}</p>
             </div>
           )}
 
           {/* Signature Section */}
-          <div className="flex justify-between mt-12 text-sm">
-            <div className="text-center min-w-[150px]">
-              <div className="border-t border-black mt-10 pt-1">
-                Received By
+          <div className="flex justify-between mt-16 text-sm px-4">
+            <div className="text-center min-w-[140px]">
+              <div className="border-t-2 border-gray-500 mt-10 pt-2">
+                <span className="font-semibold text-gray-700">Received By</span>
               </div>
             </div>
-            <div className="text-center min-w-[150px]">
-              <div className="border-t border-black mt-10 pt-1">
-                Checked By
+            <div className="text-center min-w-[140px]">
+              <div className="border-t-2 border-gray-500 mt-10 pt-2">
+                <span className="font-semibold text-gray-700">Checked By</span>
               </div>
             </div>
-            <div className="text-center min-w-[150px]">
-              <div className="border-t border-black mt-10 pt-1">
-                Authorized Signatory
+            <div className="text-center min-w-[140px]">
+              <div className="border-t-2 border-gray-500 mt-10 pt-2">
+                <span className="font-semibold text-gray-700">Authorized Signatory</span>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="mt-8 text-center text-xs border-t border-gray-400 pt-3">
-            <p>This is a computer generated document. For queries contact: 6284942412</p>
-            <p className="mt-1">NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Pb.)</p>
+          <div 
+            className="mt-10 text-center text-xs pt-4"
+            style={{ borderTop: '2px solid #003366' }}
+          >
+            <p className="text-gray-500 mb-1">
+              This is a computer generated document | For queries contact: 6284942412
+            </p>
+            <p className="font-bold" style={{ color: '#003366' }}>
+              NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
+            </p>
           </div>
         </div>
       </DialogContent>
