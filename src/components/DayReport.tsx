@@ -50,6 +50,7 @@ export default function DayReport() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [medicineDataUpdated, setMedicineDataUpdated] = useState<Date | null>(null);
   const [isRefreshingMedicine, setIsRefreshingMedicine] = useState(false);
+  const [isRefreshingPrevCash, setIsRefreshingPrevCash] = useState(false);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
   
@@ -882,14 +883,37 @@ export default function DayReport() {
               <CardTitle className="text-sm">Cash Management</CardTitle>
             </CardHeader>
             <CardContent className="p-3 space-y-2">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center gap-2">
                 <span className="text-xs">Cash in Hand (Previous Day)</span>
-                <Input
-                  type="number"
-                  value={cashPreviousDay || ''}
-                  onChange={(e) => setCashPreviousDay(parseFloat(e.target.value) || 0)}
-                  className="w-24 h-7 text-right"
-                />
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={async () => {
+                      setIsRefreshingPrevCash(true);
+                      try {
+                        const prevCash = await fetchPreviousDayCashLeftInHand(reportDate);
+                        setCashPreviousDay(prevCash);
+                        toast.success('Previous day cash updated');
+                      } catch (error) {
+                        toast.error('Failed to fetch previous day cash');
+                      } finally {
+                        setIsRefreshingPrevCash(false);
+                      }
+                    }}
+                    disabled={isRefreshingPrevCash}
+                    className="h-7 w-7 p-0"
+                    title="Refresh from previous day's closing"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${isRefreshingPrevCash ? 'animate-spin' : ''}`} />
+                  </Button>
+                  <Input
+                    type="number"
+                    value={cashPreviousDay || ''}
+                    onChange={(e) => setCashPreviousDay(parseFloat(e.target.value) || 0)}
+                    className="w-24 h-7 text-right"
+                  />
+                </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs">Today's Collection</span>
