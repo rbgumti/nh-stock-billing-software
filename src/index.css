@@ -409,6 +409,35 @@ All colors MUST be HSL.
     }
   }
 
+  /* Slow spin animation for conic gradients */
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+  }
+
+  /* Drop shadow glow for sparkle icons */
+  .drop-shadow-glow {
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+
+  /* Background radial gradient utility */
+  .bg-gradient-radial {
+    background: radial-gradient(var(--tw-gradient-stops));
+  }
+
+  /* Conic gradient for rainbow ring effect */
+  .bg-gradient-conic {
+    background: conic-gradient(var(--tw-gradient-stops));
+  }
+
   /* Gradient border effect */
   .gradient-border {
     @apply relative;
