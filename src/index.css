@@ -531,6 +531,197 @@ All colors MUST be HSL.
       box-shadow: 0 0 0 12px hsl(var(--cyan) / 0);
     }
   }
+  /* Liquid Glass Stat Card */
+  .liquid-stat-card {
+    @apply relative overflow-hidden rounded-2xl;
+    background: hsl(0 0% 100% / 0.85);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid hsl(0 0% 100% / 0.3);
+    box-shadow: 
+      0 8px 32px hsl(var(--glass-shadow)),
+      0 0 0 1px hsl(0 0% 100% / 0.1) inset,
+      0 16px 32px -8px hsl(0 0% 0% / 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark .liquid-stat-card {
+    background: hsl(262 30% 14% / 0.75);
+    border: 1px solid hsl(0 0% 100% / 0.08);
+  }
+
+  .liquid-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.6), transparent);
+  }
+
+  .liquid-stat-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+      0 20px 60px hsl(var(--glass-shadow)),
+      0 0 0 1px hsl(0 0% 100% / 0.2) inset,
+      0 32px 64px -16px hsl(0 0% 0% / 0.15);
+  }
+
+  /* Liquid Glass with Color Tint */
+  .liquid-glass-emerald {
+    background: linear-gradient(135deg, hsl(var(--emerald) / 0.12), hsl(var(--teal) / 0.08));
+  }
+
+  .liquid-glass-gold {
+    background: linear-gradient(135deg, hsl(var(--gold) / 0.12), hsl(var(--orange) / 0.08));
+  }
+
+  .liquid-glass-cyan {
+    background: linear-gradient(135deg, hsl(var(--cyan) / 0.12), hsl(var(--purple) / 0.08));
+  }
+
+  .liquid-glass-purple {
+    background: linear-gradient(135deg, hsl(var(--purple) / 0.12), hsl(var(--pink) / 0.08));
+  }
+
+  .liquid-glass-pink {
+    background: linear-gradient(135deg, hsl(var(--pink) / 0.12), hsl(var(--destructive) / 0.08));
+  }
+
+  /* Liquid Blob Animation */
+  @keyframes liquid-blob {
+    0%, 100% {
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      transform: rotate(0deg) scale(1);
+    }
+    25% {
+      border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    }
+    50% {
+      border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
+      transform: rotate(180deg) scale(1.05);
+    }
+    75% {
+      border-radius: 60% 40% 60% 30% / 60% 40% 60% 40%;
+    }
+  }
+
+  .liquid-blob {
+    animation: liquid-blob 15s ease-in-out infinite;
+  }
+
+  /* Shimmer Animation */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) rotate(25deg);
+    }
+    100% {
+      transform: translateX(100%) rotate(25deg);
+    }
+  }
+
+  .shimmer-effect {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer-effect::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      90deg,
+      transparent 40%,
+      hsl(0 0% 100% / 0.3) 50%,
+      transparent 60%
+    );
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  /* Glow hover effects for stat cards */
+  .hover-glow-emerald:hover {
+    box-shadow: 
+      0 20px 60px hsl(var(--emerald) / 0.25),
+      0 0 40px hsl(var(--emerald) / 0.15),
+      0 0 0 1px hsl(var(--emerald) / 0.3) inset;
+  }
+
+  .hover-glow-gold:hover {
+    box-shadow: 
+      0 20px 60px hsl(var(--gold) / 0.3),
+      0 0 40px hsl(var(--gold) / 0.2),
+      0 0 0 1px hsl(var(--gold) / 0.3) inset;
+  }
+
+  .hover-glow-cyan:hover {
+    box-shadow: 
+      0 20px 60px hsl(var(--cyan) / 0.25),
+      0 0 40px hsl(var(--cyan) / 0.15),
+      0 0 0 1px hsl(var(--cyan) / 0.3) inset;
+  }
+
+  .hover-glow-purple:hover {
+    box-shadow: 
+      0 20px 60px hsl(var(--purple) / 0.25),
+      0 0 40px hsl(var(--purple) / 0.15),
+      0 0 0 1px hsl(var(--purple) / 0.3) inset;
+  }
+
+  .hover-glow-pink:hover {
+    box-shadow: 
+      0 20px 60px hsl(var(--pink) / 0.25),
+      0 0 40px hsl(var(--pink) / 0.15),
+      0 0 0 1px hsl(var(--pink) / 0.3) inset;
+  }
+
+  /* Liquid Icon Container */
+  .liquid-icon {
+    @apply relative;
+    background: linear-gradient(135deg, hsl(0 0% 100% / 0.2), hsl(0 0% 100% / 0.05));
+    backdrop-filter: blur(8px);
+    border: 1px solid hsl(0 0% 100% / 0.2);
+    box-shadow: 
+      inset 0 1px 0 hsl(0 0% 100% / 0.3),
+      0 4px 12px hsl(0 0% 0% / 0.1);
+  }
+
+  /* Floating particle effect */
+  @keyframes float-particle {
+    0%, 100% {
+      transform: translateY(0) translateX(0);
+      opacity: 0.6;
+    }
+    50% {
+      transform: translateY(-20px) translateX(10px);
+      opacity: 1;
+    }
+  }
+
+  .floating-particles::before,
+  .floating-particles::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.4;
+  }
+
+  .floating-particles::before {
+    top: 20%;
+    right: 20%;
+    animation: float-particle 3s ease-in-out infinite;
+  }
+
+  .floating-particles::after {
+    bottom: 30%;
+    left: 25%;
+    animation: float-particle 4s ease-in-out infinite 1s;
+  }
 }
 
 @layer utilities {
@@ -554,6 +745,19 @@ All colors MUST be HSL.
 
   .shadow-gold {
     box-shadow: 0 10px 40px -10px hsl(var(--gold) / 0.4);
+  }
+
+  /* Enhanced shadow utilities */
+  .shadow-glow {
+    box-shadow: 0 10px 40px hsl(var(--purple) / 0.2), 0 0 20px hsl(var(--cyan) / 0.1);
+  }
+
+  .shadow-glow-gold {
+    box-shadow: 0 10px 40px hsl(var(--gold) / 0.25), 0 0 20px hsl(var(--orange) / 0.15);
+  }
+
+  .shadow-glow-cyan {
+    box-shadow: 0 10px 40px hsl(var(--cyan) / 0.25), 0 0 20px hsl(var(--purple) / 0.1);
   }
 }
 
