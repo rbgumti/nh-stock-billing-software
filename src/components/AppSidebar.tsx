@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, Sparkles, ChevronRight, ChevronLeft, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, Sparkles, ChevronRight, PanelLeftClose, PanelLeft } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,20 +15,20 @@ import navjeevanLogo from "@/assets/NH_LOGO.png";
 import { Button } from "@/components/ui/button";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600" },
-  { title: "Patients", url: "/patients", icon: Users, color: "from-blue-500 to-cyan-500" },
-  { title: "Appointments", url: "/appointments", icon: Calendar, color: "from-emerald-500 to-teal-500" },
-  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-amber-500 to-orange-500" },
-  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-pink-500 to-rose-500" },
-  { title: "Stock", url: "/stock", icon: Package, color: "from-indigo-500 to-blue-500" },
-  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-green-500 to-emerald-500" },
-  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-purple-500 to-violet-500" },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
+  { title: "Patients", url: "/patients", icon: Users, color: "from-blue-500 to-cyan-500", glow: "group-hover:shadow-blue-500/30" },
+  { title: "Appointments", url: "/appointments", icon: Calendar, color: "from-emerald-500 to-teal-500", glow: "group-hover:shadow-emerald-500/30" },
+  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-amber-500 to-orange-500", glow: "group-hover:shadow-amber-500/30" },
+  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-pink-500 to-rose-500", glow: "group-hover:shadow-pink-500/30" },
+  { title: "Stock", url: "/stock", icon: Package, color: "from-indigo-500 to-blue-500", glow: "group-hover:shadow-indigo-500/30" },
+  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-green-500 to-emerald-500", glow: "group-hover:shadow-green-500/30" },
+  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-purple-500 to-violet-500", glow: "group-hover:shadow-purple-500/30" },
 ];
 
 const quickActions = [
-  { title: "Add Patient", url: "/patients/new", color: "from-blue-500 to-cyan-500", hoverBg: "hover:bg-blue-500/10" },
-  { title: "New Prescription", url: "/prescriptions/new", color: "from-amber-500 to-orange-500", hoverBg: "hover:bg-amber-500/10" },
-  { title: "New Invoice", url: "/invoices/new", color: "from-green-500 to-emerald-500", hoverBg: "hover:bg-green-500/10" },
+  { title: "Add Patient", url: "/patients/new", color: "from-blue-500 to-cyan-500", iconColor: "text-cyan-400" },
+  { title: "New Prescription", url: "/prescriptions/new", color: "from-amber-500 to-orange-500", iconColor: "text-amber-400" },
+  { title: "New Invoice", url: "/invoices/new", color: "from-green-500 to-emerald-500", iconColor: "text-emerald-400" },
 ];
 
 export function AppSidebar() {
@@ -44,63 +44,92 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0`} collapsible="icon">
-      <SidebarContent className="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 via-transparent to-cyan-600/10 animate-pulse" />
+      <SidebarContent className="relative overflow-hidden">
+        {/* Liquid Glass Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/95 via-slate-900/98 to-slate-950 backdrop-blur-xl" />
         
-        {/* Floating orbs */}
-        <div className="absolute top-10 right-2 w-20 h-20 bg-gradient-to-br from-violet-500/30 to-purple-600/20 rounded-full blur-2xl animate-float" />
-        <div className="absolute top-1/3 -left-4 w-16 h-16 bg-gradient-to-br from-cyan-500/25 to-blue-600/15 rounded-full blur-2xl animate-float" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-1/4 right-0 w-24 h-24 bg-gradient-to-br from-pink-500/20 to-rose-600/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-10 left-2 w-14 h-14 bg-gradient-to-br from-amber-500/25 to-orange-600/15 rounded-full blur-xl animate-float" style={{ animationDelay: '0.5s' }} />
+        {/* Frosted Glass Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/8 via-transparent to-cyan-600/8" />
         
-        {/* Header */}
-        <div className="relative p-4 border-b border-white/10">
+        {/* Animated Mesh Gradient */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-violet-500/10 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-cyan-500/10 to-transparent" />
+        </div>
+        
+        {/* Floating Glass Orbs with Liquid Effect */}
+        <div className="absolute top-20 right-0 w-32 h-32 bg-gradient-radial from-violet-500/25 via-purple-600/15 to-transparent rounded-full blur-3xl animate-float" />
+        <div className="absolute top-1/3 -left-8 w-24 h-24 bg-gradient-radial from-cyan-400/20 via-blue-500/10 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute bottom-1/3 right-0 w-28 h-28 bg-gradient-radial from-pink-500/20 via-rose-500/10 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
+        <div className="absolute bottom-20 left-0 w-20 h-20 bg-gradient-radial from-amber-400/25 via-orange-500/15 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute top-1/2 right-4 w-16 h-16 bg-gradient-radial from-teal-400/20 to-transparent rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }} />
+        
+        {/* Shimmer Effect Line */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        
+        {/* Header with Glass Effect */}
+        <div className="relative p-4 border-b border-white/5">
+          {/* Glass panel behind header */}
+          <div className="absolute inset-2 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/5" />
+          
           {!collapsed ? (
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3 relative z-10">
+              {/* Logo with enhanced glow ring */}
               <div className="relative group">
-                <div className="absolute -inset-2 bg-gradient-to-r from-violet-600 via-cyan-500 to-pink-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-500 animate-pulse" />
-                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/40 to-cyan-500/40 rounded-full blur-md" />
-                <img 
-                  src={navjeevanLogo} 
-                  alt="Navjeevan Hospital Logo" 
-                  className="w-20 h-20 object-contain relative z-10 drop-shadow-2xl transition-transform duration-300 group-hover:scale-105"
-                />
+                {/* Outer glow ring */}
+                <div className="absolute -inset-4 bg-gradient-conic from-violet-500/40 via-cyan-400/30 via-pink-500/40 via-amber-400/30 to-violet-500/40 rounded-full blur-xl opacity-60 group-hover:opacity-90 transition-all duration-700 animate-spin-slow" />
+                {/* Inner glow */}
+                <div className="absolute -inset-2 bg-gradient-to-br from-violet-500/50 to-cyan-500/50 rounded-full blur-lg opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+                {/* Glass container */}
+                <div className="relative p-1 rounded-full bg-gradient-to-br from-white/10 to-white/5 border border-white/20 shadow-xl shadow-violet-500/10">
+                  <img 
+                    src={navjeevanLogo} 
+                    alt="Navjeevan Hospital Logo" 
+                    className="w-18 h-18 object-contain relative z-10 drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
+                    style={{ width: '72px', height: '72px' }}
+                  />
+                </div>
               </div>
-              <div className="text-center">
-                <h2 className="text-xl font-bold tracking-wider flex items-center gap-2 justify-center">
-                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-                  <span className="bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent">
+              
+              {/* Hospital Name with Glass Effect */}
+              <div className="text-center relative">
+                <div className="flex items-center gap-2 justify-center mb-1">
+                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse drop-shadow-glow" />
+                  <h2 className="text-xl font-bold tracking-widest bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent drop-shadow-sm">
                     NAVJEEVAN
-                  </span>
-                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-                </h2>
-                <p className="text-sm font-medium tracking-wide bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+                  </h2>
+                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse drop-shadow-glow" />
+                </div>
+                <p className="text-sm font-semibold tracking-wide bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 bg-clip-text text-transparent">
                   Hospital Sirhind
                 </p>
               </div>
             </div>
           ) : (
-            <div className="flex justify-center">
+            <div className="flex justify-center relative z-10">
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-full blur opacity-50 group-hover:opacity-75 transition-opacity" />
-                <img 
-                  src={navjeevanLogo} 
-                  alt="NH Logo" 
-                  className="w-8 h-8 object-contain relative z-10 transition-transform duration-200 group-hover:scale-110"
-                />
+                <div className="absolute -inset-2 bg-gradient-to-r from-violet-500/50 to-cyan-500/50 rounded-full blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
+                <div className="relative p-0.5 rounded-full bg-gradient-to-br from-white/15 to-white/5 border border-white/20">
+                  <img 
+                    src={navjeevanLogo} 
+                    alt="NH Logo" 
+                    className="w-8 h-8 object-contain relative z-10 transition-transform duration-200 group-hover:scale-110"
+                  />
+                </div>
               </div>
             </div>
           )}
         </div>
         
-        {/* Navigation */}
+        {/* Navigation with Liquid Glass Items */}
         <SidebarGroup className="relative z-10 px-2 pt-4">
-          <SidebarGroupLabel className="text-slate-500 uppercase text-[10px] tracking-[0.2em] font-semibold mb-2 px-2">
-            Navigation
+          <SidebarGroupLabel className="text-slate-500/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
+            <div className="w-8 h-[1px] bg-gradient-to-r from-violet-500/50 to-transparent" />
+            <span>Navigate</span>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-1.5">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -108,31 +137,40 @@ export function AppSidebar() {
                       to={item.url} 
                       className={`relative overflow-hidden rounded-xl transition-all duration-300 group flex items-center ${
                         isActive(item.url) 
-                          ? "bg-white/10 backdrop-blur-sm shadow-lg shadow-black/20" 
-                          : "hover:bg-white/5"
+                          ? "bg-white/[0.08] backdrop-blur-md shadow-lg shadow-black/20 border border-white/10" 
+                          : `hover:bg-white/[0.04] hover:backdrop-blur-sm ${item.glow} hover:shadow-lg`
                       }`}
                     >
-                      {/* Active indicator gradient bar */}
+                      {/* Liquid shine effect on hover */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-xl">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      </div>
+                      
+                      {/* Active indicator - liquid gradient bar */}
                       {isActive(item.url) && (
-                        <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${item.color} rounded-full`} />
+                        <div className={`absolute left-0 top-1 bottom-1 w-1 bg-gradient-to-b ${item.color} rounded-full shadow-lg shadow-current/50`} />
                       )}
                       
-                      {/* Icon with gradient background when active */}
-                      <div className={`relative flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-300 ${
+                      {/* Icon container with glass effect */}
+                      <div className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${
                         isActive(item.url) 
-                          ? `bg-gradient-to-br ${item.color} shadow-lg` 
-                          : "group-hover:bg-white/10"
+                          ? `bg-gradient-to-br ${item.color} shadow-lg shadow-current/30` 
+                          : "bg-white/[0.05] group-hover:bg-white/10 border border-transparent group-hover:border-white/10"
                       }`}>
-                        <item.icon className={`h-5 w-5 transition-all duration-300 ${
+                        {/* Icon glow */}
+                        {isActive(item.url) && (
+                          <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${item.color} blur-md opacity-50`} />
+                        )}
+                        <item.icon className={`h-5 w-5 transition-all duration-300 relative z-10 ${
                           isActive(item.url) 
-                            ? 'text-white drop-shadow-sm' 
+                            ? 'text-white drop-shadow-md' 
                             : 'text-slate-400 group-hover:text-white'
                         }`} />
                       </div>
                       
                       {!collapsed && (
                         <>
-                          <span className={`ml-3 font-medium transition-colors duration-300 ${
+                          <span className={`ml-3 font-medium transition-all duration-300 ${
                             isActive(item.url) 
                               ? 'text-white' 
                               : 'text-slate-400 group-hover:text-white'
@@ -141,7 +179,10 @@ export function AppSidebar() {
                           </span>
                           
                           {isActive(item.url) && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-white/70" />
+                            <div className="ml-auto flex items-center">
+                              <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-br ${item.color} mr-2 animate-pulse`} />
+                              <ChevronRight className="h-4 w-4 text-white/50" />
+                            </div>
                           )}
                         </>
                       )}
@@ -153,25 +194,34 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Quick Actions */}
+        {/* Quick Actions with Glass Cards */}
         <SidebarGroup className="relative z-10 mt-4 px-2">
-          <SidebarGroupLabel className="text-slate-500 uppercase text-[10px] tracking-[0.2em] font-semibold mb-2 px-2">
-            Quick Actions
+          <SidebarGroupLabel className="text-slate-500/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
+            <div className="w-6 h-[1px] bg-gradient-to-r from-amber-500/50 to-transparent" />
+            <span>Quick Add</span>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-1.5">
               {quickActions.map((action) => (
                 <SidebarMenuItem key={action.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={action.url} 
-                      className={`rounded-xl border border-white/10 ${action.hoverBg} transition-all duration-300 group backdrop-blur-sm hover:border-white/20 hover:shadow-lg hover:shadow-black/10`}
+                      className="relative rounded-xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:bg-white/[0.06] hover:border-white/15 transition-all duration-300 group overflow-hidden"
                     >
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-90`}>
-                        <Plus className="h-4 w-4 text-white" />
+                      {/* Shimmer effect */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden rounded-xl">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                       </div>
+                      
+                      {/* Icon with glass container */}
+                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-90 group-hover:shadow-lg`}>
+                        <Plus className="h-4 w-4 text-white relative z-10" />
+                      </div>
+                      
                       {!collapsed && (
-                        <span className={`ml-3 font-medium bg-gradient-to-r ${action.color} bg-clip-text text-transparent`}>
+                        <span className={`ml-3 font-medium bg-gradient-to-r ${action.color} bg-clip-text text-transparent group-hover:opacity-100 opacity-80 transition-opacity`}>
                           {action.title}
                         </span>
                       )}
@@ -183,44 +233,47 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Toggle Button & Footer */}
+        {/* Toggle Button with Enhanced Glass Effect */}
         <div className="mt-auto relative z-10">
-          {/* Collapse Toggle Button */}
-          <div className={`px-3 py-2 ${collapsed ? 'flex justify-center' : ''}`}>
+          <div className={`px-3 py-3 ${collapsed ? 'flex justify-center' : ''}`}>
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className={`group relative overflow-hidden rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 ${
+              className={`group relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/15 transition-all duration-300 backdrop-blur-sm ${
                 collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
               }`}
             >
-              {/* Animated gradient background on hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-cyan-500/0 to-violet-500/0 group-hover:from-violet-500/10 group-hover:via-cyan-500/10 group-hover:to-violet-500/10 transition-all duration-500" />
+              {/* Glass shimmer effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 via-cyan-500/10 to-violet-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              </div>
               
               {!collapsed && (
-                <span className="text-slate-400 text-xs font-medium group-hover:text-white transition-colors duration-300 relative z-10">
+                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-colors duration-300 relative z-10">
                   Collapse
                 </span>
               )}
               
               <div className={`relative flex items-center justify-center transition-all duration-500 ${
-                collapsed ? '' : 'bg-gradient-to-br from-violet-500/20 to-cyan-500/20 rounded-lg p-1.5'
+                collapsed ? '' : 'bg-gradient-to-br from-violet-500/15 to-cyan-500/15 rounded-lg p-1.5 border border-white/5'
               }`}>
                 {collapsed ? (
-                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-white transition-all duration-300 group-hover:scale-110" />
+                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 transition-all duration-300 group-hover:scale-110" />
                 ) : (
-                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-white transition-all duration-300 group-hover:scale-110" />
+                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-violet-400 transition-all duration-300 group-hover:scale-110" />
                 )}
               </div>
             </Button>
           </div>
 
-          {/* Footer decoration */}
+          {/* Footer with Glass Separator */}
           {!collapsed && (
             <div className="text-center px-4 pb-4">
-              <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-3" />
-              <p className="text-[10px] text-slate-600 tracking-wide">Powered by Lovable</p>
+              <div className="h-px bg-gradient-to-r from-transparent via-white/15 to-transparent mb-3" />
+              <p className="text-[10px] text-slate-600/80 tracking-wider font-medium">
+                Powered by <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Lovable</span>
+              </p>
             </div>
           )}
         </div>
