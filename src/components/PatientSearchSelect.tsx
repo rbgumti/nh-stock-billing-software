@@ -51,14 +51,22 @@ export function PatientSearchSelect({
     [patients, selectedPatientId]
   );
 
+  // Normalize file number for comparison (removes leading zeros)
+  const normalizeFileNo = (fileNo: string | undefined): string => {
+    if (!fileNo) return '';
+    return fileNo.replace(/^0+/, '') || '0'; // Remove leading zeros, keep at least '0' if all zeros
+  };
+
   // Filter patients based on search query
   const filteredPatients = useMemo(() => {
     // If file number search is active and has a query
     if (activeSearch === "fileNo" && fileNoQuery.trim()) {
-      const query = fileNoQuery.toLowerCase().trim();
+      const normalizedQuery = normalizeFileNo(fileNoQuery.trim());
       return patients.filter((patient) => {
         if (!patient || patient.id == null) return false;
-        return patient.file_no?.toLowerCase().trim().includes(query);
+        const normalizedFileNo = normalizeFileNo(patient.file_no);
+        return normalizedFileNo.includes(normalizedQuery) || 
+               patient.file_no?.toLowerCase().trim().includes(fileNoQuery.toLowerCase().trim());
       });
     }
     
@@ -117,9 +125,10 @@ export function PatientSearchSelect({
 
         // File No exact match selection (doesn't rely on dropdown ordering)
         if (activeSearch === "fileNo" && fileNoQuery.trim()) {
-          const query = fileNoQuery.toLowerCase().trim();
+          const normalizedQuery = normalizeFileNo(fileNoQuery.trim());
           const exactMatch = patients.find(
-            (p) => p.file_no?.toLowerCase().trim() === query
+            (p) => normalizeFileNo(p.file_no) === normalizedQuery ||
+                   p.file_no?.toLowerCase().trim() === fileNoQuery.toLowerCase().trim()
           );
           if (exactMatch) {
             handleSelect(exactMatch);
