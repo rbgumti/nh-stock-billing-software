@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatPhone } from "@/lib/patientUtils";
 
 interface Patient {
   id: number;
@@ -413,7 +414,7 @@ export default function Patients() {
                   )}
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Phone className="h-4 w-4 mr-2 text-cyan" />
-                    {patient.phone || 'N/A'}
+                    {formatPhone(patient.phone) || 'N/A'}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     <span className="font-medium text-foreground">Aadhar:</span> {patient.aadhar_card || 'N/A'}
@@ -493,7 +494,7 @@ export default function Patients() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{patient.phone || '-'}</TableCell>
+                    <TableCell>{formatPhone(patient.phone) || '-'}</TableCell>
                     <TableCell className="font-mono text-xs">{patient.aadhar_card || '-'}</TableCell>
                     <TableCell className="font-mono text-xs">{patient.govt_id || '-'}</TableCell>
                     <TableCell>

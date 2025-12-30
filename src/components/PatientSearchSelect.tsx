@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, ChevronDown, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatPhone } from "@/lib/patientUtils";
 
 interface Patient {
   id: number;
@@ -257,7 +258,7 @@ export function PatientSearchSelect({
               <span><span className="font-medium text-gold">File No:</span> {selectedPatient.file_no}</span>
             )}
             {selectedPatient.phone && (
-              <span><span className="font-medium">Phone:</span> {selectedPatient.phone}</span>
+              <span><span className="font-medium">Phone:</span> {formatPhone(selectedPatient.phone)}</span>
             )}
             {selectedPatient.govt_id && (
               <span><span className="font-medium">Govt ID:</span> {selectedPatient.govt_id}</span>
@@ -317,7 +318,7 @@ export function PatientSearchSelect({
                   <span className="text-muted-foreground text-xs flex flex-wrap gap-x-2">
                     <span>ID: {patient.id}</span>
                     {patient.file_no && <span className="text-gold font-medium">File: {patient.file_no}</span>}
-                    {patient.phone && <span>Ph: {patient.phone}</span>}
+                    {patient.phone && <span>Ph: {formatPhone(patient.phone)}</span>}
                     {patient.aadhar_card && <span>Aadhar: {patient.aadhar_card}</span>}
                   </span>
                 </div>

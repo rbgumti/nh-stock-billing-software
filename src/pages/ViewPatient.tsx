@@ -5,6 +5,7 @@ import { ArrowLeft, Edit, Phone, Mail, MapPin, Heart, Stethoscope, Pill } from "
 import { usePatientStore } from "@/hooks/usePatientStore";
 import { useEffect, useState } from "react";
 import { PatientFormData } from "@/hooks/usePatientForm";
+import { formatPhone } from "@/lib/patientUtils";
 
 export default function ViewPatient() {
   const { id } = useParams();
@@ -126,7 +127,7 @@ export default function ViewPatient() {
               <Phone className="h-4 w-4 mr-2 text-gray-400" />
               <div>
                 <label className="text-sm font-medium text-gray-500">Phone</label>
-                <p>{patient.phone}</p>
+                <p>{formatPhone(patient.phone)}</p>
               </div>
             </div>
             <div className="flex items-center">
