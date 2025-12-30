@@ -165,6 +165,7 @@ export const usePrescriptionStore = () => {
   };
 
   const updatePrescription = async (id: string, updates: {
+    patient_id?: number;
     patient_name?: string;
     patient_phone?: string;
     patient_age?: string;
@@ -177,6 +178,7 @@ export const usePrescriptionStore = () => {
       const { error: prescriptionError } = await supabase
         .from('prescriptions')
         .update({
+          patient_id: updates.patient_id,
           patient_name: updates.patient_name,
           patient_phone: updates.patient_phone,
           patient_age: updates.patient_age,
