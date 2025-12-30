@@ -17,6 +17,17 @@ export interface Patient {
 /**
  * Load all patients from the database with pagination to overcome 1000 row limit
  */
+/**
+ * Format phone number by removing dashes
+ */
+export function formatPhone(phone: string | null | undefined): string {
+  if (!phone) return '';
+  return phone.replace(/-/g, '');
+}
+
+/**
+ * Load all patients from the database with pagination to overcome 1000 row limit
+ */
 export async function loadAllPatients(): Promise<Patient[]> {
   let allPatients: Patient[] = [];
   let from = 0;
