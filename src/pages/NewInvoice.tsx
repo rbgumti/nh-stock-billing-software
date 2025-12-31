@@ -502,9 +502,9 @@ export default function NewInvoice() {
                       <Input
                         id={`quantity-${item.id}`}
                         type="number"
-                        min="1"
+                        min="0"
                         value={item.quantity}
-                        onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
+                        onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 0)}
                         className={item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}
                       />
                       {item.quantity > item.availableStock && item.medicineId > 0 && (
