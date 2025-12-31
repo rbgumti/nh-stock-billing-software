@@ -569,9 +569,9 @@ export default function EditInvoice() {
                       <Label>Quantity</Label>
                       <Input
                         type="number"
-                        min="1"
+                        min="0"
                         value={item.quantity}
-                        onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
+                        onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 0)}
                       />
                     </div>
                   </div>
