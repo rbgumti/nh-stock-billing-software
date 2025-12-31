@@ -8,122 +8,124 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 240 20% 98%;
-    --foreground: 240 10% 10%;
+    --background: 170 30% 97%;
+    --foreground: 180 40% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    --card-foreground: 180 40% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover-foreground: 180 40% 15%;
 
-    --primary: 262 83% 58%;
+    --primary: 170 60% 35%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 199 89% 48%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 68 70% 50%;
+    --secondary-foreground: 180 40% 15%;
 
-    --muted: 240 10% 94%;
-    --muted-foreground: 240 5% 45%;
+    --muted: 170 20% 92%;
+    --muted-foreground: 170 15% 45%;
 
-    --accent: 340 82% 52%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 68 70% 50%;
+    --accent-foreground: 180 40% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 10% 90%;
-    --input: 240 10% 90%;
-    --ring: 262 83% 58%;
+    --border: 170 20% 88%;
+    --input: 170 20% 88%;
+    --ring: 170 60% 35%;
 
     --radius: 1rem;
 
-    /* Vibrant color palette */
-    --gold: 45 100% 51%;
-    --navy: 230 60% 25%;
-    --purple: 262 83% 58%;
-    --cyan: 199 89% 48%;
-    --pink: 340 82% 52%;
-    --teal: 172 66% 50%;
-    --orange: 24 95% 53%;
-    --emerald: 160 84% 39%;
+    /* Healthcare Teal Theme Palette */
+    --gold: 68 70% 50%;
+    --navy: 180 50% 20%;
+    --purple: 170 60% 35%;
+    --cyan: 175 65% 45%;
+    --pink: 340 65% 55%;
+    --teal: 170 55% 30%;
+    --orange: 24 90% 55%;
+    --emerald: 165 70% 40%;
+    --lime: 68 70% 50%;
 
-    --sidebar-background: 262 60% 20%;
+    --sidebar-background: 175 50% 18%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 45 100% 55%;
-    --sidebar-primary-foreground: 262 60% 15%;
-    --sidebar-accent: 262 50% 30%;
-    --sidebar-accent-foreground: 45 100% 55%;
-    --sidebar-border: 262 40% 35%;
-    --sidebar-ring: 45 100% 55%;
+    --sidebar-primary: 68 70% 55%;
+    --sidebar-primary-foreground: 180 50% 15%;
+    --sidebar-accent: 175 45% 25%;
+    --sidebar-accent-foreground: 68 70% 55%;
+    --sidebar-border: 175 40% 30%;
+    --sidebar-ring: 68 70% 55%;
 
     /* Liquid Glass Design Tokens */
     --glass-background: 0 0% 100% / 0.75;
-    --glass-border: 262 60% 80% / 0.4;
-    --glass-shadow: 262 60% 50% / 0.15;
+    --glass-border: 170 50% 70% / 0.4;
+    --glass-shadow: 170 50% 40% / 0.15;
     --glass-highlight: 0 0% 100% / 0.6;
     --glass-blur: 24px;
     --glass-saturation: 200%;
 
     /* Gradient tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(199 89% 48%));
-    --gradient-secondary: linear-gradient(135deg, hsl(340 82% 52%), hsl(24 95% 53%));
-    --gradient-accent: linear-gradient(135deg, hsl(172 66% 50%), hsl(160 84% 39%));
-    --gradient-gold: linear-gradient(135deg, hsl(45 100% 51%), hsl(24 95% 53%));
+    --gradient-primary: linear-gradient(135deg, hsl(175 50% 20%), hsl(170 55% 40%));
+    --gradient-secondary: linear-gradient(135deg, hsl(68 70% 50%), hsl(80 65% 55%));
+    --gradient-accent: linear-gradient(135deg, hsl(170 55% 35%), hsl(165 60% 45%));
+    --gradient-gold: linear-gradient(135deg, hsl(68 70% 50%), hsl(55 80% 55%));
   }
 
   .dark {
-    --background: 240 15% 8%;
+    --background: 175 45% 8%;
     --foreground: 0 0% 95%;
 
-    --card: 240 15% 12%;
+    --card: 175 40% 12%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 240 15% 12%;
+    --popover: 175 40% 12%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 262 83% 65%;
+    --primary: 170 55% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 199 89% 55%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 68 65% 55%;
+    --secondary-foreground: 180 40% 12%;
 
-    --muted: 240 10% 18%;
-    --muted-foreground: 240 5% 60%;
+    --muted: 175 30% 18%;
+    --muted-foreground: 170 20% 60%;
 
-    --accent: 340 82% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 68 65% 55%;
+    --accent-foreground: 180 40% 12%;
 
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 10% 22%;
-    --input: 240 10% 22%;
-    --ring: 262 83% 65%;
+    --border: 175 25% 22%;
+    --input: 175 25% 22%;
+    --ring: 170 55% 45%;
 
-    --gold: 45 100% 55%;
-    --navy: 230 60% 35%;
-    --purple: 262 83% 65%;
-    --cyan: 199 89% 55%;
-    --pink: 340 82% 60%;
-    --teal: 172 66% 55%;
-    --orange: 24 95% 60%;
-    --emerald: 160 84% 45%;
+    --gold: 68 70% 55%;
+    --navy: 180 50% 30%;
+    --purple: 170 55% 45%;
+    --cyan: 175 60% 50%;
+    --pink: 340 65% 60%;
+    --teal: 170 50% 40%;
+    --orange: 24 90% 60%;
+    --emerald: 165 70% 45%;
+    --lime: 68 70% 55%;
 
-    --sidebar-background: 262 50% 12%;
+    --sidebar-background: 175 50% 10%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 45 100% 55%;
-    --sidebar-primary-foreground: 262 60% 15%;
-    --sidebar-accent: 262 45% 22%;
-    --sidebar-accent-foreground: 45 100% 55%;
-    --sidebar-border: 262 40% 28%;
-    --sidebar-ring: 45 100% 55%;
+    --sidebar-primary: 68 70% 55%;
+    --sidebar-primary-foreground: 180 50% 12%;
+    --sidebar-accent: 175 45% 18%;
+    --sidebar-accent-foreground: 68 70% 55%;
+    --sidebar-border: 175 40% 25%;
+    --sidebar-ring: 68 70% 55%;
 
     /* Dark mode glass tokens */
-    --glass-background: 262 30% 12% / 0.7;
-    --glass-border: 262 40% 40% / 0.35;
-    --glass-shadow: 262 60% 10% / 0.4;
-    --glass-highlight: 262 40% 50% / 0.15;
+    --glass-background: 175 35% 12% / 0.7;
+    --glass-border: 170 40% 40% / 0.35;
+    --glass-shadow: 175 50% 10% / 0.4;
+    --glass-highlight: 170 40% 50% / 0.15;
   }
 }
 
@@ -135,11 +137,11 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     background-image: 
-      radial-gradient(at 0% 0%, hsl(var(--purple) / 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsl(var(--cyan) / 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsl(var(--pink) / 0.08) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsl(var(--teal) / 0.08) 0px, transparent 50%),
-      radial-gradient(at 50% 50%, hsl(var(--gold) / 0.06) 0px, transparent 70%);
+      radial-gradient(at 0% 0%, hsl(var(--teal) / 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsl(var(--cyan) / 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsl(var(--lime) / 0.08) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsl(var(--emerald) / 0.1) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, hsl(var(--cyan) / 0.06) 0px, transparent 70%);
     background-attachment: fixed;
   }
 }
@@ -147,23 +149,23 @@ All colors MUST be HSL.
 @layer components {
   /* Colorful gradient backgrounds */
   .bg-gradient-vibrant {
-    background: linear-gradient(135deg, hsl(var(--purple)) 0%, hsl(var(--cyan)) 50%, hsl(var(--teal)) 100%);
+    background: linear-gradient(135deg, hsl(var(--teal)) 0%, hsl(var(--cyan)) 50%, hsl(var(--emerald)) 100%);
   }
 
   .bg-gradient-warm {
-    background: linear-gradient(135deg, hsl(var(--pink)) 0%, hsl(var(--orange)) 50%, hsl(var(--gold)) 100%);
+    background: linear-gradient(135deg, hsl(var(--lime)) 0%, hsl(var(--gold)) 50%, hsl(var(--orange)) 100%);
   }
 
   .bg-gradient-cool {
-    background: linear-gradient(135deg, hsl(var(--cyan)) 0%, hsl(var(--purple)) 100%);
+    background: linear-gradient(135deg, hsl(var(--cyan)) 0%, hsl(var(--teal)) 100%);
   }
 
   .bg-gradient-sunset {
-    background: linear-gradient(135deg, hsl(var(--pink)) 0%, hsl(var(--orange)) 100%);
+    background: linear-gradient(135deg, hsl(var(--lime)) 0%, hsl(var(--emerald)) 100%);
   }
 
   .bg-gradient-aurora {
-    background: linear-gradient(135deg, hsl(var(--teal)) 0%, hsl(var(--purple)) 50%, hsl(var(--pink)) 100%);
+    background: linear-gradient(135deg, hsl(var(--teal)) 0%, hsl(var(--cyan)) 50%, hsl(var(--lime)) 100%);
   }
 
   /* Liquid Glass Card */
