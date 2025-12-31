@@ -124,21 +124,21 @@ export default function Appointments() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Confirmed': return 'bg-gold/20 text-gold';
-      case 'Completed': return 'bg-muted text-muted-foreground';
-      case 'Cancelled': return 'bg-destructive/10 text-destructive';
-      case 'No-Show': return 'bg-destructive/20 text-destructive';
-      default: return 'bg-accent/10 text-accent-foreground';
+      case 'Confirmed': return 'bg-gradient-to-r from-lime to-emerald text-white border-0';
+      case 'Completed': return 'bg-gradient-to-r from-teal to-cyan text-white border-0';
+      case 'Cancelled': return 'bg-gradient-to-r from-destructive to-orange text-white border-0';
+      case 'No-Show': return 'bg-gradient-to-r from-destructive to-orange text-white border-0';
+      default: return 'bg-gradient-to-r from-cyan to-teal text-white border-0';
     }
   };
 
   const getStatusDotColor = (status: string) => {
     switch (status) {
-      case 'Confirmed': return 'bg-gold';
-      case 'Completed': return 'bg-muted-foreground';
+      case 'Confirmed': return 'bg-lime';
+      case 'Completed': return 'bg-teal';
       case 'Cancelled': return 'bg-destructive';
       case 'No-Show': return 'bg-destructive';
-      default: return 'bg-primary';
+      default: return 'bg-cyan';
     }
   };
 
@@ -237,7 +237,12 @@ export default function Appointments() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="text-center text-muted-foreground">Loading appointments...</div>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-teal border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-muted-foreground">Loading appointments...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -246,15 +251,15 @@ export default function Appointments() {
     <div
       key={appointment.id}
       className={cn(
-        "border border-border rounded-lg",
+        "border border-teal/20 rounded-lg bg-white/80 backdrop-blur-sm",
         compact ? "p-2 text-xs" : "p-4 space-y-2"
       )}
     >
       <div className={cn("flex items-start", compact ? "flex-col gap-1" : "justify-between")}>
         <div className="space-y-1 flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <Clock className={cn("text-muted-foreground", compact ? "h-3 w-3" : "h-4 w-4")} />
-            <span className={cn("font-medium", compact && "text-xs")}>
+            <Clock className={cn("text-teal", compact ? "h-3 w-3" : "h-4 w-4")} />
+            <span className={cn("font-medium text-teal", compact && "text-xs")}>
               {format(new Date(appointment.appointment_date), 'h:mm a')}
             </span>
             <Badge className={cn(getStatusColor(appointment.status), compact && "text-[10px] px-1 py-0")}>
@@ -262,41 +267,41 @@ export default function Appointments() {
             </Badge>
           </div>
           <div className={cn("flex items-center gap-2", compact && "text-xs")}>
-            <User className={cn("text-muted-foreground", compact ? "h-3 w-3" : "h-4 w-4")} />
+            <User className={cn("text-cyan", compact ? "h-3 w-3" : "h-4 w-4")} />
             <span className="truncate">{appointment.patient_name}</span>
           </div>
           {!compact && appointment.patient_phone && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Phone className="h-4 w-4" />
+              <Phone className="h-4 w-4 text-lime" />
               <span>{appointment.patient_phone}</span>
             </div>
           )}
           {!compact && (
             <div className="text-sm">
-              <span className="font-medium">Reason:</span> {appointment.reason}
+              <span className="font-medium text-teal">Reason:</span> {appointment.reason}
             </div>
           )}
           {!compact && appointment.notes && (
             <div className="text-sm text-muted-foreground">
-              <span className="font-medium">Notes:</span> {appointment.notes}
+              <span className="font-medium text-cyan">Notes:</span> {appointment.notes}
             </div>
           )}
         </div>
         {!compact && (
           <div className="flex flex-wrap gap-2">
             {appointment.status === 'Scheduled' && (
-              <Button size="sm" variant="outline" onClick={() => handleStatusUpdate(appointment.id, 'Confirmed')}>
+              <Button size="sm" variant="outline" onClick={() => handleStatusUpdate(appointment.id, 'Confirmed')} className="border-lime/30 hover:bg-lime/10 hover:border-lime">
                 Confirm
               </Button>
             )}
             {(appointment.status === 'Scheduled' || appointment.status === 'Confirmed') && (
               <>
-                <Button size="sm" variant="outline" onClick={() => handleStatusUpdate(appointment.id, 'Completed')}>
+                <Button size="sm" variant="outline" onClick={() => handleStatusUpdate(appointment.id, 'Completed')} className="border-teal/30 hover:bg-teal/10 hover:border-teal">
                   Complete
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-gold hover:bg-gold/90 text-navy"
+                  className="bg-gradient-to-r from-lime to-emerald hover:from-lime/90 hover:to-emerald/90 text-white"
                   onClick={() => navigate(`/prescriptions/new?appointmentId=${appointment.id}`)}
                 >
                   <Pill className="h-3 w-3 mr-1" />
@@ -304,7 +309,7 @@ export default function Appointments() {
                 </Button>
               </>
             )}
-            <Button size="sm" variant="outline" onClick={() => handleEdit(appointment)}>
+            <Button size="sm" variant="outline" onClick={() => handleEdit(appointment)} className="border-cyan/30 hover:bg-cyan/10 hover:border-cyan">
               Edit
             </Button>
             <Button size="sm" variant="destructive" onClick={() => handleDelete(appointment.id)}>
@@ -315,13 +320,13 @@ export default function Appointments() {
       </div>
       {compact && (
         <div className="flex gap-1 mt-1">
-          <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => handleEdit(appointment)}>
+          <Button size="sm" variant="ghost" className="h-6 px-2 text-xs hover:bg-teal/10" onClick={() => handleEdit(appointment)}>
             Edit
           </Button>
           {(appointment.status === 'Scheduled' || appointment.status === 'Confirmed') && (
             <Button
               size="sm"
-              className="h-6 px-2 text-xs bg-gold hover:bg-gold/90 text-navy"
+              className="h-6 px-2 text-xs bg-gradient-to-r from-lime to-emerald hover:from-lime/90 hover:to-emerald/90 text-white"
               onClick={() => navigate(`/prescriptions/new?appointmentId=${appointment.id}`)}
             >
               Rx
@@ -336,18 +341,18 @@ export default function Appointments() {
     const weekDays = getWeekDays();
     
     return (
-      <Card>
+      <Card className="border-teal/20 bg-white/80 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle>
+            <CardTitle className="bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">
               Week of {format(weekDays[0], 'MMM d')} - {format(weekDays[6], 'MMM d, yyyy')}
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={goToToday}>Today</Button>
-              <Button variant="outline" size="icon" onClick={navigatePrev}>
+              <Button variant="outline" size="sm" onClick={goToToday} className="border-teal/30 hover:bg-teal/10 hover:border-teal">Today</Button>
+              <Button variant="outline" size="icon" onClick={navigatePrev} className="border-teal/30 hover:bg-teal/10 hover:border-teal">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon" onClick={navigateNext}>
+              <Button variant="outline" size="icon" onClick={navigateNext} className="border-teal/30 hover:bg-teal/10 hover:border-teal">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -362,11 +367,11 @@ export default function Appointments() {
                 <div
                   key={day.toISOString()}
                   className={cn(
-                    "border rounded-lg p-2 min-h-[200px] cursor-pointer transition-colors",
-                    isToday(day) && "border-gold border-2",
-                    isSameDay(day, selectedDate) && "bg-muted/50",
-                    isDropTarget && "bg-gold/20 border-gold border-dashed",
-                    !isDropTarget && "hover:bg-muted/50"
+                    "border border-teal/20 rounded-lg p-2 min-h-[200px] cursor-pointer transition-colors bg-white/60",
+                    isToday(day) && "border-teal border-2",
+                    isSameDay(day, selectedDate) && "bg-teal/10",
+                    isDropTarget && "bg-lime/20 border-lime border-dashed",
+                    !isDropTarget && "hover:bg-teal/5"
                   )}
                   onClick={() => {
                     if (!draggedAppointment) {
@@ -380,12 +385,12 @@ export default function Appointments() {
                 >
                   <div className={cn(
                     "text-sm font-medium mb-2 text-center",
-                    isToday(day) && "text-gold"
+                    isToday(day) && "text-teal"
                   )}>
                     <div>{format(day, 'EEE')}</div>
                     <div className={cn(
                       "text-lg",
-                      isToday(day) && "bg-gold text-navy rounded-full w-8 h-8 flex items-center justify-center mx-auto"
+                      isToday(day) && "bg-gradient-to-r from-teal to-cyan text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto"
                     )}>
                       {format(day, 'd')}
                     </div>
@@ -398,18 +403,18 @@ export default function Appointments() {
                         onDragStart={(e) => handleDragStart(e, apt)}
                         onDragEnd={handleDragEnd}
                         className={cn(
-                          "text-xs p-1 rounded bg-muted truncate flex items-center gap-1 cursor-grab active:cursor-grabbing",
+                          "text-xs p-1 rounded bg-gradient-to-r from-teal/10 to-cyan/10 truncate flex items-center gap-1 cursor-grab active:cursor-grabbing",
                           draggedAppointment?.id === apt.id && "opacity-50"
                         )}
                         title={`${apt.patient_name} - ${apt.reason} (Drag to reschedule)`}
                       >
-                        <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                        <GripVertical className="h-3 w-3 text-teal flex-shrink-0" />
                         <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", getStatusDotColor(apt.status))} />
                         <span className="truncate">{format(new Date(apt.appointment_date), 'h:mm a')} {apt.patient_name}</span>
                       </div>
                     ))}
                     {dayAppts.length > 3 && (
-                      <div className="text-xs text-muted-foreground text-center">
+                      <div className="text-xs text-teal text-center">
                         +{dayAppts.length - 3} more
                       </div>
                     )}
@@ -430,16 +435,16 @@ export default function Appointments() {
     const allDays = eachDayOfInterval({ start: startDay, end: endDay });
 
     return (
-      <Card>
+      <Card className="border-teal/20 bg-white/80 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle>{format(selectedDate, 'MMMM yyyy')}</CardTitle>
+            <CardTitle className="bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">{format(selectedDate, 'MMMM yyyy')}</CardTitle>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={goToToday}>Today</Button>
-              <Button variant="outline" size="icon" onClick={navigatePrev}>
+              <Button variant="outline" size="sm" onClick={goToToday} className="border-teal/30 hover:bg-teal/10 hover:border-teal">Today</Button>
+              <Button variant="outline" size="icon" onClick={navigatePrev} className="border-teal/30 hover:bg-teal/10 hover:border-teal">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon" onClick={navigateNext}>
+              <Button variant="outline" size="icon" onClick={navigateNext} className="border-teal/30 hover:bg-teal/10 hover:border-teal">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -448,7 +453,7 @@ export default function Appointments() {
         <CardContent>
           <div className="grid grid-cols-7 gap-1">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-              <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
+              <div key={day} className="text-center text-sm font-medium text-teal py-2">
                 {day}
               </div>
             ))}
@@ -461,12 +466,12 @@ export default function Appointments() {
                 <div
                   key={day.toISOString()}
                   className={cn(
-                    "border rounded p-1 min-h-[80px] cursor-pointer transition-colors",
+                    "border border-teal/10 rounded p-1 min-h-[80px] cursor-pointer transition-colors bg-white/60",
                     !isCurrentMonth && "opacity-40",
-                    isToday(day) && "border-gold border-2",
-                    isSameDay(day, selectedDate) && "bg-muted/50",
-                    isDropTarget && "bg-gold/20 border-gold border-dashed",
-                    !isDropTarget && "hover:bg-muted/50"
+                    isToday(day) && "border-teal border-2",
+                    isSameDay(day, selectedDate) && "bg-teal/10",
+                    isDropTarget && "bg-lime/20 border-lime border-dashed",
+                    !isDropTarget && "hover:bg-teal/5"
                   )}
                   onClick={() => {
                     if (!draggedAppointment) {
@@ -480,10 +485,10 @@ export default function Appointments() {
                 >
                   <div className={cn(
                     "text-xs font-medium mb-1",
-                    isToday(day) && "text-gold"
+                    isToday(day) && "text-teal"
                   )}>
                     <span className={cn(
-                      isToday(day) && "bg-gold text-navy rounded-full w-5 h-5 flex items-center justify-center"
+                      isToday(day) && "bg-gradient-to-r from-teal to-cyan text-white rounded-full w-5 h-5 flex items-center justify-center"
                     )}>
                       {format(day, 'd')}
                     </span>
@@ -496,7 +501,7 @@ export default function Appointments() {
                         onDragStart={(e) => handleDragStart(e, apt)}
                         onDragEnd={handleDragEnd}
                         className={cn(
-                          "text-[10px] p-0.5 rounded bg-muted truncate flex items-center gap-0.5 cursor-grab active:cursor-grabbing",
+                          "text-[10px] p-0.5 rounded bg-gradient-to-r from-teal/10 to-cyan/10 truncate flex items-center gap-0.5 cursor-grab active:cursor-grabbing",
                           draggedAppointment?.id === apt.id && "opacity-50"
                         )}
                         title={`${apt.patient_name} - ${apt.reason} (Drag to reschedule)`}
@@ -506,7 +511,7 @@ export default function Appointments() {
                       </div>
                     ))}
                     {dayAppts.length > 2 && (
-                      <div className="text-[10px] text-muted-foreground">
+                      <div className="text-[10px] text-teal">
                         +{dayAppts.length - 2}
                       </div>
                     )}
@@ -524,22 +529,22 @@ export default function Appointments() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-navy">Appointments</h1>
-          <p className="text-muted-foreground mt-2">Manage patient appointments and schedules</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal via-cyan to-lime bg-clip-text text-transparent">Appointments</h1>
+          <p className="text-muted-foreground mt-1">Manage patient appointments and schedules</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) setEditingAppointment(null);
         }}>
           <DialogTrigger asChild>
-            <Button className="bg-gold hover:bg-gold/90 text-navy">
+            <Button className="bg-gradient-to-r from-teal to-cyan hover:from-teal/90 hover:to-cyan/90 text-white shadow-lg hover:shadow-teal/25 transition-all duration-300">
               <Plus className="mr-2 h-4 w-4" />
               New Appointment
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-teal/20">
             <DialogHeader>
-              <DialogTitle>{editingAppointment ? 'Edit Appointment' : 'Schedule New Appointment'}</DialogTitle>
+              <DialogTitle className="bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">{editingAppointment ? 'Edit Appointment' : 'Schedule New Appointment'}</DialogTitle>
             </DialogHeader>
             <AppointmentForm 
               appointment={editingAppointment} 
@@ -552,62 +557,74 @@ export default function Appointments() {
       {/* View Mode Tabs */}
       <div className="flex items-center justify-between">
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-          <TabsList>
-            <TabsTrigger value="day">Day</TabsTrigger>
-            <TabsTrigger value="week">Week</TabsTrigger>
-            <TabsTrigger value="month">Month</TabsTrigger>
+          <TabsList className="bg-gradient-to-r from-teal/10 via-cyan/10 to-lime/10 p-1">
+            <TabsTrigger value="day" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-cyan data-[state=active]:text-white">Day</TabsTrigger>
+            <TabsTrigger value="week" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-cyan data-[state=active]:text-white">Week</TabsTrigger>
+            <TabsTrigger value="month" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-cyan data-[state=active]:text-white">Month</TabsTrigger>
           </TabsList>
         </Tabs>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setSortOrder(sortOrder === "latest" ? "earliest" : "latest")}
-          className="gap-2"
+          className="gap-2 border-teal/30 hover:bg-teal/10 hover:border-teal"
         >
-          <ArrowUpDown className="h-4 w-4" />
+          <ArrowUpDown className="h-4 w-4 text-teal" />
           {sortOrder === "latest" ? "Latest First" : "Earliest First"}
         </Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="group relative overflow-hidden border-teal/20 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-teal/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
             <CardTitle className="text-sm font-medium">Total Appointments</CardTitle>
-            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-lg bg-gradient-to-br from-teal to-cyan">
+              <CalendarIcon className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{appointments.length}</div>
+          <CardContent className="relative">
+            <div className="text-2xl font-bold bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">{appointments.length}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="group relative overflow-hidden border-cyan/20 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-lime/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
             <CardTitle className="text-sm font-medium">Upcoming</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-lg bg-gradient-to-br from-cyan to-lime">
+              <Clock className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{upcomingAppointments.length}</div>
+          <CardContent className="relative">
+            <div className="text-2xl font-bold bg-gradient-to-r from-cyan to-lime bg-clip-text text-transparent">{upcomingAppointments.length}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="group relative overflow-hidden border-lime/20 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-lime/10 via-transparent to-emerald/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
             <CardTitle className="text-sm font-medium">Today</CardTitle>
-            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-lg bg-gradient-to-br from-lime to-emerald">
+              <CalendarIcon className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{getAppointmentsForDate(new Date()).length}</div>
+          <CardContent className="relative">
+            <div className="text-2xl font-bold bg-gradient-to-r from-lime to-emerald bg-clip-text text-transparent">{getAppointmentsForDate(new Date()).length}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="group relative overflow-hidden border-emerald/20 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 via-transparent to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
             <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-lg bg-gradient-to-br from-emerald to-teal">
+              <FileText className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="relative">
+            <div className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">
               {appointments.filter(a => a.status === 'Completed').length}
             </div>
           </CardContent>
@@ -621,40 +638,47 @@ export default function Appointments() {
       {viewMode === "day" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar */}
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-1 border-teal/20 bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Calendar</CardTitle>
+              <CardTitle className="text-teal">Calendar</CardTitle>
             </CardHeader>
             <CardContent>
               <Calendar
                 mode="single"
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
-                className={cn("rounded-md border pointer-events-auto")}
+                className={cn("rounded-md border border-teal/20 pointer-events-auto")}
                 modifiers={{
                   booked: getDatesWithAppointments(),
                 }}
                 modifiersStyles={{
-                  booked: { fontWeight: 'bold', textDecoration: 'underline' }
+                  booked: { fontWeight: 'bold', textDecoration: 'underline', color: 'hsl(var(--teal))' }
                 }}
               />
             </CardContent>
           </Card>
 
           {/* Selected Day Appointments */}
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 border-cyan/20 bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>
+              <CardTitle className="bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">
                 {format(selectedDate, 'EEEE, MMMM d, yyyy')}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                {dayAppointments.length} appointment{dayAppointments.length !== 1 ? 's' : ''}
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-teal/10 to-cyan/10 text-teal text-xs">
+                  {dayAppointments.length} appointment{dayAppointments.length !== 1 ? 's' : ''}
+                </span>
               </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {dayAppointments.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No appointments scheduled</p>
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-teal/20 to-cyan/20 flex items-center justify-center">
+                      <CalendarIcon className="h-8 w-8 text-teal" />
+                    </div>
+                    <p className="text-muted-foreground">No appointments scheduled</p>
+                  </div>
                 ) : (
                   dayAppointments.map((appointment) => renderAppointmentCard(appointment))
                 )}
@@ -665,23 +689,32 @@ export default function Appointments() {
       )}
 
       {/* Upcoming Appointments */}
-      <Card>
+      <Card className="border-teal/20 bg-white/80 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Upcoming Appointments</CardTitle>
+          <CardTitle className="bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">Upcoming Appointments</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {upcomingAppointments.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No upcoming appointments</p>
+              <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-teal/20 to-cyan/20 flex items-center justify-center">
+                  <Clock className="h-8 w-8 text-teal" />
+                </div>
+                <p className="text-muted-foreground">No upcoming appointments</p>
+              </div>
             ) : (
-              upcomingAppointments.map((appointment) => (
+              upcomingAppointments.map((appointment, index) => (
                 <div
                   key={appointment.id}
-                  className="flex items-center justify-between p-3 border border-border rounded-lg"
+                  className={`flex items-center justify-between p-3 border border-teal/20 rounded-lg bg-gradient-to-br ${
+                    index % 3 === 0 ? 'from-teal/5 to-cyan/5' :
+                    index % 3 === 1 ? 'from-cyan/5 to-lime/5' :
+                    'from-lime/5 to-emerald/5'
+                  }`}
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{appointment.patient_name}</span>
+                      <span className="font-medium text-teal">{appointment.patient_name}</span>
                       <Badge className={getStatusColor(appointment.status)}>
                         {appointment.status}
                       </Badge>
@@ -691,7 +724,7 @@ export default function Appointments() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(appointment)}>
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(appointment)} className="border-teal/30 hover:bg-teal/10 hover:border-teal">
                       Edit
                     </Button>
                   </div>
