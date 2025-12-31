@@ -18,20 +18,20 @@ import { useState } from "react";
 import { useTheme } from "next-themes";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
-  { title: "Patients", url: "/patients", icon: Users, color: "from-blue-500 to-cyan-500", glow: "group-hover:shadow-blue-500/30" },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-teal-500 to-cyan-600", glow: "group-hover:shadow-teal-500/30" },
+  { title: "Patients", url: "/patients", icon: Users, color: "from-cyan-500 to-teal-500", glow: "group-hover:shadow-cyan-500/30" },
   { title: "Appointments", url: "/appointments", icon: Calendar, color: "from-emerald-500 to-teal-500", glow: "group-hover:shadow-emerald-500/30" },
-  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-amber-500 to-orange-500", glow: "group-hover:shadow-amber-500/30" },
-  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-pink-500 to-rose-500", glow: "group-hover:shadow-pink-500/30" },
-  { title: "Stock", url: "/stock", icon: Package, color: "from-indigo-500 to-blue-500", glow: "group-hover:shadow-indigo-500/30" },
-  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-green-500 to-emerald-500", glow: "group-hover:shadow-green-500/30" },
-  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-purple-500 to-violet-500", glow: "group-hover:shadow-purple-500/30" },
+  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-lime-500 to-emerald-500", glow: "group-hover:shadow-lime-500/30" },
+  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-teal-400 to-cyan-500", glow: "group-hover:shadow-teal-400/30" },
+  { title: "Stock", url: "/stock", icon: Package, color: "from-cyan-600 to-teal-600", glow: "group-hover:shadow-cyan-600/30" },
+  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-emerald-500 to-green-500", glow: "group-hover:shadow-emerald-500/30" },
+  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-teal-600 to-emerald-600", glow: "group-hover:shadow-teal-600/30" },
 ];
 
 const quickActions = [
-  { title: "Add Patient", url: "/patients/new", color: "from-blue-500 to-cyan-500", iconColor: "text-cyan-400" },
-  { title: "New Prescription", url: "/prescriptions/new", color: "from-amber-500 to-orange-500", iconColor: "text-amber-400" },
-  { title: "New Invoice", url: "/invoices/new", color: "from-green-500 to-emerald-500", iconColor: "text-emerald-400" },
+  { title: "Add Patient", url: "/patients/new", color: "from-cyan-500 to-teal-500", iconColor: "text-cyan-400" },
+  { title: "New Prescription", url: "/prescriptions/new", color: "from-lime-500 to-emerald-500", iconColor: "text-lime-400" },
+  { title: "New Invoice", url: "/invoices/new", color: "from-emerald-500 to-green-500", iconColor: "text-emerald-400" },
 ];
 
 export function AppSidebar() {
@@ -54,27 +54,27 @@ export function AppSidebar() {
   return (
     <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0`} collapsible="icon">
       <SidebarContent className="relative overflow-hidden">
-        {/* Liquid Glass Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/95 via-slate-900/98 to-slate-950 backdrop-blur-xl" />
+        {/* Liquid Glass Background - Teal Theme */}
+        <div className="absolute inset-0 bg-gradient-to-b from-teal-900/95 via-teal-950/98 to-slate-950 backdrop-blur-xl" />
         
         {/* Frosted Glass Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/8 via-transparent to-cyan-600/8" />
+        <div className="absolute inset-0 bg-gradient-to-br from-teal-600/10 via-transparent to-emerald-600/8" />
         
         {/* Animated Mesh Gradient */}
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-violet-500/10 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-teal-500/15 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-cyan-500/10 to-transparent" />
         </div>
         
-        {/* Floating Glass Orbs with Liquid Effect */}
-        <div className="absolute top-20 right-0 w-32 h-32 bg-gradient-radial from-violet-500/25 via-purple-600/15 to-transparent rounded-full blur-3xl animate-float" />
-        <div className="absolute top-1/3 -left-8 w-24 h-24 bg-gradient-radial from-cyan-400/20 via-blue-500/10 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute bottom-1/3 right-0 w-28 h-28 bg-gradient-radial from-pink-500/20 via-rose-500/10 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
-        <div className="absolute bottom-20 left-0 w-20 h-20 bg-gradient-radial from-amber-400/25 via-orange-500/15 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute top-1/2 right-4 w-16 h-16 bg-gradient-radial from-teal-400/20 to-transparent rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }} />
+        {/* Floating Glass Orbs with Liquid Effect - Teal/Lime Theme */}
+        <div className="absolute top-20 right-0 w-32 h-32 bg-gradient-radial from-teal-500/25 via-cyan-600/15 to-transparent rounded-full blur-3xl animate-float" />
+        <div className="absolute top-1/3 -left-8 w-24 h-24 bg-gradient-radial from-cyan-400/20 via-teal-500/10 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute bottom-1/3 right-0 w-28 h-28 bg-gradient-radial from-lime-500/20 via-emerald-500/10 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
+        <div className="absolute bottom-20 left-0 w-20 h-20 bg-gradient-radial from-lime-400/25 via-yellow-500/15 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute top-1/2 right-4 w-16 h-16 bg-gradient-radial from-emerald-400/20 to-transparent rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }} />
         
         {/* Shimmer Effect Line */}
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-lime-300/30 to-transparent" />
         
         {/* Compact Header with Glass Effect */}
         <div className="relative p-2 border-b border-white/5">
@@ -85,7 +85,7 @@ export function AppSidebar() {
             <div className="flex items-center gap-2.5 relative z-10 px-1">
               {/* Compact Logo */}
               <div className="relative group flex-shrink-0">
-                <div className="absolute -inset-1 bg-gradient-to-r from-violet-500/40 to-cyan-500/40 rounded-full blur-md opacity-60 group-hover:opacity-90 transition-opacity" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/40 to-lime-500/40 rounded-full blur-md opacity-60 group-hover:opacity-90 transition-opacity" />
                 <div className="relative p-0.5 rounded-full bg-gradient-to-br from-white/10 to-white/5 border border-white/20">
                   <img 
                     src={navjeevanLogo} 
@@ -97,10 +97,10 @@ export function AppSidebar() {
               
               {/* Compact Hospital Name */}
               <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent leading-tight">
+                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white via-teal-200 to-cyan-200 bg-clip-text text-transparent leading-tight">
                   NAVJEEVAN
                 </h2>
-                <p className="text-[10px] font-medium tracking-wide bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
+                <p className="text-[10px] font-medium tracking-wide bg-gradient-to-r from-lime-300 to-emerald-400 bg-clip-text text-transparent">
                   Hospital Sirhind
                 </p>
               </div>
@@ -108,7 +108,7 @@ export function AppSidebar() {
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-violet-500/50 to-cyan-500/50 rounded-full blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/50 to-lime-500/50 rounded-full blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
                 <div className="relative p-0.5 rounded-full bg-gradient-to-br from-white/15 to-white/5 border border-white/20">
                   <img 
                     src={navjeevanLogo} 
@@ -354,7 +354,7 @@ export function AppSidebar() {
             >
               {/* Glass shimmer effect */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 via-cyan-500/10 to-violet-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-lime-500/10 to-teal-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               </div>
               
               {!collapsed && (
@@ -364,12 +364,12 @@ export function AppSidebar() {
               )}
               
               <div className={`relative flex items-center justify-center transition-all duration-500 ${
-                collapsed ? '' : 'bg-gradient-to-br from-violet-500/15 to-cyan-500/15 rounded-lg p-1.5 border border-white/5'
+                collapsed ? '' : 'bg-gradient-to-br from-teal-500/15 to-lime-500/15 rounded-lg p-1.5 border border-white/5'
               }`}>
                 {collapsed ? (
-                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 transition-all duration-300 group-hover:scale-110" />
+                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-lime-400 transition-all duration-300 group-hover:scale-110" />
                 ) : (
-                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-violet-400 transition-all duration-300 group-hover:scale-110" />
+                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-teal-400 transition-all duration-300 group-hover:scale-110" />
                 )}
               </div>
             </Button>
@@ -378,9 +378,9 @@ export function AppSidebar() {
           {/* Footer with Glass Separator */}
           {!collapsed && (
             <div className="text-center px-4 pb-4">
-              <div className="h-px bg-gradient-to-r from-transparent via-white/15 to-transparent mb-3" />
+              <div className="h-px bg-gradient-to-r from-transparent via-lime-300/20 to-transparent mb-3" />
               <p className="text-[10px] text-slate-600/80 tracking-wider font-medium">
-                Powered by <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Lovable</span>
+                Powered by <span className="bg-gradient-to-r from-teal-400 to-lime-400 bg-clip-text text-transparent">Lovable</span>
               </p>
             </div>
           )}
