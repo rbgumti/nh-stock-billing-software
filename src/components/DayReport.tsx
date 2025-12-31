@@ -67,7 +67,7 @@ export default function DayReport() {
   
   // Cash management
   const [cashPreviousDay, setCashPreviousDay] = useState(0);
-  const [looseBalance, setLooseBalance] = useState(5000);
+  // looseBalance removed per user request
   const [depositInBank, setDepositInBank] = useState(0);
   const [paytmGpay, setPaytmGpay] = useState(0);
   const [cashHandoverAmarjeet, setCashHandoverAmarjeet] = useState(0);
@@ -103,7 +103,6 @@ export default function DayReport() {
   // Helper function to calculate cash left in hand for a given report
   const calculateCashLeftInHand = (report: any, bnxAmt: number, tpnAmt: number, pshyAmt: number) => {
     const prevDayCash = Number(report.cash_previous_day) || 0;
-    const looseB = Number(report.loose_balance) || 5000;
     const depositBank = Number(report.deposit_in_bank) || 0;
     const paytm = Number(report.paytm_gpay) || 0;
     const handoverA = Number(report.cash_handover_amarjeet) || 0;
@@ -118,7 +117,7 @@ export default function DayReport() {
     const totalSaleAmt = bnxAmt + tpnAmt + pshyAmt + feesAmt + labAmt;
     const todaysColl = totalSaleAmt;
     
-    return prevDayCash + todaysColl + looseB - totalExp - depositBank - paytm - handoverA - handoverM - handoverS + adj;
+    return prevDayCash + todaysColl - totalExp - depositBank - paytm - handoverA - handoverM - handoverS + adj;
   };
 
   const fetchPreviousDayCashLeftInHand = async (currentDate: string): Promise<number> => {
@@ -208,7 +207,7 @@ export default function DayReport() {
         setNewPatients(data.new_patients || 0);
         setFollowUpPatients(data.follow_up_patients || 0);
         setCashPreviousDay(Number(data.cash_previous_day) || 0);
-        setLooseBalance(Number(data.loose_balance) || 5000);
+        // looseBalance removed
         setDepositInBank(Number(data.deposit_in_bank) || 0);
         setPaytmGpay(Number(data.paytm_gpay) || 0);
         setCashHandoverAmarjeet(Number(data.cash_handover_amarjeet) || 0);
@@ -239,7 +238,7 @@ export default function DayReport() {
         const previousDayCash = await fetchPreviousDayCashLeftInHand(reportDate);
         setCashPreviousDay(previousDayCash);
         
-        setLooseBalance(5000);
+        // looseBalance removed
         setDepositInBank(0);
         setPaytmGpay(0);
         setCashHandoverAmarjeet(0);
@@ -281,7 +280,7 @@ export default function DayReport() {
         new_patients: newPatients,
         follow_up_patients: followUpPatients,
         cash_previous_day: cashPreviousDay,
-        loose_balance: looseBalance,
+        loose_balance: 0, // kept for DB compatibility but not used
         deposit_in_bank: depositInBank,
         paytm_gpay: paytmGpay,
         cash_handover_amarjeet: cashHandoverAmarjeet,
@@ -334,7 +333,7 @@ export default function DayReport() {
     autoSaveTimeoutRef.current = setTimeout(() => {
       saveReport();
     }, 1500);
-  }, [reportDate, newPatients, followUpPatients, cashPreviousDay, looseBalance, depositInBank, 
+  }, [reportDate, newPatients, followUpPatients, cashPreviousDay, depositInBank,
       paytmGpay, cashHandoverAmarjeet, cashHandoverMandeep, cashHandoverSir, adjustments,
       tapentadolPatients, psychiatryPatients, fees, labCollection, psychiatryCollection,
       cashDetails, expenses]);
@@ -347,7 +346,7 @@ export default function DayReport() {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [newPatients, followUpPatients, cashPreviousDay, looseBalance, depositInBank,
+  }, [newPatients, followUpPatients, cashPreviousDay, depositInBank,
       paytmGpay, cashHandoverAmarjeet, cashHandoverMandeep, cashHandoverSir, adjustments,
       tapentadolPatients, psychiatryPatients, fees, labCollection, psychiatryCollection,
       cashDetails, expenses]);
@@ -516,7 +515,7 @@ export default function DayReport() {
   
   const totalSale = bnxTotal + tpnTotal + pshyTotal + fees + labCollection;
   const todaysCollection = totalSale;
-  const cashLeftInHand = cashPreviousDay + todaysCollection + looseBalance - totalExpenses - depositInBank - paytmGpay - cashHandoverAmarjeet - cashHandoverMandeep - cashHandoverSir + adjustments;
+  const cashLeftInHand = cashPreviousDay + todaysCollection - totalExpenses - depositInBank - paytmGpay - cashHandoverAmarjeet - cashHandoverMandeep - cashHandoverSir + adjustments;
   
   const totalAsPerSheet = totalSale;
   const difference = totalAsPerSheet - totalCash - paytmGpay;
@@ -551,7 +550,7 @@ export default function DayReport() {
     reportData.push(['Cash Management']);
     reportData.push(['Cash in Hand (Previous Day)', cashPreviousDay]);
     reportData.push(["Today's Collection", todaysCollection]);
-    reportData.push(['Loose Balance', looseBalance]);
+    // Loose Balance row removed
     reportData.push(['Expenses', totalExpenses]);
     reportData.push(['Deposit in Bank', depositInBank]);
     reportData.push(['Paytm/GPay', paytmGpay]);
@@ -918,15 +917,6 @@ export default function DayReport() {
               <div className="flex justify-between items-center">
                 <span className="text-xs">Today's Collection</span>
                 <span className="font-semibold">₹{todaysCollection.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs">Loose Balance</span>
-                <Input
-                  type="number"
-                  value={looseBalance || ''}
-                  onChange={(e) => setLooseBalance(parseFloat(e.target.value) || 0)}
-                  className="w-24 h-7 text-right"
-                />
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs">Expenses</span>
