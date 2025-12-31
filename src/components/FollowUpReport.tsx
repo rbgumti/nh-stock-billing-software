@@ -11,14 +11,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Search, AlertCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Download, Calendar as CalendarIcon, Search, AlertCircle, CheckCircle, CalendarClock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { loadAllPatients, Patient, formatPhone } from "@/lib/patientUtils";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import * as XLSX from "xlsx";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface FollowUpData {
+  invoiceId: string;
+  patientId: string;
   fileNo: string;
   patientName: string;
   fatherName: string;
@@ -41,6 +59,12 @@ export default function FollowUpReport() {
     from: "",
     to: "",
   });
+  const [rescheduleDialog, setRescheduleDialog] = useState<{
+    open: boolean;
+    item: FollowUpData | null;
+  }>({ open: false, item: null });
+  const [newFollowUpDate, setNewFollowUpDate] = useState<Date | undefined>();
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     loadFollowUpData();
@@ -91,6 +115,8 @@ export default function FollowUpReport() {
         const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         data.push({
+          invoiceId: invoice.id,
+          patientId: patientId,
           fileNo: patient?.file_no || "",
           patientName: patient?.patient_name || invoice.patient_name || "",
           fatherName: patient?.father_name || "",
@@ -115,6 +141,71 @@ export default function FollowUpReport() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMarkCompleted = async (item: FollowUpData) => {
+    setActionLoading(item.invoiceId);
+    try {
+      const { error } = await supabase
+        .from("invoices")
+        .update({ follow_up_date: null })
+        .eq("id", item.invoiceId);
+
+      if (error) throw error;
+
+      toast.success(`Follow-up for ${item.patientName} marked as completed`);
+      // Remove from local state
+      setFollowUpData((prev) => prev.filter((d) => d.invoiceId !== item.invoiceId));
+    } catch (error) {
+      console.error("Error marking follow-up as completed:", error);
+      toast.error("Failed to mark follow-up as completed");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReschedule = async () => {
+    if (!rescheduleDialog.item || !newFollowUpDate) return;
+
+    setActionLoading(rescheduleDialog.item.invoiceId);
+    try {
+      const newDate = formatLocalISODate(newFollowUpDate);
+      const { error } = await supabase
+        .from("invoices")
+        .update({ follow_up_date: newDate })
+        .eq("id", rescheduleDialog.item.invoiceId);
+
+      if (error) throw error;
+
+      toast.success(`Follow-up rescheduled to ${newDate}`);
+      
+      // Update local state
+      setFollowUpData((prev) =>
+        prev.map((d) => {
+          if (d.invoiceId === rescheduleDialog.item?.invoiceId) {
+            const today = new Date(formatLocalISODate());
+            const followUp = new Date(newDate);
+            const diffTime = followUp.getTime() - today.getTime();
+            const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return { ...d, followUpDate: newDate, days };
+          }
+          return d;
+        }).sort((a, b) => new Date(a.followUpDate).getTime() - new Date(b.followUpDate).getTime())
+      );
+
+      setRescheduleDialog({ open: false, item: null });
+      setNewFollowUpDate(undefined);
+    } catch (error) {
+      console.error("Error rescheduling follow-up:", error);
+      toast.error("Failed to reschedule follow-up");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const openRescheduleDialog = (item: FollowUpData) => {
+    setRescheduleDialog({ open: true, item });
+    setNewFollowUpDate(new Date(item.followUpDate));
   };
 
   const filteredData = followUpData.filter((item) => {
@@ -196,7 +287,7 @@ export default function FollowUpReport() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-primary" />
+              <CalendarIcon className="h-8 w-8 text-primary" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Total Follow-ups</p>
                 <p className="text-2xl font-bold">{followUpData.length}</p>
@@ -220,7 +311,7 @@ export default function FollowUpReport() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-orange-500" />
+              <CalendarIcon className="h-8 w-8 text-orange-500" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Today</p>
                 <p className="text-2xl font-bold text-orange-500">{todayCount}</p>
@@ -232,7 +323,7 @@ export default function FollowUpReport() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-yellow-500" />
+              <CalendarIcon className="h-8 w-8 text-yellow-500" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Next 7 Days</p>
                 <p className="text-2xl font-bold text-yellow-500">{upcomingCount}</p>
@@ -247,7 +338,7 @@ export default function FollowUpReport() {
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
+              <CalendarIcon className="h-5 w-5" />
               Follow-Up Report
             </CardTitle>
             <Button onClick={exportToExcel}>
@@ -310,18 +401,19 @@ export default function FollowUpReport() {
                   <TableHead>Days</TableHead>
                   <TableHead>Follow-up Date</TableHead>
                   <TableHead>Remarks</TableHead>
+                  <TableHead className="w-32">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={13} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={14} className="text-center py-8 text-muted-foreground">
                       No follow-up records found
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredData.map((item, index) => (
-                    <TableRow key={index} className={item.days < 0 ? "bg-destructive/10" : item.days === 0 ? "bg-orange-50" : ""}>
+                    <TableRow key={item.invoiceId} className={item.days < 0 ? "bg-destructive/10" : item.days === 0 ? "bg-orange-50" : ""}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell className="font-medium">{item.fileNo}</TableCell>
                       <TableCell>{item.patientName}</TableCell>
@@ -339,6 +431,28 @@ export default function FollowUpReport() {
                       <TableCell className="max-w-[150px] truncate" title={item.remarks}>
                         {item.remarks}
                       </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Mark as Completed"
+                            onClick={() => handleMarkCompleted(item)}
+                            disabled={actionLoading === item.invoiceId}
+                          >
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Reschedule"
+                            onClick={() => openRescheduleDialog(item)}
+                            disabled={actionLoading === item.invoiceId}
+                          >
+                            <CalendarClock className="h-4 w-4 text-blue-600" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -351,6 +465,62 @@ export default function FollowUpReport() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Reschedule Dialog */}
+      <Dialog open={rescheduleDialog.open} onOpenChange={(open) => {
+        if (!open) {
+          setRescheduleDialog({ open: false, item: null });
+          setNewFollowUpDate(undefined);
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reschedule Follow-Up</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Rescheduling follow-up for <strong>{rescheduleDialog.item?.patientName}</strong>
+            </p>
+            <div className="space-y-2">
+              <Label>New Follow-Up Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !newFollowUpDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {newFollowUpDate ? format(newFollowUpDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={newFollowUpDate}
+                    onSelect={setNewFollowUpDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRescheduleDialog({ open: false, item: null })}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleReschedule}
+              disabled={!newFollowUpDate || actionLoading === rescheduleDialog.item?.invoiceId}
+            >
+              {actionLoading === rescheduleDialog.item?.invoiceId ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
