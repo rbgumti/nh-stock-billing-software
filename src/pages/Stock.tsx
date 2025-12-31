@@ -15,6 +15,7 @@ import { SupplierForm } from "@/components/forms/SupplierForm";
 import { SupplierPaymentForm } from "@/components/forms/SupplierPaymentForm";
 import { StockLedger } from "@/components/StockLedger";
 import { ParbPharmaPO } from "@/components/forms/ParbPharmaPO";
+import { NeuroglamPO } from "@/components/forms/NeuroglamPO";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
@@ -42,6 +43,7 @@ export default function Stock() {
   const [editingPayment, setEditingPayment] = useState<SupplierPayment | null>(null);
   const [showLedgerItem, setShowLedgerItem] = useState<any>(null);
   const [showParbPharmaPO, setShowParbPharmaPO] = useState<PurchaseOrder | null>(null);
+  const [showNeuroglamPO, setShowNeuroglamPO] = useState<PurchaseOrder | null>(null);
   const { stockItems, addStockItem, updateStockItem, subscribe } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
@@ -1032,6 +1034,10 @@ export default function Stock() {
                             <FileText className="h-4 w-4 mr-2" />
                             Parb Pharma Format
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowNeuroglamPO(po)}>
+                            <FileText className="h-4 w-4 mr-2" />
+                            Neuroglam Format
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -1606,6 +1612,16 @@ export default function Stock() {
           items={showParbPharmaPO.items}
           stockItems={stockItems}
           onClose={() => setShowParbPharmaPO(null)}
+        />
+      )}
+
+      {showNeuroglamPO && (
+        <NeuroglamPO
+          poNumber={showNeuroglamPO.poNumber}
+          poDate={showNeuroglamPO.orderDate}
+          items={showNeuroglamPO.items}
+          stockItems={stockItems}
+          onClose={() => setShowNeuroglamPO(null)}
         />
       )}
     </div>
