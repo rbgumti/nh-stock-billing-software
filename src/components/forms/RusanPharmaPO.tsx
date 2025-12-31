@@ -18,7 +18,14 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/\//g, '-');
+  };
+
+  const getMonthYear = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const month = date.toLocaleDateString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return `${month} ${year}`;
   };
 
   const getStockItemDetails = (stockItemId: number) => {
@@ -39,28 +46,32 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           <title>Purchase Order - ${poNumber}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Times New Roman', Times, serif; padding: 20px; font-size: 12px; line-height: 1.4; }
-            .header { text-align: center; margin-bottom: 10px; }
-            .header-top { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 5px; }
-            .hospital-name { font-size: 22px; font-weight: bold; margin: 5px 0; }
-            .hospital-address { font-size: 11px; margin-bottom: 5px; }
-            .licence { font-size: 10px; margin-bottom: 10px; }
-            .po-info { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 11px; }
-            .recipient { margin-bottom: 15px; font-size: 11px; }
-            .recipient p { margin: 2px 0; }
-            .salutation { margin: 15px 0; font-size: 11px; }
-            .intro-text { margin-bottom: 15px; font-size: 11px; text-align: justify; }
-            table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 10px; }
-            th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-            th { background-color: #f0f0f0; font-weight: bold; }
-            .undertaking { margin: 15px 0; font-size: 10px; text-align: justify; font-weight: bold; }
-            .undertaking-text { margin: 10px 0; font-size: 10px; text-align: justify; }
-            .signature-section { display: flex; justify-content: space-between; margin-top: 40px; font-size: 11px; }
-            .signature-left, .signature-right { text-align: center; }
-            .footer-stamp { margin-top: 30px; font-size: 10px; }
-            .stamp-box { border: 1px solid #000; padding: 10px; display: inline-block; margin-top: 10px; }
+            body { font-family: 'Times New Roman', Times, serif; padding: 15px 25px; font-size: 12px; line-height: 1.5; }
+            .header-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; }
+            .hospital-name { font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0; }
+            .address-row { text-align: center; font-size: 11px; margin-bottom: 5px; }
+            .licence-row { text-align: center; font-size: 10px; margin-bottom: 15px; }
+            .po-date-row { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 12px; font-weight: bold; }
+            .to-section { margin-bottom: 15px; font-size: 11px; line-height: 1.6; }
+            .to-section .company { font-weight: bold; margin-top: 5px; }
+            .subject-line { margin-top: 10px; }
+            .salutation { margin: 15px 0 10px 0; font-size: 11px; }
+            .intro-para { font-size: 11px; text-align: justify; margin-bottom: 15px; line-height: 1.6; }
+            table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 11px; }
+            th, td { border: 1px solid #000; padding: 6px 8px; }
+            th { background-color: #f5f5f5; font-weight: bold; text-align: center; }
+            td { text-align: left; }
+            td.center { text-align: center; }
+            td.right { text-align: right; }
+            .undertaking-title { font-weight: bold; font-size: 11px; margin: 20px 0 10px 0; }
+            .undertaking-text { font-size: 10px; text-align: justify; line-height: 1.6; margin-bottom: 20px; }
+            .signature-section { display: flex; justify-content: space-between; margin-top: 30px; font-size: 11px; }
+            .sig-left { }
+            .sig-center { text-align: center; }
+            .sig-right { text-align: right; }
             @media print {
-              body { padding: 10mm; }
+              body { padding: 10mm 15mm; }
+              @page { margin: 10mm; }
             }
           </style>
         </head>
@@ -93,54 +104,59 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-4 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
-          {/* Header */}
-          <div className="text-center mb-4">
-            <div className="flex justify-between text-xs mb-2">
-              <span>Regd. Govt of Punjab</span>
-              <span>Mob_ 6284942412</span>
-            </div>
-            <h1 className="text-2xl font-bold mb-2">NAVJEEVAN HOSPITAL</h1>
-            <p className="text-sm mb-1">Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;Dr.metali Bhatti</p>
-            <p className="text-xs">Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024</p>
+        <div ref={printRef} className="p-6 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+          {/* Header Row */}
+          <div className="flex justify-between text-[11px] mb-2">
+            <span>Regd. Govt of Punjab</span>
+            <span>Mob_ 6284942412</span>
           </div>
 
-          {/* PO Info */}
-          <div className="flex justify-between mb-4 text-sm">
+          {/* Hospital Name */}
+          <h1 className="text-2xl font-bold text-center my-3">NAVJEEVAN HOSPITAL</h1>
+
+          {/* Address Row */}
+          <p className="text-center text-[11px] mb-1">
+            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dr.metali Bhatti
+          </p>
+
+          {/* Licence Row */}
+          <p className="text-center text-[10px] mb-4">
+            Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024
+          </p>
+
+          {/* PO Number and Date Row */}
+          <div className="flex justify-between font-bold text-[12px] mb-5">
             <span>PO NO- {poNumber}</span>
-            <span>DATE -{formatDate(poDate)}</span>
+            <span>DATE - {formatDate(poDate)}</span>
           </div>
 
-          {/* Recipient */}
-          <div className="mb-4 text-sm">
-            <p>To,</p>
-            <p className="font-semibold mt-2">Rusan Pharma Ltd.</p>
+          {/* To Section */}
+          <div className="text-[11px] mb-4 leading-relaxed">
+            <p className="mb-2">To,</p>
+            <p className="font-bold">Rusan Pharma Ltd.</p>
             <p>Khasra No. 122MI, Central Hope Town,</p>
             <p>Selaqui, Dehradun, Uttarakhand-248197</p>
-            <p>Sub: Pu/rchase Order</p>
+            <p className="mt-2">Sub: Pu/rchase Order</p>
           </div>
 
           {/* Salutation */}
-          <p className="mb-3 text-sm">Dear Sir, ma'am</p>
+          <p className="text-[11px] my-4">Dear Sir, ma&apos;am</p>
 
-          {/* Intro Text */}
-          <p className="mb-4 text-sm text-justify">
-            We hereby place a purchase order with Stamp and Sign of our current working doctor's. 
-            Terms and Conditions will remain same asour discussion on phonically, payment of product 
-            shall be done through cheque to your Bank account, the name and composition of product 
-            is given below, please do the supply earlier as possible.
+          {/* Intro Paragraph */}
+          <p className="text-[11px] text-justify mb-4 leading-relaxed">
+            We hereby placing a purchase order with Stamp and Sign of our current working doctor&apos;s. Terms and Conditions will remain same asour discussion on phonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-4 text-xs">
+          <table className="w-full border-collapse mb-5 text-[11px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black p-2 text-left">Sr. No.</th>
-                <th className="border border-black p-2 text-left">Product Name</th>
-                <th className="border border-black p-2 text-left">Compositions</th>
-                <th className="border border-black p-2 text-left">Packing</th>
-                <th className="border border-black p-2 text-right">Qty.In Strips</th>
-                <th className="border border-black p-2 text-right">Qty.In Tablets</th>
+                <th className="border border-black p-2 text-center">Sr. No.</th>
+                <th className="border border-black p-2 text-center">Product Name</th>
+                <th className="border border-black p-2 text-center">Compositions</th>
+                <th className="border border-black p-2 text-center">Packing</th>
+                <th className="border border-black p-2 text-center">Qty.In Strips</th>
+                <th className="border border-black p-2 text-center">Qty.In Tablets</th>
               </tr>
             </thead>
             <tbody>
@@ -153,11 +169,11 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
                 
                 return (
                   <tr key={index}>
-                    <td className="border border-black p-2">{index + 1}.</td>
+                    <td className="border border-black p-2 text-center">{index + 1}.</td>
                     <td className="border border-black p-2">{item.stockItemName}</td>
                     <td className="border border-black p-2">{stockItem?.composition || '-'}</td>
-                    <td className="border border-black p-2">{packing}</td>
-                    <td className="border border-black p-2 text-right">{item.quantity}</td>
+                    <td className="border border-black p-2 text-center">{packing}</td>
+                    <td className="border border-black p-2 text-right">{item.quantity.toLocaleString()}</td>
                     <td className="border border-black p-2 text-right">{qtyInTablets.toLocaleString()}</td>
                   </tr>
                 );
@@ -166,42 +182,25 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </table>
 
           {/* Undertaking */}
-          <p className="font-bold text-xs mb-2">UNDERTAKING:-</p>
-          <p className="text-xs text-justify mb-4">
-            We hereby confirm that the product which we intend to buy from RUSAN PHARMA 
-            LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN,SELAQUI, DEHRADUN, 
-            UTTARAKHAND.248197 Our P.O. No:{poNumber} (December 2025) :date {formatDate(poDate)}. These 
-            products purchased by us will be exclusively sold by De Addiction centre and qualified 
-            Doctors only, on our <u>License No.PSMHC/Punjab/2024/863</u> we are fully aware These 
-            product containing controlled substances as per Narcotic Drugs & Psychotropic 
-            Substances Act 1985. And we will keep the relevant records of sale and purchase to us. 
-            Also we assure our Acknowledgement in form-6(Consignment Note) for the receipt of 
-            above purchase item to supplier Immediately on receipt of above controlled 
-            substance. Further we undertake that we are taking The products for sale below 
-            mentioned formulation & for its sale within India only and not meant for any retailer 
-            counter or Export purposes. Rusan Pharma Ltd shall not be liable for any on 
-            compliance of statutory provisions committed by us intentionally or un-intentionally 
-            For <strong>Navjeevanhospital,opp.New Bus Stand,G.t. Road, Sirhind</strong>
+          <p className="font-bold text-[11px] mb-2">UNDERTAKING:-</p>
+          <p className="text-[10px] text-justify leading-relaxed mb-6">
+            We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN,SELAQUI, DEHRADUN, UTTARAKHAND.248197 Our P O. No:{poNumber} ({getMonthYear(poDate)}) :date {formatDate(poDate)}. These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our License No.PSMHC/Punjab/2024/863 we are fully aware These product containing controlled substances as per Narcotic Drugs &amp; Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6(Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation &amp; for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any on-compliance of statutory provisions committed by us intentionally or un-intentionally
+          </p>
+
+          <p className="text-[11px] mb-6">
+            For Navjeevanhospital,opp.New Bus Stand,G.t. Road, Sirhind
           </p>
 
           {/* Signature Section */}
-          <div className="flex justify-between mt-10 text-sm">
-            <div className="text-center">
+          <div className="flex justify-between items-end mt-8 text-[11px]">
+            <div>
               <p>Date: {formatDate(poDate)}</p>
-              <p className="mt-4">(Navjeevanhospital)</p>
-              <div className="mt-6 border border-black p-2 inline-block text-xs">
-                <p className="font-bold">NAVJEEEVAN HOSPITAL</p>
-                <p>Opp. Bus Stand, Bara Sirhind</p>
-                <p>Distt. Fatehgarh Sahib (Pb.)</p>
-              </div>
             </div>
             <div className="text-center">
+              <p>(Navjeevanhospital)</p>
+            </div>
+            <div className="text-right">
               <p>(Dr.metali Bhatti)</p>
-              <div className="mt-10 text-xs">
-                <p className="font-bold">DR. METALI BHATTI</p>
-                <p>M.B.B.S, MD - PSYHIATRY</p>
-                <p>PMC - 57865</p>
-              </div>
             </div>
           </div>
         </div>
