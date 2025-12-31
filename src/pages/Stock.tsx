@@ -475,7 +475,6 @@ export default function Stock() {
     doc.text(`PO Number: ${po.poNumber}`, margin, 95);
     doc.text(`Date: ${po.orderDate}`, pageWidth - margin, 95, { align: "right" });
     doc.text(`Supplier: ${po.supplier}`, margin, 103);
-    doc.text(`Expected Delivery: ${po.expectedDelivery}`, pageWidth - margin, 103, { align: "right" });
     doc.text(`Status: ${po.status}`, margin, 111);
     
     // Items Table Header
@@ -985,10 +984,6 @@ export default function Stock() {
                     <div className="text-sm">
                       <p className="text-muted-foreground">Order Date</p>
                       <p className="font-medium">{po.orderDate}</p>
-                    </div>
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Expected Delivery</p>
-                      <p className="font-medium">{po.expectedDelivery}</p>
                     </div>
                     <div className="text-sm">
                       <p className="text-muted-foreground">Total Amount</p>

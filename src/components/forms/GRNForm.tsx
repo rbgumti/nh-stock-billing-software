@@ -166,10 +166,6 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                   <p className="font-medium">{purchaseOrder.orderDate}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">Expected Delivery</p>
-                  <p className="font-medium">{purchaseOrder.expectedDelivery}</p>
-                </div>
-                <div>
                   <p className="text-muted-foreground">Total Amount</p>
                   <p className="font-medium">₹{purchaseOrder.totalAmount.toFixed(2)}</p>
                 </div>

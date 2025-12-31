@@ -107,7 +107,7 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.supplier || !formData.expectedDelivery || items.length === 0) {
+    if (!formData.supplier || items.length === 0) {
       return;
     }
 
@@ -118,7 +118,7 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
         poNumber: formData.poNumber,
         supplier: formData.supplier,
         orderDate: formData.poDate,
-        expectedDelivery: formData.expectedDelivery,
+        expectedDelivery: formData.poDate, // Use order date as default
         items,
         totalAmount,
         notes: formData.notes
@@ -189,16 +189,6 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="expectedDelivery">Expected Delivery *</Label>
-              <Input
-                id="expectedDelivery"
-                type="date"
-                value={formData.expectedDelivery}
-                onChange={(e) => setFormData({ ...formData, expectedDelivery: e.target.value })}
-                required
-              />
-            </div>
           </div>
 
           {/* Show supplier details if selected */}
