@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Bell } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +14,10 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { formatLocalISODate } from "@/lib/dateUtils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
@@ -39,6 +42,37 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [pendingFollowUps, setPendingFollowUps] = useState(0);
+
+  // Fetch pending follow-ups count
+  useEffect(() => {
+    const fetchPendingFollowUps = async () => {
+      const today = formatLocalISODate();
+      const { count, error } = await supabase
+        .from('invoices')
+        .select('*', { count: 'exact', head: true })
+        .lte('follow_up_date', today)
+        .not('follow_up_date', 'is', null);
+      
+      if (!error && count !== null) {
+        setPendingFollowUps(count);
+      }
+    };
+
+    fetchPendingFollowUps();
+
+    // Subscribe to invoice changes
+    const channel = supabase
+      .channel('sidebar-followups')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, () => {
+        fetchPendingFollowUps();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
@@ -98,6 +132,27 @@ export function AppSidebar() {
                   Hospital Sirhind
                 </p>
               </div>
+
+              {/* Notification Bell */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <NavLink to="/reports" className="relative group">
+                      <div className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 flex items-center justify-center transition-all">
+                        <Bell className="h-4 w-4 text-slate-400 group-hover:text-white transition-colors" />
+                        {pendingFollowUps > 0 && (
+                          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
+                            {pendingFollowUps > 9 ? '9+' : pendingFollowUps}
+                          </span>
+                        )}
+                      </div>
+                    </NavLink>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="bg-slate-800 border-white/10">
+                    <p className="text-xs">{pendingFollowUps} pending follow-ups</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
