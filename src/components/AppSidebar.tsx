@@ -57,7 +57,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0`} collapsible="icon">
-      <SidebarContent className="relative overflow-hidden">
+      <SidebarContent className="relative overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20">
         {/* Liquid Glass Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/95 via-slate-900/98 to-slate-950 backdrop-blur-xl" />
         
