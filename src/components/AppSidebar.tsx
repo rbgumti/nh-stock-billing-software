@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +14,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
 import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
@@ -39,16 +39,6 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
   const [sheetOpen, setSheetOpen] = useState(false);
-  const quickAddRef = useRef<HTMLDivElement>(null);
-  const navigateRef = useRef<HTMLDivElement>(null);
-
-  const scrollToQuickAdd = () => {
-    quickAddRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const scrollToNavigate = () => {
-    navigateRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
@@ -199,21 +189,11 @@ export function AppSidebar() {
         </div>
         
         {/* Navigation with Liquid Glass Items */}
-        <SidebarGroup ref={navigateRef} className="relative z-10 px-2 pt-4 scroll-mt-4">
+        <SidebarGroup className="relative z-10 px-2 pt-4">
           <SidebarGroupLabel className="text-slate-500/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
             <div className="w-8 h-[1px] bg-gradient-to-r from-violet-500/50 to-transparent" />
             <span>Navigate</span>
             <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            {!collapsed && (
-              <button
-                onClick={scrollToQuickAdd}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/30 transition-all group"
-                title="Jump to Quick Add"
-              >
-                <span className="text-[9px] text-amber-400 font-medium">Quick Add</span>
-                <ChevronDown className="h-3 w-3 text-amber-400 group-hover:translate-y-0.5 transition-transform" />
-              </button>
-            )}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1.5">
@@ -282,21 +262,11 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Quick Actions with Glass Cards */}
-        <SidebarGroup ref={quickAddRef} className="relative z-10 mt-4 px-2 scroll-mt-4">
+        <SidebarGroup className="relative z-10 mt-4 px-2">
           <SidebarGroupLabel className="text-slate-500/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
             <div className="w-6 h-[1px] bg-gradient-to-r from-amber-500/50 to-transparent" />
             <span>Quick Add</span>
             <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            {!collapsed && (
-              <button
-                onClick={scrollToNavigate}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/30 transition-all group"
-                title="Back to Navigate"
-              >
-                <span className="text-[9px] text-violet-400 font-medium">Navigate</span>
-                <ChevronUp className="h-3 w-3 text-violet-400 group-hover:-translate-y-0.5 transition-transform" />
-              </button>
-            )}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1.5">
