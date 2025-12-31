@@ -572,11 +572,7 @@ export default function EditInvoice() {
                         min="1"
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
-                        readOnly={!!(item.frequency && item.durationDays && item.durationDays > 0)}
                       />
-                      {item.frequency && item.durationDays && item.durationDays > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">Auto-calculated</p>
-                      )}
                     </div>
                   </div>
                   
