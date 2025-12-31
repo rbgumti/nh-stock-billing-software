@@ -858,17 +858,17 @@ export default function Stock() {
       <FloatingOrbs />
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal via-cyan to-lime bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
             Stock Management
           </h1>
           <p className="text-muted-foreground mt-2">Monitor and manage your inventory, purchase orders, and goods receipt</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setShowAddForm(true)} className="bg-gradient-to-r from-lime-500 to-emerald-500 hover:shadow-lg hover:shadow-lime-500/25 text-white font-semibold">
+          <Button onClick={() => setShowAddForm(true)} className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
             <Plus className="h-4 w-4 mr-2" />
             Add Stock Item
           </Button>
-          <Button onClick={() => setShowPOForm(true)} variant="outline" className="glass-subtle border-teal/20 hover:border-teal/40">
+          <Button onClick={() => setShowPOForm(true)} variant="outline" className="glass-subtle border-purple/20 hover:border-purple/40">
             <FileText className="h-4 w-4 mr-2" />
             Create PO
           </Button>
@@ -878,25 +878,25 @@ export default function Stock() {
       {/* Tabs for different sections */}
       <Tabs defaultValue="stock" className="w-full">
         <TabsList className="grid w-full grid-cols-5 glass-strong border-0 p-1">
-          <TabsTrigger value="stock" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-cyan data-[state=active]:text-white">Stock Items</TabsTrigger>
+          <TabsTrigger value="stock" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple data-[state=active]:to-cyan data-[state=active]:text-white">Stock Items</TabsTrigger>
           <TabsTrigger value="purchase-orders" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan data-[state=active]:to-teal data-[state=active]:text-white">Purchase Orders</TabsTrigger>
-          <TabsTrigger value="grn" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-lime-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white">Goods Receipt</TabsTrigger>
-          <TabsTrigger value="payments" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald data-[state=active]:to-teal data-[state=active]:text-white">Payments</TabsTrigger>
-          <TabsTrigger value="suppliers" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white">Suppliers</TabsTrigger>
+          <TabsTrigger value="grn" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-emerald data-[state=active]:text-white">Goods Receipt</TabsTrigger>
+          <TabsTrigger value="payments" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gold data-[state=active]:to-orange data-[state=active]:text-white">Payments</TabsTrigger>
+          <TabsTrigger value="suppliers" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink data-[state=active]:to-purple data-[state=active]:text-white">Suppliers</TabsTrigger>
         </TabsList>
 
         <TabsContent value="stock" className="space-y-6">
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-teal/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
               <CardContent className="pt-6 relative">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Items</p>
-                    <p className="text-2xl font-bold bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">{stockItems.length}</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{stockItems.length}</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-r from-teal to-cyan">
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-cyan">
                     <Package className="h-5 w-5 text-white" />
                   </div>
                 </div>
@@ -904,16 +904,16 @@ export default function Stock() {
             </Card>
             
             <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-destructive/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
               <CardContent className="pt-6 relative">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Low Stock Items</p>
-                    <p className="text-2xl font-bold bg-gradient-to-r from-orange to-destructive bg-clip-text text-transparent">
+                    <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">
                       {stockItems.filter(item => item.currentStock <= item.minimumStock).length}
                     </p>
                   </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-destructive">
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-pink">
                     <AlertTriangle className="h-5 w-5 text-white" />
                   </div>
                 </div>

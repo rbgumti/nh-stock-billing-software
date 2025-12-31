@@ -403,8 +403,8 @@ export default function Invoices() {
     return (
       <div className="p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="p-4 rounded-full bg-gradient-to-r from-teal/10 to-lime/10 w-fit mx-auto mb-4 animate-pulse">
-            <Receipt className="h-8 w-8 text-teal" />
+          <div className="p-4 rounded-full bg-gradient-to-r from-purple/10 to-cyan/10 w-fit mx-auto mb-4 animate-pulse">
+            <Receipt className="h-8 w-8 text-purple" />
           </div>
           <p className="text-lg text-muted-foreground">Loading invoices...</p>
         </div>
@@ -417,12 +417,12 @@ export default function Invoices() {
       <FloatingOrbs />
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal via-cyan to-lime bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
             Invoices
           </h1>
           <p className="text-muted-foreground mt-2">Manage billing and payments</p>
         </div>
-        <Button asChild className="bg-gradient-to-r from-lime-500 to-emerald-500 hover:shadow-lg hover:shadow-lime-500/25 text-white font-semibold">
+        <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
           <Link to="/invoices/new">
             <Plus className="h-4 w-4 mr-2" />
             Create Invoice
@@ -433,30 +433,30 @@ export default function Invoices() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-teal/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-teal to-cyan">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-cyan">
                 <Receipt className="h-5 w-5 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">{filteredInvoices.length}</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{filteredInvoices.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
         <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-lime/10 via-transparent to-emerald/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-lime-500 to-emerald-500">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-gold to-orange">
                 <Receipt className="h-5 w-5 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-lime-500 to-emerald-500 bg-clip-text text-transparent">₹{totalAmount.toFixed(2)}</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{totalAmount.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
@@ -478,15 +478,15 @@ export default function Invoices() {
         </Card>
 
         <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
           <CardContent className="pt-6 relative">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-yellow-500 to-orange">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-pink">
                 <Receipt className="h-5 w-5 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-yellow-500 to-orange bg-clip-text text-transparent">₹{pendingAmount.toFixed(2)}</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">₹{pendingAmount.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
@@ -495,16 +495,16 @@ export default function Invoices() {
 
       {/* Search and Filter */}
       <Card className="glass-strong border-0 overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-teal/5 via-transparent to-lime/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-transparent to-cyan/5" />
         <CardContent className="pt-6 relative">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-teal" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-purple" />
               <Input
                 placeholder="Search by invoice ID or patient name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 glass-subtle border-teal/20 focus:border-teal/40"
+                className="pl-10 glass-subtle border-purple/20 focus:border-purple/40"
               />
             </div>
             <div className="flex gap-2">
@@ -515,8 +515,8 @@ export default function Invoices() {
                   size="sm"
                   onClick={() => setStatusFilter(status)}
                   className={statusFilter === status 
-                    ? "bg-gradient-to-r from-teal to-lime text-white border-0" 
-                    : "glass-subtle border-teal/20 hover:border-teal/40"
+                    ? "bg-gradient-to-r from-purple to-cyan text-white border-0" 
+                    : "glass-subtle border-purple/20 hover:border-purple/40"
                   }
                 >
                   {status === "all" ? "All Status" : status}
@@ -530,16 +530,16 @@ export default function Invoices() {
       {/* Bulk Action Bar */}
       {selectedIds.size > 0 && (
         <Card className="glass-strong border-0 overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-lime/10 via-transparent to-emerald/10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-gold/10 via-transparent to-orange/10" />
           <CardContent className="py-3 flex items-center justify-between relative">
-            <span className="text-sm font-medium text-lime-600">
+            <span className="text-sm font-medium text-gold">
               {selectedIds.size} invoice(s) selected
             </span>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())} className="glass-subtle border-teal/20 hover:border-teal/40">
+              <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())} className="glass-subtle border-purple/20 hover:border-purple/40">
                 Clear Selection
               </Button>
-              <Button size="sm" onClick={bulkMarkAsPaid} className="bg-gradient-to-r from-lime-500 to-emerald-500 hover:shadow-lg hover:shadow-lime-500/25 text-white">
+              <Button size="sm" onClick={bulkMarkAsPaid} className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white">
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Mark as Paid
               </Button>
@@ -564,30 +564,30 @@ export default function Invoices() {
         {filteredInvoices.map((invoice: any, index: number) => (
           <Card key={invoice.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
             <div className={`absolute inset-0 bg-gradient-to-br ${
-              index % 4 === 0 ? 'from-teal/5 via-transparent to-cyan/5' :
-              index % 4 === 1 ? 'from-cyan/5 via-transparent to-lime/5' :
-              index % 4 === 2 ? 'from-lime/5 via-transparent to-emerald/5' :
-              'from-emerald/5 via-transparent to-teal/5'
+              index % 4 === 0 ? 'from-purple/5 via-transparent to-cyan/5' :
+              index % 4 === 1 ? 'from-cyan/5 via-transparent to-teal/5' :
+              index % 4 === 2 ? 'from-gold/5 via-transparent to-orange/5' :
+              'from-pink/5 via-transparent to-purple/5'
             } opacity-50 group-hover:opacity-100 transition-opacity`} />
             <CardContent className="pt-6 relative">
               <div className="flex gap-4 items-start">
                 <Checkbox
                   checked={selectedIds.has(invoice.id)}
                   onCheckedChange={() => toggleSelect(invoice.id)}
-                  className="mt-1 border-teal/40 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-teal data-[state=checked]:to-lime"
+                  className="mt-1 border-purple/40 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple data-[state=checked]:to-cyan"
                 />
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">{invoice.id}</h3>
+                      <h3 className="text-lg font-semibold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{invoice.id}</h3>
                       <p className="text-muted-foreground">{invoice.patientName}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold bg-gradient-to-r from-lime-500 to-emerald-500 bg-clip-text text-transparent">₹{invoice.amount.toFixed(2)}</p>
+                      <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{invoice.amount.toFixed(2)}</p>
                       <Badge className={`${
                         invoice.status === 'Paid' ? 'bg-gradient-to-r from-emerald to-teal text-white border-0' :
-                        invoice.status === 'Pending' ? 'bg-gradient-to-r from-yellow-500 to-orange text-white border-0' :
-                        'bg-gradient-to-r from-destructive to-orange text-white border-0'
+                        invoice.status === 'Pending' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
+                        'bg-gradient-to-r from-pink to-destructive text-white border-0'
                       }`}>
                         {invoice.status}
                       </Badge>

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { PersonalInformationForm } from "@/components/forms/PersonalInformationForm";
 import { ContactInformationForm } from "@/components/forms/ContactInformationForm";
 import { EmergencyContactForm } from "@/components/forms/EmergencyContactForm";
@@ -30,11 +30,8 @@ export default function EditPatient() {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-teal border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-muted-foreground">Loading patient data...</p>
-        </div>
+      <div className="p-6 flex items-center justify-center">
+        <p className="text-lg text-gray-600">Loading patient data...</p>
       </div>
     );
   }
@@ -42,17 +39,12 @@ export default function EditPatient() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center space-x-4">
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={() => navigate(-1)}
-          className="border-teal/30 hover:bg-teal/10 hover:border-teal"
-        >
-          <ArrowLeft className="h-4 w-4 text-teal" />
+        <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal via-cyan to-lime bg-clip-text text-transparent">Edit Patient</h1>
-          <p className="text-muted-foreground mt-1">Update patient information below</p>
+          <h1 className="text-3xl font-bold text-gray-900">Edit Patient</h1>
+          <p className="text-gray-600 mt-2">Update patient information below</p>
         </div>
       </div>
 
@@ -84,19 +76,10 @@ export default function EditPatient() {
         />
 
         <div className="flex space-x-4">
-          <Button 
-            type="submit" 
-            className="flex-1 bg-gradient-to-r from-lime to-emerald hover:from-lime/90 hover:to-emerald/90 text-white shadow-lg hover:shadow-lime/25 transition-all duration-300"
-          >
-            <Save className="mr-2 h-4 w-4" />
+          <Button type="submit" className="flex-1">
             Update Patient
           </Button>
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="border-teal/30 hover:bg-teal/10 hover:border-teal"
-          >
+          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
             Cancel
           </Button>
         </div>
