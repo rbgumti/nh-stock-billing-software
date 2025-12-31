@@ -1,7 +1,7 @@
 
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UserPlus } from "lucide-react";
 import { PersonalInformationForm } from "@/components/forms/PersonalInformationForm";
 import { ContactInformationForm } from "@/components/forms/ContactInformationForm";
 import { EmergencyContactForm } from "@/components/forms/EmergencyContactForm";
@@ -16,12 +16,17 @@ export default function NewPatient() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center space-x-4">
-        <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={() => navigate(-1)}
+          className="border-teal/30 hover:bg-teal/10 hover:border-teal"
+        >
+          <ArrowLeft className="h-4 w-4 text-teal" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Add New Patient</h1>
-          <p className="text-gray-600 mt-2">Enter patient information below</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal via-cyan to-lime bg-clip-text text-transparent">Add New Patient</h1>
+          <p className="text-muted-foreground mt-1">Enter patient information below</p>
         </div>
       </div>
 
@@ -80,10 +85,19 @@ export default function NewPatient() {
         />
 
         <div className="flex space-x-4">
-          <Button type="submit" className="flex-1">
+          <Button 
+            type="submit" 
+            className="flex-1 bg-gradient-to-r from-teal to-cyan hover:from-teal/90 hover:to-cyan/90 text-white shadow-lg hover:shadow-teal/25 transition-all duration-300"
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
             Add Patient
           </Button>
-          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="border-teal/30 hover:bg-teal/10 hover:border-teal"
+          >
             Cancel
           </Button>
         </div>
