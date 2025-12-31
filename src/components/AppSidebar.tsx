@@ -80,11 +80,11 @@ export function AppSidebar() {
               {/* Logo - Rounded with sidebar-matching background */}
               <div className="relative group flex-shrink-0">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-500/0 to-cyan-500/0 group-hover:from-violet-500/40 group-hover:to-cyan-500/40 blur-md transition-all duration-300" />
-                <div className="relative w-12 h-12 rounded-full bg-slate-800/80 border border-white/10 group-hover:border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                <div className="relative w-14 h-14 rounded-full bg-slate-800/80 border border-white/10 group-hover:border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.3)]">
                   <img 
                     src={navjeevanLogo} 
                     alt="Navjeevan Hospital Logo" 
-                    className="w-10 h-10 object-contain transition-transform duration-300 group-hover:scale-110"
+                    className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-110"
                   />
                 </div>
               </div>
@@ -103,11 +103,11 @@ export function AppSidebar() {
             <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-500/0 to-cyan-500/0 group-hover:from-violet-500/40 group-hover:to-cyan-500/40 blur-md transition-all duration-300" />
-                <div className="relative w-10 h-10 rounded-full bg-slate-800/80 border border-white/10 group-hover:border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                <div className="relative w-11 h-11 rounded-full bg-slate-800/80 border border-white/10 group-hover:border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
                   <img 
                     src={navjeevanLogo}
                     alt="NH Logo" 
-                    className="w-8 h-8 object-contain transition-transform duration-200 group-hover:scale-110"
+                    className="w-9 h-9 object-contain transition-transform duration-200 group-hover:scale-110"
                   />
                 </div>
               </div>
