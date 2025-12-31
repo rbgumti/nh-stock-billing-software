@@ -232,7 +232,7 @@ export default function Patients() {
       <FloatingOrbs />
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal via-cyan to-lime bg-clip-text text-transparent">
             Patients
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -242,11 +242,11 @@ export default function Patients() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowImport(!showImport)} className="glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5">
-            <Upload className="h-4 w-4 mr-2 text-purple" />
+          <Button variant="outline" onClick={() => setShowImport(!showImport)} className="glass-subtle border-teal/20 hover:border-teal/40 hover:bg-teal/5">
+            <Upload className="h-4 w-4 mr-2 text-teal" />
             Import Excel
           </Button>
-          <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
+          <Button asChild className="bg-gradient-to-r from-lime-500 to-emerald-500 hover:shadow-lg hover:shadow-lime-500/25 text-white font-semibold">
             <Link to="/patients/new">
               <Plus className="h-4 w-4 mr-2" />
               Add Patient
@@ -264,16 +264,16 @@ export default function Patients() {
 
       {/* Search */}
       <Card className="glass-strong border-0 overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-transparent to-cyan/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-teal/5 via-transparent to-lime/5" />
         <CardContent className="pt-6 relative">
           <Tabs value={searchTab} onValueChange={(v) => setSearchTab(v as "general" | "fileno")}>
             <div className="flex items-center justify-between mb-4">
-              <TabsList className="glass-subtle border-purple/20">
-                <TabsTrigger value="general" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple data-[state=active]:to-cyan data-[state=active]:text-white">
+              <TabsList className="glass-subtle border-teal/20">
+                <TabsTrigger value="general" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-cyan data-[state=active]:text-white">
                   <Search className="h-4 w-4" />
                   General Search
                 </TabsTrigger>
-                <TabsTrigger value="fileno" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan data-[state=active]:to-teal data-[state=active]:text-white">
+                <TabsTrigger value="fileno" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-lime-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white">
                   <FileText className="h-4 w-4" />
                   File No. Search
                 </TabsTrigger>
@@ -376,10 +376,10 @@ export default function Patients() {
           {patients.map((patient, index) => (
             <Card key={patient.id} className="glass-strong border-0 overflow-hidden relative hover:shadow-glow transition-all duration-300 group">
               <div className={`absolute inset-0 bg-gradient-to-br ${
-                index % 4 === 0 ? 'from-purple/10 via-transparent to-cyan/10' :
-                index % 4 === 1 ? 'from-cyan/10 via-transparent to-teal/10' :
-                index % 4 === 2 ? 'from-gold/10 via-transparent to-orange/10' :
-                'from-pink/10 via-transparent to-purple/10'
+                index % 4 === 0 ? 'from-teal/10 via-transparent to-cyan/10' :
+                index % 4 === 1 ? 'from-cyan/10 via-transparent to-lime/10' :
+                index % 4 === 2 ? 'from-lime/10 via-transparent to-emerald/10' :
+                'from-emerald/10 via-transparent to-teal/10'
               } opacity-50 group-hover:opacity-100 transition-opacity`} />
               <CardHeader className="relative">
                 <div className="flex justify-between items-start">
@@ -390,9 +390,9 @@ export default function Patients() {
                   <div className="flex flex-col gap-1 items-end">
                     {patient.category && (
                       <Badge className={`${
-                        patient.category === 'BNX' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
-                        patient.category === 'TPN' ? 'bg-gradient-to-r from-cyan to-teal text-white border-0' :
-                        patient.category === 'PSHY' ? 'bg-gradient-to-r from-purple to-pink text-white border-0' :
+                        patient.category === 'BNX' ? 'bg-gradient-to-r from-cyan to-teal text-white border-0' :
+                        patient.category === 'TPN' ? 'bg-gradient-to-r from-lime-500 to-emerald-500 text-white border-0' :
+                        patient.category === 'PSHY' ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white border-0' :
                         'bg-gradient-to-r from-emerald to-teal text-white border-0'
                       }`}>
                         {patient.category}
@@ -413,14 +413,14 @@ export default function Patients() {
                     </div>
                   )}
                   <div className="flex items-center text-sm text-muted-foreground">
-                    <Phone className="h-4 w-4 mr-2 text-cyan" />
+                    <Phone className="h-4 w-4 mr-2 text-teal" />
                     {formatPhone(patient.phone) || 'N/A'}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     <span className="font-medium text-foreground">Aadhar:</span> {patient.aadhar_card || 'N/A'}
                   </div>
                   <div className="flex space-x-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1 glass-subtle border-cyan/20 hover:border-cyan/40 hover:bg-cyan/5" asChild>
+                    <Button variant="outline" size="sm" className="flex-1 glass-subtle border-teal/20 hover:border-teal/40 hover:bg-teal/5" asChild>
                       <Link to={`/patients/view/${patient.id}`}>
                         <Eye className="h-3 w-3 mr-1" />
                         View
