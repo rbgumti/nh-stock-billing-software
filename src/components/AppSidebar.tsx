@@ -77,14 +77,15 @@ export function AppSidebar() {
           
           {!collapsed ? (
             <div className="flex items-center gap-2 relative z-10 px-0.5">
-              {/* Logo - Clean with no background */}
+              {/* Logo - Rounded with sidebar-matching background */}
               <div className="relative group flex-shrink-0">
-                <img 
-                  src={navjeevanLogo} 
-                  alt="Navjeevan Hospital Logo" 
-                  className="w-14 h-14 object-contain relative z-10 transition-transform duration-300 group-hover:scale-105"
-                  style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.3))' }}
-                />
+                <div className="w-12 h-12 rounded-full bg-slate-800/80 border border-white/10 flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={navjeevanLogo} 
+                    alt="Navjeevan Hospital Logo" 
+                    className="w-10 h-10 object-contain transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
               </div>
               
               {/* Hospital Name - Shifted right */}
@@ -100,12 +101,13 @@ export function AppSidebar() {
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
-                <img 
-                  src={navjeevanLogo}
-                  alt="NH Logo" 
-                  className="w-11 h-11 object-contain relative z-10 transition-transform duration-200 group-hover:scale-110"
-                  style={{ filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.3))' }}
-                />
+                <div className="w-10 h-10 rounded-full bg-slate-800/80 border border-white/10 flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={navjeevanLogo}
+                    alt="NH Logo" 
+                    className="w-8 h-8 object-contain transition-transform duration-200 group-hover:scale-110"
+                  />
+                </div>
               </div>
               
               {/* Slide Panel Trigger when collapsed */}
