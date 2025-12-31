@@ -122,62 +122,62 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+        <div ref={printRef} className="p-4 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '10px', lineHeight: '1.3' }}>
           {/* Header Row */}
-          <div className="flex justify-between text-[11px] mb-2">
+          <div className="flex justify-between text-[9px] mb-1">
             <span>Regd. Govt of Punjab</span>
             <span>Mob_ 6284942412</span>
           </div>
 
           {/* Hospital Header with Logo */}
-          <div className="flex items-center justify-center gap-4 my-3">
-            <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
-            <h1 className="text-2xl font-bold">NAVJEEVAN HOSPITAL</h1>
-            <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
+          <div className="flex items-center justify-center gap-2 my-2">
+            <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
+            <h1 className="text-lg font-bold">NAVJEEVAN HOSPITAL</h1>
+            <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
           </div>
 
           {/* Address Row */}
-          <p className="text-center text-[11px] mb-1">
-            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dr. Metali Bhatti
+          <p className="text-center text-[9px] mb-0.5">
+            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;Dr. Metali Bhatti
           </p>
 
           {/* Licence Row */}
-          <p className="text-center text-[10px] mb-4">
+          <p className="text-center text-[8px] mb-2">
             Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024
           </p>
 
           {/* REF NO and PO NO */}
-          <div className="text-center text-[12px] mb-2">
+          <div className="text-center text-[10px] mb-1">
             <p>REF NO – {poNumber}</p>
           </div>
-          <div className="flex justify-between text-[12px] mb-5 px-16">
+          <div className="flex justify-between text-[10px] mb-3 px-10">
             <span>PO NO {poNumber}</span>
             <span>Date- {formatDate(poDate)}</span>
           </div>
 
           {/* To Section */}
-          <div className="text-[11px] mb-4 leading-relaxed ml-24">
-            <p className="mb-1">To</p>
+          <div className="text-[9px] mb-2 leading-snug ml-16">
+            <p className="mb-0.5">To</p>
             <p className="font-bold">VYADO HEALTHCARE PVT LTD</p>
             <p>Gali no.4,VinodNagar,Hisar</p>
             <p>125001</p>
           </div>
 
           {/* Subject Section */}
-          <div className="text-[11px] mb-3 ml-24">
+          <div className="text-[9px] mb-2 ml-16">
             <p>Subject: Medicine order</p>
-            <p className="mt-2">Respected Sir/Ma&apos;am</p>
-            <p className="mt-2">Kindly provide us :-</p>
+            <p className="mt-1">Respected Sir/Ma&apos;am</p>
+            <p className="mt-1">Kindly provide us :-</p>
           </div>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-5 text-[11px]">
+          <table className="w-full border-collapse mb-2 text-[9px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black p-2 text-center">SR.NO.</th>
-                <th className="border border-black p-2 text-center">PRODUCT NAME</th>
-                <th className="border border-black p-2 text-center">packing</th>
-                <th className="border border-black p-2 text-center">QTY.</th>
+                <th className="border border-black px-1 py-0.5 text-center">SR.NO.</th>
+                <th className="border border-black px-1 py-0.5 text-center">PRODUCT NAME</th>
+                <th className="border border-black px-1 py-0.5 text-center">packing</th>
+                <th className="border border-black px-1 py-0.5 text-center">QTY.</th>
               </tr>
             </thead>
             <tbody>
@@ -187,10 +187,10 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
                 
                 return (
                   <tr key={index}>
-                    <td className="border border-black p-2 text-center">{index + 1}</td>
-                    <td className="border border-black p-2">{item.stockItemName}</td>
-                    <td className="border border-black p-2 text-center">{packing}</td>
-                    <td className="border border-black p-2 text-center">{item.quantity}TAB</td>
+                    <td className="border border-black px-1 py-0.5 text-center">{index + 1}</td>
+                    <td className="border border-black px-1 py-0.5">{item.stockItemName}</td>
+                    <td className="border border-black px-1 py-0.5 text-center">{packing}</td>
+                    <td className="border border-black px-1 py-0.5 text-center">{item.quantity}TAB</td>
                   </tr>
                 );
               })}
@@ -198,16 +198,16 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </table>
 
           {/* Footer Section */}
-          <div className="text-[11px] mt-6 ml-24 leading-relaxed">
+          <div className="text-[9px] mt-3 ml-16 leading-snug">
             <p>For our centre Navjeevan hospital at below written address at the earliest.</p>
-            <p className="mt-3">Address: Navjeevan hospital Opp.Busstand,Vill.Bara,Sirhind,distt. Fatehgarh sahib.</p>
+            <p className="mt-1">Address: Navjeevan hospital Opp.Busstand,Vill.Bara,Sirhind,distt. Fatehgarh sahib.</p>
           </div>
 
           {/* Signature Section */}
-          <div className="text-[11px] mt-8 ml-24 leading-relaxed">
+          <div className="text-[9px] mt-4 ml-16 leading-snug">
             <p>Thanking you</p>
             <p>Yours Sincerely,</p>
-            <p className="mt-3">Navjeevan Hospital,</p>
+            <p className="mt-1">Navjeevan Hospital,</p>
             <p>OPP.NEW BUS STAND,</p>
             <p>G.T.ROAD, BARA,SIRHIND,</p>
           </div>

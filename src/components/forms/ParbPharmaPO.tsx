@@ -129,64 +129,64 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+        <div ref={printRef} className="p-4 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '10px', lineHeight: '1.3' }}>
           {/* Header Row */}
-          <div className="flex justify-between text-[11px] mb-2">
+          <div className="flex justify-between text-[9px] mb-1">
             <span>Regd. Govt of Punjab</span>
             <span>Mob_ 6284942412</span>
           </div>
 
           {/* Hospital Header with Logo */}
-          <div className="flex items-center justify-center gap-4 my-3">
-            <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
-            <h1 className="text-2xl font-bold">NAVJEEVAN HOSPITAL</h1>
-            <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
+          <div className="flex items-center justify-center gap-2 my-2">
+            <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
+            <h1 className="text-lg font-bold">NAVJEEVAN HOSPITAL</h1>
+            <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
           </div>
 
           {/* Address Row */}
-          <p className="text-center text-[11px] mb-1">
-            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dr. Metalli Bhatti
+          <p className="text-center text-[9px] mb-0.5">
+            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;Dr. Metalli Bhatti
           </p>
 
           {/* Licence Row */}
-          <p className="text-center text-[10px] mb-4">
+          <p className="text-center text-[8px] mb-2">
             Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024
           </p>
 
           {/* PO Number and Date Row */}
-          <div className="flex justify-between font-bold text-[12px] mb-5">
+          <div className="flex justify-between font-bold text-[10px] mb-3">
             <span>P.O  NO_ {poNumber}</span>
             <span>DATE - {formatDate(poDate)}</span>
           </div>
 
           {/* To Section */}
-          <div className="text-[11px] mb-4 leading-relaxed">
-            <p className="mb-1">To,</p>
+          <div className="text-[9px] mb-2 leading-snug">
+            <p className="mb-0.5">To,</p>
             <p className="font-bold">PARB PHARMACEUTICALS PVT. LTD.</p>
             <p>E-9,INDUSTRIAL AREA SIIDCUL,SILAQULI</p>
             <p>DEHRADUN UTTARAKHAND</p>
           </div>
 
           {/* Subject */}
-          <p className="text-[11px] mb-3">Subject: purchase order.</p>
+          <p className="text-[9px] mb-1">Subject: purchase order.</p>
 
           {/* Salutation */}
-          <p className="text-[11px] mb-3">Dear sir,ma&apos;am</p>
+          <p className="text-[9px] mb-1">Dear sir,ma&apos;am</p>
 
           {/* Intro Paragraph */}
-          <p className="text-[11px] text-justify mb-4 leading-relaxed">
+          <p className="text-[9px] text-justify mb-2 leading-snug">
             We hereby placing a purchase order , Terms and Conditions will remain same as Our discussion on phonically. payment of product shall be done through cheque to your bank account. The name and composition of product give below, please do the supply earlier as possible.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-5 text-[11px]">
+          <table className="w-full border-collapse mb-2 text-[9px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black p-2 text-center">S. No.</th>
-                <th className="border border-black p-2 text-center">Product Name</th>
-                <th className="border border-black p-2 text-center">composition</th>
-                <th className="border border-black p-2 text-center">QTY IN TABLETS</th>
-                <th className="border border-black p-2 text-center">PACKING</th>
+                <th className="border border-black px-1 py-0.5 text-center">S. No.</th>
+                <th className="border border-black px-1 py-0.5 text-center">Product Name</th>
+                <th className="border border-black px-1 py-0.5 text-center">composition</th>
+                <th className="border border-black px-1 py-0.5 text-center">QTY IN TABLETS</th>
+                <th className="border border-black px-1 py-0.5 text-center">PACKING</th>
               </tr>
             </thead>
             <tbody>
@@ -199,11 +199,11 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
                 
                 return (
                   <tr key={index}>
-                    <td className="border border-black p-2 text-center">{index + 1}.</td>
-                    <td className="border border-black p-2">{item.stockItemName}</td>
-                    <td className="border border-black p-2">{stockItem?.composition || '-'}</td>
-                    <td className="border border-black p-2 text-right">{qtyInTablets.toLocaleString()}</td>
-                    <td className="border border-black p-2 text-center">{packing}</td>
+                    <td className="border border-black px-1 py-0.5 text-center">{index + 1}.</td>
+                    <td className="border border-black px-1 py-0.5">{item.stockItemName}</td>
+                    <td className="border border-black px-1 py-0.5">{stockItem?.composition || '-'}</td>
+                    <td className="border border-black px-1 py-0.5 text-right">{qtyInTablets.toLocaleString()}</td>
+                    <td className="border border-black px-1 py-0.5 text-center">{packing}</td>
                   </tr>
                 );
               })}
@@ -211,20 +211,18 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
           </table>
 
           {/* Undertaking */}
-          <p className="font-bold text-[11px] mb-2 text-right">UNDERTAKING</p>
-          <p className="text-[10px] text-justify leading-relaxed mb-6">
+          <p className="font-bold text-[9px] mb-1 text-right">UNDERTAKING</p>
+          <p className="text-[8px] text-justify leading-snug mb-3">
             We hereby confirm that the products which we intend to buy from PARA PHARMACEUTICALS PVT. LTD. E-9,INDUSTRIAL AREA SIIDCUL,SILAQUI DEHRADUN UTTARAKHAND INDIA Our P.O.NO {poNumber} .dt- {formatDate(poDate)}.These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only ,on our License no PSMHC/Pb./2024/863.We are full aware these products containing controlled substance as per Narcotic drugs &amp; psychotropic substance Act 1985,and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation &amp;for its sale within india only &amp; not meant for export.
           </p>
 
           {/* Date and Signature Section */}
-          <div className="text-[11px] mb-8">
+          <div className="text-[9px] mb-4">
             <p>Date. {formatDate(poDate)}</p>
           </div>
 
-          <p className="text-[11px] mb-2">.</p>
-
           {/* Signature Section */}
-          <div className="flex justify-between items-end mt-8 text-[11px]">
+          <div className="flex justify-between items-end mt-4 text-[9px]">
             <div></div>
             <div className="text-center">
               <p>for Navjeevan hospital, sirhind</p>
