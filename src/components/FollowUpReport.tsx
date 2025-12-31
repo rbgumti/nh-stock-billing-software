@@ -17,21 +17,29 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { Download, Calendar as CalendarIcon, Search, AlertCircle, CheckCircle, CalendarClock } from "lucide-react";
+import { Download, Calendar as CalendarIcon, Search, AlertCircle, CheckCircle, CalendarClock, Settings, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { loadAllPatients, Patient, formatPhone } from "@/lib/patientUtils";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import * as XLSX from "xlsx";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, addDays, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface FollowUpData {
@@ -65,6 +73,13 @@ export default function FollowUpReport() {
   }>({ open: false, item: null });
   const [newFollowUpDate, setNewFollowUpDate] = useState<Date | undefined>();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
+  // Backfill state
+  const [backfillDialog, setBackfillDialog] = useState(false);
+  const [backfillDays, setBackfillDays] = useState("15");
+  const [backfillDateRange, setBackfillDateRange] = useState({ from: "", to: "" });
+  const [backfillPreview, setBackfillPreview] = useState<{ count: number; invoices: any[] } | null>(null);
+  const [backfillLoading, setBackfillLoading] = useState(false);
 
   useEffect(() => {
     loadFollowUpData();
@@ -208,6 +223,119 @@ export default function FollowUpReport() {
     setNewFollowUpDate(new Date(item.followUpDate));
   };
 
+  // Backfill functions
+  const previewBackfill = async () => {
+    setBackfillLoading(true);
+    try {
+      let query = supabase
+        .from("invoices")
+        .select("id, invoice_date, patient_name, follow_up_date")
+        .is("follow_up_date", null);
+
+      if (backfillDateRange.from) {
+        query = query.gte("invoice_date", backfillDateRange.from);
+      }
+      if (backfillDateRange.to) {
+        query = query.lte("invoice_date", backfillDateRange.to);
+      }
+
+      const { data, error } = await query.order("invoice_date", { ascending: false });
+
+      if (error) throw error;
+
+      setBackfillPreview({
+        count: data?.length || 0,
+        invoices: data?.slice(0, 10) || [], // Show first 10 for preview
+      });
+    } catch (error) {
+      console.error("Error previewing backfill:", error);
+      toast.error("Failed to load preview");
+    } finally {
+      setBackfillLoading(false);
+    }
+  };
+
+  const executeBackfill = async () => {
+    if (!backfillPreview || backfillPreview.count === 0) return;
+
+    setBackfillLoading(true);
+    try {
+      const daysToAdd = parseInt(backfillDays);
+      
+      // Fetch all invoices to update
+      let query = supabase
+        .from("invoices")
+        .select("id, invoice_date")
+        .is("follow_up_date", null);
+
+      if (backfillDateRange.from) {
+        query = query.gte("invoice_date", backfillDateRange.from);
+      }
+      if (backfillDateRange.to) {
+        query = query.lte("invoice_date", backfillDateRange.to);
+      }
+
+      const { data: invoices, error: fetchError } = await query;
+
+      if (fetchError) throw fetchError;
+
+      if (!invoices || invoices.length === 0) {
+        toast.info("No invoices to update");
+        return;
+      }
+
+      // Update each invoice with calculated follow-up date
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const invoice of invoices) {
+        const invoiceDate = parseISO(invoice.invoice_date);
+        const followUpDate = formatLocalISODate(addDays(invoiceDate, daysToAdd));
+
+        const { error } = await supabase
+          .from("invoices")
+          .update({ follow_up_date: followUpDate })
+          .eq("id", invoice.id);
+
+        if (error) {
+          errorCount++;
+          console.error(`Failed to update invoice ${invoice.id}:`, error);
+        } else {
+          successCount++;
+        }
+      }
+
+      toast.success(`Updated ${successCount} invoices with follow-up dates`);
+      if (errorCount > 0) {
+        toast.warning(`Failed to update ${errorCount} invoices`);
+      }
+
+      // Close dialog and reload data
+      setBackfillDialog(false);
+      setBackfillPreview(null);
+      loadFollowUpData();
+    } catch (error) {
+      console.error("Error executing backfill:", error);
+      toast.error("Failed to backfill follow-up dates");
+    } finally {
+      setBackfillLoading(false);
+    }
+  };
+
+  const openBackfillDialog = () => {
+    // Set default date range to current month
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    setBackfillDateRange({
+      from: formatLocalISODate(firstDay),
+      to: formatLocalISODate(lastDay),
+    });
+    setBackfillPreview(null);
+    setBackfillDialog(true);
+  };
+
   const filteredData = followUpData.filter((item) => {
     const matchesSearch =
       searchTerm === "" ||
@@ -341,10 +469,16 @@ export default function FollowUpReport() {
               <CalendarIcon className="h-5 w-5" />
               Follow-Up Report
             </CardTitle>
-            <Button onClick={exportToExcel}>
-              <Download className="h-4 w-4 mr-2" />
-              Export Excel
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={openBackfillDialog}>
+                <Settings className="h-4 w-4 mr-2" />
+                Backfill Dates
+              </Button>
+              <Button onClick={exportToExcel}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Excel
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -517,6 +651,118 @@ export default function FollowUpReport() {
               disabled={!newFollowUpDate || actionLoading === rescheduleDialog.item?.invoiceId}
             >
               {actionLoading === rescheduleDialog.item?.invoiceId ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Backfill Dialog */}
+      <Dialog open={backfillDialog} onOpenChange={(open) => {
+        if (!open) {
+          setBackfillDialog(false);
+          setBackfillPreview(null);
+        }
+      }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Backfill Follow-Up Dates</DialogTitle>
+            <DialogDescription>
+              Set follow-up dates for invoices that don't have one. The follow-up date will be calculated as invoice date + the number of days you specify.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Invoice Date From</Label>
+                <Input
+                  type="date"
+                  value={backfillDateRange.from}
+                  onChange={(e) =>
+                    setBackfillDateRange((prev) => ({ ...prev, from: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <Label>Invoice Date To</Label>
+                <Input
+                  type="date"
+                  value={backfillDateRange.to}
+                  onChange={(e) =>
+                    setBackfillDateRange((prev) => ({ ...prev, to: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Days to Add for Follow-Up</Label>
+              <Select value={backfillDays} onValueChange={setBackfillDays}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 days</SelectItem>
+                  <SelectItem value="10">10 days</SelectItem>
+                  <SelectItem value="14">14 days</SelectItem>
+                  <SelectItem value="15">15 days</SelectItem>
+                  <SelectItem value="21">21 days</SelectItem>
+                  <SelectItem value="30">30 days</SelectItem>
+                  <SelectItem value="45">45 days</SelectItem>
+                  <SelectItem value="60">60 days</SelectItem>
+                  <SelectItem value="90">90 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              variant="outline"
+              onClick={previewBackfill}
+              disabled={backfillLoading}
+              className="w-full"
+            >
+              <RefreshCw className={cn("h-4 w-4 mr-2", backfillLoading && "animate-spin")} />
+              Preview Changes
+            </Button>
+
+            {backfillPreview && (
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Invoices to Update:</span>
+                  <Badge variant="secondary" className="text-lg">{backfillPreview.count}</Badge>
+                </div>
+                
+                {backfillPreview.invoices.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Sample invoices:</p>
+                    <div className="max-h-40 overflow-auto space-y-1">
+                      {backfillPreview.invoices.map((inv) => (
+                        <div key={inv.id} className="text-sm flex justify-between items-center py-1 border-b last:border-0">
+                          <span>{inv.patient_name}</span>
+                          <span className="text-muted-foreground">
+                            {inv.invoice_date} → {formatLocalISODate(addDays(parseISO(inv.invoice_date), parseInt(backfillDays)))}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    {backfillPreview.count > 10 && (
+                      <p className="text-xs text-muted-foreground">
+                        ...and {backfillPreview.count - 10} more
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBackfillDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={executeBackfill}
+              disabled={!backfillPreview || backfillPreview.count === 0 || backfillLoading}
+            >
+              {backfillLoading ? "Processing..." : `Update ${backfillPreview?.count || 0} Invoices`}
             </Button>
           </DialogFooter>
         </DialogContent>
