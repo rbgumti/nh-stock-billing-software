@@ -17,6 +17,7 @@ import { StockLedger } from "@/components/StockLedger";
 import { ParbPharmaPO } from "@/components/forms/ParbPharmaPO";
 import { NeuroglamPO } from "@/components/forms/NeuroglamPO";
 import { VyadoHealthcarePO } from "@/components/forms/VyadoHealthcarePO";
+import { VeeEssPharmaPO } from "@/components/forms/VeeEssPharmaPO";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
@@ -46,6 +47,7 @@ export default function Stock() {
   const [showParbPharmaPO, setShowParbPharmaPO] = useState<PurchaseOrder | null>(null);
   const [showNeuroglamPO, setShowNeuroglamPO] = useState<PurchaseOrder | null>(null);
   const [showVyadoHealthcarePO, setShowVyadoHealthcarePO] = useState<PurchaseOrder | null>(null);
+  const [showVeeEssPharmaPO, setShowVeeEssPharmaPO] = useState<PurchaseOrder | null>(null);
   const { stockItems, addStockItem, updateStockItem, subscribe } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
@@ -1044,6 +1046,10 @@ export default function Stock() {
                             <FileText className="h-4 w-4 mr-2" />
                             VYADO Healthcare Format
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowVeeEssPharmaPO(po)}>
+                            <FileText className="h-4 w-4 mr-2" />
+                            VEE ESS Pharma Format
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -1638,6 +1644,16 @@ export default function Stock() {
           items={showVyadoHealthcarePO.items}
           stockItems={stockItems}
           onClose={() => setShowVyadoHealthcarePO(null)}
+        />
+      )}
+
+      {showVeeEssPharmaPO && (
+        <VeeEssPharmaPO
+          poNumber={showVeeEssPharmaPO.poNumber}
+          poDate={showVeeEssPharmaPO.orderDate}
+          items={showVeeEssPharmaPO.items}
+          stockItems={stockItems}
+          onClose={() => setShowVeeEssPharmaPO(null)}
         />
       )}
     </div>
