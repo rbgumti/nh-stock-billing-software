@@ -2,130 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* LIQUID GLASS DESIGN SYSTEM
+   A modern glassmorphism theme with fluid animations and vibrant gradients
 */
 
 @layer base {
   :root {
-    --background: 170 30% 97%;
-    --foreground: 180 40% 15%;
+    --background: 200 30% 98%;
+    --foreground: 200 50% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 180 40% 15%;
+    --card-foreground: 200 50% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 180 40% 15%;
+    --popover-foreground: 200 50% 10%;
 
-    --primary: 170 60% 35%;
+    --primary: 175 70% 40%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 68 70% 50%;
-    --secondary-foreground: 180 40% 15%;
+    --secondary: 155 60% 45%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 170 20% 92%;
-    --muted-foreground: 170 15% 45%;
+    --muted: 180 20% 94%;
+    --muted-foreground: 180 15% 45%;
 
-    --accent: 68 70% 50%;
-    --accent-foreground: 180 40% 15%;
+    --accent: 165 65% 45%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 170 20% 88%;
-    --input: 170 20% 88%;
-    --ring: 170 60% 35%;
+    --border: 180 25% 88%;
+    --input: 180 25% 88%;
+    --ring: 175 70% 40%;
 
     --radius: 1rem;
 
-    /* Healthcare Teal Theme Palette */
-    --gold: 68 70% 50%;
-    --navy: 180 50% 20%;
-    --purple: 170 60% 35%;
-    --cyan: 175 65% 45%;
-    --pink: 340 65% 55%;
-    --teal: 170 55% 30%;
-    --orange: 24 90% 55%;
-    --emerald: 165 70% 40%;
-    --lime: 68 70% 50%;
+    /* Liquid Glass Palette */
+    --gold: 45 90% 55%;
+    --navy: 200 60% 20%;
+    --purple: 260 65% 55%;
+    --cyan: 185 75% 48%;
+    --pink: 330 70% 60%;
+    --teal: 175 70% 38%;
+    --orange: 25 95% 55%;
+    --emerald: 155 70% 42%;
+    --lime: 85 70% 50%;
 
-    --sidebar-background: 175 50% 18%;
+    /* Sidebar Glass Theme */
+    --sidebar-background: 200 50% 8%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 68 70% 55%;
-    --sidebar-primary-foreground: 180 50% 15%;
-    --sidebar-accent: 175 45% 25%;
-    --sidebar-accent-foreground: 68 70% 55%;
-    --sidebar-border: 175 40% 30%;
-    --sidebar-ring: 68 70% 55%;
+    --sidebar-primary: 175 70% 50%;
+    --sidebar-primary-foreground: 200 50% 8%;
+    --sidebar-accent: 200 40% 15%;
+    --sidebar-accent-foreground: 175 70% 55%;
+    --sidebar-border: 200 40% 20%;
+    --sidebar-ring: 175 70% 50%;
 
-    /* Liquid Glass Design Tokens */
-    --glass-background: 0 0% 100% / 0.75;
-    --glass-border: 170 50% 70% / 0.4;
-    --glass-shadow: 170 50% 40% / 0.15;
-    --glass-highlight: 0 0% 100% / 0.6;
-    --glass-blur: 24px;
-    --glass-saturation: 200%;
+    /* Liquid Glass Core Tokens */
+    --glass-background: 0 0% 100% / 0.7;
+    --glass-border: 180 50% 80% / 0.5;
+    --glass-shadow: 200 60% 30% / 0.12;
+    --glass-highlight: 0 0% 100% / 0.8;
+    --glass-blur: 20px;
+    --glass-saturation: 180%;
 
-    /* Gradient tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(175 50% 20%), hsl(170 55% 40%));
-    --gradient-secondary: linear-gradient(135deg, hsl(68 70% 50%), hsl(80 65% 55%));
-    --gradient-accent: linear-gradient(135deg, hsl(170 55% 35%), hsl(165 60% 45%));
-    --gradient-gold: linear-gradient(135deg, hsl(68 70% 50%), hsl(55 80% 55%));
+    /* Animated gradient stops */
+    --gradient-start: 175 70% 40%;
+    --gradient-mid: 185 75% 48%;
+    --gradient-end: 155 70% 45%;
   }
 
   .dark {
-    --background: 175 45% 8%;
+    --background: 210 50% 6%;
     --foreground: 0 0% 95%;
 
-    --card: 175 40% 12%;
+    --card: 210 45% 10%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 175 40% 12%;
+    --popover: 210 45% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 170 55% 45%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 175 65% 50%;
+    --primary-foreground: 210 50% 6%;
 
-    --secondary: 68 65% 55%;
-    --secondary-foreground: 180 40% 12%;
+    --secondary: 155 55% 50%;
+    --secondary-foreground: 210 50% 6%;
 
-    --muted: 175 30% 18%;
-    --muted-foreground: 170 20% 60%;
+    --muted: 210 35% 15%;
+    --muted-foreground: 180 20% 60%;
 
-    --accent: 68 65% 55%;
-    --accent-foreground: 180 40% 12%;
+    --accent: 165 60% 50%;
+    --accent-foreground: 210 50% 6%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 175 25% 22%;
-    --input: 175 25% 22%;
-    --ring: 170 55% 45%;
+    --border: 210 30% 18%;
+    --input: 210 30% 18%;
+    --ring: 175 65% 50%;
 
-    --gold: 68 70% 55%;
-    --navy: 180 50% 30%;
-    --purple: 170 55% 45%;
-    --cyan: 175 60% 50%;
-    --pink: 340 65% 60%;
-    --teal: 170 50% 40%;
-    --orange: 24 90% 60%;
-    --emerald: 165 70% 45%;
-    --lime: 68 70% 55%;
+    --glass-background: 210 45% 10% / 0.75;
+    --glass-border: 180 40% 35% / 0.4;
+    --glass-shadow: 210 50% 5% / 0.5;
+    --glass-highlight: 180 40% 50% / 0.15;
 
-    --sidebar-background: 175 50% 10%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 68 70% 55%;
-    --sidebar-primary-foreground: 180 50% 12%;
-    --sidebar-accent: 175 45% 18%;
-    --sidebar-accent-foreground: 68 70% 55%;
-    --sidebar-border: 175 40% 25%;
-    --sidebar-ring: 68 70% 55%;
-
-    /* Dark mode glass tokens */
-    --glass-background: 175 35% 12% / 0.7;
-    --glass-border: 170 40% 40% / 0.35;
-    --glass-shadow: 175 50% 10% / 0.4;
-    --glass-highlight: 170 40% 50% / 0.15;
+    --sidebar-background: 210 50% 5%;
+    --sidebar-accent: 210 45% 12%;
+    --sidebar-border: 210 40% 15%;
   }
 }
 
@@ -135,40 +119,35 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     background-image: 
-      radial-gradient(at 0% 0%, hsl(var(--teal) / 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsl(var(--cyan) / 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsl(var(--lime) / 0.08) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsl(var(--emerald) / 0.1) 0px, transparent 50%),
-      radial-gradient(at 50% 50%, hsl(var(--cyan) / 0.06) 0px, transparent 70%);
+      radial-gradient(ellipse at 0% 0%, hsl(var(--teal) / 0.12) 0px, transparent 50%),
+      radial-gradient(ellipse at 100% 0%, hsl(var(--cyan) / 0.1) 0px, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, hsl(var(--emerald) / 0.08) 0px, transparent 50%),
+      radial-gradient(ellipse at 20% 100%, hsl(var(--lime) / 0.06) 0px, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, hsl(var(--cyan) / 0.04) 0px, transparent 60%);
     background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Selection styling */
+  ::selection {
+    background: hsl(var(--teal) / 0.3);
+    color: hsl(var(--foreground));
   }
 }
 
 @layer components {
-  /* Colorful gradient backgrounds */
-  .bg-gradient-vibrant {
-    background: linear-gradient(135deg, hsl(var(--teal)) 0%, hsl(var(--cyan)) 50%, hsl(var(--emerald)) 100%);
-  }
+  /* ========================================
+     LIQUID GLASS CORE COMPONENTS
+     ======================================== */
 
-  .bg-gradient-warm {
-    background: linear-gradient(135deg, hsl(var(--lime)) 0%, hsl(var(--gold)) 50%, hsl(var(--orange)) 100%);
-  }
-
-  .bg-gradient-cool {
-    background: linear-gradient(135deg, hsl(var(--cyan)) 0%, hsl(var(--teal)) 100%);
-  }
-
-  .bg-gradient-sunset {
-    background: linear-gradient(135deg, hsl(var(--lime)) 0%, hsl(var(--emerald)) 100%);
-  }
-
-  .bg-gradient-aurora {
-    background: linear-gradient(135deg, hsl(var(--teal)) 0%, hsl(var(--cyan)) 50%, hsl(var(--lime)) 100%);
-  }
-
-  /* Liquid Glass Card */
+  /* Base Glass Card */
   .glass {
     background: hsl(var(--glass-background));
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
@@ -176,121 +155,288 @@ All colors MUST be HSL.
     border: 1px solid hsl(var(--glass-border));
     box-shadow: 
       0 8px 32px hsl(var(--glass-shadow)),
-      inset 0 1px 0 hsl(var(--glass-highlight));
+      inset 0 1px 0 hsl(var(--glass-highlight)),
+      inset 0 -1px 0 hsl(0 0% 0% / 0.03);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .glass-subtle {
-    background: hsl(var(--glass-background));
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid hsl(var(--glass-border));
-  }
-
-  .glass-strong {
-    background: hsl(0 0% 100% / 0.9);
-    backdrop-filter: blur(30px) saturate(200%);
-    -webkit-backdrop-filter: blur(30px) saturate(200%);
-    border: 1px solid hsl(var(--glass-border));
+  .glass:hover {
     box-shadow: 
       0 16px 48px hsl(var(--glass-shadow)),
-      inset 0 2px 0 hsl(var(--glass-highlight)),
-      inset 0 -1px 0 hsl(0 0% 0% / 0.05);
+      inset 0 1px 0 hsl(var(--glass-highlight)),
+      inset 0 -1px 0 hsl(0 0% 0% / 0.03);
+    transform: translateY(-2px);
+  }
+
+  /* Strong Glass - More prominent */
+  .glass-strong {
+    background: hsl(0 0% 100% / 0.85);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid hsl(0 0% 100% / 0.4);
+    box-shadow: 
+      0 16px 64px hsl(var(--glass-shadow)),
+      0 0 0 1px hsl(0 0% 100% / 0.1) inset,
+      inset 0 2px 0 hsl(var(--glass-highlight));
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark .glass-strong {
-    background: hsl(262 30% 14% / 0.85);
+    background: hsl(210 45% 12% / 0.85);
+    border: 1px solid hsl(0 0% 100% / 0.08);
   }
 
-  /* Colorful glass variants */
-  .glass-purple {
-    background: hsl(var(--purple) / 0.1);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid hsl(var(--purple) / 0.25);
-    box-shadow: 0 8px 32px hsl(var(--purple) / 0.1);
-  }
-
-  .glass-cyan {
-    background: hsl(var(--cyan) / 0.1);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid hsl(var(--cyan) / 0.25);
-    box-shadow: 0 8px 32px hsl(var(--cyan) / 0.1);
-  }
-
-  .glass-pink {
-    background: hsl(var(--pink) / 0.1);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid hsl(var(--pink) / 0.25);
-    box-shadow: 0 8px 32px hsl(var(--pink) / 0.1);
-  }
-
-  .glass-gold {
-    background: hsl(var(--gold) / 0.1);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid hsl(var(--gold) / 0.3);
-    box-shadow: 0 8px 32px hsl(var(--gold) / 0.15);
-  }
-
-  /* Glass Button Effect */
-  .glass-button {
-    @apply relative overflow-hidden transition-all duration-300;
+  /* Subtle Glass - Lighter effect */
+  .glass-subtle {
     background: hsl(var(--glass-background));
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
     border: 1px solid hsl(var(--glass-border));
   }
 
-  .glass-button:hover {
+  /* ========================================
+     LIQUID GLASS CARDS WITH COLOR TINTS
+     ======================================== */
+
+  .liquid-card {
+    @apply relative overflow-hidden rounded-2xl;
+    background: hsl(0 0% 100% / 0.8);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid hsl(0 0% 100% / 0.35);
+    box-shadow: 
+      0 4px 24px hsl(var(--glass-shadow)),
+      0 0 0 1px hsl(0 0% 100% / 0.1) inset,
+      0 1px 0 hsl(0 0% 100% / 0.6) inset;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .liquid-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      hsl(var(--cyan) / 0.5), 
+      hsl(var(--teal) / 0.5), 
+      transparent
+    );
+  }
+
+  .liquid-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 
+      0 20px 60px hsl(var(--glass-shadow)),
+      0 0 0 1px hsl(var(--teal) / 0.2) inset,
+      0 1px 0 hsl(0 0% 100% / 0.7) inset;
+    border-color: hsl(var(--teal) / 0.3);
+  }
+
+  .dark .liquid-card {
+    background: hsl(210 45% 10% / 0.8);
+    border: 1px solid hsl(0 0% 100% / 0.08);
+  }
+
+  /* Liquid Card Color Variants */
+  .liquid-card-teal {
+    @apply liquid-card;
+    background: linear-gradient(135deg, 
+      hsl(var(--teal) / 0.08) 0%, 
+      hsl(0 0% 100% / 0.8) 50%, 
+      hsl(var(--cyan) / 0.06) 100%
+    );
+  }
+
+  .liquid-card-cyan {
+    @apply liquid-card;
+    background: linear-gradient(135deg, 
+      hsl(var(--cyan) / 0.08) 0%, 
+      hsl(0 0% 100% / 0.8) 50%, 
+      hsl(var(--lime) / 0.06) 100%
+    );
+  }
+
+  .liquid-card-lime {
+    @apply liquid-card;
+    background: linear-gradient(135deg, 
+      hsl(var(--lime) / 0.08) 0%, 
+      hsl(0 0% 100% / 0.8) 50%, 
+      hsl(var(--emerald) / 0.06) 100%
+    );
+  }
+
+  .liquid-card-emerald {
+    @apply liquid-card;
+    background: linear-gradient(135deg, 
+      hsl(var(--emerald) / 0.08) 0%, 
+      hsl(0 0% 100% / 0.8) 50%, 
+      hsl(var(--teal) / 0.06) 100%
+    );
+  }
+
+  /* ========================================
+     LIQUID GLASS BUTTONS
+     ======================================== */
+
+  .liquid-button {
+    @apply relative overflow-hidden px-6 py-3 rounded-xl font-medium;
+    background: hsl(0 0% 100% / 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--teal) / 0.2);
+    box-shadow: 
+      0 4px 16px hsl(var(--teal) / 0.1),
+      inset 0 1px 0 hsl(0 0% 100% / 0.6);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .liquid-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 32px hsl(var(--teal) / 0.2),
+      inset 0 1px 0 hsl(0 0% 100% / 0.8);
+    border-color: hsl(var(--teal) / 0.4);
+  }
+
+  .liquid-button-primary {
+    @apply relative overflow-hidden px-6 py-3 rounded-xl font-medium text-white;
+    background: linear-gradient(135deg, hsl(var(--teal)), hsl(var(--cyan)));
+    border: 1px solid hsl(var(--teal) / 0.5);
+    box-shadow: 
+      0 4px 20px hsl(var(--teal) / 0.3),
+      inset 0 1px 0 hsl(0 0% 100% / 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .liquid-button-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+      0 8px 40px hsl(var(--teal) / 0.4),
+      inset 0 1px 0 hsl(0 0% 100% / 0.3);
+  }
+
+  /* ========================================
+     LIQUID GLASS INPUTS
+     ======================================== */
+
+  .liquid-input {
+    background: hsl(0 0% 100% / 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--teal) / 0.2);
+    box-shadow: inset 0 2px 4px hsl(0 0% 0% / 0.02);
+    transition: all 0.3s ease;
+  }
+
+  .liquid-input:focus {
     background: hsl(0 0% 100% / 0.95);
-    box-shadow: 0 12px 32px hsl(var(--purple) / 0.2);
-    transform: translateY(-3px);
-    border-color: hsl(var(--purple) / 0.4);
+    border-color: hsl(var(--teal));
+    box-shadow: 
+      0 0 0 4px hsl(var(--teal) / 0.12),
+      inset 0 2px 4px hsl(0 0% 0% / 0.02);
+    outline: none;
   }
 
-  .dark .glass-button:hover {
-    background: hsl(262 30% 18% / 0.85);
+  /* ========================================
+     FLOATING ORBS & DECORATIONS
+     ======================================== */
+
+  .liquid-orb {
+    @apply absolute rounded-full pointer-events-none;
+    background: radial-gradient(
+      circle at 30% 30%,
+      hsl(var(--teal) / 0.3),
+      hsl(var(--cyan) / 0.15),
+      transparent
+    );
+    filter: blur(40px);
+    animation: liquid-float 12s ease-in-out infinite;
   }
 
-  /* Colorful glow effects */
-  .glow-purple {
-    box-shadow: 0 0 30px hsl(var(--purple) / 0.4), 0 0 60px hsl(var(--purple) / 0.2);
+  .liquid-orb-cyan {
+    @apply absolute rounded-full pointer-events-none;
+    background: radial-gradient(
+      circle at 30% 30%,
+      hsl(var(--cyan) / 0.35),
+      hsl(var(--lime) / 0.15),
+      transparent
+    );
+    filter: blur(50px);
+    animation: liquid-float 10s ease-in-out infinite reverse;
   }
 
-  .glow-cyan {
-    box-shadow: 0 0 30px hsl(var(--cyan) / 0.4), 0 0 60px hsl(var(--cyan) / 0.2);
+  .liquid-orb-lime {
+    @apply absolute rounded-full pointer-events-none;
+    background: radial-gradient(
+      circle at 30% 30%,
+      hsl(var(--lime) / 0.3),
+      hsl(var(--emerald) / 0.15),
+      transparent
+    );
+    filter: blur(45px);
+    animation: liquid-float 14s ease-in-out infinite;
   }
 
-  .glow-pink {
-    box-shadow: 0 0 30px hsl(var(--pink) / 0.4), 0 0 60px hsl(var(--pink) / 0.2);
+  .liquid-orb-emerald {
+    @apply absolute rounded-full pointer-events-none;
+    background: radial-gradient(
+      circle at 30% 30%,
+      hsl(var(--emerald) / 0.3),
+      hsl(var(--teal) / 0.15),
+      transparent
+    );
+    filter: blur(55px);
+    animation: liquid-float 16s ease-in-out infinite 2s;
   }
 
-  .glow-gold {
-    box-shadow: 0 0 30px hsl(var(--gold) / 0.5), 0 0 60px hsl(var(--gold) / 0.25);
-  }
-
-  /* Animated gradient border */
-  .gradient-border-animated {
-    @apply relative;
-    background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
-                linear-gradient(135deg, hsl(var(--purple)), hsl(var(--cyan)), hsl(var(--pink)), hsl(var(--gold))) border-box;
-    border: 2px solid transparent;
-    background-size: 100% 100%, 300% 300%;
-    animation: gradient-shift 4s ease infinite;
-  }
-
-  @keyframes gradient-shift {
+  @keyframes liquid-float {
     0%, 100% {
-      background-position: 0% 0%, 0% 50%;
+      transform: translateY(0) translateX(0) scale(1);
+      opacity: 0.7;
+    }
+    25% {
+      transform: translateY(-20px) translateX(15px) scale(1.05);
+      opacity: 0.9;
     }
     50% {
-      background-position: 0% 0%, 100% 50%;
+      transform: translateY(-35px) translateX(0) scale(1.1);
+      opacity: 0.8;
+    }
+    75% {
+      transform: translateY(-20px) translateX(-15px) scale(1.05);
+      opacity: 0.9;
     }
   }
 
-  /* Liquid shine effect */
+  /* Liquid Blob Animation */
+  .liquid-blob {
+    animation: liquid-morph 15s ease-in-out infinite;
+  }
+
+  @keyframes liquid-morph {
+    0%, 100% {
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      transform: rotate(0deg) scale(1);
+    }
+    25% {
+      border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    }
+    50% {
+      border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
+      transform: rotate(180deg) scale(1.05);
+    }
+    75% {
+      border-radius: 60% 40% 60% 30% / 60% 40% 60% 40%;
+    }
+  }
+
+  /* ========================================
+     SHIMMER & SHINE EFFECTS
+     ======================================== */
+
   .liquid-shine {
     @apply relative overflow-hidden;
   }
@@ -315,314 +461,6 @@ All colors MUST be HSL.
     left: 100%;
   }
 
-  /* Rainbow shine effect */
-  .rainbow-shine {
-    @apply relative overflow-hidden;
-  }
-
-  .rainbow-shine::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--purple) / 0.3),
-      hsl(var(--cyan) / 0.3),
-      hsl(var(--pink) / 0.3),
-      transparent
-    );
-    transition: left 0.6s ease;
-  }
-
-  .rainbow-shine:hover::before {
-    left: 100%;
-  }
-
-  /* Glass Input */
-  .glass-input {
-    background: hsl(var(--glass-background));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid hsl(var(--glass-border));
-    transition: all 0.25s ease;
-  }
-
-  .glass-input:focus {
-    background: hsl(0 0% 100% / 0.95);
-    border-color: hsl(var(--purple));
-    box-shadow: 0 0 0 4px hsl(var(--purple) / 0.15), 0 8px 24px hsl(var(--purple) / 0.1);
-  }
-
-  .dark .glass-input:focus {
-    background: hsl(262 30% 16% / 0.95);
-  }
-
-  /* Floating orbs for background decoration */
-  .glass-orb {
-    @apply absolute rounded-full pointer-events-none;
-    background: radial-gradient(
-      circle at 30% 30%,
-      hsl(var(--purple) / 0.35),
-      hsl(var(--cyan) / 0.15),
-      hsl(var(--pink) / 0.1)
-    );
-    filter: blur(50px);
-    animation: float 10s ease-in-out infinite;
-  }
-
-  .glass-orb-gold {
-    @apply absolute rounded-full pointer-events-none;
-    background: radial-gradient(
-      circle at 30% 30%,
-      hsl(var(--gold) / 0.4),
-      hsl(var(--orange) / 0.2)
-    );
-    filter: blur(45px);
-    animation: float 8s ease-in-out infinite reverse;
-  }
-
-  .glass-orb-pink {
-    @apply absolute rounded-full pointer-events-none;
-    background: radial-gradient(
-      circle at 30% 30%,
-      hsl(var(--pink) / 0.35),
-      hsl(var(--purple) / 0.15)
-    );
-    filter: blur(55px);
-    animation: float 12s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0) translateX(0) scale(1);
-    }
-    25% {
-      transform: translateY(-15px) translateX(10px) scale(1.02);
-    }
-    50% {
-      transform: translateY(-25px) translateX(0) scale(1.05);
-    }
-    75% {
-      transform: translateY(-15px) translateX(-10px) scale(1.02);
-    }
-  }
-
-  /* Slow spin animation for conic gradients */
-  @keyframes spin-slow {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .animate-spin-slow {
-    animation: spin-slow 8s linear infinite;
-  }
-
-  /* Drop shadow glow for sparkle icons */
-  .drop-shadow-glow {
-    filter: drop-shadow(0 0 6px currentColor);
-  }
-
-  /* Background radial gradient utility */
-  .bg-gradient-radial {
-    background: radial-gradient(var(--tw-gradient-stops));
-  }
-
-  /* Conic gradient for rainbow ring effect */
-  .bg-gradient-conic {
-    background: conic-gradient(var(--tw-gradient-stops));
-  }
-
-  /* Gradient border effect */
-  .gradient-border {
-    @apply relative;
-    background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
-                linear-gradient(135deg, hsl(var(--purple)), hsl(var(--cyan)), hsl(var(--gold))) border-box;
-    border: 2px solid transparent;
-  }
-
-  /* Colorful text gradients */
-  .text-gradient-vibrant {
-    background: linear-gradient(135deg, hsl(var(--purple)), hsl(var(--cyan)));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .text-gradient-warm {
-    background: linear-gradient(135deg, hsl(var(--pink)), hsl(var(--orange)), hsl(var(--gold)));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .text-gradient-aurora {
-    background: linear-gradient(135deg, hsl(var(--teal)), hsl(var(--purple)), hsl(var(--pink)));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Colorful badge variants */
-  .badge-purple {
-    background: hsl(var(--purple) / 0.15);
-    color: hsl(var(--purple));
-    border: 1px solid hsl(var(--purple) / 0.3);
-  }
-
-  .badge-cyan {
-    background: hsl(var(--cyan) / 0.15);
-    color: hsl(var(--cyan));
-    border: 1px solid hsl(var(--cyan) / 0.3);
-  }
-
-  .badge-pink {
-    background: hsl(var(--pink) / 0.15);
-    color: hsl(var(--pink));
-    border: 1px solid hsl(var(--pink) / 0.3);
-  }
-
-  .badge-gold {
-    background: hsl(var(--gold) / 0.15);
-    color: hsl(38 90% 40%);
-    border: 1px solid hsl(var(--gold) / 0.3);
-  }
-
-  .badge-teal {
-    background: hsl(var(--teal) / 0.15);
-    color: hsl(var(--teal));
-    border: 1px solid hsl(var(--teal) / 0.3);
-  }
-
-  .badge-emerald {
-    background: hsl(var(--emerald) / 0.15);
-    color: hsl(var(--emerald));
-    border: 1px solid hsl(var(--emerald) / 0.3);
-  }
-
-  /* Pulse animation with color */
-  .pulse-purple {
-    animation: pulse-purple 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  @keyframes pulse-purple {
-    0%, 100% {
-      box-shadow: 0 0 0 0 hsl(var(--purple) / 0.4);
-    }
-    50% {
-      box-shadow: 0 0 0 12px hsl(var(--purple) / 0);
-    }
-  }
-
-  .pulse-cyan {
-    animation: pulse-cyan 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  @keyframes pulse-cyan {
-    0%, 100% {
-      box-shadow: 0 0 0 0 hsl(var(--cyan) / 0.4);
-    }
-    50% {
-      box-shadow: 0 0 0 12px hsl(var(--cyan) / 0);
-    }
-  }
-  /* Liquid Glass Stat Card */
-  .liquid-stat-card {
-    @apply relative overflow-hidden rounded-2xl;
-    background: hsl(0 0% 100% / 0.85);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid hsl(0 0% 100% / 0.3);
-    box-shadow: 
-      0 8px 32px hsl(var(--glass-shadow)),
-      0 0 0 1px hsl(0 0% 100% / 0.1) inset,
-      0 16px 32px -8px hsl(0 0% 0% / 0.1);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .dark .liquid-stat-card {
-    background: hsl(262 30% 14% / 0.75);
-    border: 1px solid hsl(0 0% 100% / 0.08);
-  }
-
-  .liquid-stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.6), transparent);
-  }
-
-  .liquid-stat-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 
-      0 20px 60px hsl(var(--glass-shadow)),
-      0 0 0 1px hsl(0 0% 100% / 0.2) inset,
-      0 32px 64px -16px hsl(0 0% 0% / 0.15);
-  }
-
-  /* Liquid Glass with Color Tint */
-  .liquid-glass-emerald {
-    background: linear-gradient(135deg, hsl(var(--emerald) / 0.12), hsl(var(--teal) / 0.08));
-  }
-
-  .liquid-glass-gold {
-    background: linear-gradient(135deg, hsl(var(--gold) / 0.12), hsl(var(--orange) / 0.08));
-  }
-
-  .liquid-glass-cyan {
-    background: linear-gradient(135deg, hsl(var(--cyan) / 0.12), hsl(var(--purple) / 0.08));
-  }
-
-  .liquid-glass-purple {
-    background: linear-gradient(135deg, hsl(var(--purple) / 0.12), hsl(var(--pink) / 0.08));
-  }
-
-  .liquid-glass-pink {
-    background: linear-gradient(135deg, hsl(var(--pink) / 0.12), hsl(var(--destructive) / 0.08));
-  }
-
-  /* Liquid Blob Animation */
-  @keyframes liquid-blob {
-    0%, 100% {
-      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-      transform: rotate(0deg) scale(1);
-    }
-    25% {
-      border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
-    }
-    50% {
-      border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
-      transform: rotate(180deg) scale(1.05);
-    }
-    75% {
-      border-radius: 60% 40% 60% 30% / 60% 40% 60% 40%;
-    }
-  }
-
-  .liquid-blob {
-    animation: liquid-blob 15s ease-in-out infinite;
-  }
-
-  /* Shimmer Animation */
-  @keyframes shimmer {
-    0% {
-      transform: translateX(-100%) rotate(25deg);
-    }
-    100% {
-      transform: translateX(100%) rotate(25deg);
-    }
-  }
-
   .shimmer-effect {
     @apply relative overflow-hidden;
   }
@@ -637,25 +475,74 @@ All colors MUST be HSL.
     background: linear-gradient(
       90deg,
       transparent 40%,
-      hsl(0 0% 100% / 0.3) 50%,
+      hsl(0 0% 100% / 0.25) 50%,
       transparent 60%
     );
-    animation: shimmer 3s ease-in-out infinite;
+    animation: shimmer 4s ease-in-out infinite;
   }
 
-  /* Glow hover effects for stat cards */
-  .hover-glow-emerald:hover {
-    box-shadow: 
-      0 20px 60px hsl(var(--emerald) / 0.25),
-      0 0 40px hsl(var(--emerald) / 0.15),
-      0 0 0 1px hsl(var(--emerald) / 0.3) inset;
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) rotate(25deg);
+    }
+    100% {
+      transform: translateX(100%) rotate(25deg);
+    }
   }
 
-  .hover-glow-gold:hover {
+  /* Rainbow Shimmer */
+  .rainbow-shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .rainbow-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--teal) / 0.2),
+      hsl(var(--cyan) / 0.2),
+      hsl(var(--lime) / 0.2),
+      transparent
+    );
+    transition: left 0.7s ease;
+  }
+
+  .rainbow-shimmer:hover::before {
+    left: 100%;
+  }
+
+  /* ========================================
+     GLOW EFFECTS
+     ======================================== */
+
+  .glow-teal {
+    box-shadow: 0 0 30px hsl(var(--teal) / 0.4), 0 0 60px hsl(var(--teal) / 0.2);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 30px hsl(var(--cyan) / 0.4), 0 0 60px hsl(var(--cyan) / 0.2);
+  }
+
+  .glow-lime {
+    box-shadow: 0 0 30px hsl(var(--lime) / 0.5), 0 0 60px hsl(var(--lime) / 0.25);
+  }
+
+  .glow-emerald {
+    box-shadow: 0 0 30px hsl(var(--emerald) / 0.4), 0 0 60px hsl(var(--emerald) / 0.2);
+  }
+
+  /* Hover Glow Effects */
+  .hover-glow-teal:hover {
     box-shadow: 
-      0 20px 60px hsl(var(--gold) / 0.3),
-      0 0 40px hsl(var(--gold) / 0.2),
-      0 0 0 1px hsl(var(--gold) / 0.3) inset;
+      0 20px 60px hsl(var(--teal) / 0.25),
+      0 0 40px hsl(var(--teal) / 0.15),
+      0 0 0 1px hsl(var(--teal) / 0.3) inset;
   }
 
   .hover-glow-cyan:hover {
@@ -665,42 +552,210 @@ All colors MUST be HSL.
       0 0 0 1px hsl(var(--cyan) / 0.3) inset;
   }
 
-  .hover-glow-purple:hover {
+  .hover-glow-lime:hover {
     box-shadow: 
-      0 20px 60px hsl(var(--purple) / 0.25),
-      0 0 40px hsl(var(--purple) / 0.15),
-      0 0 0 1px hsl(var(--purple) / 0.3) inset;
+      0 20px 60px hsl(var(--lime) / 0.3),
+      0 0 40px hsl(var(--lime) / 0.2),
+      0 0 0 1px hsl(var(--lime) / 0.3) inset;
   }
 
-  .hover-glow-pink:hover {
+  .hover-glow-emerald:hover {
     box-shadow: 
-      0 20px 60px hsl(var(--pink) / 0.25),
-      0 0 40px hsl(var(--pink) / 0.15),
-      0 0 0 1px hsl(var(--pink) / 0.3) inset;
+      0 20px 60px hsl(var(--emerald) / 0.25),
+      0 0 40px hsl(var(--emerald) / 0.15),
+      0 0 0 1px hsl(var(--emerald) / 0.3) inset;
   }
 
-  /* Liquid Icon Container */
-  .liquid-icon {
+  /* ========================================
+     GRADIENT BACKGROUNDS
+     ======================================== */
+
+  .bg-gradient-teal {
+    background: linear-gradient(135deg, hsl(var(--teal)) 0%, hsl(var(--cyan)) 100%);
+  }
+
+  .bg-gradient-cyan {
+    background: linear-gradient(135deg, hsl(var(--cyan)) 0%, hsl(var(--lime)) 100%);
+  }
+
+  .bg-gradient-lime {
+    background: linear-gradient(135deg, hsl(var(--lime)) 0%, hsl(var(--emerald)) 100%);
+  }
+
+  .bg-gradient-emerald {
+    background: linear-gradient(135deg, hsl(var(--emerald)) 0%, hsl(var(--teal)) 100%);
+  }
+
+  .bg-gradient-aurora {
+    background: linear-gradient(135deg, hsl(var(--teal)) 0%, hsl(var(--cyan)) 35%, hsl(var(--lime)) 70%, hsl(var(--emerald)) 100%);
+  }
+
+  .bg-gradient-ocean {
+    background: linear-gradient(135deg, hsl(200 70% 35%) 0%, hsl(var(--teal)) 50%, hsl(var(--cyan)) 100%);
+  }
+
+  /* ========================================
+     TEXT GRADIENTS
+     ======================================== */
+
+  .text-gradient-teal {
+    background: linear-gradient(135deg, hsl(var(--teal)), hsl(var(--cyan)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-aurora {
+    background: linear-gradient(135deg, hsl(var(--teal)), hsl(var(--cyan)), hsl(var(--lime)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-lime {
+    background: linear-gradient(135deg, hsl(var(--lime)), hsl(var(--emerald)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ========================================
+     ANIMATED GRADIENT BORDER
+     ======================================== */
+
+  .gradient-border-animated {
     @apply relative;
-    background: linear-gradient(135deg, hsl(0 0% 100% / 0.2), hsl(0 0% 100% / 0.05));
-    backdrop-filter: blur(8px);
-    border: 1px solid hsl(0 0% 100% / 0.2);
-    box-shadow: 
-      inset 0 1px 0 hsl(0 0% 100% / 0.3),
-      0 4px 12px hsl(0 0% 0% / 0.1);
+    background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+                linear-gradient(135deg, hsl(var(--teal)), hsl(var(--cyan)), hsl(var(--lime)), hsl(var(--emerald))) border-box;
+    border: 2px solid transparent;
+    background-size: 100% 100%, 300% 300%;
+    animation: gradient-flow 4s ease infinite;
   }
 
-  /* Floating particle effect */
-  @keyframes float-particle {
+  @keyframes gradient-flow {
     0%, 100% {
-      transform: translateY(0) translateX(0);
-      opacity: 0.6;
+      background-position: 0% 0%, 0% 50%;
     }
     50% {
-      transform: translateY(-20px) translateX(10px);
-      opacity: 1;
+      background-position: 0% 0%, 100% 50%;
     }
   }
+
+  /* ========================================
+     LIQUID STAT CARDS
+     ======================================== */
+
+  .liquid-stat-card {
+    @apply relative overflow-hidden rounded-2xl;
+    background: hsl(0 0% 100% / 0.85);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid hsl(0 0% 100% / 0.4);
+    box-shadow: 
+      0 8px 32px hsl(var(--glass-shadow)),
+      0 0 0 1px hsl(0 0% 100% / 0.1) inset,
+      0 16px 32px -8px hsl(0 0% 0% / 0.08);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .liquid-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.7), transparent);
+  }
+
+  .liquid-stat-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 
+      0 24px 80px hsl(var(--glass-shadow)),
+      0 0 0 1px hsl(0 0% 100% / 0.2) inset,
+      0 40px 80px -20px hsl(0 0% 0% / 0.12);
+  }
+
+  .dark .liquid-stat-card {
+    background: hsl(210 45% 10% / 0.8);
+    border: 1px solid hsl(0 0% 100% / 0.08);
+  }
+
+  /* ========================================
+     LIQUID ICON CONTAINERS
+     ======================================== */
+
+  .liquid-icon {
+    @apply relative rounded-xl;
+    background: linear-gradient(135deg, hsl(0 0% 100% / 0.25), hsl(0 0% 100% / 0.1));
+    backdrop-filter: blur(8px);
+    border: 1px solid hsl(0 0% 100% / 0.25);
+    box-shadow: 
+      inset 0 1px 0 hsl(0 0% 100% / 0.4),
+      0 4px 16px hsl(0 0% 0% / 0.08);
+  }
+
+  /* ========================================
+     PULSE ANIMATIONS
+     ======================================== */
+
+  .pulse-teal {
+    animation: pulse-teal 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-teal {
+    0%, 100% {
+      box-shadow: 0 0 0 0 hsl(var(--teal) / 0.5);
+    }
+    50% {
+      box-shadow: 0 0 0 15px hsl(var(--teal) / 0);
+    }
+  }
+
+  .pulse-cyan {
+    animation: pulse-cyan 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-cyan {
+    0%, 100% {
+      box-shadow: 0 0 0 0 hsl(var(--cyan) / 0.5);
+    }
+    50% {
+      box-shadow: 0 0 0 15px hsl(var(--cyan) / 0);
+    }
+  }
+
+  /* ========================================
+     BADGES
+     ======================================== */
+
+  .badge-teal {
+    background: hsl(var(--teal) / 0.12);
+    color: hsl(var(--teal));
+    border: 1px solid hsl(var(--teal) / 0.25);
+  }
+
+  .badge-cyan {
+    background: hsl(var(--cyan) / 0.12);
+    color: hsl(var(--cyan));
+    border: 1px solid hsl(var(--cyan) / 0.25);
+  }
+
+  .badge-lime {
+    background: hsl(var(--lime) / 0.12);
+    color: hsl(82 55% 35%);
+    border: 1px solid hsl(var(--lime) / 0.3);
+  }
+
+  .badge-emerald {
+    background: hsl(var(--emerald) / 0.12);
+    color: hsl(var(--emerald));
+    border: 1px solid hsl(var(--emerald) / 0.25);
+  }
+
+  /* ========================================
+     FLOATING PARTICLES
+     ======================================== */
 
   .floating-particles::before,
   .floating-particles::after {
@@ -716,13 +771,53 @@ All colors MUST be HSL.
   .floating-particles::before {
     top: 20%;
     right: 20%;
-    animation: float-particle 3s ease-in-out infinite;
+    animation: float-particle 3.5s ease-in-out infinite;
   }
 
   .floating-particles::after {
     bottom: 30%;
     left: 25%;
-    animation: float-particle 4s ease-in-out infinite 1s;
+    animation: float-particle 4.5s ease-in-out infinite 1.5s;
+  }
+
+  @keyframes float-particle {
+    0%, 100% {
+      transform: translateY(0) translateX(0);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translateY(-25px) translateX(12px);
+      opacity: 1;
+    }
+  }
+
+  /* Slow spin animation */
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 10s linear infinite;
+  }
+
+  /* Drop shadow glow */
+  .drop-shadow-glow {
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+
+  /* Radial gradient utility */
+  .bg-gradient-radial {
+    background: radial-gradient(var(--tw-gradient-stops));
+  }
+
+  /* Conic gradient for rainbow effects */
+  .bg-gradient-conic {
+    background: conic-gradient(var(--tw-gradient-stops));
   }
 }
 
@@ -732,37 +827,34 @@ All colors MUST be HSL.
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
   }
 
-  /* Colorful shadows */
-  .shadow-purple {
-    box-shadow: 0 10px 40px -10px hsl(var(--purple) / 0.35);
+  /* Shadow utilities */
+  .shadow-teal {
+    box-shadow: 0 10px 40px -10px hsl(var(--teal) / 0.35);
   }
 
   .shadow-cyan {
     box-shadow: 0 10px 40px -10px hsl(var(--cyan) / 0.35);
   }
 
-  .shadow-pink {
-    box-shadow: 0 10px 40px -10px hsl(var(--pink) / 0.35);
+  .shadow-lime {
+    box-shadow: 0 10px 40px -10px hsl(var(--lime) / 0.4);
   }
 
-  .shadow-gold {
-    box-shadow: 0 10px 40px -10px hsl(var(--gold) / 0.4);
+  .shadow-emerald {
+    box-shadow: 0 10px 40px -10px hsl(var(--emerald) / 0.35);
   }
 
-  /* Enhanced shadow utilities */
-  .shadow-glow {
-    box-shadow: 0 10px 40px hsl(var(--purple) / 0.2), 0 0 20px hsl(var(--cyan) / 0.1);
+  /* Glass shadows */
+  .shadow-glass {
+    box-shadow: 0 10px 40px hsl(var(--teal) / 0.15), 0 0 20px hsl(var(--cyan) / 0.08);
   }
 
-  .shadow-glow-gold {
-    box-shadow: 0 10px 40px hsl(var(--gold) / 0.25), 0 0 20px hsl(var(--orange) / 0.15);
-  }
-
-  .shadow-glow-cyan {
-    box-shadow: 0 10px 40px hsl(var(--cyan) / 0.25), 0 0 20px hsl(var(--purple) / 0.1);
+  .shadow-glass-lg {
+    box-shadow: 0 20px 60px hsl(var(--teal) / 0.2), 0 0 30px hsl(var(--cyan) / 0.1);
   }
 }
 
+/* Hide Lovable badge */
 #lovable-badge {
   display: none !important;
 }

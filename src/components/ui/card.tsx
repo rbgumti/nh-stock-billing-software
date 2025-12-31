@@ -4,19 +4,24 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const cardVariants = cva(
-  "rounded-2xl text-card-foreground transition-all duration-300",
+  "rounded-2xl text-card-foreground transition-all duration-500",
   {
     variants: {
       variant: {
         default: "border bg-card shadow-sm",
-        glass: "glass border-0",
-        "glass-strong": "glass-strong border-0",
-        "glass-subtle": "glass-subtle border-0",
-        gradient: "gradient-border"
+        glass: "liquid-card",
+        "glass-strong": "glass-strong",
+        "glass-subtle": "glass-subtle",
+        "liquid": "liquid-card",
+        "liquid-teal": "liquid-card-teal",
+        "liquid-cyan": "liquid-card-cyan",
+        "liquid-lime": "liquid-card-lime",
+        "liquid-emerald": "liquid-card-emerald",
+        gradient: "gradient-border-animated"
       }
     },
     defaultVariants: {
-      variant: "glass"
+      variant: "liquid"
     }
   }
 )
