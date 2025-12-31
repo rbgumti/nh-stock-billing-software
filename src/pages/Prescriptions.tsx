@@ -177,11 +177,16 @@ export default function Prescriptions() {
   const allSelected = filteredPrescriptions.length > 0 && selectedIds.size === filteredPrescriptions.length;
 
   return (
-    <div className="container mx-auto p-6 relative">
+    <div className="container mx-auto p-6 relative min-h-screen">
       <FloatingOrbs />
-      <div className="flex justify-between items-center mb-6">
+      
+      {/* Ambient liquid blobs */}
+      <div className="fixed top-20 left-20 w-96 h-96 bg-gradient-to-br from-gold/8 via-purple/5 to-cyan/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-cyan/8 via-pink/5 to-gold/8 rounded-full blur-3xl pointer-events-none" />
+      
+      <div className="flex justify-between items-center mb-6 relative z-10">
         <div>
-          <h1 className="text-3xl font-bold text-navy">Prescriptions</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gold via-amber-400 to-gold bg-clip-text text-transparent">Prescriptions</h1>
           <p className="text-muted-foreground">Manage patient prescriptions</p>
         </div>
         <Button onClick={() => navigate('/prescriptions/new')} className="bg-gold hover:bg-gold/90 text-navy">
@@ -190,20 +195,20 @@ export default function Prescriptions() {
         </Button>
       </div>
 
-      <div className="mb-6 space-y-4">
+      <div className="mb-6 space-y-4 relative z-10">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             placeholder="Search by patient name, prescription number, or diagnosis..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 glass-strong border-white/10"
           />
         </div>
 
         {/* Bulk Actions Bar */}
         {filteredPrescriptions.length > 0 && (
-          <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
+          <div className="flex items-center justify-between glass-strong border border-white/10 rounded-lg p-3">
             <div className="flex items-center gap-3">
               <Checkbox 
                 checked={allSelected}
@@ -236,7 +241,7 @@ export default function Prescriptions() {
       </div>
 
       {filteredPrescriptions.length === 0 ? (
-        <Card>
+        <Card className="glass-strong border border-white/10 relative z-10">
           <CardContent className="text-center py-12">
             <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground mb-4">
@@ -251,13 +256,14 @@ export default function Prescriptions() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 relative z-10">
           {filteredPrescriptions.map((prescription) => (
             <Card 
               key={prescription.id} 
-              className={`hover:shadow-lg transition-shadow ${selectedIds.has(prescription.id!) ? 'ring-2 ring-primary' : ''}`}
+              className={`glass-strong border border-white/10 hover:border-gold/30 transition-all duration-300 group overflow-hidden ${selectedIds.has(prescription.id!) ? 'ring-2 ring-gold' : ''}`}
             >
-              <CardHeader>
+              <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardHeader className="relative z-10">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
                     <Checkbox
@@ -265,16 +271,16 @@ export default function Prescriptions() {
                       onCheckedChange={() => toggleSelection(prescription.id!)}
                       aria-label={`Select ${prescription.prescription_number}`}
                     />
-                    <CardTitle className="text-lg">{prescription.prescription_number}</CardTitle>
+                    <CardTitle className="text-lg bg-gradient-to-r from-gold to-amber-400 bg-clip-text text-transparent">{prescription.prescription_number}</CardTitle>
                   </div>
                   <Badge className={getStatusColor(prescription.status)}>
                     {prescription.status}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 relative z-10">
                 <div className="flex items-center text-sm">
-                  <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <User className="mr-2 h-4 w-4 text-gold" />
                   <span className="font-medium">{prescription.patient_name}</span>
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
@@ -307,7 +313,7 @@ export default function Prescriptions() {
                     <Button
                       size="sm"
                       onClick={() => navigate(`/invoices/new?prescriptionId=${prescription.id}`)}
-                      className="flex-1"
+                      className="flex-1 bg-gold hover:bg-gold/90 text-navy"
                     >
                       Invoice
                     </Button>
