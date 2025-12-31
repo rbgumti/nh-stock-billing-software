@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, Sparkles, ChevronRight, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -11,8 +11,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
@@ -36,6 +38,7 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
@@ -67,48 +70,39 @@ export function AppSidebar() {
         {/* Shimmer Effect Line */}
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         
-        {/* Header with Glass Effect */}
-        <div className="relative p-4 border-b border-white/5">
+        {/* Compact Header with Glass Effect */}
+        <div className="relative p-2 border-b border-white/5">
           {/* Glass panel behind header */}
-          <div className="absolute inset-2 rounded-2xl bg-white/[0.03] backdrop-blur-sm border border-white/5" />
+          <div className="absolute inset-1 rounded-xl bg-white/[0.03] backdrop-blur-sm border border-white/5" />
           
           {!collapsed ? (
-            <div className="flex flex-col items-center gap-3 relative z-10">
-              {/* Logo with enhanced glow ring */}
-              <div className="relative group">
-                {/* Outer glow ring */}
-                <div className="absolute -inset-4 bg-gradient-conic from-violet-500/40 via-cyan-400/30 via-pink-500/40 via-amber-400/30 to-violet-500/40 rounded-full blur-xl opacity-60 group-hover:opacity-90 transition-all duration-700 animate-spin-slow" />
-                {/* Inner glow */}
-                <div className="absolute -inset-2 bg-gradient-to-br from-violet-500/50 to-cyan-500/50 rounded-full blur-lg opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
-                {/* Glass container */}
-                <div className="relative p-1 rounded-full bg-gradient-to-br from-white/10 to-white/5 border border-white/20 shadow-xl shadow-violet-500/10">
+            <div className="flex items-center gap-2.5 relative z-10 px-1">
+              {/* Compact Logo */}
+              <div className="relative group flex-shrink-0">
+                <div className="absolute -inset-1 bg-gradient-to-r from-violet-500/40 to-cyan-500/40 rounded-full blur-md opacity-60 group-hover:opacity-90 transition-opacity" />
+                <div className="relative p-0.5 rounded-full bg-gradient-to-br from-white/10 to-white/5 border border-white/20">
                   <img 
                     src={navjeevanLogo} 
                     alt="Navjeevan Hospital Logo" 
-                    className="w-18 h-18 object-contain relative z-10 drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
-                    style={{ width: '72px', height: '72px' }}
+                    className="w-10 h-10 object-contain relative z-10 drop-shadow-lg transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
               </div>
               
-              {/* Hospital Name with Glass Effect */}
-              <div className="text-center relative">
-                <div className="flex items-center gap-2 justify-center mb-1">
-                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse drop-shadow-glow" />
-                  <h2 className="text-xl font-bold tracking-widest bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent drop-shadow-sm">
-                    NAVJEEVAN
-                  </h2>
-                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse drop-shadow-glow" />
-                </div>
-                <p className="text-sm font-semibold tracking-wide bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 bg-clip-text text-transparent">
+              {/* Compact Hospital Name */}
+              <div className="min-w-0 flex-1">
+                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent leading-tight">
+                  NAVJEEVAN
+                </h2>
+                <p className="text-[10px] font-medium tracking-wide bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
                   Hospital Sirhind
                 </p>
               </div>
             </div>
           ) : (
-            <div className="flex justify-center relative z-10">
+            <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
-                <div className="absolute -inset-2 bg-gradient-to-r from-violet-500/50 to-cyan-500/50 rounded-full blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-violet-500/50 to-cyan-500/50 rounded-full blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
                 <div className="relative p-0.5 rounded-full bg-gradient-to-br from-white/15 to-white/5 border border-white/20">
                   <img 
                     src={navjeevanLogo} 
@@ -117,6 +111,81 @@ export function AppSidebar() {
                   />
                 </div>
               </div>
+              
+              {/* Slide Panel Trigger when collapsed */}
+              <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-8 h-8 p-0 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all"
+                  >
+                    <Menu className="h-4 w-4 text-slate-400 hover:text-white" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-72 bg-slate-900/98 backdrop-blur-xl border-white/10 p-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-transparent to-cyan-600/5" />
+                  <SheetHeader className="relative p-4 border-b border-white/10">
+                    <div className="flex items-center gap-3">
+                      <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
+                      <div>
+                        <SheetTitle className="text-white text-base">NAVJEEVAN</SheetTitle>
+                        <p className="text-xs text-amber-400">Hospital Sirhind</p>
+                      </div>
+                    </div>
+                  </SheetHeader>
+                  
+                  <div className="relative p-3 space-y-4 overflow-y-auto max-h-[calc(100vh-100px)]">
+                    {/* Navigation */}
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2 px-2">Navigate</p>
+                      <div className="space-y-1">
+                        {navigationItems.map((item) => (
+                          <NavLink
+                            key={item.title}
+                            to={item.url}
+                            onClick={() => setSheetOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+                              isActive(item.url)
+                                ? "bg-white/10 border border-white/10"
+                                : "hover:bg-white/5"
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              isActive(item.url) ? `bg-gradient-to-br ${item.color}` : "bg-white/5"
+                            }`}>
+                              <item.icon className={`h-4 w-4 ${isActive(item.url) ? "text-white" : "text-slate-400"}`} />
+                            </div>
+                            <span className={isActive(item.url) ? "text-white font-medium" : "text-slate-300"}>
+                              {item.title}
+                            </span>
+                          </NavLink>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Quick Actions */}
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2 px-2">Quick Add</p>
+                      <div className="space-y-1">
+                        {quickActions.map((action) => (
+                          <NavLink
+                            key={action.title}
+                            to={action.url}
+                            onClick={() => setSheetOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all"
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${action.color}`}>
+                              <Plus className="h-4 w-4 text-white" />
+                            </div>
+                            <span className="text-slate-300">{action.title}</span>
+                          </NavLink>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           )}
         </div>
