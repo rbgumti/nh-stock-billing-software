@@ -503,15 +503,10 @@ export default function NewInvoice() {
                         id={`quantity-${item.id}`}
                         type="number"
                         min="1"
-                        max={item.availableStock}
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
                         className={item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}
-                        readOnly={!!(item.frequency && item.durationDays && item.durationDays > 0)}
                       />
-                      {item.frequency && item.durationDays && item.durationDays > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">Auto-calculated</p>
-                      )}
                       {item.quantity > item.availableStock && item.medicineId > 0 && (
                         <p className="text-xs text-red-500 mt-1">Exceeds available stock ({item.availableStock})</p>
                       )}
