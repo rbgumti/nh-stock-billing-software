@@ -7,75 +7,87 @@ interface FloatingOrbsProps {
 export function FloatingOrbs({ className }: FloatingOrbsProps) {
   return (
     <div className={cn("fixed inset-0 overflow-hidden pointer-events-none -z-10", className)}>
-      {/* Large gold orb - top left */}
+      {/* Large teal orb - top left */}
       <div 
-        className="absolute w-96 h-96 rounded-full opacity-30"
+        className="absolute w-[500px] h-[500px] rounded-full liquid-blob"
         style={{
-          top: '-10%',
-          left: '-5%',
-          background: 'radial-gradient(circle at 30% 30%, hsl(var(--gold) / 0.4), hsl(var(--gold) / 0.1), transparent 70%)',
+          top: '-15%',
+          left: '-10%',
+          background: 'radial-gradient(circle at 30% 30%, hsl(var(--teal) / 0.35), hsl(var(--cyan) / 0.15), transparent 70%)',
+          filter: 'blur(80px)',
+          animation: 'liquid-float 15s ease-in-out infinite',
+        }}
+      />
+      
+      {/* Cyan orb - top right */}
+      <div 
+        className="absolute w-[400px] h-[400px] rounded-full liquid-blob"
+        style={{
+          top: '5%',
+          right: '-8%',
+          background: 'radial-gradient(circle at 40% 40%, hsl(var(--cyan) / 0.4), hsl(var(--lime) / 0.15), transparent 70%)',
+          filter: 'blur(70px)',
+          animation: 'liquid-float 12s ease-in-out infinite reverse',
+        }}
+      />
+      
+      {/* Medium lime orb - center right */}
+      <div 
+        className="absolute w-80 h-80 rounded-full liquid-blob"
+        style={{
+          top: '45%',
+          right: '5%',
+          background: 'radial-gradient(circle at 50% 50%, hsl(var(--lime) / 0.35), hsl(var(--emerald) / 0.12), transparent 70%)',
           filter: 'blur(60px)',
-          animation: 'float 8s ease-in-out infinite',
+          animation: 'liquid-float 18s ease-in-out infinite 2s',
         }}
       />
       
-      {/* Navy orb - top right */}
+      {/* Emerald orb - bottom left */}
       <div 
-        className="absolute w-80 h-80 rounded-full opacity-20"
+        className="absolute w-72 h-72 rounded-full liquid-blob"
         style={{
-          top: '10%',
-          right: '-5%',
-          background: 'radial-gradient(circle at 40% 40%, hsl(var(--navy) / 0.5), hsl(var(--navy) / 0.2), transparent 70%)',
-          filter: 'blur(50px)',
-          animation: 'float 10s ease-in-out infinite 1s',
-        }}
-      />
-      
-      {/* Medium gold orb - center right */}
-      <div 
-        className="absolute w-64 h-64 rounded-full opacity-25"
-        style={{
-          top: '40%',
-          right: '10%',
-          background: 'radial-gradient(circle at 50% 50%, hsl(var(--gold) / 0.3), hsl(var(--gold) / 0.1), transparent 70%)',
-          filter: 'blur(40px)',
-          animation: 'float 7s ease-in-out infinite 2s',
-        }}
-      />
-      
-      {/* Small accent orb - bottom left */}
-      <div 
-        className="absolute w-48 h-48 rounded-full opacity-20"
-        style={{
-          bottom: '20%',
-          left: '5%',
-          background: 'radial-gradient(circle at 30% 30%, hsl(220 60% 60% / 0.4), hsl(220 60% 60% / 0.1), transparent 70%)',
-          filter: 'blur(35px)',
-          animation: 'float 9s ease-in-out infinite 0.5s',
-        }}
-      />
-      
-      {/* Large navy orb - bottom */}
-      <div 
-        className="absolute w-72 h-72 rounded-full opacity-15"
-        style={{
-          bottom: '-5%',
-          left: '30%',
-          background: 'radial-gradient(circle at 50% 50%, hsl(var(--navy) / 0.4), hsl(var(--navy) / 0.15), transparent 70%)',
+          bottom: '15%',
+          left: '3%',
+          background: 'radial-gradient(circle at 30% 30%, hsl(var(--emerald) / 0.4), hsl(var(--teal) / 0.15), transparent 70%)',
           filter: 'blur(55px)',
-          animation: 'float 11s ease-in-out infinite 3s',
+          animation: 'liquid-float 14s ease-in-out infinite 1s',
         }}
       />
       
-      {/* Extra small gold orb - floating */}
+      {/* Large cyan orb - bottom center */}
       <div 
-        className="absolute w-32 h-32 rounded-full opacity-30"
+        className="absolute w-96 h-96 rounded-full liquid-blob"
         style={{
-          top: '60%',
-          left: '20%',
-          background: 'radial-gradient(circle at 40% 40%, hsl(var(--gold) / 0.5), transparent 70%)',
-          filter: 'blur(25px)',
-          animation: 'float 6s ease-in-out infinite 1.5s',
+          bottom: '-10%',
+          left: '35%',
+          background: 'radial-gradient(circle at 50% 50%, hsl(var(--cyan) / 0.3), hsl(var(--teal) / 0.1), transparent 70%)',
+          filter: 'blur(75px)',
+          animation: 'liquid-float 20s ease-in-out infinite 4s',
+        }}
+      />
+      
+      {/* Small accent orb - floating left */}
+      <div 
+        className="absolute w-48 h-48 rounded-full"
+        style={{
+          top: '55%',
+          left: '18%',
+          background: 'radial-gradient(circle at 40% 40%, hsl(var(--teal) / 0.5), transparent 70%)',
+          filter: 'blur(40px)',
+          animation: 'liquid-float 10s ease-in-out infinite 1.5s',
+        }}
+      />
+
+      {/* Extra small lime orb - center */}
+      <div 
+        className="absolute w-40 h-40 rounded-full"
+        style={{
+          top: '30%',
+          left: '50%',
+          background: 'radial-gradient(circle at 40% 40%, hsl(var(--lime) / 0.4), transparent 70%)',
+          filter: 'blur(35px)',
+          animation: 'liquid-float 8s ease-in-out infinite 3s reverse',
         }}
       />
     </div>
