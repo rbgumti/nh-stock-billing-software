@@ -77,34 +77,34 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           <title>Purchase Order - ${poNumber}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Times New Roman', Times, serif; padding: 15px 25px; font-size: 12px; line-height: 1.5; }
-            .header-section { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
-            .logo { width: 60px; height: 60px; object-fit: contain; }
-            .header-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; }
-            .hospital-name { font-size: 24px; font-weight: bold; text-align: center; margin: 5px 0; }
-            .address-row { text-align: center; font-size: 11px; margin-bottom: 5px; }
-            .licence-row { text-align: center; font-size: 10px; margin-bottom: 15px; }
-            .po-date-row { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 12px; font-weight: bold; }
-            .to-section { margin-bottom: 15px; font-size: 11px; line-height: 1.6; }
-            .to-section .company { font-weight: bold; margin-top: 5px; }
-            .subject-line { margin-top: 10px; }
-            .salutation { margin: 15px 0 10px 0; font-size: 11px; }
-            .intro-para { font-size: 11px; text-align: justify; margin-bottom: 15px; line-height: 1.6; }
-            table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 11px; }
-            th, td { border: 1px solid #000; padding: 6px 8px; }
+            body { font-family: 'Times New Roman', Times, serif; padding: 8px 15px; font-size: 10px; line-height: 1.3; }
+            .header-section { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
+            .logo { width: 45px; height: 45px; object-fit: contain; }
+            .header-row { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px; }
+            .hospital-name { font-size: 18px; font-weight: bold; text-align: center; margin: 3px 0; }
+            .address-row { text-align: center; font-size: 9px; margin-bottom: 3px; }
+            .licence-row { text-align: center; font-size: 8px; margin-bottom: 8px; }
+            .po-date-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 10px; font-weight: bold; }
+            .to-section { margin-bottom: 8px; font-size: 9px; line-height: 1.4; }
+            .to-section .company { font-weight: bold; margin-top: 3px; }
+            .subject-line { margin-top: 5px; }
+            .salutation { margin: 8px 0 5px 0; font-size: 9px; }
+            .intro-para { font-size: 9px; text-align: justify; margin-bottom: 8px; line-height: 1.4; }
+            table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9px; }
+            th, td { border: 1px solid #000; padding: 3px 5px; }
             th { background-color: #f5f5f5; font-weight: bold; text-align: center; }
             td { text-align: left; }
             td.center { text-align: center; }
             td.right { text-align: right; }
-            .undertaking-title { font-weight: bold; font-size: 11px; margin: 20px 0 10px 0; }
-            .undertaking-text { font-size: 10px; text-align: justify; line-height: 1.6; margin-bottom: 20px; }
-            .signature-section { display: flex; justify-content: space-between; margin-top: 30px; font-size: 11px; }
+            .undertaking-title { font-weight: bold; font-size: 9px; margin: 10px 0 5px 0; }
+            .undertaking-text { font-size: 8px; text-align: justify; line-height: 1.3; margin-bottom: 10px; }
+            .signature-section { display: flex; justify-content: space-between; margin-top: 15px; font-size: 9px; }
             .sig-left { }
             .sig-center { text-align: center; }
             .sig-right { text-align: right; }
             @media print {
-              body { padding: 10mm 15mm; }
-              @page { margin: 10mm; }
+              body { padding: 5mm 10mm; }
+              @page { margin: 5mm; size: A4; }
             }
           </style>
         </head>

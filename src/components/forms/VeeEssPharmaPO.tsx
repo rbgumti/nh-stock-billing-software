@@ -75,26 +75,26 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
           <title>Purchase Order - ${poNumber}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Times New Roman', Times, serif; padding: 15px 25px; font-size: 12px; line-height: 1.5; }
-            .header-section { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
-            .logo { width: 60px; height: 60px; object-fit: contain; }
-            .header-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; }
-            .hospital-name { font-size: 24px; font-weight: bold; text-align: center; margin: 5px 0; }
-            .address-row { text-align: center; font-size: 11px; margin-bottom: 5px; }
-            .licence-row { text-align: center; font-size: 10px; margin-bottom: 15px; }
-            .ref-po-section { text-align: center; font-size: 12px; margin-bottom: 10px; }
-            .to-section { margin-bottom: 15px; font-size: 11px; line-height: 1.6; margin-left: 120px; }
-            .subject-section { margin-left: 120px; font-size: 11px; margin-bottom: 15px; }
-            table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 11px; }
-            th, td { border: 1px solid #000; padding: 6px 8px; }
+            body { font-family: 'Times New Roman', Times, serif; padding: 8px 15px; font-size: 10px; line-height: 1.3; }
+            .header-section { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
+            .logo { width: 45px; height: 45px; object-fit: contain; }
+            .header-row { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px; }
+            .hospital-name { font-size: 18px; font-weight: bold; text-align: center; margin: 3px 0; }
+            .address-row { text-align: center; font-size: 9px; margin-bottom: 3px; }
+            .licence-row { text-align: center; font-size: 8px; margin-bottom: 8px; }
+            .ref-po-section { text-align: center; font-size: 10px; margin-bottom: 6px; }
+            .to-section { margin-bottom: 8px; font-size: 9px; line-height: 1.4; margin-left: 80px; }
+            .subject-section { margin-left: 80px; font-size: 9px; margin-bottom: 8px; }
+            table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9px; }
+            th, td { border: 1px solid #000; padding: 3px 5px; }
             th { background-color: #f5f5f5; font-weight: bold; text-align: center; }
             td { text-align: left; }
             td.center { text-align: center; }
-            .footer-section { font-size: 11px; margin-top: 25px; margin-left: 120px; line-height: 1.8; }
-            .signature-section { font-size: 11px; margin-top: 20px; margin-left: 120px; line-height: 1.6; }
+            .footer-section { font-size: 9px; margin-top: 15px; margin-left: 80px; line-height: 1.5; }
+            .signature-section { font-size: 9px; margin-top: 12px; margin-left: 80px; line-height: 1.4; }
             @media print {
-              body { padding: 10mm 15mm; }
-              @page { margin: 10mm; }
+              body { padding: 5mm 10mm; }
+              @page { margin: 5mm; size: A4; }
             }
           </style>
         </head>
