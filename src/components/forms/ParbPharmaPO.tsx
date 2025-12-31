@@ -1,10 +1,11 @@
 import { useRef, useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, X } from "lucide-react";
+import { Printer, Download } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
+import jsPDF from "jspdf";
 
 interface ParbPharmaPOProps {
   poNumber: string;
@@ -51,13 +52,11 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    // Wait for logo to be ready
     if (!logoBase64) {
       setTimeout(handlePrint, 100);
       return;
     }
 
-    // Replace logo src with base64 for print
     const printHTML = printContent.innerHTML.replace(
       /src="[^"]*NH_LOGO[^"]*"/g,
       `src="${logoBase64}"`
@@ -114,6 +113,143 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     }, 250);
   };
 
+  const handleDownloadPDF = () => {
+    if (!logoBase64) {
+      setTimeout(handleDownloadPDF, 100);
+      return;
+    }
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    let y = 10;
+
+    // Header row
+    pdf.setFontSize(7);
+    pdf.text('Regd. Govt of Punjab', 10, y);
+    pdf.text('Mob_ 6284942412', pageWidth - 10, y, { align: 'right' });
+    y += 5;
+
+    // Logo and Hospital Name
+    const logoSize = 12;
+    pdf.addImage(logoBase64, 'PNG', pageWidth / 2 - 35, y, logoSize, logoSize);
+    pdf.setFontSize(14);
+    pdf.setFont('times', 'bold');
+    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y + 7, { align: 'center' });
+    pdf.addImage(logoBase64, 'PNG', pageWidth / 2 + 23, y, logoSize, logoSize);
+    y += 15;
+
+    // Address
+    pdf.setFontSize(7);
+    pdf.setFont('times', 'normal');
+    pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib    Dr. Metalli Bhatti', pageWidth / 2, y, { align: 'center' });
+    y += 4;
+
+    // Licence
+    pdf.setFontSize(6);
+    pdf.text('Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024', pageWidth / 2, y, { align: 'center' });
+    y += 6;
+
+    // PO Number and Date
+    pdf.setFontSize(8);
+    pdf.setFont('times', 'bold');
+    pdf.text(`P.O  NO_ ${poNumber}`, 10, y);
+    pdf.text(`DATE - ${formatDate(poDate)}`, pageWidth - 10, y, { align: 'right' });
+    y += 6;
+
+    // To Section
+    pdf.setFontSize(7);
+    pdf.setFont('times', 'normal');
+    pdf.text('To,', 10, y);
+    y += 3;
+    pdf.setFont('times', 'bold');
+    pdf.text('PARB PHARMACEUTICALS PVT. LTD.', 10, y);
+    y += 3;
+    pdf.setFont('times', 'normal');
+    pdf.text('E-9,INDUSTRIAL AREA SIIDCUL,SILAQULI', 10, y);
+    y += 3;
+    pdf.text('DEHRADUN UTTARAKHAND', 10, y);
+    y += 4;
+
+    pdf.text('Subject: purchase order.', 10, y);
+    y += 4;
+    pdf.text("Dear sir,ma'am", 10, y);
+    y += 5;
+
+    // Intro paragraph
+    const introText = "We hereby placing a purchase order , Terms and Conditions will remain same as Our discussion on phonically. payment of product shall be done through cheque to your bank account. The name and composition of product give below, please do the supply earlier as possible.";
+    const splitIntro = pdf.splitTextToSize(introText, pageWidth - 20);
+    pdf.text(splitIntro, 10, y);
+    y += splitIntro.length * 3 + 3;
+
+    // Table
+    const tableHeaders = ['S. No.', 'Product Name', 'composition', 'QTY IN TABLETS', 'PACKING'];
+    const colWidths = [15, 55, 55, 35, 25];
+    let x = 10;
+
+    // Table header
+    pdf.setFillColor(245, 245, 245);
+    pdf.rect(x, y, pageWidth - 20, 5, 'F');
+    pdf.setFontSize(6);
+    pdf.setFont('times', 'bold');
+    tableHeaders.forEach((header, i) => {
+      pdf.text(header, x + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + colWidths[i] / 2, y + 3.5, { align: 'center' });
+    });
+    pdf.rect(x, y, pageWidth - 20, 5);
+    y += 5;
+
+    // Table rows
+    pdf.setFont('times', 'normal');
+    items.forEach((item, index) => {
+      const stockItem = getStockItemDetails(item.stockItemId);
+      const packing = stockItem?.packing || "10*10";
+      const packingMatch = packing.match(/(\d+)\*(\d+)/);
+      const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 10;
+      const qtyInTablets = item.quantity * tabletsPerStrip;
+
+      const rowData = [
+        `${index + 1}.`,
+        item.stockItemName,
+        stockItem?.composition || '-',
+        qtyInTablets.toLocaleString(),
+        packing
+      ];
+
+      let cellX = x;
+      rowData.forEach((cell, i) => {
+        pdf.rect(cellX, y, colWidths[i], 5);
+        const align = i === 0 || i === 4 ? 'center' : i === 3 ? 'right' : 'left';
+        const textX = align === 'center' ? cellX + colWidths[i] / 2 : align === 'right' ? cellX + colWidths[i] - 1 : cellX + 1;
+        pdf.text(cell, textX, y + 3.5, { align });
+        cellX += colWidths[i];
+      });
+      y += 5;
+    });
+    y += 3;
+
+    // Undertaking
+    pdf.setFont('times', 'bold');
+    pdf.setFontSize(7);
+    pdf.text('UNDERTAKING', pageWidth - 10, y, { align: 'right' });
+    y += 4;
+
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(6);
+    const undertakingText = `We hereby confirm that the products which we intend to buy from PARA PHARMACEUTICALS PVT. LTD. E-9,INDUSTRIAL AREA SIIDCUL,SILAQUI DEHRADUN UTTARAKHAND INDIA Our P.O.NO ${poNumber} .dt- ${formatDate(poDate)}.These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only ,on our License no PSMHC/Pb./2024/863.We are full aware these products containing controlled substance as per Narcotic drugs & psychotropic substance Act 1985,and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation &for its sale within india only & not meant for export.`;
+    const splitUndertaking = pdf.splitTextToSize(undertakingText, pageWidth - 20);
+    pdf.text(splitUndertaking, 10, y);
+    y += splitUndertaking.length * 2.5 + 4;
+
+    pdf.setFontSize(7);
+    pdf.text(`Date. ${formatDate(poDate)}`, 10, y);
+    y += 8;
+
+    // Signature section
+    pdf.text('for Navjeevan hospital, sirhind', pageWidth / 2, y, { align: 'center' });
+    pdf.text('Dr.Metalli Bhatti', pageWidth - 10, y, { align: 'right' });
+
+    pdf.save(`PO-${poNumber}-Parb-Pharma.pdf`);
+  };
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -121,6 +257,10 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
           <DialogTitle className="flex items-center justify-between">
             <span>Parb Pharma Purchase Order Format</span>
             <div className="flex gap-2">
+              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                PDF
+              </Button>
               <Button onClick={handlePrint} size="sm" className="flex items-center gap-2">
                 <Printer className="h-4 w-4" />
                 Print
