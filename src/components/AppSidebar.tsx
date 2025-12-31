@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Sun, Moon } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Sun, Moon, Sparkles } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,20 +18,20 @@ import { useState } from "react";
 import { useTheme } from "next-themes";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-teal-500 to-cyan-600", glow: "group-hover:shadow-teal-500/30" },
-  { title: "Patients", url: "/patients", icon: Users, color: "from-cyan-500 to-teal-500", glow: "group-hover:shadow-cyan-500/30" },
-  { title: "Appointments", url: "/appointments", icon: Calendar, color: "from-emerald-500 to-teal-500", glow: "group-hover:shadow-emerald-500/30" },
-  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-lime-500 to-emerald-500", glow: "group-hover:shadow-lime-500/30" },
-  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-teal-400 to-cyan-500", glow: "group-hover:shadow-teal-400/30" },
-  { title: "Stock", url: "/stock", icon: Package, color: "from-cyan-600 to-teal-600", glow: "group-hover:shadow-cyan-600/30" },
-  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-emerald-500 to-green-500", glow: "group-hover:shadow-emerald-500/30" },
-  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-teal-600 to-emerald-600", glow: "group-hover:shadow-teal-600/30" },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-teal to-cyan", glow: "teal" },
+  { title: "Patients", url: "/patients", icon: Users, color: "from-cyan to-teal", glow: "cyan" },
+  { title: "Appointments", url: "/appointments", icon: Calendar, color: "from-emerald to-teal", glow: "emerald" },
+  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-lime to-emerald", glow: "lime" },
+  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-teal to-cyan", glow: "teal" },
+  { title: "Stock", url: "/stock", icon: Package, color: "from-cyan to-teal", glow: "cyan" },
+  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-emerald to-teal", glow: "emerald" },
+  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-teal to-emerald", glow: "teal" },
 ];
 
 const quickActions = [
-  { title: "Add Patient", url: "/patients/new", color: "from-cyan-500 to-teal-500", iconColor: "text-cyan-400" },
-  { title: "New Prescription", url: "/prescriptions/new", color: "from-lime-500 to-emerald-500", iconColor: "text-lime-400" },
-  { title: "New Invoice", url: "/invoices/new", color: "from-emerald-500 to-green-500", iconColor: "text-emerald-400" },
+  { title: "Add Patient", url: "/patients/new", color: "from-cyan to-teal", iconColor: "text-cyan" },
+  { title: "New Prescription", url: "/prescriptions/new", color: "from-lime to-emerald", iconColor: "text-lime" },
+  { title: "New Invoice", url: "/invoices/new", color: "from-emerald to-teal", iconColor: "text-emerald" },
 ];
 
 export function AppSidebar() {
@@ -54,66 +54,72 @@ export function AppSidebar() {
   return (
     <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0`} collapsible="icon">
       <SidebarContent className="relative overflow-hidden">
-        {/* Liquid Glass Background - Teal Theme */}
-        <div className="absolute inset-0 bg-gradient-to-b from-teal-900/95 via-teal-950/98 to-slate-950 backdrop-blur-xl" />
+        {/* Liquid Glass Base Layer */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/98 via-slate-950 to-slate-950" />
         
-        {/* Frosted Glass Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-teal-600/10 via-transparent to-emerald-600/8" />
+        {/* Glass Refraction Layer */}
+        <div className="absolute inset-0 backdrop-blur-3xl backdrop-saturate-200" />
         
-        {/* Animated Mesh Gradient */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-teal-500/15 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-cyan-500/10 to-transparent" />
+        {/* Liquid Glass Morphing Gradient */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--teal)/0.15),transparent_50%),radial-gradient(ellipse_at_bottom,hsl(var(--cyan)/0.1),transparent_50%)]" />
+        
+        {/* Animated Liquid Blobs */}
+        <div className="absolute top-10 -right-10 w-40 h-40 bg-gradient-to-br from-teal/30 via-cyan/20 to-transparent rounded-full blur-3xl animate-liquid-float opacity-60" />
+        <div className="absolute top-1/3 -left-16 w-32 h-32 bg-gradient-to-br from-cyan/25 via-teal/15 to-transparent rounded-full blur-3xl animate-liquid-float opacity-50" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/4 -right-8 w-36 h-36 bg-gradient-to-br from-lime/20 via-emerald/15 to-transparent rounded-full blur-3xl animate-liquid-float opacity-40" style={{ animationDelay: '4s' }} />
+        <div className="absolute bottom-10 -left-10 w-28 h-28 bg-gradient-to-br from-emerald/25 via-teal/15 to-transparent rounded-full blur-3xl animate-liquid-float opacity-50" style={{ animationDelay: '1s' }} />
+        
+        {/* Liquid Glass Highlight Line */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
+        
+        {/* Glass Shimmer Effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent -translate-x-full animate-shimmer" />
         </div>
         
-        {/* Floating Glass Orbs with Liquid Effect - Teal/Lime Theme */}
-        <div className="absolute top-20 right-0 w-32 h-32 bg-gradient-radial from-teal-500/25 via-cyan-600/15 to-transparent rounded-full blur-3xl animate-float" />
-        <div className="absolute top-1/3 -left-8 w-24 h-24 bg-gradient-radial from-cyan-400/20 via-teal-500/10 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute bottom-1/3 right-0 w-28 h-28 bg-gradient-radial from-lime-500/20 via-emerald-500/10 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
-        <div className="absolute bottom-20 left-0 w-20 h-20 bg-gradient-radial from-lime-400/25 via-yellow-500/15 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute top-1/2 right-4 w-16 h-16 bg-gradient-radial from-emerald-400/20 to-transparent rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }} />
-        
-        {/* Shimmer Effect Line */}
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-lime-300/30 to-transparent" />
-        
-        {/* Compact Header with Glass Effect */}
+        {/* Compact Header with Enhanced Glass Effect */}
         <div className="relative p-2 border-b border-white/5">
           {/* Glass panel behind header */}
-          <div className="absolute inset-1 rounded-xl bg-white/[0.03] backdrop-blur-sm border border-white/5" />
+          <div className="absolute inset-1 rounded-2xl glass-strong" />
           
           {!collapsed ? (
             <div className="flex items-center gap-2.5 relative z-10 px-1">
-              {/* Compact Logo */}
+              {/* Compact Logo with Liquid Glow */}
               <div className="relative group flex-shrink-0">
-                <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/40 to-lime-500/40 rounded-full blur-md opacity-60 group-hover:opacity-90 transition-opacity" />
-                <div className="relative p-0.5 rounded-full bg-gradient-to-br from-white/10 to-white/5 border border-white/20">
+                <div className="absolute -inset-2 bg-gradient-to-r from-teal/40 via-cyan/30 to-lime/40 rounded-full blur-xl opacity-50 group-hover:opacity-80 transition-opacity duration-500 animate-pulse-teal" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-teal/30 to-lime/30 rounded-full blur-md opacity-60 group-hover:opacity-100 transition-opacity" />
+                <div className="relative p-0.5 rounded-full bg-gradient-to-br from-white/15 to-white/5 border border-white/20 shadow-glass">
                   <img 
                     src={navjeevanLogo} 
                     alt="Navjeevan Hospital Logo" 
-                    className="w-10 h-10 object-contain relative z-10 drop-shadow-lg transition-transform duration-300 group-hover:scale-105"
+                    className="w-10 h-10 object-contain relative z-10 drop-shadow-lg transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
               </div>
               
-              {/* Compact Hospital Name */}
+              {/* Compact Hospital Name with Liquid Text */}
               <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white via-teal-200 to-cyan-200 bg-clip-text text-transparent leading-tight">
+                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white via-teal-200 to-cyan-200 bg-clip-text text-transparent leading-tight drop-shadow-sm">
                   NAVJEEVAN
                 </h2>
-                <p className="text-[10px] font-medium tracking-wide bg-gradient-to-r from-lime-300 to-emerald-400 bg-clip-text text-transparent">
-                  Hospital Sirhind
-                </p>
+                <div className="flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-lime/60" />
+                  <p className="text-[10px] font-medium tracking-wide bg-gradient-to-r from-lime to-emerald bg-clip-text text-transparent">
+                    Hospital Sirhind
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/50 to-lime-500/50 rounded-full blur-md opacity-70 group-hover:opacity-100 transition-opacity" />
-                <div className="relative p-0.5 rounded-full bg-gradient-to-br from-white/15 to-white/5 border border-white/20">
+                <div className="absolute -inset-2 bg-gradient-to-r from-teal/50 to-lime/50 rounded-full blur-xl opacity-60 group-hover:opacity-100 transition-opacity animate-pulse-teal" />
+                <div className="relative p-0.5 rounded-full bg-gradient-to-br from-white/15 to-white/5 border border-white/20 shadow-glass">
                   <img 
                     src={navjeevanLogo} 
                     alt="NH Logo" 
-                    className="w-8 h-8 object-contain relative z-10 transition-transform duration-200 group-hover:scale-110"
+                    className="w-8 h-8 object-contain relative z-10 transition-transform duration-300 group-hover:scale-110"
                   />
                 </div>
               </div>
@@ -124,19 +130,22 @@ export function AppSidebar() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-8 h-8 p-0 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all"
+                    className="w-8 h-8 p-0 rounded-xl glass hover:glass-strong transition-all duration-300"
                   >
-                    <Menu className="h-4 w-4 text-slate-400 hover:text-white" />
+                    <Menu className="h-4 w-4 text-slate-400 hover:text-white transition-colors" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-72 bg-slate-900/98 backdrop-blur-xl border-white/10 p-0">
-                  <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-transparent to-cyan-600/5" />
+                <SheetContent side="left" className="w-72 bg-slate-950/95 backdrop-blur-2xl backdrop-saturate-200 border-white/10 p-0">
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--teal)/0.1),transparent_60%)]" />
                   <SheetHeader className="relative p-4 border-b border-white/10">
                     <div className="flex items-center gap-3">
-                      <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
+                      <div className="relative">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-teal/40 to-lime/40 rounded-full blur-md opacity-60" />
+                        <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain relative" />
+                      </div>
                       <div>
-                        <SheetTitle className="text-white text-base">NAVJEEVAN</SheetTitle>
-                        <p className="text-xs text-amber-400">Hospital Sirhind</p>
+                        <SheetTitle className="text-white text-base bg-gradient-to-r from-white to-teal-200 bg-clip-text text-transparent">NAVJEEVAN</SheetTitle>
+                        <p className="text-xs bg-gradient-to-r from-lime to-emerald bg-clip-text text-transparent">Hospital Sirhind</p>
                       </div>
                     </div>
                   </SheetHeader>
@@ -151,14 +160,14 @@ export function AppSidebar() {
                             key={item.title}
                             to={item.url}
                             onClick={() => setSheetOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
                               isActive(item.url)
-                                ? "bg-white/10 border border-white/10"
-                                : "hover:bg-white/5"
+                                ? "glass-strong border border-white/15"
+                                : "hover:glass"
                             }`}
                           >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              isActive(item.url) ? `bg-gradient-to-br ${item.color}` : "bg-white/5"
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                              isActive(item.url) ? `bg-gradient-to-br ${item.color} shadow-liquid` : "glass"
                             }`}>
                               <item.icon className={`h-4 w-4 ${isActive(item.url) ? "text-white" : "text-slate-400"}`} />
                             </div>
@@ -179,12 +188,12 @@ export function AppSidebar() {
                             key={action.title}
                             to={action.url}
                             onClick={() => setSheetOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all"
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:glass transition-all duration-300 group"
                           >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${action.color}`}>
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center bg-gradient-to-br ${action.color} shadow-liquid group-hover:scale-110 transition-transform duration-300`}>
                               <Plus className="h-4 w-4 text-white" />
                             </div>
-                            <span className="text-slate-300">{action.title}</span>
+                            <span className={`text-slate-300 bg-gradient-to-r ${action.color} bg-clip-text group-hover:text-transparent transition-all`}>{action.title}</span>
                           </NavLink>
                         ))}
                       </div>
@@ -199,7 +208,7 @@ export function AppSidebar() {
         {/* Navigation with Liquid Glass Items */}
         <SidebarGroup className="relative z-10 px-2 pt-4">
           <SidebarGroupLabel className="text-slate-500/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
-            <div className="w-8 h-[1px] bg-gradient-to-r from-violet-500/50 to-transparent" />
+            <div className="w-8 h-[1px] bg-gradient-to-r from-teal/50 to-transparent" />
             <span>Navigate</span>
             <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </SidebarGroupLabel>
@@ -210,42 +219,42 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
-                      className={`relative overflow-hidden rounded-xl transition-all duration-300 group flex items-center ${
+                      className={`relative overflow-hidden rounded-xl transition-all duration-500 group flex items-center ${
                         isActive(item.url) 
-                          ? "bg-white/[0.08] backdrop-blur-md shadow-lg shadow-black/20 border border-white/10" 
-                          : `hover:bg-white/[0.04] hover:backdrop-blur-sm ${item.glow} hover:shadow-lg`
+                          ? "glass-strong shadow-liquid border border-white/15" 
+                          : "hover:glass hover:shadow-glass"
                       }`}
                     >
                       {/* Liquid shine effect on hover */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-xl">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden rounded-xl pointer-events-none">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
                       </div>
                       
                       {/* Active indicator - liquid gradient bar */}
                       {isActive(item.url) && (
-                        <div className={`absolute left-0 top-1 bottom-1 w-1 bg-gradient-to-b ${item.color} rounded-full shadow-lg shadow-current/50`} />
+                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b ${item.color} rounded-full shadow-glow`} />
                       )}
                       
-                      {/* Icon container with glass effect */}
-                      <div className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${
+                      {/* Icon container with liquid glass effect */}
+                      <div className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-500 ${
                         isActive(item.url) 
-                          ? `bg-gradient-to-br ${item.color} shadow-lg shadow-current/30` 
-                          : "bg-white/[0.05] group-hover:bg-white/10 border border-transparent group-hover:border-white/10"
+                          ? `bg-gradient-to-br ${item.color} shadow-liquid` 
+                          : "glass group-hover:glass-strong"
                       }`}>
-                        {/* Icon glow */}
+                        {/* Icon glow effect */}
                         {isActive(item.url) && (
-                          <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${item.color} blur-md opacity-50`} />
+                          <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${item.color} blur-lg opacity-50 animate-pulse-teal`} />
                         )}
-                        <item.icon className={`h-5 w-5 transition-all duration-300 relative z-10 ${
+                        <item.icon className={`h-5 w-5 transition-all duration-500 relative z-10 ${
                           isActive(item.url) 
-                            ? 'text-white drop-shadow-md' 
+                            ? 'text-white drop-shadow-lg' 
                             : 'text-slate-400 group-hover:text-white'
                         }`} />
                       </div>
                       
                       {!collapsed && (
                         <>
-                          <span className={`ml-3 font-medium transition-all duration-300 ${
+                          <span className={`ml-3 font-medium transition-all duration-500 ${
                             isActive(item.url) 
                               ? 'text-white' 
                               : 'text-slate-400 group-hover:text-white'
@@ -254,8 +263,8 @@ export function AppSidebar() {
                           </span>
                           
                           {isActive(item.url) && (
-                            <div className="ml-auto flex items-center">
-                              <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-br ${item.color} mr-2 animate-pulse`} />
+                            <div className="ml-auto flex items-center gap-1">
+                              <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-br ${item.color} animate-pulse`} />
                               <ChevronRight className="h-4 w-4 text-white/50" />
                             </div>
                           )}
@@ -269,10 +278,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Quick Actions with Glass Cards */}
+        {/* Quick Actions with Liquid Glass Cards */}
         <SidebarGroup className="relative z-10 mt-4 px-2">
           <SidebarGroupLabel className="text-slate-500/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
-            <div className="w-6 h-[1px] bg-gradient-to-r from-amber-500/50 to-transparent" />
+            <div className="w-6 h-[1px] bg-gradient-to-r from-lime/50 to-transparent" />
             <span>Quick Add</span>
             <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </SidebarGroupLabel>
@@ -283,20 +292,21 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={action.url} 
-                      className="relative rounded-xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:bg-white/[0.06] hover:border-white/15 transition-all duration-300 group overflow-hidden"
+                      className="relative rounded-xl glass hover:glass-strong transition-all duration-500 group overflow-hidden"
                     >
-                      {/* Shimmer effect */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden rounded-xl">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      {/* Liquid shimmer effect */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden rounded-xl pointer-events-none">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
                       </div>
                       
-                      {/* Icon with glass container */}
-                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-90 group-hover:shadow-lg`}>
+                      {/* Icon with liquid container */}
+                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br ${action.color} shadow-liquid transition-all duration-500 group-hover:scale-110 group-hover:rotate-90`}>
+                        <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${action.color} blur-md opacity-0 group-hover:opacity-60 transition-opacity duration-500`} />
                         <Plus className="h-4 w-4 text-white relative z-10" />
                       </div>
                       
                       {!collapsed && (
-                        <span className={`ml-3 font-medium bg-gradient-to-r ${action.color} bg-clip-text text-transparent group-hover:opacity-100 opacity-80 transition-opacity`}>
+                        <span className={`ml-3 font-medium bg-gradient-to-r ${action.color} bg-clip-text text-transparent group-hover:opacity-100 opacity-70 transition-all duration-500`}>
                           {action.title}
                         </span>
                       )}
@@ -316,27 +326,28 @@ export function AppSidebar() {
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className={`group relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/15 transition-all duration-300 backdrop-blur-sm ${
+              className={`group relative overflow-hidden rounded-xl glass hover:glass-strong transition-all duration-500 ${
                 collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
               }`}
             >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              {/* Liquid shimmer */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden rounded-xl pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange/10 via-amber/10 to-orange/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
               </div>
               
               {!collapsed && (
-                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-colors duration-300 relative z-10">
+                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-colors duration-500 relative z-10">
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </span>
               )}
               
               <div className={`relative flex items-center justify-center transition-all duration-500 ${
-                collapsed ? '' : 'bg-gradient-to-br from-amber-500/15 to-orange-500/15 rounded-lg p-1.5 border border-white/5'
+                collapsed ? '' : 'glass rounded-lg p-1.5'
               }`}>
                 {theme === "dark" ? (
-                  <Sun className="h-4 w-4 text-amber-400 group-hover:text-amber-300 transition-all duration-300 group-hover:scale-110" />
+                  <Sun className="h-4 w-4 text-orange group-hover:text-amber-300 transition-all duration-500 group-hover:scale-110 group-hover:rotate-180" />
                 ) : (
-                  <Moon className="h-4 w-4 text-slate-400 group-hover:text-violet-400 transition-all duration-300 group-hover:scale-110" />
+                  <Moon className="h-4 w-4 text-slate-400 group-hover:text-purple transition-all duration-500 group-hover:scale-110" />
                 )}
               </div>
             </Button>
@@ -348,39 +359,41 @@ export function AppSidebar() {
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className={`group relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/15 transition-all duration-300 backdrop-blur-sm ${
+              className={`group relative overflow-hidden rounded-xl glass hover:glass-strong transition-all duration-500 ${
                 collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
               }`}
             >
-              {/* Glass shimmer effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-lime-500/10 to-teal-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              {/* Liquid shimmer effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden rounded-xl pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-r from-teal/10 via-lime/10 to-teal/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
               </div>
               
               {!collapsed && (
-                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-colors duration-300 relative z-10">
+                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-colors duration-500 relative z-10">
                   Collapse
                 </span>
               )}
               
               <div className={`relative flex items-center justify-center transition-all duration-500 ${
-                collapsed ? '' : 'bg-gradient-to-br from-teal-500/15 to-lime-500/15 rounded-lg p-1.5 border border-white/5'
+                collapsed ? '' : 'glass rounded-lg p-1.5'
               }`}>
                 {collapsed ? (
-                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-lime-400 transition-all duration-300 group-hover:scale-110" />
+                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-lime transition-all duration-500 group-hover:scale-110" />
                 ) : (
-                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-teal-400 transition-all duration-300 group-hover:scale-110" />
+                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-teal transition-all duration-500 group-hover:scale-110" />
                 )}
               </div>
             </Button>
           </div>
 
-          {/* Footer with Glass Separator */}
+          {/* Footer with Liquid Glass Separator */}
           {!collapsed && (
             <div className="text-center px-4 pb-4">
-              <div className="h-px bg-gradient-to-r from-transparent via-lime-300/20 to-transparent mb-3" />
-              <p className="text-[10px] text-slate-600/80 tracking-wider font-medium">
-                Powered by <span className="bg-gradient-to-r from-teal-400 to-lime-400 bg-clip-text text-transparent">Lovable</span>
+              <div className="h-px bg-gradient-to-r from-transparent via-teal/30 to-transparent mb-3" />
+              <p className="text-[10px] text-slate-600/80 tracking-wider font-medium flex items-center justify-center gap-1">
+                <span>Powered by</span>
+                <span className="bg-gradient-to-r from-teal to-lime bg-clip-text text-transparent font-semibold">Lovable</span>
+                <Sparkles className="w-2.5 h-2.5 text-lime/50" />
               </p>
             </div>
           )}
