@@ -69,26 +69,26 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           <title>Purchase Order - ${poNumber}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Times New Roman', Times, serif; padding: 8px 15px; font-size: 10px; line-height: 1.3; }
-            .header-section { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; }
-            .logo { width: 45px; height: 45px; object-fit: contain; }
-            .header-row { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px; }
-            .hospital-name { font-size: 18px; font-weight: bold; text-align: center; margin: 3px 0; }
-            .address-row { text-align: center; font-size: 9px; margin-bottom: 3px; }
-            .licence-row { text-align: center; font-size: 8px; margin-bottom: 8px; }
-            .ref-po-section { text-align: center; font-size: 10px; margin-bottom: 10px; }
-            .to-section { margin-bottom: 8px; font-size: 9px; line-height: 1.4; margin-left: 60px; }
-            .subject-section { margin-left: 60px; font-size: 9px; margin-bottom: 8px; }
-            table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9px; }
-            th, td { border: 1px solid #000; padding: 3px 5px; }
-            th { background-color: #f5f5f5; font-weight: bold; text-align: center; }
+            body { font-family: 'Times New Roman', Times, serif; padding: 6px 12px; font-size: 9px; line-height: 1.2; }
+            .header-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
+            .header-section { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+            .logo { width: 32px; height: 32px; object-fit: contain; }
+            .hospital-name { font-size: 16px; font-weight: bold; flex: 1; text-align: center; }
+            .address-row { text-align: center; font-size: 8px; margin-bottom: 2px; }
+            .licence-row { text-align: center; font-size: 7px; margin-bottom: 4px; }
+            .ref-po-section { text-align: center; font-size: 9px; margin-bottom: 4px; }
+            .to-section { margin-bottom: 4px; font-size: 8px; line-height: 1.3; margin-left: 20px; }
+            .subject-section { margin-left: 20px; font-size: 8px; margin-bottom: 4px; }
+            table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 8px; }
+            th, td { border: 1px solid #000; padding: 2px 3px; }
+            th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
             td { text-align: left; }
             td.center { text-align: center; }
-            .footer-section { font-size: 9px; margin-top: 15px; margin-left: 60px; line-height: 1.5; }
-            .signature-section { font-size: 9px; margin-top: 15px; margin-left: 60px; line-height: 1.4; }
+            .footer-section { font-size: 8px; margin-top: 8px; margin-left: 20px; line-height: 1.3; }
+            .signature-section { font-size: 8px; margin-top: 8px; margin-left: 20px; line-height: 1.3; }
             @media print {
-              body { padding: 5mm 10mm; }
-              @page { margin: 5mm; size: A4; }
+              body { padding: 4mm 8mm; }
+              @page { margin: 4mm; size: A4; }
             }
           </style>
         </head>
@@ -122,13 +122,13 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
     pdf.text('Mob_ 6284942412', pageWidth - 10, y, { align: 'right' });
     y += 5;
 
-    // Logo and Hospital Name
-    const logoSize = 12;
-    pdf.addImage(logoBase64, 'PNG', pageWidth / 2 - 35, y, logoSize, logoSize);
+    // Logo and Hospital Name (single logo on left)
+    const logoSize = 10;
+    pdf.addImage(logoBase64, 'PNG', 10, y, logoSize, logoSize);
     pdf.setFontSize(14);
     pdf.setFont('times', 'bold');
-    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y + 7, { align: 'center' });
-    pdf.addImage(logoBase64, 'PNG', pageWidth / 2 + 23, y, logoSize, logoSize);
+    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y + 6, { align: 'center' });
+    y += 12;
     y += 15;
 
     // Address
@@ -264,10 +264,9 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </div>
 
           {/* Hospital Header with Logo */}
-          <div className="flex items-center justify-center gap-2 my-2">
-            <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
-            <h1 className="text-lg font-bold">NAVJEEVAN HOSPITAL</h1>
-            <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
+          <div className="flex items-center gap-3 my-1">
+            <img src={navjeevanLogo} alt="Logo" className="w-8 h-8 object-contain" />
+            <h1 className="text-base font-bold flex-1 text-center">NAVJEEVAN HOSPITAL</h1>
           </div>
 
           {/* Address Row */}
