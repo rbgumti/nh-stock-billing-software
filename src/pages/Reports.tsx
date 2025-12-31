@@ -38,6 +38,7 @@ import DailyStockReport from "@/components/DailyStockReport";
 import DayReport from "@/components/DayReport";
 import SaleReport from "@/components/SaleReport";
 import FollowUpReport from "@/components/FollowUpReport";
+import { FloatingOrbs } from "@/components/ui/floating-orbs";
 
 export default function Reports() {
   const { stockItems } = useStockStore();
@@ -260,39 +261,50 @@ export default function Reports() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 relative">
+      <FloatingOrbs />
+      
+      {/* Ambient liquid blobs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-gradient-radial from-purple/20 via-purple/5 to-transparent rounded-full blur-3xl liquid-blob" />
+        <div className="absolute top-1/3 -right-20 w-80 h-80 bg-gradient-radial from-cyan/20 via-cyan/5 to-transparent rounded-full blur-3xl liquid-blob" style={{ animationDelay: '-5s' }} />
+        <div className="absolute -bottom-20 left-1/3 w-72 h-72 bg-gradient-radial from-gold/15 via-gold/5 to-transparent rounded-full blur-3xl liquid-blob" style={{ animationDelay: '-10s' }} />
+      </div>
+
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
-          <p className="text-gray-600 mt-2">Comprehensive reports and analytics</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent drop-shadow-sm">
+            Reports
+          </h1>
+          <p className="text-muted-foreground mt-1">Comprehensive reports and analytics</p>
         </div>
         <div className="flex gap-2">
           <Input
             type="date"
             value={dateRange.from}
             onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-            className="w-auto"
+            className="w-auto glass-subtle border-purple/20"
           />
           <Input
             type="date"
             value={dateRange.to}
             onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-            className="w-auto"
+            className="w-auto glass-subtle border-purple/20"
           />
         </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="salereport">Sale Report</TabsTrigger>
-          <TabsTrigger value="dayreport">Day's Report</TabsTrigger>
-          <TabsTrigger value="patients">Patient Reports</TabsTrigger>
-          <TabsTrigger value="stock">Stock Reports</TabsTrigger>
-          <TabsTrigger value="invoices">Invoice Reports</TabsTrigger>
-          <TabsTrigger value="stockledger">Stock Ledger</TabsTrigger>
-          <TabsTrigger value="dailystock">Daily Stock</TabsTrigger>
-          <TabsTrigger value="followup">Follow-Up</TabsTrigger>
+        <TabsList className="glass-strong border-0 p-1 grid w-full grid-cols-9">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple data-[state=active]:to-cyan data-[state=active]:text-white">Overview</TabsTrigger>
+          <TabsTrigger value="salereport" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan data-[state=active]:to-teal data-[state=active]:text-white">Sale Report</TabsTrigger>
+          <TabsTrigger value="dayreport" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gold data-[state=active]:to-orange data-[state=active]:text-white">Day's Report</TabsTrigger>
+          <TabsTrigger value="patients" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink data-[state=active]:to-purple data-[state=active]:text-white">Patient Reports</TabsTrigger>
+          <TabsTrigger value="stock" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald data-[state=active]:to-teal data-[state=active]:text-white">Stock Reports</TabsTrigger>
+          <TabsTrigger value="invoices" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple data-[state=active]:to-pink data-[state=active]:text-white">Invoice Reports</TabsTrigger>
+          <TabsTrigger value="stockledger" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan data-[state=active]:to-purple data-[state=active]:text-white">Stock Ledger</TabsTrigger>
+          <TabsTrigger value="dailystock" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-emerald data-[state=active]:text-white">Daily Stock</TabsTrigger>
+          <TabsTrigger value="followup" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange data-[state=active]:to-gold data-[state=active]:text-white">Follow-Up</TabsTrigger>
         </TabsList>
 
         <TabsContent value="salereport" className="space-y-6">
@@ -305,48 +317,60 @@ export default function Reports() {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-purple/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center">
-                  <Users className="h-8 w-8 text-blue-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-cyan to-purple shadow-lg">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Patients</p>
+                    <p className="text-sm font-medium text-muted-foreground">Total Patients</p>
                     <p className="text-2xl font-bold">{patientStats.total}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 via-transparent to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center">
-                  <Package className="h-8 w-8 text-green-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-emerald to-teal shadow-lg">
+                    <Package className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Stock Items</p>
+                    <p className="text-sm font-medium text-muted-foreground">Stock Items</p>
                     <p className="text-2xl font-bold">{stockStats.totalItems}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center">
-                  <Receipt className="h-8 w-8 text-purple-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-purple to-pink shadow-lg">
+                    <Receipt className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Invoices</p>
+                    <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
                     <p className="text-2xl font-bold">{invoiceStats.total}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div className="flex items-center">
-                  <DollarSign className="h-8 w-8 text-orange-600" />
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-gold to-orange shadow-lg">
+                    <DollarSign className="h-6 w-6 text-white" />
+                  </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                    <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                     <p className="text-2xl font-bold">₹{invoiceStats.totalRevenue.toFixed(2)}</p>
                   </div>
                 </div>
@@ -357,19 +381,20 @@ export default function Reports() {
 
         <TabsContent value="patients" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Patient Reports</h2>
-            <Button onClick={() => exportReport('patients')}>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-pink to-purple bg-clip-text text-transparent">Patient Reports</h2>
+            <Button onClick={() => exportReport('patients')} className="bg-gradient-to-r from-pink to-purple hover:shadow-glow text-white">
               <Download className="h-4 w-4 mr-2" />
               Export Excel
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Patients by Gender</CardTitle>
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink/5 via-transparent to-purple/5" />
+              <CardHeader className="relative">
+                <CardTitle className="text-lg">Patients by Gender</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative">
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
@@ -390,18 +415,19 @@ export default function Reports() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Patients by Age Group</CardTitle>
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 via-transparent to-purple/5" />
+              <CardHeader className="relative">
+                <CardTitle className="text-lg">Patients by Age Group</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative">
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={formatBarData(patientStats.byAgeGroup)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#3b82f6" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
+                    <Bar dataKey="value" fill="hsl(var(--purple))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -409,29 +435,32 @@ export default function Reports() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 to-purple/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Patients</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Patients</p>
                   <p className="text-2xl font-bold">{patientStats.total}</p>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">New This Month</p>
-                  <p className="text-2xl font-bold text-green-600">{patientStats.newThisMonth}</p>
+                  <p className="text-sm font-medium text-muted-foreground">New This Month</p>
+                  <p className="text-2xl font-bold text-emerald">{patientStats.newThisMonth}</p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/10 to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Growth Rate</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-sm font-medium text-muted-foreground">Growth Rate</p>
+                  <p className="text-2xl font-bold text-cyan">
                     {patientStats.total > 0 ? ((patientStats.newThisMonth / patientStats.total) * 100).toFixed(1) : 0}%
                   </p>
                 </div>
@@ -440,9 +469,10 @@ export default function Reports() {
           </div>
 
           {/* Detailed Patient List */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Detailed Patient Information</CardTitle>
+          <Card className="glass-strong border-0 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-pink/5 via-transparent to-purple/5" />
+            <CardHeader className="relative">
+              <CardTitle className="text-lg">Detailed Patient Information</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4 max-h-80 overflow-y-auto">
@@ -508,74 +538,80 @@ export default function Reports() {
 
         <TabsContent value="stock" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Stock Reports</h2>
-            <Button onClick={() => exportReport('stock')}>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">Stock Reports</h2>
+            <Button onClick={() => exportReport('stock')} className="bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white">
               <Download className="h-4 w-4 mr-2" />
               Export Excel
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Items</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Items</p>
                   <p className="text-2xl font-bold">{stockStats.totalItems}</p>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-destructive/10 to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
-                  <p className="text-2xl font-bold text-red-600">{stockStats.lowStock}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Low Stock Items</p>
+                  <p className="text-2xl font-bold text-destructive">{stockStats.lowStock}</p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Value</p>
-                  <p className="text-2xl font-bold text-green-600">₹{stockStats.totalValue.toFixed(2)}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+                  <p className="text-2xl font-bold text-emerald">₹{stockStats.totalValue.toFixed(2)}</p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange/10 to-gold/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Expiring Soon</p>
-                  <p className="text-2xl font-bold text-orange-600">{stockStats.expiringItems}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Expiring Soon</p>
+                  <p className="text-2xl font-bold text-orange">{stockStats.expiringItems}</p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Stock by Category</CardTitle>
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald/5 via-transparent to-teal/5" />
+              <CardHeader className="relative">
+                <CardTitle className="text-lg">Stock by Category</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative">
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={formatBarData(stockStats.byCategory)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#10b981" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
+                    <Bar dataKey="value" fill="hsl(var(--emerald))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Stock Status Overview</CardTitle>
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 via-transparent to-emerald/5" />
+              <CardHeader className="relative">
+                <CardTitle className="text-lg">Stock Status Overview</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative">
                 <div className="space-y-4 max-h-80 overflow-y-auto">
                   {stockItems.map((item) => {
                     const isLowStock = item.currentStock <= item.minimumStock;
@@ -633,74 +669,80 @@ export default function Reports() {
 
         <TabsContent value="invoices" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Invoice Reports</h2>
-            <Button onClick={() => exportReport('invoices')}>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple to-pink bg-clip-text text-transparent">Invoice Reports</h2>
+            <Button onClick={() => exportReport('invoices')} className="bg-gradient-to-r from-purple to-pink hover:shadow-glow text-white">
               <Download className="h-4 w-4 mr-2" />
               Export Excel
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/10 to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Invoices</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
                   <p className="text-2xl font-bold">{invoiceStats.total}</p>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Paid Invoices</p>
-                  <p className="text-2xl font-bold text-green-600">{invoiceStats.paid}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Paid Invoices</p>
+                  <p className="text-2xl font-bold text-emerald">{invoiceStats.paid}</p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange/10 to-gold/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Invoices</p>
-                  <p className="text-2xl font-bold text-orange-600">{invoiceStats.pending}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Pending Invoices</p>
+                  <p className="text-2xl font-bold text-orange">{invoiceStats.pending}</p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 to-purple/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-blue-600">₹{invoiceStats.totalRevenue.toFixed(2)}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                  <p className="text-2xl font-bold text-cyan">₹{invoiceStats.totalRevenue.toFixed(2)}</p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Monthly Revenue</CardTitle>
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/5 via-transparent to-pink/5" />
+              <CardHeader className="relative">
+                <CardTitle className="text-lg">Monthly Revenue</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative">
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={formatBarData(invoiceStats.monthlyRevenue)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`₹${value}`, 'Revenue']} />
-                    <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip formatter={(value) => [`₹${value}`, 'Revenue']} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
+                    <Line type="monotone" dataKey="value" stroke="hsl(var(--purple))" strokeWidth={3} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Detailed Invoice Report</CardTitle>
+            <Card className="glass-strong border-0 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 via-transparent to-purple/5" />
+              <CardHeader className="relative">
+                <CardTitle className="text-lg">Detailed Invoice Report</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative">
                 <div className="space-y-4 max-h-80 overflow-y-auto">
                   {invoices.map((invoice: any) => (
                     <div key={invoice.id} className="border rounded-lg p-4 space-y-3">
