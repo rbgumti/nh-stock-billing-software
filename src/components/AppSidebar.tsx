@@ -79,7 +79,7 @@ export function AppSidebar() {
             <div className="flex items-center gap-3 relative z-10 px-1">
               {/* Compact Logo - More visible with transparent background */}
               <div className="relative group flex-shrink-0">
-                <div className="absolute -inset-2 bg-gradient-to-r from-violet-500/50 to-cyan-500/50 rounded-full blur-lg opacity-70 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute -inset-2 bg-gradient-to-r from-violet-500/50 to-cyan-500/50 rounded-full blur-lg opacity-70 group-hover:opacity-100 transition-opacity animate-[pulse_3s_ease-in-out_infinite]" />
                 <img 
                   src={navjeevanLogo} 
                   alt="Navjeevan Hospital Logo" 
@@ -100,9 +100,9 @@ export function AppSidebar() {
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
-                <div className="absolute -inset-2 bg-gradient-to-r from-violet-500/60 to-cyan-500/60 rounded-full blur-lg opacity-80 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute -inset-2 bg-gradient-to-r from-violet-500/60 to-cyan-500/60 rounded-full blur-lg opacity-80 group-hover:opacity-100 transition-opacity animate-[pulse_3s_ease-in-out_infinite]" />
                 <img 
-                  src={navjeevanLogo} 
+                  src={navjeevanLogo}
                   alt="NH Logo" 
                   className="w-9 h-9 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] transition-transform duration-200 group-hover:scale-110"
                 />
