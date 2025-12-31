@@ -137,63 +137,63 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+        <div ref={printRef} className="p-4 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '10px', lineHeight: '1.3' }}>
           {/* Header Row */}
-          <div className="flex justify-between text-[11px] mb-2">
+          <div className="flex justify-between text-[9px] mb-1">
             <span>Regd. Govt of Punjab</span>
             <span>Mob_ 6284942412</span>
           </div>
 
           {/* Hospital Header with Logo */}
-          <div className="flex items-center justify-center gap-4 my-3">
-            <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
-            <h1 className="text-2xl font-bold">NAVJEEVAN HOSPITAL</h1>
-            <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
+          <div className="flex items-center justify-center gap-2 my-2">
+            <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
+            <h1 className="text-lg font-bold">NAVJEEVAN HOSPITAL</h1>
+            <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
           </div>
 
           {/* Address Row */}
-          <p className="text-center text-[11px] mb-1">
-            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dr.metali Bhatti
+          <p className="text-center text-[9px] mb-0.5">
+            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;Dr.metali Bhatti
           </p>
 
           {/* Licence Row */}
-          <p className="text-center text-[10px] mb-4">
+          <p className="text-center text-[8px] mb-2">
             Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024
           </p>
 
           {/* PO Number and Date Row */}
-          <div className="flex justify-between font-bold text-[12px] mb-5">
+          <div className="flex justify-between font-bold text-[10px] mb-3">
             <span>PO NO- {poNumber}</span>
             <span>DATE - {formatDate(poDate)}</span>
           </div>
 
           {/* To Section */}
-          <div className="text-[11px] mb-4 leading-relaxed">
-            <p className="mb-2">To,</p>
+          <div className="text-[9px] mb-2 leading-snug">
+            <p className="mb-1">To,</p>
             <p className="font-bold">Rusan Pharma Ltd.</p>
             <p>Khasra No. 122MI, Central Hope Town,</p>
             <p>Selaqui, Dehradun, Uttarakhand-248197</p>
-            <p className="mt-2">Sub: Pu/rchase Order</p>
+            <p className="mt-1">Sub: Pu/rchase Order</p>
           </div>
 
           {/* Salutation */}
-          <p className="text-[11px] my-4">Dear Sir, ma&apos;am</p>
+          <p className="text-[9px] my-2">Dear Sir, ma&apos;am</p>
 
           {/* Intro Paragraph */}
-          <p className="text-[11px] text-justify mb-4 leading-relaxed">
+          <p className="text-[9px] text-justify mb-2 leading-snug">
             We hereby placing a purchase order with Stamp and Sign of our current working doctor&apos;s. Terms and Conditions will remain same asour discussion on phonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-5 text-[11px]">
+          <table className="w-full border-collapse mb-2 text-[9px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black p-2 text-center">Sr. No.</th>
-                <th className="border border-black p-2 text-center">Product Name</th>
-                <th className="border border-black p-2 text-center">Compositions</th>
-                <th className="border border-black p-2 text-center">Packing</th>
-                <th className="border border-black p-2 text-center">Qty.In Strips</th>
-                <th className="border border-black p-2 text-center">Qty.In Tablets</th>
+                <th className="border border-black px-1 py-0.5 text-center">Sr. No.</th>
+                <th className="border border-black px-1 py-0.5 text-center">Product Name</th>
+                <th className="border border-black px-1 py-0.5 text-center">Compositions</th>
+                <th className="border border-black px-1 py-0.5 text-center">Packing</th>
+                <th className="border border-black px-1 py-0.5 text-center">Qty.In Strips</th>
+                <th className="border border-black px-1 py-0.5 text-center">Qty.In Tablets</th>
               </tr>
             </thead>
             <tbody>
@@ -206,12 +206,12 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
                 
                 return (
                   <tr key={index}>
-                    <td className="border border-black p-2 text-center">{index + 1}.</td>
-                    <td className="border border-black p-2">{item.stockItemName}</td>
-                    <td className="border border-black p-2">{stockItem?.composition || '-'}</td>
-                    <td className="border border-black p-2 text-center">{packing}</td>
-                    <td className="border border-black p-2 text-right">{item.quantity.toLocaleString()}</td>
-                    <td className="border border-black p-2 text-right">{qtyInTablets.toLocaleString()}</td>
+                    <td className="border border-black px-1 py-0.5 text-center">{index + 1}.</td>
+                    <td className="border border-black px-1 py-0.5">{item.stockItemName}</td>
+                    <td className="border border-black px-1 py-0.5">{stockItem?.composition || '-'}</td>
+                    <td className="border border-black px-1 py-0.5 text-center">{packing}</td>
+                    <td className="border border-black px-1 py-0.5 text-right">{item.quantity.toLocaleString()}</td>
+                    <td className="border border-black px-1 py-0.5 text-right">{qtyInTablets.toLocaleString()}</td>
                   </tr>
                 );
               })}
@@ -219,17 +219,17 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </table>
 
           {/* Undertaking */}
-          <p className="font-bold text-[11px] mb-2">UNDERTAKING:-</p>
-          <p className="text-[10px] text-justify leading-relaxed mb-6">
+          <p className="font-bold text-[9px] mb-1">UNDERTAKING:-</p>
+          <p className="text-[8px] text-justify leading-snug mb-3">
             We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN,SELAQUI, DEHRADUN, UTTARAKHAND.248197 Our P O. No:{poNumber} ({getMonthYear(poDate)}) :date {formatDate(poDate)}. These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our License No.PSMHC/Punjab/2024/863 we are fully aware These product containing controlled substances as per Narcotic Drugs &amp; Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6(Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation &amp; for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any on-compliance of statutory provisions committed by us intentionally or un-intentionally
           </p>
 
-          <p className="text-[11px] mb-6">
+          <p className="text-[9px] mb-3">
             For Navjeevanhospital,opp.New Bus Stand,G.t. Road, Sirhind
           </p>
 
           {/* Signature Section */}
-          <div className="flex justify-between items-end mt-8 text-[11px]">
+          <div className="flex justify-between items-end mt-4 text-[9px]">
             <div>
               <p>Date: {formatDate(poDate)}</p>
             </div>
