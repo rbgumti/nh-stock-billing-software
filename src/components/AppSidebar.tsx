@@ -76,19 +76,20 @@ export function AppSidebar() {
           <div className="absolute inset-1 rounded-xl bg-white/[0.03] backdrop-blur-sm border border-white/5" />
           
           {!collapsed ? (
-            <div className="flex items-center gap-3 relative z-10 px-1">
-              {/* Compact Logo - More visible with transparent background */}
+            <div className="flex items-center gap-4 relative z-10 px-1">
+              {/* Compact Logo - Clean transparent background */}
               <div className="relative group flex-shrink-0">
-                <div className="absolute -inset-2 bg-gradient-to-r from-violet-500/50 to-cyan-500/50 rounded-full blur-lg opacity-70 group-hover:opacity-100 transition-opacity animate-[pulse_3s_ease-in-out_infinite]" />
+                <div className="absolute -inset-3 bg-gradient-to-r from-violet-500/40 to-cyan-500/40 rounded-full blur-xl opacity-60 group-hover:opacity-90 transition-opacity animate-[pulse_3s_ease-in-out_infinite]" />
                 <img 
                   src={navjeevanLogo} 
                   alt="Navjeevan Hospital Logo" 
-                  className="w-11 h-11 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] transition-transform duration-300 group-hover:scale-110"
+                  className="w-12 h-12 object-contain relative z-10 brightness-110 contrast-105 transition-transform duration-300 group-hover:scale-110"
+                  style={{ filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.4))' }}
                 />
               </div>
               
-              {/* Compact Hospital Name - Shifted right */}
-              <div className="min-w-0 flex-1 pl-1">
+              {/* Compact Hospital Name - Shifted more right */}
+              <div className="min-w-0 flex-1 pl-2">
                 <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent leading-tight">
                   NAVJEEVAN
                 </h2>
@@ -100,11 +101,12 @@ export function AppSidebar() {
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
-                <div className="absolute -inset-2 bg-gradient-to-r from-violet-500/60 to-cyan-500/60 rounded-full blur-lg opacity-80 group-hover:opacity-100 transition-opacity animate-[pulse_3s_ease-in-out_infinite]" />
+                <div className="absolute -inset-3 bg-gradient-to-r from-violet-500/40 to-cyan-500/40 rounded-full blur-xl opacity-60 group-hover:opacity-90 transition-opacity animate-[pulse_3s_ease-in-out_infinite]" />
                 <img 
                   src={navjeevanLogo}
                   alt="NH Logo" 
-                  className="w-9 h-9 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] transition-transform duration-200 group-hover:scale-110"
+                  className="w-10 h-10 object-contain relative z-10 brightness-110 contrast-105 transition-transform duration-200 group-hover:scale-110"
+                  style={{ filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.4))' }}
                 />
               </div>
               
