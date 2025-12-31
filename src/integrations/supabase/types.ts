@@ -219,7 +219,9 @@ export type Database = {
         Row: {
           batch_no: string | null
           created_at: string
+          duration_days: number | null
           expiry_date: string | null
+          frequency: string | null
           id: string
           invoice_id: string
           medicine_id: number
@@ -233,7 +235,9 @@ export type Database = {
         Insert: {
           batch_no?: string | null
           created_at?: string
+          duration_days?: number | null
           expiry_date?: string | null
+          frequency?: string | null
           id?: string
           invoice_id: string
           medicine_id: number
@@ -247,7 +251,9 @@ export type Database = {
         Update: {
           batch_no?: string | null
           created_at?: string
+          duration_days?: number | null
           expiry_date?: string | null
+          frequency?: string | null
           id?: string
           invoice_id?: string
           medicine_id?: number
@@ -278,6 +284,7 @@ export type Database = {
       invoices: {
         Row: {
           created_at: string
+          follow_up_date: string | null
           id: string
           invoice_date: string
           invoice_number: string
@@ -293,6 +300,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          follow_up_date?: string | null
           id: string
           invoice_date: string
           invoice_number: string
@@ -308,6 +316,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          follow_up_date?: string | null
           id?: string
           invoice_date?: string
           invoice_number?: string
