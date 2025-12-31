@@ -95,7 +95,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.supplier || !formData.expectedDelivery || items.length === 0) {
+    if (!formData.supplier || items.length === 0) {
       return;
     }
 
@@ -111,7 +111,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
         poNumber: finalPoNumber,
         supplier: formData.supplier,
         orderDate: formData.poDate,
-        expectedDelivery: formData.expectedDelivery,
+        expectedDelivery: formData.poDate, // Use order date as default
         status: 'Pending',
         items,
         totalAmount,
@@ -184,16 +184,6 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="expectedDelivery">Expected Delivery *</Label>
-              <Input
-                id="expectedDelivery"
-                type="date"
-                value={formData.expectedDelivery}
-                onChange={(e) => setFormData({ ...formData, expectedDelivery: e.target.value })}
-                required
-              />
-            </div>
           </div>
 
           {/* Rusan Pharma Format Button */}
