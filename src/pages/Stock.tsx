@@ -1031,6 +1031,10 @@ export default function Stock() {
                             <FileText className="h-4 w-4 mr-2" />
                             Standard PO
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowNeuroglamPO(po)}>
+                            <FileText className="h-4 w-4 mr-2" />
+                            Neuroglam Format
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setShowParbPharmaPO(po)}>
                             <FileText className="h-4 w-4 mr-2" />
                             Parb Pharma Format
@@ -1039,17 +1043,13 @@ export default function Stock() {
                             <FileText className="h-4 w-4 mr-2" />
                             Rusan Pharma Format
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setShowNeuroglamPO(po)}>
+                          <DropdownMenuItem onClick={() => setShowVeeEssPharmaPO(po)}>
                             <FileText className="h-4 w-4 mr-2" />
-                            Neuroglam Format
+                            VEE ESS Pharma Format
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setShowVyadoHealthcarePO(po)}>
                             <FileText className="h-4 w-4 mr-2" />
                             VYADO Healthcare Format
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setShowVeeEssPharmaPO(po)}>
-                            <FileText className="h-4 w-4 mr-2" />
-                            VEE ESS Pharma Format
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
