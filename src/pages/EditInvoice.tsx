@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Plus, Trash2, RotateCcw, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, RotateCcw, AlertTriangle, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
+import { addDays, format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+const FREQUENCY_OPTIONS = [
+  { value: "OD", label: "OD (Once Daily)", multiplier: 1 },
+  { value: "BD", label: "BD (Twice Daily)", multiplier: 2 },
+  { value: "TDS", label: "TDS (Thrice Daily)", multiplier: 3 },
+  { value: "4x", label: "4 Times a day", multiplier: 4 },
+  { value: "5x", label: "5 Times a day", multiplier: 5 },
+  { value: "6x", label: "6 Times a day", multiplier: 6 },
+  { value: "7x", label: "7 Times a day", multiplier: 7 },
+  { value: "8x", label: "8 Times a day", multiplier: 8 },
+];
 
 interface InvoiceItem {
   id: string;
@@ -36,6 +48,8 @@ interface InvoiceItem {
   availableStock: number;
   isReturned?: boolean;
   returnQuantity?: number;
+  frequency?: string;
+  durationDays?: number;
 }
 
 export default function EditInvoice() {
@@ -105,7 +119,9 @@ export default function EditInvoice() {
           total: item.total,
           availableStock: stockItem?.currentStock || 0,
           isReturned: false,
-          returnQuantity: 0
+          returnQuantity: 0,
+          frequency: (item as any).frequency || "",
+          durationDays: (item as any).duration_days || 0
         };
       });
 
@@ -135,7 +151,9 @@ export default function EditInvoice() {
       originalQuantity: 0,
       unitPrice: 0,
       total: 0,
-      availableStock: 0
+      availableStock: 0,
+      frequency: "",
+      durationDays: 0
     };
     setItems([...items, newItem]);
   };
@@ -164,6 +182,17 @@ export default function EditInvoice() {
           }
         }
         
+        // Recalculate quantity when frequency or duration changes
+        if (field === "frequency" || field === "durationDays") {
+          const freq = field === "frequency" ? value as string : updatedItem.frequency;
+          const days = field === "durationDays" ? value as number : updatedItem.durationDays;
+          const freqOption = FREQUENCY_OPTIONS.find(f => f.value === freq);
+          if (freqOption && days && days > 0) {
+            updatedItem.quantity = freqOption.multiplier * days;
+            updatedItem.total = updatedItem.quantity * updatedItem.unitPrice;
+          }
+        }
+        
         if (field === "quantity") {
           updatedItem.total = (value as number) * updatedItem.unitPrice;
         }
@@ -173,6 +202,10 @@ export default function EditInvoice() {
       return item;
     }));
   };
+
+  // Calculate follow-up date based on max duration
+  const maxDuration = Math.max(...items.map(item => item.durationDays || 0), 0);
+  const followUpDate = maxDuration > 0 && invoiceDate ? format(addDays(new Date(invoiceDate), maxDuration), 'yyyy-MM-dd') : '';
 
   const subtotal = items.reduce((sum, item) => sum + item.total, 0);
   const total = subtotal;
@@ -214,7 +247,8 @@ export default function EditInvoice() {
           invoice_date: invoiceDate,
           subtotal: subtotal,
           total: total,
-          notes: notes
+          notes: notes,
+          follow_up_date: followUpDate || null
         })
         .eq('id', id);
 
@@ -238,7 +272,9 @@ export default function EditInvoice() {
         mrp: item.mrp,
         quantity: item.quantity,
         unit_price: item.unitPrice,
-        total: item.total
+        total: item.total,
+        frequency: item.frequency || null,
+        duration_days: item.durationDays || null
       }));
 
       const { error: itemsError } = await supabase
@@ -487,13 +523,22 @@ export default function EditInvoice() {
                       </Select>
                     </div>
                     <div>
-                      <Label>Quantity</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
-                      />
+                      <Label>Frequency</Label>
+                      <Select
+                        value={item.frequency || ""}
+                        onValueChange={(value) => updateItem(item.id, "frequency", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FREQUENCY_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="flex items-end">
                       <Button
@@ -506,6 +551,32 @@ export default function EditInvoice() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Duration (Days)</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={item.durationDays || ""}
+                        onChange={(e) => updateItem(item.id, "durationDays", parseInt(e.target.value) || 0)}
+                        placeholder="Enter days"
+                      />
+                    </div>
+                    <div>
+                      <Label>Quantity</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
+                        readOnly={!!(item.frequency && item.durationDays && item.durationDays > 0)}
+                      />
+                      {item.frequency && item.durationDays && item.durationDays > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">Auto-calculated</p>
+                      )}
                     </div>
                   </div>
                   
@@ -547,6 +618,15 @@ export default function EditInvoice() {
                   ₹{total.toFixed(2)}
                 </span>
               </div>
+              {followUpDate && (
+                <div className="flex justify-between items-center text-sm border-t pt-4">
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    Follow-up Date:
+                  </span>
+                  <span className="font-medium text-primary">{format(new Date(followUpDate), 'dd MMM yyyy')}</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

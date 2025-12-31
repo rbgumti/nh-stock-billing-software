@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MedicineSearchSelect } from "@/components/MedicineSearchSelect";
-import { ArrowLeft, Plus, Trash2, FileText, Hand } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, FileText, Hand, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { addDays, format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
@@ -15,6 +17,17 @@ import { usePrescriptionStore } from "@/hooks/usePrescriptionStore";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientSearchSelect } from "@/components/PatientSearchSelect";
 import { loadAllPatients, Patient } from "@/lib/patientUtils";
+
+const FREQUENCY_OPTIONS = [
+  { value: "OD", label: "OD (Once Daily)", multiplier: 1 },
+  { value: "BD", label: "BD (Twice Daily)", multiplier: 2 },
+  { value: "TDS", label: "TDS (Thrice Daily)", multiplier: 3 },
+  { value: "4x", label: "4 Times a day", multiplier: 4 },
+  { value: "5x", label: "5 Times a day", multiplier: 5 },
+  { value: "6x", label: "6 Times a day", multiplier: 6 },
+  { value: "7x", label: "7 Times a day", multiplier: 7 },
+  { value: "8x", label: "8 Times a day", multiplier: 8 },
+];
 
 interface InvoiceItem {
   id: string;
@@ -29,6 +42,8 @@ interface InvoiceItem {
   availableStock: number;
   stockAfterInvoice: number;
   fromPrescription?: boolean;
+  frequency?: string;
+  durationDays?: number;
 }
 
 export default function NewInvoice() {
@@ -56,7 +71,9 @@ export default function NewInvoice() {
       unitPrice: 0, 
       total: 0,
       availableStock: 0,
-      stockAfterInvoice: 0
+      stockAfterInvoice: 0,
+      frequency: "",
+      durationDays: 0
     }
   ]);
   const [newItemId, setNewItemId] = useState<string | null>(null);
@@ -172,7 +189,9 @@ export default function NewInvoice() {
       unitPrice: 0,
       total: 0,
       availableStock: 0,
-      stockAfterInvoice: 0
+      stockAfterInvoice: 0,
+      frequency: "",
+      durationDays: 0
     };
     setItems([newItem, ...items]);
     setNewItemId(itemId);
@@ -214,7 +233,19 @@ export default function NewInvoice() {
           }
         }
         
-        // Recalculate when quantity changes
+        // Recalculate quantity when frequency or duration changes
+        if (field === "frequency" || field === "durationDays") {
+          const freq = field === "frequency" ? value as string : updatedItem.frequency;
+          const days = field === "durationDays" ? value as number : updatedItem.durationDays;
+          const freqOption = FREQUENCY_OPTIONS.find(f => f.value === freq);
+          if (freqOption && days && days > 0) {
+            updatedItem.quantity = freqOption.multiplier * days;
+            updatedItem.stockAfterInvoice = updatedItem.availableStock - updatedItem.quantity;
+            updatedItem.total = updatedItem.quantity * updatedItem.unitPrice;
+          }
+        }
+        
+        // Recalculate when quantity changes directly
         if (field === "quantity") {
           updatedItem.stockAfterInvoice = updatedItem.availableStock - (value as number);
           updatedItem.total = (value as number) * updatedItem.unitPrice;
@@ -225,6 +256,10 @@ export default function NewInvoice() {
       return item;
     }));
   };
+
+  // Calculate follow-up date based on max duration
+  const maxDuration = Math.max(...items.map(item => item.durationDays || 0), 0);
+  const followUpDate = maxDuration > 0 ? format(addDays(new Date(invoiceDate), maxDuration), 'yyyy-MM-dd') : '';
 
   const subtotal = items.reduce((sum, item) => sum + item.total, 0);
   // Removed tax; total equals subtotal now
@@ -289,7 +324,8 @@ export default function NewInvoice() {
           tax: 0,
           total: total,
           notes: notes,
-          status: 'Pending'
+          status: 'Pending',
+          follow_up_date: followUpDate || null
         })
         .select()
         .single();
@@ -306,7 +342,9 @@ export default function NewInvoice() {
         mrp: item.mrp,
         quantity: item.quantity,
         unit_price: item.unitPrice,
-        total: item.total
+        total: item.total,
+        frequency: item.frequency || null,
+        duration_days: item.durationDays || null
       }));
 
       const { error: itemsError } = await supabase
@@ -428,6 +466,38 @@ export default function NewInvoice() {
                       />
                     </div>
                     <div>
+                      <Label htmlFor={`frequency-${item.id}`}>Frequency</Label>
+                      <Select
+                        value={item.frequency || ""}
+                        onValueChange={(value) => updateItem(item.id, "frequency", value)}
+                      >
+                        <SelectTrigger id={`frequency-${item.id}`}>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FREQUENCY_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor={`duration-${item.id}`}>Duration (Days)</Label>
+                      <Input
+                        id={`duration-${item.id}`}
+                        type="number"
+                        min="1"
+                        value={item.durationDays || ""}
+                        onChange={(e) => updateItem(item.id, "durationDays", parseInt(e.target.value) || 0)}
+                        placeholder="Enter days"
+                      />
+                    </div>
+                    <div>
                       <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
                       <Input
                         id={`quantity-${item.id}`}
@@ -437,7 +507,11 @@ export default function NewInvoice() {
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
                         className={item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}
+                        readOnly={!!(item.frequency && item.durationDays && item.durationDays > 0)}
                       />
+                      {item.frequency && item.durationDays && item.durationDays > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">Auto-calculated</p>
+                      )}
                       {item.quantity > item.availableStock && item.medicineId > 0 && (
                         <p className="text-xs text-red-500 mt-1">Exceeds available stock ({item.availableStock})</p>
                       )}
@@ -529,6 +603,15 @@ export default function NewInvoice() {
                   <span>Total:</span>
                   <span>₹{total.toFixed(2)}</span>
                 </div>
+                {followUpDate && (
+                  <div className="flex justify-between items-center text-sm border-t pt-2 mt-2">
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      Follow-up Date:
+                    </span>
+                    <span className="font-medium text-primary">{format(new Date(followUpDate), 'dd MMM yyyy')}</span>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
