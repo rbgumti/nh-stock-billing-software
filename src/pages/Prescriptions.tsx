@@ -26,10 +26,10 @@ export default function Prescriptions() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Active': return 'bg-green-500';
-      case 'Dispensed': return 'bg-blue-500';
-      case 'Cancelled': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'Active': return 'bg-gradient-to-r from-emerald to-teal text-white border-0';
+      case 'Dispensed': return 'bg-gradient-to-r from-cyan to-teal text-white border-0';
+      case 'Cancelled': return 'bg-gradient-to-r from-destructive to-orange text-white border-0';
+      default: return 'bg-gradient-to-r from-muted to-muted-foreground text-white border-0';
     }
   };
 
@@ -168,7 +168,12 @@ export default function Prescriptions() {
   if (loading) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-center">Loading prescriptions...</div>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-teal border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-muted-foreground">Loading prescriptions...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -181,10 +186,13 @@ export default function Prescriptions() {
       <FloatingOrbs />
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-navy">Prescriptions</h1>
-          <p className="text-muted-foreground">Manage patient prescriptions</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal via-cyan to-lime bg-clip-text text-transparent">Prescriptions</h1>
+          <p className="text-muted-foreground mt-1">Manage patient prescriptions</p>
         </div>
-        <Button onClick={() => navigate('/prescriptions/new')} className="bg-gold hover:bg-gold/90 text-navy">
+        <Button 
+          onClick={() => navigate('/prescriptions/new')} 
+          className="bg-gradient-to-r from-teal to-cyan hover:from-teal/90 hover:to-cyan/90 text-white shadow-lg hover:shadow-teal/25 transition-all duration-300"
+        >
           <Plus className="mr-2 h-4 w-4" />
           New Prescription
         </Button>
@@ -192,23 +200,24 @@ export default function Prescriptions() {
 
       <div className="mb-6 space-y-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-teal h-4 w-4" />
           <Input
             placeholder="Search by patient name, prescription number, or diagnosis..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 border-teal/30 focus:border-teal focus:ring-teal/20 bg-white/80 backdrop-blur-sm"
           />
         </div>
 
         {/* Bulk Actions Bar */}
         {filteredPrescriptions.length > 0 && (
-          <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
+          <div className="flex items-center justify-between bg-gradient-to-r from-teal/10 via-cyan/10 to-lime/10 backdrop-blur-sm rounded-lg p-3 border border-teal/20">
             <div className="flex items-center gap-3">
               <Checkbox 
                 checked={allSelected}
                 onCheckedChange={selectAll}
                 aria-label="Select all"
+                className="border-teal data-[state=checked]:bg-teal data-[state=checked]:border-teal"
               />
               <span className="text-sm text-muted-foreground">
                 {hasSelection 
@@ -218,15 +227,15 @@ export default function Prescriptions() {
             </div>
             {hasSelection && (
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={handleBulkExport}>
-                  <Download className="mr-2 h-4 w-4" />
+                <Button size="sm" variant="outline" onClick={handleBulkExport} className="border-teal/30 hover:bg-teal/10 hover:border-teal">
+                  <Download className="mr-2 h-4 w-4 text-teal" />
                   Export PDF
                 </Button>
-                <Button size="sm" variant="outline" onClick={handleBulkCancel} className="text-destructive hover:text-destructive">
+                <Button size="sm" variant="outline" onClick={handleBulkCancel} className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10">
                   <XCircle className="mr-2 h-4 w-4" />
                   Cancel Selected
                 </Button>
-                <Button size="sm" variant="ghost" onClick={clearSelection}>
+                <Button size="sm" variant="ghost" onClick={clearSelection} className="hover:bg-teal/10">
                   Clear
                 </Button>
               </div>
@@ -236,14 +245,16 @@ export default function Prescriptions() {
       </div>
 
       {filteredPrescriptions.length === 0 ? (
-        <Card>
+        <Card className="border-teal/20 bg-white/80 backdrop-blur-sm">
           <CardContent className="text-center py-12">
-            <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-teal/20 to-cyan/20 flex items-center justify-center">
+              <FileText className="h-8 w-8 text-teal" />
+            </div>
             <p className="text-muted-foreground mb-4">
               {searchTerm ? 'No prescriptions found' : 'No prescriptions yet'}
             </p>
             {!searchTerm && (
-              <Button onClick={() => navigate('/prescriptions/new')}>
+              <Button onClick={() => navigate('/prescriptions/new')} className="bg-gradient-to-r from-teal to-cyan hover:from-teal/90 hover:to-cyan/90 text-white">
                 <Plus className="mr-2 h-4 w-4" />
                 Create First Prescription
               </Button>
@@ -252,47 +263,58 @@ export default function Prescriptions() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredPrescriptions.map((prescription) => (
+          {filteredPrescriptions.map((prescription, index) => (
             <Card 
               key={prescription.id} 
-              className={`hover:shadow-lg transition-shadow ${selectedIds.has(prescription.id!) ? 'ring-2 ring-primary' : ''}`}
+              className={`group relative overflow-hidden hover:shadow-xl transition-all duration-300 border-teal/20 bg-white/80 backdrop-blur-sm ${selectedIds.has(prescription.id!) ? 'ring-2 ring-teal shadow-lg shadow-teal/20' : ''}`}
             >
-              <CardHeader>
+              {/* Gradient overlay */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${
+                index % 4 === 0 ? 'from-teal/10 via-transparent to-cyan/10' :
+                index % 4 === 1 ? 'from-cyan/10 via-transparent to-lime/10' :
+                index % 4 === 2 ? 'from-lime/10 via-transparent to-emerald/10' :
+                'from-emerald/10 via-transparent to-teal/10'
+              } opacity-50 group-hover:opacity-100 transition-opacity`} />
+              
+              <CardHeader className="relative">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={selectedIds.has(prescription.id!)}
                       onCheckedChange={() => toggleSelection(prescription.id!)}
                       aria-label={`Select ${prescription.prescription_number}`}
+                      className="border-teal data-[state=checked]:bg-teal data-[state=checked]:border-teal"
                     />
-                    <CardTitle className="text-lg">{prescription.prescription_number}</CardTitle>
+                    <CardTitle className="text-lg bg-gradient-to-r from-teal to-cyan bg-clip-text text-transparent">{prescription.prescription_number}</CardTitle>
                   </div>
                   <Badge className={getStatusColor(prescription.status)}>
                     {prescription.status}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 relative">
                 <div className="flex items-center text-sm">
-                  <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <User className="mr-2 h-4 w-4 text-teal" />
                   <span className="font-medium">{prescription.patient_name}</span>
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="mr-2 h-4 w-4" />
+                  <Calendar className="mr-2 h-4 w-4 text-cyan" />
                   <span>{format(new Date(prescription.prescription_date), 'dd MMM yyyy')}</span>
                 </div>
                 <div className="text-sm">
-                  <span className="font-medium">Diagnosis:</span> {prescription.diagnosis}
+                  <span className="font-medium text-teal">Diagnosis:</span> {prescription.diagnosis}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {prescription.items.length} medicine(s)
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-teal/10 to-cyan/10 text-teal text-xs">
+                    {prescription.items.length} medicine(s)
+                  </span>
                 </div>
                 <div className="flex gap-2 pt-2">
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => navigate(`/prescriptions/view/${prescription.id}`)}
-                    className="flex-1"
+                    className="flex-1 border-teal/30 hover:bg-teal/10 hover:border-teal"
                   >
                     View
                   </Button>
@@ -300,14 +322,15 @@ export default function Prescriptions() {
                     size="sm"
                     variant="outline"
                     onClick={() => navigate(`/prescriptions/edit/${prescription.id}`)}
+                    className="border-cyan/30 hover:bg-cyan/10 hover:border-cyan"
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="h-4 w-4 text-cyan" />
                   </Button>
                   {prescription.status === 'Active' && (
                     <Button
                       size="sm"
                       onClick={() => navigate(`/invoices/new?prescriptionId=${prescription.id}`)}
-                      className="flex-1"
+                      className="flex-1 bg-gradient-to-r from-lime to-emerald hover:from-lime/90 hover:to-emerald/90 text-white"
                     >
                       Invoice
                     </Button>
