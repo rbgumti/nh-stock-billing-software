@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Sun, Moon } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +15,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import navjeevanLogo from "@/assets/NH_LOGO.png";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useTheme } from "next-themes";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
@@ -40,11 +39,6 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
   const [sheetOpen, setSheetOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
@@ -308,42 +302,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Theme Toggle & Collapse Button */}
-        <div className="mt-auto relative z-10 space-y-2">
-          {/* Theme Toggle */}
-          <div className={`px-3 ${collapsed ? 'flex justify-center' : ''}`}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleTheme}
-              className={`group relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/15 transition-all duration-300 backdrop-blur-sm ${
-                collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
-              }`}
-            >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-              </div>
-              
-              {!collapsed && (
-                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-colors duration-300 relative z-10">
-                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
-                </span>
-              )}
-              
-              <div className={`relative flex items-center justify-center transition-all duration-500 ${
-                collapsed ? '' : 'bg-gradient-to-br from-amber-500/15 to-orange-500/15 rounded-lg p-1.5 border border-white/5'
-              }`}>
-                {theme === "dark" ? (
-                  <Sun className="h-4 w-4 text-amber-400 group-hover:text-amber-300 transition-all duration-300 group-hover:scale-110" />
-                ) : (
-                  <Moon className="h-4 w-4 text-slate-400 group-hover:text-violet-400 transition-all duration-300 group-hover:scale-110" />
-                )}
-              </div>
-            </Button>
-          </div>
-
-          {/* Collapse Button */}
-          <div className={`px-3 pb-2 ${collapsed ? 'flex justify-center' : ''}`}>
+        {/* Toggle Button with Enhanced Glass Effect */}
+        <div className="mt-auto relative z-10">
+          <div className={`px-3 py-3 ${collapsed ? 'flex justify-center' : ''}`}>
             <Button
               variant="ghost"
               size="sm"
