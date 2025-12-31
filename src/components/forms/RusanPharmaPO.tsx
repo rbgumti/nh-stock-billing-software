@@ -1,9 +1,10 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Printer, X } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
+import navjeevanLogo from "@/assets/NH_LOGO.png";
 
 interface RusanPharmaPOProps {
   poNumber: string;
@@ -15,6 +16,24 @@ interface RusanPharmaPOProps {
 
 export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: RusanPharmaPOProps) {
   const printRef = useRef<HTMLDivElement>(null);
+  const [logoBase64, setLogoBase64] = useState<string>("");
+
+  // Convert logo to base64 for print window
+  useEffect(() => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        setLogoBase64(canvas.toDataURL("image/png"));
+      }
+    };
+    img.src = navjeevanLogo;
+  }, []);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -39,6 +58,18 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    // Wait for logo to be ready
+    if (!logoBase64) {
+      setTimeout(handlePrint, 100);
+      return;
+    }
+
+    // Replace logo src with base64 for print
+    const printHTML = printContent.innerHTML.replace(
+      /src="[^"]*NH_LOGO[^"]*"/g,
+      `src="${logoBase64}"`
+    );
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -47,8 +78,10 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Times New Roman', Times, serif; padding: 15px 25px; font-size: 12px; line-height: 1.5; }
+            .header-section { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
+            .logo { width: 60px; height: 60px; object-fit: contain; }
             .header-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; }
-            .hospital-name { font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0; }
+            .hospital-name { font-size: 24px; font-weight: bold; text-align: center; margin: 5px 0; }
             .address-row { text-align: center; font-size: 11px; margin-bottom: 5px; }
             .licence-row { text-align: center; font-size: 10px; margin-bottom: 15px; }
             .po-date-row { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 12px; font-weight: bold; }
@@ -76,7 +109,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </style>
         </head>
         <body>
-          ${printContent.innerHTML}
+          ${printHTML}
         </body>
       </html>
     `);
@@ -111,8 +144,12 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             <span>Mob_ 6284942412</span>
           </div>
 
-          {/* Hospital Name */}
-          <h1 className="text-2xl font-bold text-center my-3">NAVJEEVAN HOSPITAL</h1>
+          {/* Hospital Header with Logo */}
+          <div className="flex items-center justify-center gap-4 my-3">
+            <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
+            <h1 className="text-2xl font-bold">NAVJEEVAN HOSPITAL</h1>
+            <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
+          </div>
 
           {/* Address Row */}
           <p className="text-center text-[11px] mb-1">
