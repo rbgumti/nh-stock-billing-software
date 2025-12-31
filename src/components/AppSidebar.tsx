@@ -80,75 +80,74 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0`} collapsible="icon">
+    <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0 transition-all duration-500 ease-out`} collapsible="icon">
       <SidebarContent className="relative overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20">
-        {/* Liquid Glass Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/95 via-slate-900/98 to-slate-950 backdrop-blur-xl" />
+        {/* Enhanced Liquid Glass Background */}
+        <div className="absolute inset-0 sidebar-glass" />
         
-        {/* Frosted Glass Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/8 via-transparent to-cyan-600/8" />
+        {/* Animated Gradient Mesh */}
+        <div className="absolute inset-0 sidebar-breathing-bg bg-gradient-to-br from-violet-600/10 via-transparent to-cyan-600/8" />
         
-        {/* Animated Mesh Gradient */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-violet-500/10 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-cyan-500/10 to-transparent" />
-        </div>
+        {/* Animated Liquid Blobs */}
+        <div className="absolute top-16 right-0 w-40 h-40 bg-gradient-radial from-violet-500/30 via-purple-600/15 to-transparent rounded-full blur-3xl animate-liquid-flow" />
+        <div className="absolute top-1/4 -left-10 w-32 h-32 bg-gradient-radial from-cyan-400/25 via-blue-500/12 to-transparent rounded-full blur-2xl animate-liquid-flow" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/4 right-0 w-36 h-36 bg-gradient-radial from-pink-500/25 via-rose-500/12 to-transparent rounded-full blur-3xl animate-liquid-flow" style={{ animationDelay: '4s' }} />
+        <div className="absolute bottom-16 left-0 w-28 h-28 bg-gradient-radial from-amber-400/30 via-orange-500/15 to-transparent rounded-full blur-2xl animate-liquid-flow" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 right-2 w-20 h-20 bg-gradient-radial from-teal-400/25 to-transparent rounded-full blur-xl animate-liquid-flow" style={{ animationDelay: '3s' }} />
+        <div className="absolute top-2/3 left-4 w-16 h-16 bg-gradient-radial from-indigo-400/20 to-transparent rounded-full blur-lg animate-liquid-flow" style={{ animationDelay: '5s' }} />
         
-        {/* Floating Glass Orbs with Liquid Effect */}
-        <div className="absolute top-20 right-0 w-32 h-32 bg-gradient-radial from-violet-500/25 via-purple-600/15 to-transparent rounded-full blur-3xl animate-float" />
-        <div className="absolute top-1/3 -left-8 w-24 h-24 bg-gradient-radial from-cyan-400/20 via-blue-500/10 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute bottom-1/3 right-0 w-28 h-28 bg-gradient-radial from-pink-500/20 via-rose-500/10 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
-        <div className="absolute bottom-20 left-0 w-20 h-20 bg-gradient-radial from-amber-400/25 via-orange-500/15 to-transparent rounded-full blur-2xl animate-float" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute top-1/2 right-4 w-16 h-16 bg-gradient-radial from-teal-400/20 to-transparent rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }} />
+        {/* Top Shimmer Line */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
         
-        {/* Shimmer Effect Line */}
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        {/* Side Glow Accents */}
+        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-violet-500/40 via-transparent to-cyan-500/40" />
         
-        {/* Compact Header with Glass Effect */}
+        {/* Compact Header with Enhanced Glass Effect */}
         <div className="relative p-2 border-b border-white/5">
-          {/* Glass panel behind header */}
-          <div className="absolute inset-1 rounded-xl bg-white/[0.03] backdrop-blur-sm border border-white/5" />
+          {/* Glass panel behind header with glow */}
+          <div className="absolute inset-1 rounded-xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md border border-white/10 shadow-lg shadow-purple-500/5" />
           
           {!collapsed ? (
             <div className="flex items-center gap-2 relative z-10 px-0.5">
-              {/* Logo - Rounded with sidebar-matching background */}
+              {/* Logo with enhanced liquid glow */}
               <div className="relative group flex-shrink-0">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-500/0 to-cyan-500/0 group-hover:from-violet-500/40 group-hover:to-cyan-500/40 blur-md transition-all duration-300" />
-                <div className="relative w-14 h-14 rounded-full bg-slate-800/80 border border-white/10 group-hover:border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-violet-500/0 to-cyan-500/0 group-hover:from-violet-500/50 group-hover:to-cyan-500/50 blur-lg transition-all duration-500" />
+                <div className="absolute inset-0 rounded-full bg-gradient-conic from-violet-500/30 via-cyan-500/30 via-pink-500/30 to-violet-500/30 opacity-0 group-hover:opacity-100 blur-md transition-all duration-500 animate-spin-slow" />
+                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-white/15 group-hover:border-white/30 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:shadow-[0_0_30px_rgba(139,92,246,0.4)]">
                   <img 
                     src={navjeevanLogo} 
                     alt="Navjeevan Hospital Logo" 
-                    className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-110"
+                    className="w-12 h-12 object-contain transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
                   />
                 </div>
               </div>
               
-              {/* Hospital Name - Shifted right */}
+              {/* Hospital Name with enhanced gradient */}
               <div className="min-w-0 flex-1 pl-1">
-                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent leading-tight">
+                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent leading-tight drop-shadow-sm">
                   NAVJEEVAN
                 </h2>
-                <p className="text-[10px] font-medium tracking-wide bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
+                <p className="text-[10px] font-medium tracking-wide bg-gradient-to-r from-amber-300 via-gold to-orange-400 bg-clip-text text-transparent">
                   Hospital Sirhind
                 </p>
               </div>
 
-              {/* Notification Bell */}
+              {/* Notification Bell with enhanced styling */}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <NavLink to="/reports" className="relative group">
-                      <div className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 flex items-center justify-center transition-all">
-                        <Bell className="h-4 w-4 text-slate-400 group-hover:text-white transition-colors" />
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.15] hover:to-white/[0.05] border border-white/10 hover:border-white/25 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
+                        <Bell className="h-4 w-4 text-slate-400 group-hover:text-white transition-all duration-300 group-hover:scale-110" />
                         {pendingFollowUps > 0 && (
-                          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
+                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-[10px] font-bold text-white flex items-center justify-center shadow-lg shadow-rose-500/30 animate-pulse">
                             {pendingFollowUps > 9 ? '9+' : pendingFollowUps}
                           </span>
                         )}
                       </div>
                     </NavLink>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="bg-slate-800 border-white/10">
+                  <TooltipContent side="bottom" className="bg-slate-800/95 border-white/10 backdrop-blur-xl">
                     <p className="text-xs">{pendingFollowUps} pending follow-ups</p>
                   </TooltipContent>
                 </Tooltip>
@@ -157,28 +156,28 @@ export function AppSidebar() {
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-500/0 to-cyan-500/0 group-hover:from-violet-500/40 group-hover:to-cyan-500/40 blur-md transition-all duration-300" />
-                <div className="relative w-11 h-11 rounded-full bg-slate-800/80 border border-white/10 group-hover:border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-violet-500/0 to-cyan-500/0 group-hover:from-violet-500/50 group-hover:to-cyan-500/50 blur-lg transition-all duration-500" />
+                <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-white/15 group-hover:border-white/30 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:shadow-[0_0_25px_rgba(139,92,246,0.4)]">
                   <img 
                     src={navjeevanLogo}
                     alt="NH Logo" 
-                    className="w-9 h-9 object-contain transition-transform duration-200 group-hover:scale-110"
+                    className="w-9 h-9 object-contain transition-all duration-300 group-hover:scale-110 group-hover:brightness-110"
                   />
                 </div>
               </div>
               
-              {/* Slide Panel Trigger when collapsed */}
+              {/* Slide Panel Trigger with enhanced styling */}
               <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-8 h-8 p-0 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all"
+                    className="w-9 h-9 p-0 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] hover:from-white/[0.15] hover:to-white/[0.05] border border-white/10 hover:border-white/25 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10"
                   >
-                    <Menu className="h-4 w-4 text-slate-400 hover:text-white" />
+                    <Menu className="h-4 w-4 text-slate-400 hover:text-white transition-colors duration-300" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-72 bg-slate-900/98 backdrop-blur-xl border-white/10 p-0">
+                <SheetContent side="left" className="w-72 bg-gradient-to-b from-slate-900/99 to-slate-950/99 backdrop-blur-2xl border-white/10 p-0">
                   <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-transparent to-cyan-600/5" />
                   <SheetHeader className="relative p-4 border-b border-white/10">
                     <div className="flex items-center gap-3">
@@ -245,12 +244,12 @@ export function AppSidebar() {
           )}
         </div>
         
-        {/* Navigation with Liquid Glass Items */}
+        {/* Navigation with Enhanced Liquid Glass Items */}
         <SidebarGroup className="relative z-10 px-2 pt-4">
-          <SidebarGroupLabel className="text-slate-500/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
-            <div className="w-8 h-[1px] bg-gradient-to-r from-violet-500/50 to-transparent" />
-            <span>Navigate</span>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <SidebarGroupLabel className="text-slate-500/90 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
+            <div className="w-8 h-[1px] bg-gradient-to-r from-violet-500/60 to-transparent" />
+            <span className="bg-gradient-to-r from-slate-400 to-slate-500 bg-clip-text text-transparent">Navigate</span>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1.5">
@@ -259,53 +258,53 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
-                      className={`relative overflow-hidden rounded-xl transition-all duration-300 group flex items-center ${
+                      className={`relative overflow-hidden rounded-xl transition-all duration-500 group flex items-center ${
                         isActive(item.url) 
-                          ? "bg-white/[0.08] backdrop-blur-md shadow-lg shadow-black/20 border border-white/10" 
-                          : `hover:bg-white/[0.04] hover:backdrop-blur-sm ${item.glow} hover:shadow-lg`
+                          ? "bg-gradient-to-r from-white/[0.12] to-white/[0.04] backdrop-blur-lg shadow-xl shadow-black/20 border border-white/15" 
+                          : `hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-white/[0.02] hover:backdrop-blur-md ${item.glow} hover:shadow-xl hover:border-white/10`
                       }`}
                     >
-                      {/* Liquid shine effect on hover */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-xl">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      {/* Enhanced liquid shine effect on hover */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
                       </div>
                       
-                      {/* Active indicator - liquid gradient bar */}
+                      {/* Active indicator - enhanced liquid gradient bar */}
                       {isActive(item.url) && (
-                        <div className={`absolute left-0 top-1 bottom-1 w-1 bg-gradient-to-b ${item.color} rounded-full shadow-lg shadow-current/50`} />
+                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b ${item.color} rounded-full shadow-lg shadow-current/60 animate-glow-pulse`} />
                       )}
                       
-                      {/* Icon container with glass effect */}
-                      <div className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${
+                      {/* Icon container with enhanced glass effect */}
+                      <div className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-500 ${
                         isActive(item.url) 
-                          ? `bg-gradient-to-br ${item.color} shadow-lg shadow-current/30` 
-                          : "bg-white/[0.05] group-hover:bg-white/10 border border-transparent group-hover:border-white/10"
+                          ? `bg-gradient-to-br ${item.color} shadow-lg shadow-current/40` 
+                          : "bg-gradient-to-br from-white/[0.08] to-white/[0.02] group-hover:from-white/[0.15] group-hover:to-white/[0.05] border border-transparent group-hover:border-white/15"
                       }`}>
-                        {/* Icon glow */}
+                        {/* Enhanced icon glow */}
                         {isActive(item.url) && (
-                          <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${item.color} blur-md opacity-50`} />
+                          <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${item.color} blur-lg opacity-60`} />
                         )}
-                        <item.icon className={`h-5 w-5 transition-all duration-300 relative z-10 ${
+                        <item.icon className={`h-5 w-5 transition-all duration-500 relative z-10 ${
                           isActive(item.url) 
-                            ? 'text-white drop-shadow-md' 
-                            : 'text-slate-400 group-hover:text-white'
+                            ? 'text-white drop-shadow-lg' 
+                            : 'text-slate-400 group-hover:text-white group-hover:scale-110'
                         }`} />
                       </div>
                       
                       {!collapsed && (
                         <>
-                          <span className={`ml-3 font-medium transition-all duration-300 ${
+                          <span className={`ml-3 font-medium transition-all duration-500 ${
                             isActive(item.url) 
                               ? 'text-white' 
-                              : 'text-slate-400 group-hover:text-white'
+                              : 'text-slate-400 group-hover:text-white group-hover:translate-x-0.5'
                           }`}>
                             {item.title}
                           </span>
                           
                           {isActive(item.url) && (
-                            <div className="ml-auto flex items-center">
-                              <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-br ${item.color} mr-2 animate-pulse`} />
-                              <ChevronRight className="h-4 w-4 text-white/50" />
+                            <div className="ml-auto flex items-center gap-1.5">
+                              <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${item.color} mr-1 animate-pulse shadow-sm shadow-current/50`} />
+                              <ChevronRight className="h-4 w-4 text-white/60" />
                             </div>
                           )}
                         </>
@@ -318,12 +317,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Quick Actions with Glass Cards */}
+        {/* Quick Actions with Enhanced Glass Cards */}
         <SidebarGroup className="relative z-10 mt-4 px-2">
-          <SidebarGroupLabel className="text-slate-500/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
-            <div className="w-6 h-[1px] bg-gradient-to-r from-amber-500/50 to-transparent" />
-            <span>Quick Add</span>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <SidebarGroupLabel className="text-slate-500/90 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
+            <div className="w-6 h-[1px] bg-gradient-to-r from-amber-500/60 to-transparent" />
+            <span className="bg-gradient-to-r from-slate-400 to-slate-500 bg-clip-text text-transparent">Quick Add</span>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1.5">
@@ -332,20 +331,20 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={action.url} 
-                      className="relative rounded-xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:bg-white/[0.06] hover:border-white/15 transition-all duration-300 group overflow-hidden"
+                      className="relative rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.04] to-transparent backdrop-blur-sm hover:from-white/[0.1] hover:to-white/[0.02] hover:border-white/20 transition-all duration-500 group overflow-hidden hover:shadow-lg"
                     >
-                      {/* Shimmer effect */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden rounded-xl">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      {/* Enhanced shimmer effect */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/12 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
                       </div>
                       
-                      {/* Icon with glass container */}
-                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-90 group-hover:shadow-lg`}>
+                      {/* Icon with enhanced glass container and rotation */}
+                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-90 group-hover:shadow-xl group-hover:shadow-current/30`}>
                         <Plus className="h-4 w-4 text-white relative z-10" />
                       </div>
                       
                       {!collapsed && (
-                        <span className={`ml-3 font-medium bg-gradient-to-r ${action.color} bg-clip-text text-transparent group-hover:opacity-100 opacity-80 transition-opacity`}>
+                        <span className={`ml-3 font-medium bg-gradient-to-r ${action.color} bg-clip-text text-transparent group-hover:opacity-100 opacity-75 transition-all duration-500 group-hover:translate-x-0.5`}>
                           {action.title}
                         </span>
                       )}
@@ -364,39 +363,39 @@ export function AppSidebar() {
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className={`group relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/15 transition-all duration-300 backdrop-blur-sm ${
+              className={`group relative overflow-hidden rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.05] to-transparent hover:from-white/[0.12] hover:to-white/[0.04] hover:border-white/20 transition-all duration-500 backdrop-blur-md hover:shadow-lg hover:shadow-purple-500/10 ${
                 collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
               }`}
             >
-              {/* Glass shimmer effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/10 via-cyan-500/10 to-violet-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              {/* Enhanced glass shimmer effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/15 via-cyan-500/15 to-violet-500/15 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
               </div>
               
               {!collapsed && (
-                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-colors duration-300 relative z-10">
+                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-all duration-500 relative z-10">
                   Collapse
                 </span>
               )}
               
               <div className={`relative flex items-center justify-center transition-all duration-500 ${
-                collapsed ? '' : 'bg-gradient-to-br from-violet-500/15 to-cyan-500/15 rounded-lg p-1.5 border border-white/5'
+                collapsed ? '' : 'bg-gradient-to-br from-violet-500/20 to-cyan-500/20 rounded-lg p-1.5 border border-white/10'
               }`}>
                 {collapsed ? (
-                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 transition-all duration-300 group-hover:scale-110" />
+                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 transition-all duration-500 group-hover:scale-110" />
                 ) : (
-                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-violet-400 transition-all duration-300 group-hover:scale-110" />
+                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-violet-400 transition-all duration-500 group-hover:scale-110" />
                 )}
               </div>
             </Button>
           </div>
 
-          {/* Footer with Glass Separator */}
+          {/* Footer with Enhanced Glass Separator */}
           {!collapsed && (
             <div className="text-center px-4 pb-4">
-              <div className="h-px bg-gradient-to-r from-transparent via-white/15 to-transparent mb-3" />
+              <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-3" />
               <p className="text-[10px] text-slate-600/80 tracking-wider font-medium">
-                Powered by <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Lovable</span>
+                Powered by <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-semibold">Lovable</span>
               </p>
             </div>
           )}
