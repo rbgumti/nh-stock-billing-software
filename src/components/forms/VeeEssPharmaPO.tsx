@@ -89,38 +89,36 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
     const pageWidth = pdf.internal.pageSize.getWidth();
     let y = 10;
 
-    // Header row
+    // Header row - bold
     pdf.setFontSize(7);
+    pdf.setFont('times', 'bold');
     pdf.text('Regd. Govt of Punjab', 10, y);
-    pdf.text('Mob_ 6284942412', pageWidth - 10, y, { align: 'right' });
+    pdf.text('Mob: 6284942412', pageWidth - 10, y, { align: 'right' });
     y += 5;
 
-    // Hospital Name (centered)
+    // Hospital Name (centered) - bold
     pdf.setFontSize(14);
     pdf.setFont('times', 'bold');
     pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y + 6, { align: 'center' });
     y += 12;
 
-    // Address
+    // Address - bold
     pdf.setFontSize(7);
-    pdf.setFont('times', 'normal');
+    pdf.setFont('times', 'bold');
     pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib    Dr. Metalli Bhatti', pageWidth / 2, y, { align: 'center' });
     y += 4;
 
-    // Licence
+    // Licence - bold
     pdf.setFontSize(6);
+    pdf.setFont('times', 'bold');
     pdf.text('Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024', pageWidth / 2, y, { align: 'center' });
     y += 6;
 
-    // REF NO
+    // PO Number and Date - bold (removed REF NO)
     pdf.setFontSize(8);
-    pdf.text(`REF NO – ${poNumber}`, pageWidth / 2, y, { align: 'center' });
-    y += 5;
-
-    // PO Number and Date
     pdf.setFont('times', 'bold');
-    pdf.text(`PO NO - ${poNumber}`, 20, y);
-    pdf.text(`DATE – ${formatDate(poDate)}`, pageWidth - 20, y, { align: 'right' });
+    pdf.text(`PO NO: ${poNumber}`, 20, y);
+    pdf.text(`DATE: ${formatDate(poDate)}`, pageWidth - 20, y, { align: 'right' });
     y += 6;
 
     // To Section
@@ -239,9 +237,9 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
 
         <div ref={printRef} className="p-4 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '10px', lineHeight: '1.3' }}>
           {/* Header Row */}
-          <div className="flex justify-between text-[9px] mb-1">
+          <div className="flex justify-between text-[9px] font-bold mb-1">
             <span>Regd. Govt of Punjab</span>
-            <span>Mob_ 6284942412</span>
+            <span>Mob: 6284942412</span>
           </div>
 
           {/* Hospital Header */}
@@ -250,24 +248,19 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
           </div>
 
           {/* Address Row */}
-          <p className="text-center text-[9px] mb-0.5">
+          <p className="text-center text-[9px] font-bold mb-0.5">
             Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;Dr. Metalli Bhatti
           </p>
 
           {/* Licence Row */}
-          <p className="text-center text-[8px] mb-2">
+          <p className="text-center text-[8px] font-bold mb-2">
             Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024
           </p>
 
-          {/* REF NO */}
-          <div className="text-center text-[10px] mb-1">
-            <p>REF NO – {poNumber}</p>
-          </div>
-
-          {/* PO NO and Date */}
-          <div className="flex justify-between text-[10px] mb-3 px-10">
-            <span>PO NO - {poNumber}</span>
-            <span>DATE – {formatDate(poDate)}</span>
+          {/* PO NO and Date - removed REF NO */}
+          <div className="flex justify-between text-[10px] font-bold mb-3 px-10">
+            <span>PO NO: {poNumber}</span>
+            <span>DATE: {formatDate(poDate)}</span>
           </div>
 
           {/* To Section */}
