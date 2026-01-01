@@ -50,7 +50,7 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Times New Roman', Times, serif; padding: 6px 12px; font-size: 9px; line-height: 1.2; }
-            .header-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
+            .header-row { text-align: center; font-size: 8px; margin-bottom: 2px; }
             .header-section { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
             .logo { width: 32px; height: 32px; object-fit: contain; }
             .hospital-name { font-size: 16px; font-weight: bold; flex: 1; text-align: center; }
@@ -94,11 +94,12 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
     const pageWidth = pdf.internal.pageSize.getWidth();
     let y = 10;
 
-    // Header row - bold
+    // Header row - centered and bold
     pdf.setFontSize(7);
     pdf.setFont('times', 'bold');
-    pdf.text('Regd. Govt of Punjab', 10, y);
-    pdf.text('Mob: 6284942412', pageWidth - 10, y, { align: 'right' });
+    pdf.text('Regd. Govt of Punjab', pageWidth / 2, y, { align: 'center' });
+    y += 4;
+    pdf.text('Mob: 6284942412', pageWidth / 2, y, { align: 'center' });
     y += 5;
 
     // Hospital Name (centered) - bold
@@ -247,10 +248,10 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
         </DialogHeader>
 
         <div ref={printRef} className="p-4 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '10px', lineHeight: '1.3' }}>
-          {/* Header Row */}
-          <div className="flex justify-between text-[9px] font-bold mb-1">
-            <span>Regd. Govt of Punjab</span>
-            <span>Mob: 6284942412</span>
+          {/* Header Row - Centered */}
+          <div className="text-center text-[9px] font-bold mb-1">
+            <p>Regd. Govt of Punjab</p>
+            <p>Mob: 6284942412</p>
           </div>
 
           {/* Hospital Header */}

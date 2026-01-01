@@ -43,7 +43,7 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Times New Roman', Times, serif; padding: 12px 20px; font-size: 14px; line-height: 1.5; }
-            .header-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 6px; }
+            .header-row { text-align: center; font-size: 13px; font-weight: bold; margin-bottom: 6px; }
             .hospital-name { font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 6px; }
             .address-row { text-align: center; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
             .licence-row { text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
@@ -82,11 +82,12 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
     const pageWidth = pdf.internal.pageSize.getWidth();
     let y = 15;
 
-    // Header row - bold
+    // Header row - centered and bold
     pdf.setFontSize(11);
     pdf.setFont('times', 'bold');
-    pdf.text('Regd. Govt of Punjab', 15, y);
-    pdf.text('Mob: 6284942412', pageWidth - 15, y, { align: 'right' });
+    pdf.text('Regd. Govt of Punjab', pageWidth / 2, y, { align: 'center' });
+    y += 5;
+    pdf.text('Mob: 6284942412', pageWidth / 2, y, { align: 'center' });
     y += 8;
 
     // Hospital Name (centered) - bold
@@ -219,10 +220,10 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
         </DialogHeader>
 
         <div ref={printRef} className="p-6 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '14px', lineHeight: '1.5' }}>
-          {/* Header Row */}
-          <div className="flex justify-between text-[13px] font-bold mb-2">
-            <span>Regd. Govt of Punjab</span>
-            <span>Mob: 6284942412</span>
+          {/* Header Row - Centered */}
+          <div className="text-center text-[13px] font-bold mb-2">
+            <p>Regd. Govt of Punjab</p>
+            <p>Mob: 6284942412</p>
           </div>
 
           {/* Hospital Header */}
