@@ -190,7 +190,7 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
     pdf.text('Thanking you', leftMargin, y);
     y += 5;
     pdf.text('Yours Sincerely,', leftMargin, y);
-    y += 6;
+    y += 25; // Space for stamp and signature
     pdf.text('Navjeevan Hospital,', leftMargin, y);
     y += 5;
     pdf.text('OPP.NEW BUS STAND,', leftMargin, y);
@@ -299,7 +299,10 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           <div className="text-[13px] mt-6 ml-16 leading-normal">
             <p>Thanking you</p>
             <p>Yours Sincerely,</p>
-            <p className="mt-2">Navjeevan Hospital,</p>
+            <div className="h-16 border-b border-dashed border-gray-400 my-2" style={{ width: '200px' }}>
+              {/* Space for stamp and signature */}
+            </div>
+            <p>Navjeevan Hospital,</p>
             <p>OPP.NEW BUS STAND,</p>
             <p>G.T.ROAD, BARA,SIRHIND,</p>
           </div>
