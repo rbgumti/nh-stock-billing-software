@@ -42,26 +42,24 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           <title>Purchase Order - ${poNumber}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Times New Roman', Times, serif; padding: 6px 12px; font-size: 9px; line-height: 1.2; }
-            .header-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
-            .header-section { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
-            .logo { width: 32px; height: 32px; object-fit: contain; }
-            .hospital-name { font-size: 16px; font-weight: bold; flex: 1; text-align: center; }
-            .address-row { text-align: center; font-size: 8px; margin-bottom: 2px; }
-            .licence-row { text-align: center; font-size: 7px; margin-bottom: 4px; }
-            .ref-po-section { text-align: center; font-size: 9px; margin-bottom: 4px; }
-            .to-section { margin-bottom: 4px; font-size: 8px; line-height: 1.3; margin-left: 20px; }
-            .subject-section { margin-left: 20px; font-size: 8px; margin-bottom: 4px; }
-            table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 8px; }
-            th, td { border: 1px solid #000; padding: 2px 3px; }
+            body { font-family: 'Times New Roman', Times, serif; padding: 8px 15px; font-size: 12px; line-height: 1.4; }
+            .header-row { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 4px; }
+            .hospital-name { font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 4px; }
+            .address-row { text-align: center; font-size: 11px; font-weight: bold; margin-bottom: 3px; }
+            .licence-row { text-align: center; font-size: 10px; font-weight: bold; margin-bottom: 6px; }
+            .po-date-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 8px; padding: 0 30px; }
+            .to-section { margin-bottom: 6px; font-size: 11px; line-height: 1.4; margin-left: 30px; }
+            .subject-section { margin-left: 30px; font-size: 11px; margin-bottom: 6px; }
+            table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 11px; }
+            th, td { border: 1px solid #000; padding: 4px 6px; }
             th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
             td { text-align: left; }
             td.center { text-align: center; }
-            .footer-section { font-size: 8px; margin-top: 8px; margin-left: 20px; line-height: 1.3; }
-            .signature-section { font-size: 8px; margin-top: 8px; margin-left: 20px; line-height: 1.3; }
+            .footer-section { font-size: 11px; margin-top: 12px; margin-left: 30px; line-height: 1.4; }
+            .signature-section { font-size: 11px; margin-top: 12px; margin-left: 30px; line-height: 1.4; }
             @media print {
-              body { padding: 4mm 8mm; }
-              @page { margin: 4mm; size: A4; }
+              body { padding: 6mm 10mm; }
+              @page { margin: 6mm; size: A4; }
             }
           </style>
         </head>
@@ -82,41 +80,39 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
   const handleDownloadPDF = () => {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
-    let y = 10;
+    let y = 12;
 
-    // Header row
-    pdf.setFontSize(7);
+    // Header row - bold
+    pdf.setFontSize(9);
+    pdf.setFont('times', 'bold');
     pdf.text('Regd. Govt of Punjab', 10, y);
-    pdf.text('Mob_ 6284942412', pageWidth - 10, y, { align: 'right' });
-    y += 5;
+    pdf.text('Mob: 6284942412', pageWidth - 10, y, { align: 'right' });
+    y += 6;
 
-    // Hospital Name (centered)
-    pdf.setFontSize(14);
+    // Hospital Name (centered) - bold
+    pdf.setFontSize(16);
     pdf.setFont('times', 'bold');
     pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y + 6, { align: 'center' });
-    y += 12;
+    y += 14;
 
-    // Address
-    pdf.setFontSize(7);
-    pdf.setFont('times', 'normal');
+    // Address - bold
+    pdf.setFontSize(9);
+    pdf.setFont('times', 'bold');
     pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib    Dr. Metali Bhatti', pageWidth / 2, y, { align: 'center' });
-    y += 4;
-
-    // Licence
-    pdf.setFontSize(6);
-    pdf.text('Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024', pageWidth / 2, y, { align: 'center' });
-    y += 6;
-
-    // REF NO
-    pdf.setFontSize(8);
-    pdf.text(`REF NO – ${poNumber}`, pageWidth / 2, y, { align: 'center' });
     y += 5;
 
-    // PO Number and Date
+    // Licence - bold
+    pdf.setFontSize(8);
     pdf.setFont('times', 'bold');
-    pdf.text(`PO NO ${poNumber}`, 20, y);
-    pdf.text(`Date- ${formatDate(poDate)}`, pageWidth - 20, y, { align: 'right' });
-    y += 6;
+    pdf.text('Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024', pageWidth / 2, y, { align: 'center' });
+    y += 8;
+
+    // PO Number and Date - bold (removed REF NO)
+    pdf.setFontSize(10);
+    pdf.setFont('times', 'bold');
+    pdf.text(`PO NO: ${poNumber}`, 20, y);
+    pdf.text(`Date: ${formatDate(poDate)}`, pageWidth - 20, y, { align: 'right' });
+    y += 8;
 
     // To Section
     pdf.setFontSize(7);
@@ -221,39 +217,36 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-4 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '10px', lineHeight: '1.3' }}>
+        <div ref={printRef} className="p-4 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '12px', lineHeight: '1.4' }}>
           {/* Header Row */}
-          <div className="flex justify-between text-[9px] mb-1">
+          <div className="flex justify-between text-[11px] font-bold mb-1">
             <span>Regd. Govt of Punjab</span>
-            <span>Mob_ 6284942412</span>
+            <span>Mob: 6284942412</span>
           </div>
 
           {/* Hospital Header */}
           <div className="my-1">
-            <h1 className="text-base font-bold text-center">NAVJEEVAN HOSPITAL</h1>
+            <h1 className="text-xl font-bold text-center">NAVJEEVAN HOSPITAL</h1>
           </div>
 
           {/* Address Row */}
-          <p className="text-center text-[9px] mb-0.5">
+          <p className="text-center text-[11px] font-bold mb-0.5">
             Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;Dr. Metali Bhatti
           </p>
 
           {/* Licence Row */}
-          <p className="text-center text-[8px] mb-2">
+          <p className="text-center text-[10px] font-bold mb-3">
             Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024
           </p>
 
-          {/* REF NO and PO NO */}
-          <div className="text-center text-[10px] mb-1">
-            <p>REF NO – {poNumber}</p>
-          </div>
-          <div className="flex justify-between text-[10px] mb-3 px-10">
-            <span>PO NO {poNumber}</span>
-            <span>Date- {formatDate(poDate)}</span>
+          {/* PO NO and Date - removed REF NO */}
+          <div className="flex justify-between text-[12px] font-bold mb-4 px-10">
+            <span>PO NO: {poNumber}</span>
+            <span>Date: {formatDate(poDate)}</span>
           </div>
 
           {/* To Section */}
-          <div className="text-[9px] mb-2 leading-snug ml-16">
+          <div className="text-[11px] mb-3 leading-snug ml-16">
             <p className="mb-0.5">To</p>
             <p className="font-bold">VYADO HEALTHCARE PVT LTD</p>
             <p>Gali no.4,VinodNagar,Hisar</p>
@@ -261,20 +254,20 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </div>
 
           {/* Subject Section */}
-          <div className="text-[9px] mb-2 ml-16">
+          <div className="text-[11px] mb-3 ml-16">
             <p>Subject: Medicine order</p>
             <p className="mt-1">Respected Sir/Ma&apos;am</p>
             <p className="mt-1">Kindly provide us :-</p>
           </div>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-2 text-[9px]">
+          <table className="w-full border-collapse mb-3 text-[11px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black px-1 py-0.5 text-center">SR.NO.</th>
-                <th className="border border-black px-1 py-0.5 text-center">PRODUCT NAME</th>
-                <th className="border border-black px-1 py-0.5 text-center">packing</th>
-                <th className="border border-black px-1 py-0.5 text-center">QTY.</th>
+                <th className="border border-black px-2 py-1 text-center">SR.NO.</th>
+                <th className="border border-black px-2 py-1 text-center">PRODUCT NAME</th>
+                <th className="border border-black px-2 py-1 text-center">PACKING</th>
+                <th className="border border-black px-2 py-1 text-center">QTY.</th>
               </tr>
             </thead>
             <tbody>
@@ -284,10 +277,10 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
                 
                 return (
                   <tr key={index}>
-                    <td className="border border-black px-1 py-0.5 text-center">{index + 1}</td>
-                    <td className="border border-black px-1 py-0.5">{item.stockItemName}</td>
-                    <td className="border border-black px-1 py-0.5 text-center">{packing}</td>
-                    <td className="border border-black px-1 py-0.5 text-center">{item.quantity}TAB</td>
+                    <td className="border border-black px-2 py-1 text-center">{index + 1}</td>
+                    <td className="border border-black px-2 py-1">{item.stockItemName}</td>
+                    <td className="border border-black px-2 py-1 text-center">{packing}</td>
+                    <td className="border border-black px-2 py-1 text-center">{item.quantity}TAB</td>
                   </tr>
                 );
               })}
@@ -295,13 +288,13 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </table>
 
           {/* Footer Section */}
-          <div className="text-[9px] mt-3 ml-16 leading-snug">
+          <div className="text-[11px] mt-4 ml-16 leading-snug">
             <p>For our centre Navjeevan hospital at below written address at the earliest.</p>
             <p className="mt-1">Address: Navjeevan hospital Opp.Busstand,Vill.Bara,Sirhind,distt. Fatehgarh sahib.</p>
           </div>
 
           {/* Signature Section */}
-          <div className="text-[9px] mt-4 ml-16 leading-snug">
+          <div className="text-[11px] mt-5 ml-16 leading-snug">
             <p>Thanking you</p>
             <p>Yours Sincerely,</p>
             <p className="mt-1">Navjeevan Hospital,</p>
