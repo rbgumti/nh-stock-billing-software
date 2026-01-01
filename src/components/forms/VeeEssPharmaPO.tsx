@@ -1,10 +1,9 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Printer, Download } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
-import navjeevanLogo from "@/assets/NH_LOGO.png";
 import jsPDF from "jspdf";
 
 interface VeeEssPharmaPOProps {
@@ -17,24 +16,6 @@ interface VeeEssPharmaPOProps {
 
 export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }: VeeEssPharmaPOProps) {
   const printRef = useRef<HTMLDivElement>(null);
-  const [logoBase64, setLogoBase64] = useState<string>("");
-
-  // Convert logo to base64 for print window
-  useEffect(() => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(img, 0, 0);
-        setLogoBase64(canvas.toDataURL("image/png"));
-      }
-    };
-    img.src = navjeevanLogo;
-  }, []);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -57,15 +38,7 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    if (!logoBase64) {
-      setTimeout(handlePrint, 100);
-      return;
-    }
-
-    const printHTML = printContent.innerHTML.replace(
-      /src="[^"]*NH_LOGO[^"]*"/g,
-      `src="${logoBase64}"`
-    );
+    const printHTML = printContent.innerHTML;
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -112,11 +85,6 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
   };
 
   const handleDownloadPDF = () => {
-    if (!logoBase64) {
-      setTimeout(handleDownloadPDF, 100);
-      return;
-    }
-
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     let y = 10;
@@ -127,9 +95,7 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
     pdf.text('Mob_ 6284942412', pageWidth - 10, y, { align: 'right' });
     y += 5;
 
-    // Logo and Hospital Name (single logo on left)
-    const logoSize = 10;
-    pdf.addImage(logoBase64, 'PNG', 10, y, logoSize, logoSize);
+    // Hospital Name (centered)
     pdf.setFontSize(14);
     pdf.setFont('times', 'bold');
     pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y + 6, { align: 'center' });
@@ -278,10 +244,9 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
             <span>Mob_ 6284942412</span>
           </div>
 
-          {/* Hospital Header with Logo */}
-          <div className="flex items-center gap-3 my-1">
-            <img src={navjeevanLogo} alt="Logo" className="w-8 h-8 object-contain" />
-            <h1 className="text-base font-bold flex-1 text-center">NAVJEEVAN HOSPITAL</h1>
+          {/* Hospital Header */}
+          <div className="my-1">
+            <h1 className="text-base font-bold text-center">NAVJEEVAN HOSPITAL</h1>
           </div>
 
           {/* Address Row */}
