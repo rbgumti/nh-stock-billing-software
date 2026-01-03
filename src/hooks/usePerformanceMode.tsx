@@ -1,26 +1,39 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-interface PerformanceModeContextType {
+interface AppSettingsContextType {
   performanceMode: boolean;
   setPerformanceMode: (enabled: boolean) => void;
+  compactMode: boolean;
+  setCompactMode: (enabled: boolean) => void;
 }
 
-const PerformanceModeContext = createContext<PerformanceModeContextType | undefined>(undefined);
+const AppSettingsContext = createContext<AppSettingsContextType | undefined>(undefined);
 
-const STORAGE_KEY = "performance_mode";
+const PERFORMANCE_KEY = "performance_mode";
+const COMPACT_KEY = "compact_mode";
 
-export function PerformanceModeProvider({ children }: { children: React.ReactNode }) {
+export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
   const [performanceMode, setPerformanceModeState] = useState(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(PERFORMANCE_KEY);
+    return stored === "true";
+  });
+
+  const [compactMode, setCompactModeState] = useState(() => {
+    const stored = localStorage.getItem(COMPACT_KEY);
     return stored === "true";
   });
 
   const setPerformanceMode = (enabled: boolean) => {
     setPerformanceModeState(enabled);
-    localStorage.setItem(STORAGE_KEY, String(enabled));
+    localStorage.setItem(PERFORMANCE_KEY, String(enabled));
   };
 
-  // Apply performance-mode class to document root
+  const setCompactMode = (enabled: boolean) => {
+    setCompactModeState(enabled);
+    localStorage.setItem(COMPACT_KEY, String(enabled));
+  };
+
+  // Apply mode classes to document root
   useEffect(() => {
     if (performanceMode) {
       document.documentElement.classList.add("performance-mode");
@@ -29,17 +42,39 @@ export function PerformanceModeProvider({ children }: { children: React.ReactNod
     }
   }, [performanceMode]);
 
+  useEffect(() => {
+    if (compactMode) {
+      document.documentElement.classList.add("compact-mode");
+    } else {
+      document.documentElement.classList.remove("compact-mode");
+    }
+  }, [compactMode]);
+
   return (
-    <PerformanceModeContext.Provider value={{ performanceMode, setPerformanceMode }}>
+    <AppSettingsContext.Provider value={{ 
+      performanceMode, 
+      setPerformanceMode, 
+      compactMode, 
+      setCompactMode 
+    }}>
       {children}
-    </PerformanceModeContext.Provider>
+    </AppSettingsContext.Provider>
   );
 }
 
-export function usePerformanceMode() {
-  const context = useContext(PerformanceModeContext);
+export function useAppSettings() {
+  const context = useContext(AppSettingsContext);
   if (context === undefined) {
-    throw new Error("usePerformanceMode must be used within a PerformanceModeProvider");
+    throw new Error("useAppSettings must be used within an AppSettingsProvider");
   }
   return context;
 }
+
+// Keep backward compatibility
+export function usePerformanceMode() {
+  const { performanceMode, setPerformanceMode } = useAppSettings();
+  return { performanceMode, setPerformanceMode };
+}
+
+// Alias for the provider (backward compatibility)
+export const PerformanceModeProvider = AppSettingsProvider;

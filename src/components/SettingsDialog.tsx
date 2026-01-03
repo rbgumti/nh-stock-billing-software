@@ -1,4 +1,4 @@
-import { Settings, Zap } from "lucide-react";
+import { Settings, Zap, Minimize2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { usePerformanceMode } from "@/hooks/usePerformanceMode";
+import { Separator } from "@/components/ui/separator";
+import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 export function SettingsDialog() {
-  const { performanceMode, setPerformanceMode } = usePerformanceMode();
+  const { performanceMode, setPerformanceMode, compactMode, setCompactMode } = useAppSettings();
 
   return (
     <Dialog>
@@ -29,7 +30,8 @@ export function SettingsDialog() {
             Customize your app experience
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 py-4">
+          {/* Performance Mode */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-lg bg-amber-500/10">
@@ -40,7 +42,7 @@ export function SettingsDialog() {
                   Performance Mode
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Disable animations and effects for better performance on low-end devices
+                  Disable animations and effects for better performance
                 </p>
               </div>
             </div>
@@ -48,6 +50,30 @@ export function SettingsDialog() {
               id="performance-mode"
               checked={performanceMode}
               onCheckedChange={setPerformanceMode}
+            />
+          </div>
+
+          <Separator />
+
+          {/* Compact Mode */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <Minimize2 className="w-5 h-5 text-blue-500" />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="compact-mode" className="text-sm font-medium">
+                  Compact Mode
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Reduce spacing and padding for more content density
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="compact-mode"
+              checked={compactMode}
+              onCheckedChange={setCompactMode}
             />
           </div>
         </div>
