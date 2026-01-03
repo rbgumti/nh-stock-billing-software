@@ -71,15 +71,52 @@ export default function Dashboard() {
 
   const loadAllData = useCallback(async () => {
     try {
-      const [invoiceRes, stockRes, patientRes] = await Promise.all([
+      const [invoiceRes, stockRes, patientRes, prescriptionRes] = await Promise.all([
         supabase.from('invoices').select('*').order('created_at', { ascending: false }),
         supabase.from('stock_items').select('*').order('name'),
-        supabase.from('patients').select('*').order('id', { ascending: false }).limit(100)
+        supabase.from('patients').select('*').order('id', { ascending: false }).limit(100),
+        supabase.from('prescriptions').select('id, patient_name, created_at').order('created_at', { ascending: false }).limit(10)
       ]);
 
       if (invoiceRes.data) setInvoices(invoiceRes.data);
       if (stockRes.data) setStockItems(stockRes.data);
       if (patientRes.data) setPatients(patientRes.data);
+      
+      // Populate initial activity from recent data
+      const initialUpdates: RealtimeUpdate[] = [];
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      
+      // Add recent invoices from today
+      invoiceRes.data?.slice(0, 3).forEach(inv => {
+        if (inv.created_at?.startsWith(today)) {
+          initialUpdates.push({
+            id: `inv-${inv.id}`,
+            type: 'invoice',
+            message: `Invoice ${inv.invoice_number} for ${inv.patient_name}`,
+            timestamp: new Date(inv.created_at)
+          });
+        }
+      });
+      
+      // Add recent prescriptions from today
+      prescriptionRes.data?.slice(0, 2).forEach(pres => {
+        if (pres.created_at?.startsWith(today)) {
+          initialUpdates.push({
+            id: `pres-${pres.id}`,
+            type: 'prescription',
+            message: `Prescription for ${pres.patient_name}`,
+            timestamp: new Date(pres.created_at)
+          });
+        }
+      });
+      
+      // Sort by timestamp descending and take top 10
+      initialUpdates.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      if (initialUpdates.length > 0) {
+        setRealtimeUpdates(initialUpdates.slice(0, 10));
+      }
+      
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Error loading data:', error);
