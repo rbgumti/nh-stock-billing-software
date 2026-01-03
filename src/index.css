@@ -193,7 +193,75 @@ All colors MUST be HSL.
   display: none !important;
 }
 
-@layer components {
+/* Compact Mode - Reduced spacing for more content density */
+:root.compact-mode {
+  --spacing-scale: 0.7;
+}
+
+:root.compact-mode .p-4 { padding: 0.75rem !important; }
+:root.compact-mode .p-6 { padding: 1rem !important; }
+:root.compact-mode .p-8 { padding: 1.25rem !important; }
+:root.compact-mode .px-4 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+:root.compact-mode .px-6 { padding-left: 1rem !important; padding-right: 1rem !important; }
+:root.compact-mode .py-4 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+:root.compact-mode .py-6 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+:root.compact-mode .py-8 { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+
+:root.compact-mode .gap-4 { gap: 0.75rem !important; }
+:root.compact-mode .gap-6 { gap: 1rem !important; }
+:root.compact-mode .gap-8 { gap: 1.25rem !important; }
+
+:root.compact-mode .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem !important; }
+:root.compact-mode .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem !important; }
+:root.compact-mode .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem !important; }
+
+:root.compact-mode .mb-4 { margin-bottom: 0.75rem !important; }
+:root.compact-mode .mb-6 { margin-bottom: 1rem !important; }
+:root.compact-mode .mb-8 { margin-bottom: 1.25rem !important; }
+:root.compact-mode .mt-4 { margin-top: 0.75rem !important; }
+:root.compact-mode .mt-6 { margin-top: 1rem !important; }
+:root.compact-mode .mt-8 { margin-top: 1.25rem !important; }
+
+:root.compact-mode .text-3xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+:root.compact-mode .text-4xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+
+:root.compact-mode .h-12 { height: 2.5rem !important; }
+:root.compact-mode .h-16 { height: 3rem !important; }
+:root.compact-mode .h-20 { height: 4rem !important; }
+
+/* Compact table cells */
+:root.compact-mode table th,
+:root.compact-mode table td {
+  padding: 0.5rem 0.75rem !important;
+}
+
+/* Compact card headers */
+:root.compact-mode [class*="CardHeader"] {
+  padding: 1rem !important;
+}
+
+:root.compact-mode [class*="CardContent"] {
+  padding: 1rem !important;
+  padding-top: 0 !important;
+}
+
+/* Compact buttons */
+:root.compact-mode .btn-lg,
+:root.compact-mode button[class*="h-11"],
+:root.compact-mode button[class*="h-12"] {
+  height: 2.25rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+/* Compact form inputs */
+:root.compact-mode input[class*="h-10"],
+:root.compact-mode input[class*="h-11"],
+:root.compact-mode select[class*="h-10"],
+:root.compact-mode select[class*="h-11"] {
+  height: 2.25rem !important;
+}
+
   /* Colorful gradient backgrounds */
   .bg-gradient-vibrant {
     background: linear-gradient(135deg, hsl(var(--purple)) 0%, hsl(var(--cyan)) 50%, hsl(var(--teal)) 100%);
@@ -690,7 +758,6 @@ All colors MUST be HSL.
     bottom: 30%;
     left: 25%;
     animation: float-particle 4s ease-in-out infinite 1s;
-  }
   }
 
   /* Liquid sidebar animations */
