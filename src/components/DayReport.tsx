@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Loader2, Check, RefreshCw, ToggleLeft, ToggleRight } from "lucide-react";
+import { Download, Calendar, Loader2, Check, RefreshCw, ToggleLeft, ToggleRight, Save } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -51,8 +51,7 @@ export default function DayReport() {
   const [medicineDataUpdated, setMedicineDataUpdated] = useState<Date | null>(null);
   const [isRefreshingMedicine, setIsRefreshingMedicine] = useState(false);
   const [isRefreshingPrevCash, setIsRefreshingPrevCash] = useState(false);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isInitialLoadRef = useRef(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   // Patient counts
   const [newPatients, setNewPatients] = useState(0);
@@ -312,8 +311,10 @@ export default function DayReport() {
           .single();
       if (error) throw error;
         setReportId(data.id);
+        toast.success('Report saved successfully');
       }
       setLastSaved(new Date());
+      setHasUnsavedChanges(false);
     } catch (error: any) {
       console.error('Error saving report:', error);
       toast.error('Failed to save report: ' + error.message);
@@ -322,41 +323,17 @@ export default function DayReport() {
     }
   };
 
-  // Auto-save with debounce
-  const triggerAutoSave = useCallback(() => {
-    if (isInitialLoadRef.current || loading) return;
-    
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-    
-    autoSaveTimeoutRef.current = setTimeout(() => {
-      saveReport();
-    }, 1500);
-  }, [reportDate, newPatients, followUpPatients, cashPreviousDay, depositInBank,
-      paytmGpay, cashHandoverAmarjeet, cashHandoverMandeep, cashHandoverSir, adjustments,
-      tapentadolPatients, psychiatryPatients, fees, labCollection, psychiatryCollection,
-      cashDetails, expenses]);
-
-  // Watch for changes and trigger auto-save
+  // Track unsaved changes
   useEffect(() => {
-    triggerAutoSave();
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-    };
+    setHasUnsavedChanges(true);
   }, [newPatients, followUpPatients, cashPreviousDay, depositInBank,
       paytmGpay, cashHandoverAmarjeet, cashHandoverMandeep, cashHandoverSir, adjustments,
       tapentadolPatients, psychiatryPatients, fees, labCollection, psychiatryCollection,
       cashDetails, expenses]);
 
   useEffect(() => {
-    isInitialLoadRef.current = true;
     loadSavedReport().then(() => {
-      setTimeout(() => {
-        isInitialLoadRef.current = false;
-      }, 100);
+      setHasUnsavedChanges(false);
     });
   }, [loadSavedReport]);
 
@@ -718,15 +695,16 @@ export default function DayReport() {
         <div>
           <h2 className="text-xl font-bold text-navy">Day's Report - {formatDate(reportDate)}</h2>
           <div className="flex items-center gap-3 text-xs">
-            {saving ? (
-              <span className="text-muted-foreground flex items-center gap-1">
-                <Loader2 className="h-3 w-3 animate-spin" /> Saving...
+            {hasUnsavedChanges && !saving && (
+              <span className="text-amber-600 flex items-center gap-1">
+                Unsaved changes
               </span>
-            ) : lastSaved ? (
+            )}
+            {lastSaved && !hasUnsavedChanges && (
               <span className="text-green-600 flex items-center gap-1">
-                <Check className="h-3 w-3" /> Auto-saved
+                <Check className="h-3 w-3" /> Saved
               </span>
-            ) : null}
+            )}
             {medicineDataUpdated && (
               <span className="text-muted-foreground flex items-center gap-1 bg-muted px-2 py-0.5 rounded-full">
                 <RefreshCw className="h-3 w-3" />
@@ -762,6 +740,15 @@ export default function DayReport() {
             title="Refresh data"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshingMedicine ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button 
+            onClick={saveReport} 
+            size="sm" 
+            className="bg-green-600 hover:bg-green-700 text-white"
+            disabled={saving || !hasUnsavedChanges}
+          >
+            {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+            {saving ? 'Saving...' : 'Save'}
           </Button>
           <Button onClick={exportToExcel} size="sm" className="bg-gold hover:bg-gold/90 text-navy">
             <Download className="h-4 w-4 mr-1" />
