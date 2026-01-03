@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
@@ -26,6 +26,7 @@ import { usePurchaseOrderStore } from "@/hooks/usePurchaseOrderStore";
 import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
 import { useSupplierPaymentStore, SupplierPayment } from "@/hooks/useSupplierPaymentStore";
 import jsPDF from "jspdf";
+import * as XLSX from "xlsx";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { formatLocalISODate } from "@/lib/dateUtils";
 
@@ -673,6 +674,202 @@ export default function Stock() {
     });
   };
 
+  // Stock Export Functions
+  const exportStockToExcel = () => {
+    const workbook = XLSX.utils.book_new();
+    
+    const reportData: any[][] = [
+      ['STOCK INVENTORY REPORT'],
+      [`Generated: ${new Date().toLocaleDateString('en-GB')} at ${new Date().toLocaleTimeString()}`],
+      [],
+      ['Item Name', 'Category', 'Current Stock', 'Minimum Stock', 'Unit Price', 'MRP', 'Total Value', 'Supplier', 'Batch No', 'Expiry Date', 'Status'],
+    ];
+
+    stockItems.forEach(item => {
+      const status = item.currentStock <= item.minimumStock * 0.5 ? 'Critical' : 
+                     item.currentStock <= item.minimumStock ? 'Low Stock' : 'In Stock';
+      reportData.push([
+        item.name,
+        item.category,
+        item.currentStock,
+        item.minimumStock,
+        item.unitPrice,
+        item.mrp || item.unitPrice,
+        (item.currentStock * item.unitPrice).toFixed(2),
+        item.supplier,
+        item.batchNo,
+        item.expiryDate,
+        status
+      ]);
+    });
+
+    // Add summary
+    reportData.push([]);
+    reportData.push(['SUMMARY']);
+    reportData.push(['Total Items', stockItems.length]);
+    reportData.push(['Low Stock Items', stockItems.filter(i => i.currentStock <= i.minimumStock).length]);
+    reportData.push(['Total Inventory Value', `₹${stockItems.reduce((t, i) => t + (i.currentStock * i.unitPrice), 0).toFixed(2)}`]);
+
+    // Category breakdown
+    reportData.push([]);
+    reportData.push(['CATEGORY BREAKDOWN']);
+    ['BNX', 'TPN', 'PSHY'].forEach(cat => {
+      const catItems = stockItems.filter(i => i.category === cat);
+      const catValue = catItems.reduce((t, i) => t + (i.currentStock * i.unitPrice), 0);
+      reportData.push([cat, `${catItems.length} items`, `₹${catValue.toFixed(2)}`]);
+    });
+
+    const sheet = XLSX.utils.aoa_to_sheet(reportData);
+    sheet['!cols'] = [
+      { wch: 30 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 20 }, { wch: 15 }, { wch: 12 }, { wch: 10 }
+    ];
+    
+    XLSX.utils.book_append_sheet(workbook, sheet, 'Stock Report');
+    XLSX.writeFile(workbook, `Stock_Report_${formatLocalISODate()}.xlsx`);
+    toast({ title: "Exported", description: "Stock report exported to Excel" });
+  };
+
+  const exportStockToPDF = () => {
+    const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape for more columns
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 15;
+    let y = 20;
+
+    // Header
+    pdf.setFillColor(0, 51, 102); // Navy
+    pdf.rect(0, 0, pageWidth, 30, 'F');
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(18);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, 12, { align: 'center' });
+    
+    pdf.setFontSize(14);
+    pdf.text('Stock Inventory Report', pageWidth / 2, 22, { align: 'center' });
+
+    y = 40;
+
+    // Date
+    pdf.setTextColor(100, 100, 100);
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Generated: ${new Date().toLocaleDateString('en-GB')} at ${new Date().toLocaleTimeString()}`, margin, y);
+    y += 8;
+
+    // Summary Cards
+    const totalValue = stockItems.reduce((t, i) => t + (i.currentStock * i.unitPrice), 0);
+    const lowStockCount = stockItems.filter(i => i.currentStock <= i.minimumStock).length;
+    
+    // Summary boxes
+    const boxWidth = 60;
+    const boxHeight = 20;
+    const boxes = [
+      { label: 'Total Items', value: String(stockItems.length), color: [59, 130, 246] }, // Blue
+      { label: 'Low Stock', value: String(lowStockCount), color: [245, 158, 11] }, // Amber
+      { label: 'Total Value', value: `₹${totalValue.toFixed(0)}`, color: [16, 185, 129] }, // Green
+      { label: 'Categories', value: '3', color: [139, 92, 246] }, // Purple
+    ];
+
+    boxes.forEach((box, idx) => {
+      const x = margin + idx * (boxWidth + 10);
+      pdf.setFillColor(box.color[0], box.color[1], box.color[2]);
+      pdf.roundedRect(x, y, boxWidth, boxHeight, 3, 3, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(8);
+      pdf.text(box.label, x + 5, y + 8);
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(box.value, x + 5, y + 16);
+    });
+    
+    y += boxHeight + 10;
+
+    // Category sections
+    const categories = [
+      { name: 'BNX', color: [59, 130, 246] as [number, number, number] },
+      { name: 'TPN', color: [245, 158, 11] as [number, number, number] },
+      { name: 'PSHY', color: [139, 92, 246] as [number, number, number] }
+    ];
+
+    categories.forEach(cat => {
+      const items = stockItems.filter(i => i.category === cat.name);
+      if (items.length === 0) return;
+
+      // Check page break
+      if (y > pageHeight - 50) {
+        pdf.addPage();
+        y = 20;
+      }
+
+      // Category header
+      pdf.setFillColor(cat.color[0], cat.color[1], cat.color[2]);
+      pdf.rect(margin, y, pageWidth - 2 * margin, 8, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${cat.name} (${items.length} items)`, margin + 5, y + 5.5);
+      y += 10;
+
+      // Table header
+      pdf.setFillColor(240, 240, 240);
+      pdf.rect(margin, y, pageWidth - 2 * margin, 7, 'F');
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'bold');
+      
+      const cols = [margin + 3, margin + 70, margin + 95, margin + 120, margin + 145, margin + 175, margin + 210, margin + 240];
+      pdf.text('Item Name', cols[0], y + 5);
+      pdf.text('Stock', cols[1], y + 5);
+      pdf.text('Min', cols[2], y + 5);
+      pdf.text('Price', cols[3], y + 5);
+      pdf.text('Value', cols[4], y + 5);
+      pdf.text('Supplier', cols[5], y + 5);
+      pdf.text('Expiry', cols[6], y + 5);
+      pdf.text('Status', cols[7], y + 5);
+      y += 8;
+
+      // Table rows
+      pdf.setFont('helvetica', 'normal');
+      items.forEach((item, idx) => {
+        if (y > pageHeight - 20) {
+          pdf.addPage();
+          y = 20;
+        }
+
+        if (idx % 2 === 0) {
+          pdf.setFillColor(250, 250, 250);
+          pdf.rect(margin, y - 1, pageWidth - 2 * margin, 6, 'F');
+        }
+
+        const status = item.currentStock <= item.minimumStock * 0.5 ? 'Critical' : 
+                       item.currentStock <= item.minimumStock ? 'Low' : 'OK';
+        const statusColor = status === 'Critical' ? [220, 38, 38] : status === 'Low' ? [245, 158, 11] : [16, 185, 129];
+
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(item.name.substring(0, 35), cols[0], y + 3);
+        pdf.text(String(item.currentStock), cols[1], y + 3);
+        pdf.text(String(item.minimumStock), cols[2], y + 3);
+        pdf.text(`₹${item.unitPrice}`, cols[3], y + 3);
+        pdf.text(`₹${(item.currentStock * item.unitPrice).toFixed(0)}`, cols[4], y + 3);
+        pdf.text(item.supplier.substring(0, 15), cols[5], y + 3);
+        pdf.text(item.expiryDate !== 'N/A' ? item.expiryDate : '-', cols[6], y + 3);
+        
+        pdf.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(status, cols[7], y + 3);
+        pdf.setFont('helvetica', 'normal');
+        
+        y += 6;
+      });
+
+      y += 8;
+    });
+
+    pdf.save(`Stock_Report_${formatLocalISODate()}.pdf`);
+    toast({ title: "Exported", description: "Stock report exported to PDF with colors" });
+  };
+
   return (
     <div className="p-6 space-y-6 relative">
       <FloatingOrbs />
@@ -684,6 +881,25 @@ export default function Stock() {
           <p className="text-muted-foreground mt-2">Monitor and manage your inventory, purchase orders, and goods receipt</p>
         </div>
         <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="glass-subtle border-emerald/20 hover:border-emerald/40">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportStockToPDF}>
+                <FileText className="h-4 w-4 mr-2 text-red-500" />
+                PDF (with Colors)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportStockToExcel}>
+                <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" />
+                Excel
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button onClick={() => setShowAddForm(true)} className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
             <Plus className="h-4 w-4 mr-2" />
             Add Stock Item

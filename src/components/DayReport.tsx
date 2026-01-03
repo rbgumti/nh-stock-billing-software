@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Loader2, Check, RefreshCw, ToggleLeft, ToggleRight, Save } from "lucide-react";
+import { Download, Calendar, Loader2, Check, RefreshCw, ToggleLeft, ToggleRight, Save, FileSpreadsheet, FileText, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
 import { formatLocalISODate } from "@/lib/dateUtils";
 
 interface MedicineReportItem {
@@ -505,7 +507,7 @@ export default function DayReport() {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = (withColors: boolean = false) => {
     const workbook = XLSX.utils.book_new();
 
     const reportData: any[][] = [
@@ -527,7 +529,6 @@ export default function DayReport() {
     reportData.push(['Cash Management']);
     reportData.push(['Cash in Hand (Previous Day)', cashPreviousDay]);
     reportData.push(["Today's Collection", todaysCollection]);
-    // Loose Balance row removed
     reportData.push(['Expenses', totalExpenses]);
     reportData.push(['Deposit in Bank', depositInBank]);
     reportData.push(['Paytm/GPay', paytmGpay]);
@@ -578,9 +579,246 @@ export default function DayReport() {
     reportData.push(['DIFFERENCE', '', difference]);
 
     const sheet = XLSX.utils.aoa_to_sheet(reportData);
+    
+    // Apply colors if requested
+    if (withColors) {
+      // Set column widths
+      sheet['!cols'] = [
+        { wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 18 }, { wch: 15 }
+      ];
+    }
+    
     XLSX.utils.book_append_sheet(workbook, sheet, 'Day Report');
+    XLSX.writeFile(workbook, `Day_Report_${reportDate}${withColors ? '_Color' : ''}.xlsx`);
+    toast.success(`Excel exported ${withColors ? 'with colors' : 'successfully'}`);
+  };
 
-    XLSX.writeFile(workbook, `Day_Report_${reportDate}.xlsx`);
+  const exportToPDF = () => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 15;
+    let y = 20;
+
+    // Header
+    pdf.setFillColor(0, 51, 102); // Navy
+    pdf.rect(0, 0, pageWidth, 35, 'F');
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(18);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, 15, { align: 'center' });
+    
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('De-Addiction & Rehabilitation Centre', pageWidth / 2, 22, { align: 'center' });
+    
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`Day's Report - ${formatDate(reportDate)}`, pageWidth / 2, 30, { align: 'center' });
+
+    y = 45;
+
+    // Patient Details Section
+    pdf.setTextColor(0, 51, 102);
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('BNX Details', margin, y);
+    
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(margin, y + 2, 80, 25, 'F');
+    
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`New Patients: ${newPatients}`, margin + 5, y + 10);
+    pdf.text(`Follow-up Patients: ${followUpPatients}`, margin + 5, y + 17);
+    pdf.text(`Total Patients: ${totalPatients}`, margin + 5, y + 24);
+
+    // Pharmacy Sale section
+    pdf.setTextColor(0, 51, 102);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Pharmacy Sale', pageWidth - margin - 60, y);
+    
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(pageWidth - margin - 65, y + 2, 65, 25, 'F');
+    
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Tapentadol Patients: ${tapentadolPatients}`, pageWidth - margin - 60, y + 10);
+    pdf.text(`Psychiatry Patients: ${psychiatryPatients}`, pageWidth - margin - 60, y + 17);
+    pdf.text(`Fees: ₹${fees}`, pageWidth - margin - 60, y + 24);
+
+    y += 35;
+
+    // Medicine tables helper
+    const drawMedicineTable = (medicines: MedicineReportItem[], title: string, headerColor: [number, number, number], total: number) => {
+      if (medicines.length === 0) return;
+      
+      // Check if we need a new page
+      if (y > 250) {
+        pdf.addPage();
+        y = 20;
+      }
+
+      pdf.setFillColor(...headerColor);
+      pdf.rect(margin, y, pageWidth - 2 * margin, 8, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(title, margin + 3, y + 5.5);
+      y += 10;
+
+      // Table header
+      pdf.setFillColor(230, 230, 230);
+      pdf.rect(margin, y, pageWidth - 2 * margin, 7, 'F');
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'bold');
+      
+      const cols = [margin + 3, margin + 55, margin + 75, margin + 95, margin + 115, margin + 140, margin + 160];
+      pdf.text('Brand', cols[0], y + 5);
+      pdf.text('Qty', cols[1], y + 5);
+      pdf.text('Rate', cols[2], y + 5);
+      pdf.text('Amount', cols[3], y + 5);
+      pdf.text('Opening', cols[4], y + 5);
+      pdf.text('Received', cols[5], y + 5);
+      pdf.text('Closing', cols[6], y + 5);
+      y += 8;
+
+      // Table rows
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      medicines.forEach((m, idx) => {
+        if (y > 275) {
+          pdf.addPage();
+          y = 20;
+        }
+        
+        if (idx % 2 === 0) {
+          pdf.setFillColor(250, 250, 250);
+          pdf.rect(margin, y - 1, pageWidth - 2 * margin, 6, 'F');
+        }
+        
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(m.brand.substring(0, 30), cols[0], y + 3);
+        pdf.text(String(m.qtySold), cols[1], y + 3);
+        pdf.text(`₹${m.rate}`, cols[2], y + 3);
+        pdf.text(`₹${m.amount}`, cols[3], y + 3);
+        pdf.text(String(m.opening), cols[4], y + 3);
+        pdf.setTextColor(0, 150, 0);
+        pdf.text(String(m.stockReceived), cols[5], y + 3);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(String(m.closing), cols[6], y + 3);
+        y += 6;
+      });
+
+      // Total row
+      pdf.setFillColor(212, 175, 55); // Gold
+      pdf.rect(margin, y, pageWidth - 2 * margin, 7, 'F');
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Total', cols[0], y + 5);
+      pdf.text(`₹${total}`, cols[3], y + 5);
+      y += 12;
+    };
+
+    // Draw medicine tables
+    drawMedicineTable(bnxMedicines, 'BNX Medicines', [59, 130, 246], bnxTotal); // Blue
+    drawMedicineTable(tpnMedicines, 'TPN Medicines', [245, 158, 11], tpnTotal); // Amber
+    drawMedicineTable(pshyMedicines, 'PSHY Medicines', [139, 92, 246], pshyTotal); // Purple
+
+    // Cash Management Section
+    if (y > 200) {
+      pdf.addPage();
+      y = 20;
+    }
+
+    pdf.setFillColor(0, 51, 102);
+    pdf.rect(margin, y, 80, 8, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Cash Management', margin + 3, y + 5.5);
+    y += 12;
+
+    const cashItems = [
+      ['Cash Previous Day', `₹${cashPreviousDay}`],
+      ["Today's Collection", `₹${todaysCollection}`],
+      ['Expenses', `₹${totalExpenses}`],
+      ['Deposit in Bank', `₹${depositInBank}`],
+      ['Paytm/GPay', `₹${paytmGpay}`],
+      ['Cash H/O Amarjeet', `₹${cashHandoverAmarjeet}`],
+      ['Cash H/O Mandeep', `₹${cashHandoverMandeep}`],
+      ['Cash H/O Sir', `₹${cashHandoverSir}`],
+      ['Adjustments', `₹${adjustments}`],
+    ];
+
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(0, 0, 0);
+    
+    cashItems.forEach((item, idx) => {
+      if (idx % 2 === 0) {
+        pdf.setFillColor(245, 245, 245);
+        pdf.rect(margin, y - 1, 80, 6, 'F');
+      }
+      pdf.text(item[0], margin + 3, y + 3);
+      pdf.text(item[1], margin + 75, y + 3, { align: 'right' });
+      y += 6;
+    });
+
+    // Cash left in hand (highlighted)
+    pdf.setFillColor(0, 150, 0);
+    pdf.rect(margin, y, 80, 8, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Cash Left in Hand', margin + 3, y + 5.5);
+    pdf.text(`₹${cashLeftInHand}`, margin + 75, y + 5.5, { align: 'right' });
+    y += 15;
+
+    // Summary Section
+    if (y > 240) {
+      pdf.addPage();
+      y = 20;
+    }
+
+    pdf.setFillColor(212, 175, 55); // Gold
+    pdf.rect(pageWidth - margin - 70, y - 8, 70, 8, 'F');
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Summary', pageWidth - margin - 67, y - 2);
+
+    const summaryItems = [
+      ['BNX Collection', `₹${bnxTotal}`, [59, 130, 246]],
+      ['TPN Collection', `₹${tpnTotal}`, [245, 158, 11]],
+      ['PSHY Collection', `₹${pshyTotal}`, [139, 92, 246]],
+      ['Fees', `₹${fees}`, [100, 100, 100]],
+      ['Lab Collection', `₹${labCollection}`, [100, 100, 100]],
+    ];
+
+    pdf.setFontSize(9);
+    summaryItems.forEach((item) => {
+      pdf.setFillColor(item[2][0] as number, item[2][1] as number, item[2][2] as number);
+      pdf.rect(pageWidth - margin - 70, y, 3, 6, 'F');
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(item[0] as string, pageWidth - margin - 65, y + 4);
+      pdf.text(item[1] as string, pageWidth - margin, y + 4, { align: 'right' });
+      y += 7;
+    });
+
+    // Total Sale
+    pdf.setFillColor(0, 51, 102);
+    pdf.rect(pageWidth - margin - 70, y, 70, 8, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Total Sale', pageWidth - margin - 67, y + 5.5);
+    pdf.text(`₹${totalSale}`, pageWidth - margin - 3, y + 5.5, { align: 'right' });
+
+    pdf.save(`Day_Report_${reportDate}.pdf`);
+    toast.success('PDF exported with colors');
   };
 
   const MedicineTable = ({ data, title, total }: { data: MedicineReportItem[], title: string, total: number }) => {
@@ -750,10 +988,29 @@ export default function DayReport() {
             {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
             {saving ? 'Saving...' : 'Save'}
           </Button>
-          <Button onClick={exportToExcel} size="sm" className="bg-gold hover:bg-gold/90 text-navy">
-            <Download className="h-4 w-4 mr-1" />
-            Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="bg-gold hover:bg-gold/90 text-navy">
+                <Download className="h-4 w-4 mr-1" />
+                Export
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportToPDF()}>
+                <FileText className="h-4 w-4 mr-2 text-red-500" />
+                PDF (with Colors)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToExcel(true)}>
+                <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" />
+                Excel (with Colors)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToExcel(false)}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Excel (Plain)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
