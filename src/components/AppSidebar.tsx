@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { SettingsDialog } from "@/components/SettingsDialog";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
@@ -331,6 +332,17 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Settings Section */}
+        {!collapsed && (
+          <SidebarGroup className="relative z-10 mt-2">
+            <SidebarGroupContent>
+              <div className="px-2">
+                <SettingsDialog />
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* Toggle Button with Enhanced Glass Effect */}
         <div className="mt-auto relative z-10">
