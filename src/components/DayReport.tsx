@@ -755,7 +755,7 @@ export default function DayReport() {
     pdf.setTextColor(0, 51, 102);
     pdf.setFontSize(9);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`Fees Collected: ₹${fmt(fees)}`, rightCardX + 4, y + 35);
+    pdf.text(`Fees Collected: Rs.${fmt(fees)}`, rightCardX + 4, y + 35);
 
     y += 46;
 
@@ -801,7 +801,7 @@ export default function DayReport() {
       pdf.setTextColor(...rev.color);
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(`₹${fmt(rev.value)}`, cardX + colWidth / 2, summaryY + 18, { align: 'center' });
+      pdf.text(`Rs.${fmt(rev.value)}`, cardX + colWidth / 2, summaryY + 18, { align: 'center' });
     });
     
     // Total Sale - highlighted bar
@@ -813,7 +813,7 @@ export default function DayReport() {
     pdf.setFont('helvetica', 'bold');
     pdf.text('TOTAL SALE', margin + 10, totalSaleY + 8);
     pdf.setFontSize(14);
-    pdf.text(`₹${fmt(totalSale)}`, pageWidth - margin - 10, totalSaleY + 8, { align: 'right' });
+    pdf.text(`Rs.${fmt(totalSale)}`, pageWidth - margin - 10, totalSaleY + 8, { align: 'right' });
 
     y += 66;
 
@@ -854,7 +854,7 @@ export default function DayReport() {
       pdf.text(item.label, margin + 4, cashRowY + 4.5);
       
       const displayValue = Math.abs(item.value);
-      const prefix = item.negative ? '- ₹' : '₹';
+      const prefix = item.negative ? '- Rs.' : 'Rs.';
       pdf.setTextColor(item.negative ? 180 : 0, item.negative ? 0 : 100, item.negative ? 0 : 0);
       pdf.text(`${prefix}${fmt(displayValue)}`, margin + (pageWidth - 2 * margin - 8) * 0.55 - 6, cashRowY + 4.5, { align: 'right' });
       cashRowY += 6;
@@ -868,7 +868,7 @@ export default function DayReport() {
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('Cash Left in Hand', margin + 6, cashRowY + 7);
-    pdf.text(`₹${fmt(cashLeftInHand)}`, margin + (pageWidth - 2 * margin - 8) * 0.55 - 8, cashRowY + 7, { align: 'right' });
+    pdf.text(`Rs.${fmt(cashLeftInHand)}`, margin + (pageWidth - 2 * margin - 8) * 0.55 - 8, cashRowY + 7, { align: 'right' });
 
     // ===== Expenses & Cash Denominations Section =====
     const rightSectionX = margin + (pageWidth - 2 * margin - 8) * 0.55 + 8;
@@ -892,7 +892,7 @@ export default function DayReport() {
         pdf.setTextColor(80, 80, 80);
         pdf.text(exp.description.substring(0, 20), rightSectionX + 4, expenseY + 3);
         pdf.setTextColor(220, 38, 38);
-        pdf.text(`₹${fmt(exp.amount)}`, rightSectionX + rightSectionWidth - 4, expenseY + 3, { align: 'right' });
+        pdf.text(`Rs.${fmt(exp.amount)}`, rightSectionX + rightSectionWidth - 4, expenseY + 3, { align: 'right' });
         expenseY += 5;
       }
     });
@@ -903,7 +903,7 @@ export default function DayReport() {
     pdf.setFontSize(8);
     pdf.setFont('helvetica', 'bold');
     pdf.text('Total Expenses', rightSectionX + 4, y + 34.5);
-    pdf.text(`₹${fmt(totalExpenses)}`, rightSectionX + rightSectionWidth - 4, y + 34.5, { align: 'right' });
+    pdf.text(`Rs.${fmt(totalExpenses)}`, rightSectionX + rightSectionWidth - 4, y + 34.5, { align: 'right' });
     
     // Cash Denominations Card
     const denomY = y + 42;
@@ -929,7 +929,7 @@ export default function DayReport() {
       pdf.rect(dx - 1, dy, 16, 8, 'F');
       pdf.setTextColor(60, 60, 60);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(`₹${denom.denomination}`, dx, dy + 3);
+      pdf.text(`Rs.${denom.denomination}`, dx, dy + 3);
       pdf.setFont('helvetica', 'normal');
       pdf.text(`×${denom.count}`, dx, dy + 6.5);
     });
@@ -941,7 +941,7 @@ export default function DayReport() {
     pdf.setFontSize(7);
     pdf.setFont('helvetica', 'bold');
     pdf.text('Sheet Total', rightSectionX + 4, denomY + 36);
-    pdf.text(`₹${fmt(totalCash)}`, rightSectionX + rightSectionWidth - 4, denomY + 36, { align: 'right' });
+    pdf.text(`Rs.${fmt(totalCash)}`, rightSectionX + rightSectionWidth - 4, denomY + 36, { align: 'right' });
 
     // Add footer to page 1
     addFooter();
@@ -1040,11 +1040,11 @@ export default function DayReport() {
         pdf.text(String(m.qtySold), cols[1], y + 3.5);
         pdf.setFont('helvetica', 'normal');
         
-        pdf.text(`₹${fmt(m.rate)}`, cols[2], y + 3.5);
+        pdf.text(`Rs.${fmt(m.rate)}`, cols[2], y + 3.5);
         
         pdf.setTextColor(...headerColor);
         pdf.setFont('helvetica', 'bold');
-        pdf.text(`₹${fmt(m.amount)}`, cols[3], y + 3.5);
+        pdf.text(`Rs.${fmt(m.amount)}`, cols[3], y + 3.5);
         pdf.setFont('helvetica', 'normal');
         
         pdf.setTextColor(100, 100, 100);
@@ -1070,7 +1070,7 @@ export default function DayReport() {
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(8);
       pdf.text('CATEGORY TOTAL', cols[0], y + 5);
-      pdf.text(`₹${fmt(total)}`, cols[3], y + 5);
+      pdf.text(`Rs.${fmt(total)}`, cols[3], y + 5);
       y += 12;
     };
 
@@ -1089,7 +1089,7 @@ export default function DayReport() {
       pdf.setFont('helvetica', 'bold');
       pdf.text('GRAND TOTAL', margin + 6, y + 7);
       pdf.setTextColor(255, 255, 255);
-      pdf.text(`₹${fmt(bnxTotal + tpnTotal + pshyTotal)}`, pageWidth - margin - 6, y + 7, { align: 'right' });
+      pdf.text(`Rs.${fmt(bnxTotal + tpnTotal + pshyTotal)}`, pageWidth - margin - 6, y + 7, { align: 'right' });
     }
 
     // Add footer to last page
