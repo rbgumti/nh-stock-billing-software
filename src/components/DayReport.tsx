@@ -599,238 +599,503 @@ export default function DayReport() {
   const exportToPDF = () => {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const margin = 15;
-    let y = 20;
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 12;
+    let y = 0;
+    let pageNum = 1;
+    const totalPages = 2;
 
     // Helper to format numbers to 2 decimal places
     const fmt = (n: number) => n.toFixed(2);
 
+    // Helper to add page footer
+    const addFooter = () => {
+      pdf.setFillColor(248, 248, 248);
+      pdf.rect(0, pageHeight - 12, pageWidth, 12, 'F');
+      pdf.setDrawColor(212, 175, 55);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+      pdf.setTextColor(100, 100, 100);
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('NAVJEEVAN HOSPITAL | De-Addiction & Rehabilitation Centre', margin, pageHeight - 5);
+      pdf.text(`Page ${pageNum} of ${totalPages}`, pageWidth - margin, pageHeight - 5, { align: 'right' });
+    };
+
+    // Helper to draw rounded rect (simulated with filled rect)
+    const drawCard = (x: number, yPos: number, w: number, h: number, bgColor: [number, number, number] = [255, 255, 255]) => {
+      // Shadow effect
+      pdf.setFillColor(230, 230, 230);
+      pdf.rect(x + 1, yPos + 1, w, h, 'F');
+      // Main card
+      pdf.setFillColor(...bgColor);
+      pdf.rect(x, yPos, w, h, 'F');
+      // Border
+      pdf.setDrawColor(220, 220, 220);
+      pdf.setLineWidth(0.3);
+      pdf.rect(x, yPos, w, h, 'S');
+    };
+
     // ========== PAGE 1: BNX Details, Pharmacy Sale, Summary, Cash Management ==========
     
-    // Header
-    pdf.setFillColor(0, 51, 102); // Navy
-    pdf.rect(0, 0, pageWidth, 35, 'F');
+    // Gradient Header (simulated with multiple rects)
+    pdf.setFillColor(0, 40, 80);
+    pdf.rect(0, 0, pageWidth, 38, 'F');
+    pdf.setFillColor(0, 51, 102);
+    pdf.rect(0, 0, pageWidth, 32, 'F');
+    
+    // Gold accent line
+    pdf.setFillColor(212, 175, 55);
+    pdf.rect(0, 32, pageWidth, 2, 'F');
+    
+    // Header text
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(20);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, 14, { align: 'center' });
+    
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(212, 175, 55);
+    pdf.text('De-Addiction & Rehabilitation Centre', pageWidth / 2, 21, { align: 'center' });
     
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(18);
+    pdf.setFontSize(11);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, 15, { align: 'center' });
+    pdf.text(`Daily Report  •  ${formatDate(reportDate)}`, pageWidth / 2, 29, { align: 'center' });
+
+    y = 46;
+
+    // ===== Patient Statistics Section =====
+    const cardWidth = (pageWidth - 2 * margin - 8) / 2;
     
+    // BNX Details Card
+    drawCard(margin, y, cardWidth, 38, [250, 252, 255]);
+    
+    // Card header with icon indicator
+    pdf.setFillColor(59, 130, 246);
+    pdf.rect(margin, y, cardWidth, 9, 'F');
+    pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text('De-Addiction & Rehabilitation Centre', pageWidth / 2, 22, { align: 'center' });
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('BNX PATIENT COUNT', margin + 4, y + 6.5);
     
+    // Patient stats
+    const bnxStatsY = y + 14;
+    pdf.setTextColor(80, 80, 80);
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
+    
+    // New Patients
+    pdf.setFillColor(220, 252, 231);
+    pdf.rect(margin + 4, bnxStatsY, 36, 10, 'F');
+    pdf.setTextColor(22, 163, 74);
     pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`Day's Report - ${formatDate(reportDate)}`, pageWidth / 2, 30, { align: 'center' });
-
-    y = 45;
-
-    // BNX Details Section
+    pdf.text(String(newPatients), margin + 22, bnxStatsY + 7, { align: 'center' });
+    pdf.setFontSize(6);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('NEW', margin + 22, bnxStatsY + 12, { align: 'center' });
+    
+    // Follow-up Patients
+    pdf.setFillColor(254, 243, 199);
+    pdf.rect(margin + 44, bnxStatsY, 36, 10, 'F');
+    pdf.setTextColor(180, 83, 9);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(String(followUpPatients), margin + 62, bnxStatsY + 7, { align: 'center' });
+    pdf.setFontSize(6);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('FOLLOW-UP', margin + 62, bnxStatsY + 12, { align: 'center' });
+    
+    // Total
     pdf.setTextColor(0, 51, 102);
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`Total: ${totalPatients} patients`, margin + 4, y + 35);
+
+    // Pharmacy Sale Card
+    const rightCardX = margin + cardWidth + 8;
+    drawCard(rightCardX, y, cardWidth, 38, [255, 251, 250]);
+    
+    pdf.setFillColor(139, 92, 246);
+    pdf.rect(rightCardX, y, cardWidth, 9, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('PHARMACY STATISTICS', rightCardX + 4, y + 6.5);
+    
+    // Pharmacy stats
+    const pharmStatsY = y + 14;
+    
+    // Tapentadol
+    pdf.setFillColor(254, 226, 226);
+    pdf.rect(rightCardX + 4, pharmStatsY, 28, 10, 'F');
+    pdf.setTextColor(220, 38, 38);
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('BNX Details', margin, y);
-    
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(margin, y + 2, 80, 25, 'F');
-    
-    pdf.setTextColor(0, 0, 0);
-    pdf.setFontSize(10);
+    pdf.text(String(tapentadolPatients), rightCardX + 18, pharmStatsY + 7, { align: 'center' });
+    pdf.setFontSize(5);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`New Patients: ${newPatients}`, margin + 5, y + 10);
-    pdf.text(`Follow-up Patients: ${followUpPatients}`, margin + 5, y + 17);
-    pdf.text(`Total Patients: ${totalPatients}`, margin + 5, y + 24);
-
-    // Pharmacy Sale section
+    pdf.text('TAPENTADOL', rightCardX + 18, pharmStatsY + 12, { align: 'center' });
+    
+    // Psychiatry
+    pdf.setFillColor(233, 213, 255);
+    pdf.rect(rightCardX + 36, pharmStatsY, 28, 10, 'F');
+    pdf.setTextColor(126, 34, 206);
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(String(psychiatryPatients), rightCardX + 50, pharmStatsY + 7, { align: 'center' });
+    pdf.setFontSize(5);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('PSYCHIATRY', rightCardX + 50, pharmStatsY + 12, { align: 'center' });
+    
+    // Fees
     pdf.setTextColor(0, 51, 102);
+    pdf.setFontSize(9);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Pharmacy Sale', pageWidth - margin - 60, y);
-    
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(pageWidth - margin - 65, y + 2, 65, 25, 'F');
-    
-    pdf.setTextColor(0, 0, 0);
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(`Tapentadol Patients: ${tapentadolPatients}`, pageWidth - margin - 60, y + 10);
-    pdf.text(`Psychiatry Patients: ${psychiatryPatients}`, pageWidth - margin - 60, y + 17);
-    pdf.text(`Fees: ₹${fmt(fees)}`, pageWidth - margin - 60, y + 24);
+    pdf.text(`Fees Collected: ₹${fmt(fees)}`, rightCardX + 4, y + 35);
 
-    y += 40;
+    y += 46;
 
-    // Summary Section on Page 1
-    pdf.setFillColor(212, 175, 55); // Gold
-    pdf.rect(margin, y, 85, 8, 'F');
+    // ===== Revenue Summary Section =====
+    drawCard(margin, y, pageWidth - 2 * margin, 58, [255, 255, 255]);
+    
+    // Section header
+    pdf.setFillColor(212, 175, 55);
+    pdf.rect(margin, y, pageWidth - 2 * margin, 9, 'F');
     pdf.setTextColor(0, 0, 0);
     pdf.setFontSize(11);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Summary', margin + 3, y + 5.5);
-    y += 12;
-
-    const summaryItems = [
-      ['BNX Collection', `₹${fmt(bnxTotal)}`, [59, 130, 246]],
-      ['TPN Collection', `₹${fmt(tpnTotal)}`, [245, 158, 11]],
-      ['PSHY Collection', `₹${fmt(pshyTotal)}`, [139, 92, 246]],
-      ['Fees', `₹${fmt(fees)}`, [100, 100, 100]],
-      ['Lab Collection', `₹${fmt(labCollection)}`, [100, 100, 100]],
+    pdf.text('REVENUE SUMMARY', margin + 4, y + 6.5);
+    
+    const summaryY = y + 14;
+    const colWidth = (pageWidth - 2 * margin - 20) / 5;
+    
+    // Revenue cards
+    const revenues = [
+      { label: 'BNX', value: bnxTotal, color: [59, 130, 246] as [number, number, number], bg: [239, 246, 255] as [number, number, number] },
+      { label: 'TPN', value: tpnTotal, color: [245, 158, 11] as [number, number, number], bg: [255, 251, 235] as [number, number, number] },
+      { label: 'PSHY', value: pshyTotal, color: [139, 92, 246] as [number, number, number], bg: [245, 243, 255] as [number, number, number] },
+      { label: 'Fees', value: fees, color: [22, 163, 74] as [number, number, number], bg: [240, 253, 244] as [number, number, number] },
+      { label: 'Lab', value: labCollection, color: [100, 116, 139] as [number, number, number], bg: [248, 250, 252] as [number, number, number] },
     ];
-
-    pdf.setFontSize(9);
-    summaryItems.forEach((item) => {
-      pdf.setFillColor(item[2][0] as number, item[2][1] as number, item[2][2] as number);
-      pdf.rect(margin, y, 3, 6, 'F');
-      pdf.setTextColor(0, 0, 0);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(item[0] as string, margin + 5, y + 4);
-      pdf.text(item[1] as string, margin + 80, y + 4, { align: 'right' });
-      y += 7;
+    
+    revenues.forEach((rev, idx) => {
+      const cardX = margin + 4 + idx * (colWidth + 3);
+      pdf.setFillColor(...rev.bg);
+      pdf.rect(cardX, summaryY, colWidth, 24, 'F');
+      
+      // Color indicator bar
+      pdf.setFillColor(...rev.color);
+      pdf.rect(cardX, summaryY, colWidth, 3, 'F');
+      
+      // Label
+      pdf.setTextColor(100, 100, 100);
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(rev.label, cardX + colWidth / 2, summaryY + 10, { align: 'center' });
+      
+      // Value
+      pdf.setTextColor(...rev.color);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`₹${fmt(rev.value)}`, cardX + colWidth / 2, summaryY + 18, { align: 'center' });
     });
-
-    // Total Sale
-    pdf.setFillColor(0, 51, 102);
-    pdf.rect(margin, y, 85, 8, 'F');
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Total Sale', margin + 3, y + 5.5);
-    pdf.text(`₹${fmt(totalSale)}`, margin + 82, y + 5.5, { align: 'right' });
-    y += 18;
-
-    // Cash Management Section on Page 1
-    pdf.setFillColor(0, 51, 102);
-    pdf.rect(margin, y, 85, 8, 'F');
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(11);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Cash Management', margin + 3, y + 5.5);
-    y += 12;
-
-    const cashItems = [
-      ['Cash Previous Day', `₹${fmt(cashPreviousDay)}`],
-      ["Today's Collection", `₹${fmt(todaysCollection)}`],
-      ['Expenses', `₹${fmt(totalExpenses)}`],
-      ['Deposit in Bank', `₹${fmt(depositInBank)}`],
-      ['Paytm/GPay', `₹${fmt(paytmGpay)}`],
-      ['Cash H/O Amarjeet', `₹${fmt(cashHandoverAmarjeet)}`],
-      ['Cash H/O Mandeep', `₹${fmt(cashHandoverMandeep)}`],
-      ['Cash H/O Sir', `₹${fmt(cashHandoverSir)}`],
-      ['Adjustments', `₹${fmt(adjustments)}`],
-    ];
-
-    pdf.setFontSize(9);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(0, 0, 0);
     
+    // Total Sale - highlighted bar
+    const totalSaleY = summaryY + 30;
+    pdf.setFillColor(0, 51, 102);
+    pdf.rect(margin + 4, totalSaleY, pageWidth - 2 * margin - 8, 12, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('TOTAL SALE', margin + 10, totalSaleY + 8);
+    pdf.setFontSize(14);
+    pdf.text(`₹${fmt(totalSale)}`, pageWidth - margin - 10, totalSaleY + 8, { align: 'right' });
+
+    y += 66;
+
+    // ===== Cash Management Section =====
+    const cashCardHeight = 82;
+    drawCard(margin, y, (pageWidth - 2 * margin - 8) * 0.55, cashCardHeight, [255, 255, 255]);
+    
+    // Cash header
+    pdf.setFillColor(0, 51, 102);
+    pdf.rect(margin, y, (pageWidth - 2 * margin - 8) * 0.55, 9, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('CASH MANAGEMENT', margin + 4, y + 6.5);
+    
+    const cashY = y + 12;
+    const cashItems = [
+      { label: 'Cash Previous Day', value: cashPreviousDay, highlight: false },
+      { label: "Today's Collection", value: todaysCollection, highlight: false },
+      { label: 'Less: Expenses', value: -totalExpenses, highlight: false, negative: true },
+      { label: 'Less: Bank Deposit', value: -depositInBank, highlight: false, negative: true },
+      { label: 'Less: Paytm/GPay', value: -paytmGpay, highlight: false, negative: true },
+      { label: 'H/O Amarjeet', value: -cashHandoverAmarjeet, highlight: false, negative: true },
+      { label: 'H/O Mandeep', value: -cashHandoverMandeep, highlight: false, negative: true },
+      { label: 'H/O Sir', value: -cashHandoverSir, highlight: false, negative: true },
+      { label: 'Adjustments', value: adjustments, highlight: false },
+    ];
+    
+    pdf.setFontSize(8);
+    let cashRowY = cashY;
     cashItems.forEach((item, idx) => {
       if (idx % 2 === 0) {
-        pdf.setFillColor(245, 245, 245);
-        pdf.rect(margin, y - 1, 85, 6, 'F');
+        pdf.setFillColor(250, 250, 250);
+        pdf.rect(margin + 2, cashRowY, (pageWidth - 2 * margin - 8) * 0.55 - 4, 6, 'F');
       }
-      pdf.text(item[0], margin + 3, y + 3);
-      pdf.text(item[1], margin + 82, y + 3, { align: 'right' });
-      y += 6;
+      pdf.setTextColor(80, 80, 80);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(item.label, margin + 4, cashRowY + 4.5);
+      
+      const displayValue = Math.abs(item.value);
+      const prefix = item.negative ? '- ₹' : '₹';
+      pdf.setTextColor(item.negative ? 180 : 0, item.negative ? 0 : 100, item.negative ? 0 : 0);
+      pdf.text(`${prefix}${fmt(displayValue)}`, margin + (pageWidth - 2 * margin - 8) * 0.55 - 6, cashRowY + 4.5, { align: 'right' });
+      cashRowY += 6;
     });
-
-    // Cash left in hand (highlighted)
-    pdf.setFillColor(0, 150, 0);
-    pdf.rect(margin, y, 85, 8, 'F');
+    
+    // Cash left in hand - final highlight
+    cashRowY += 2;
+    pdf.setFillColor(22, 163, 74);
+    pdf.rect(margin + 2, cashRowY, (pageWidth - 2 * margin - 8) * 0.55 - 4, 10, 'F');
     pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Cash Left in Hand', margin + 3, y + 5.5);
-    pdf.text(`₹${fmt(cashLeftInHand)}`, margin + 82, y + 5.5, { align: 'right' });
+    pdf.text('Cash Left in Hand', margin + 6, cashRowY + 7);
+    pdf.text(`₹${fmt(cashLeftInHand)}`, margin + (pageWidth - 2 * margin - 8) * 0.55 - 8, cashRowY + 7, { align: 'right' });
+
+    // ===== Expenses & Cash Denominations Section =====
+    const rightSectionX = margin + (pageWidth - 2 * margin - 8) * 0.55 + 8;
+    const rightSectionWidth = (pageWidth - 2 * margin - 8) * 0.45;
+    
+    // Expenses card
+    drawCard(rightSectionX, y, rightSectionWidth, 38, [255, 250, 250]);
+    pdf.setFillColor(220, 38, 38);
+    pdf.rect(rightSectionX, y, rightSectionWidth, 9, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('EXPENSES', rightSectionX + 4, y + 6.5);
+    
+    let expenseY = y + 12;
+    pdf.setFontSize(7);
+    pdf.setFont('helvetica', 'normal');
+    const displayExpenses = expenses.slice(0, 4);
+    displayExpenses.forEach((exp) => {
+      if (exp.description && exp.amount > 0) {
+        pdf.setTextColor(80, 80, 80);
+        pdf.text(exp.description.substring(0, 20), rightSectionX + 4, expenseY + 3);
+        pdf.setTextColor(220, 38, 38);
+        pdf.text(`₹${fmt(exp.amount)}`, rightSectionX + rightSectionWidth - 4, expenseY + 3, { align: 'right' });
+        expenseY += 5;
+      }
+    });
+    
+    pdf.setFillColor(254, 226, 226);
+    pdf.rect(rightSectionX + 2, y + 30, rightSectionWidth - 4, 6, 'F');
+    pdf.setTextColor(180, 0, 0);
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Total Expenses', rightSectionX + 4, y + 34.5);
+    pdf.text(`₹${fmt(totalExpenses)}`, rightSectionX + rightSectionWidth - 4, y + 34.5, { align: 'right' });
+    
+    // Cash Denominations Card
+    const denomY = y + 42;
+    drawCard(rightSectionX, denomY, rightSectionWidth, 40, [250, 252, 255]);
+    pdf.setFillColor(59, 130, 246);
+    pdf.rect(rightSectionX, denomY, rightSectionWidth, 8, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('CASH COUNT', rightSectionX + 4, denomY + 5.5);
+    
+    let denomRowY = denomY + 10;
+    pdf.setFontSize(6);
+    const denomCols = [rightSectionX + 4, rightSectionX + 22, rightSectionX + 40, rightSectionX + 58];
+    
+    cashDetails.filter(d => d.count > 0).slice(0, 8).forEach((denom, idx) => {
+      const col = idx % 4;
+      const row = Math.floor(idx / 4);
+      const dx = denomCols[col];
+      const dy = denomRowY + row * 10;
+      
+      pdf.setFillColor(240, 240, 240);
+      pdf.rect(dx - 1, dy, 16, 8, 'F');
+      pdf.setTextColor(60, 60, 60);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`₹${denom.denomination}`, dx, dy + 3);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`×${denom.count}`, dx, dy + 6.5);
+    });
+    
+    // Sheet total at bottom
+    pdf.setFillColor(59, 130, 246);
+    pdf.rect(rightSectionX + 2, denomY + 32, rightSectionWidth - 4, 6, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(7);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Sheet Total', rightSectionX + 4, denomY + 36);
+    pdf.text(`₹${fmt(totalCash)}`, rightSectionX + rightSectionWidth - 4, denomY + 36, { align: 'right' });
+
+    // Add footer to page 1
+    addFooter();
 
     // ========== PAGE 2: Medicine Tables ==========
     pdf.addPage();
-    y = 20;
+    pageNum = 2;
+    y = 0;
 
     // Page 2 Header
+    pdf.setFillColor(0, 40, 80);
+    pdf.rect(0, 0, pageWidth, 22, 'F');
     pdf.setFillColor(0, 51, 102);
-    pdf.rect(0, 0, pageWidth, 20, 'F');
+    pdf.rect(0, 0, pageWidth, 18, 'F');
+    pdf.setFillColor(212, 175, 55);
+    pdf.rect(0, 18, pageWidth, 2, 'F');
+    
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(12);
+    pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`Medicine Details - ${formatDate(reportDate)}`, pageWidth / 2, 13, { align: 'center' });
+    pdf.text('MEDICINE DETAILS', pageWidth / 2, 12, { align: 'center' });
+    
     y = 28;
 
-    // Medicine tables helper
-    const drawMedicineTable = (medicines: MedicineReportItem[], title: string, headerColor: [number, number, number], total: number) => {
+    // Medicine tables helper with enhanced styling
+    const drawMedicineTable = (medicines: MedicineReportItem[], title: string, headerColor: [number, number, number], lightBg: [number, number, number], total: number) => {
       if (medicines.length === 0) return;
       
       // Check if we need a new page
-      if (y > 250) {
+      if (y > 245) {
+        addFooter();
         pdf.addPage();
-        y = 20;
+        pageNum++;
+        y = 15;
       }
 
+      // Table title with colored bar
       pdf.setFillColor(...headerColor);
       pdf.rect(margin, y, pageWidth - 2 * margin, 8, 'F');
       pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(11);
+      pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(title, margin + 3, y + 5.5);
+      pdf.text(title.toUpperCase(), margin + 4, y + 5.5);
+      
+      // Item count badge
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(pageWidth - margin - 20, y + 1.5, 18, 5, 'F');
+      pdf.setTextColor(...headerColor);
+      pdf.setFontSize(7);
+      pdf.text(`${medicines.length} items`, pageWidth - margin - 11, y + 5, { align: 'center' });
+      
       y += 10;
 
       // Table header
-      pdf.setFillColor(230, 230, 230);
+      pdf.setFillColor(245, 245, 245);
       pdf.rect(margin, y, pageWidth - 2 * margin, 7, 'F');
-      pdf.setTextColor(0, 0, 0);
-      pdf.setFontSize(8);
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.2);
+      pdf.line(margin, y + 7, pageWidth - margin, y + 7);
+      
+      pdf.setTextColor(60, 60, 60);
+      pdf.setFontSize(7);
       pdf.setFont('helvetica', 'bold');
       
-      const cols = [margin + 3, margin + 55, margin + 75, margin + 95, margin + 115, margin + 140, margin + 160];
-      pdf.text('Brand', cols[0], y + 5);
-      pdf.text('Qty', cols[1], y + 5);
-      pdf.text('Rate', cols[2], y + 5);
-      pdf.text('Amount', cols[3], y + 5);
-      pdf.text('Opening', cols[4], y + 5);
-      pdf.text('Received', cols[5], y + 5);
-      pdf.text('Closing', cols[6], y + 5);
+      const cols = [margin + 3, margin + 58, margin + 76, margin + 96, margin + 118, margin + 142, margin + 164];
+      pdf.text('MEDICINE NAME', cols[0], y + 5);
+      pdf.text('QTY', cols[1], y + 5);
+      pdf.text('RATE', cols[2], y + 5);
+      pdf.text('AMOUNT', cols[3], y + 5);
+      pdf.text('OPENING', cols[4], y + 5);
+      pdf.text('RECEIVED', cols[5], y + 5);
+      pdf.text('CLOSING', cols[6], y + 5);
       y += 8;
 
       // Table rows
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(8);
+      pdf.setFontSize(7);
       medicines.forEach((m, idx) => {
-        if (y > 275) {
+        if (y > 270) {
+          addFooter();
           pdf.addPage();
-          y = 20;
+          pageNum++;
+          y = 15;
         }
         
         if (idx % 2 === 0) {
-          pdf.setFillColor(250, 250, 250);
-          pdf.rect(margin, y - 1, pageWidth - 2 * margin, 6, 'F');
+          pdf.setFillColor(...lightBg);
+          pdf.rect(margin, y - 0.5, pageWidth - 2 * margin, 5.5, 'F');
         }
         
+        pdf.setTextColor(40, 40, 40);
+        pdf.text(m.brand.substring(0, 32), cols[0], y + 3.5);
+        
         pdf.setTextColor(0, 0, 0);
-        pdf.text(m.brand.substring(0, 30), cols[0], y + 3);
-        pdf.text(String(m.qtySold), cols[1], y + 3);
-        pdf.text(`₹${fmt(m.rate)}`, cols[2], y + 3);
-        pdf.text(`₹${fmt(m.amount)}`, cols[3], y + 3);
-        pdf.text(String(m.opening), cols[4], y + 3);
-        pdf.setTextColor(0, 150, 0);
-        pdf.text(String(m.stockReceived), cols[5], y + 3);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(String(m.closing), cols[6], y + 3);
-        y += 6;
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(String(m.qtySold), cols[1], y + 3.5);
+        pdf.setFont('helvetica', 'normal');
+        
+        pdf.text(`₹${fmt(m.rate)}`, cols[2], y + 3.5);
+        
+        pdf.setTextColor(...headerColor);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`₹${fmt(m.amount)}`, cols[3], y + 3.5);
+        pdf.setFont('helvetica', 'normal');
+        
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(String(m.opening), cols[4], y + 3.5);
+        
+        pdf.setTextColor(22, 163, 74);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(m.stockReceived > 0 ? `+${m.stockReceived}` : '0', cols[5], y + 3.5);
+        pdf.setFont('helvetica', 'normal');
+        
+        pdf.setTextColor(0, 51, 102);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(String(m.closing), cols[6], y + 3.5);
+        pdf.setFont('helvetica', 'normal');
+        
+        y += 5.5;
       });
 
       // Total row
-      pdf.setFillColor(212, 175, 55); // Gold
+      pdf.setFillColor(...headerColor);
       pdf.rect(margin, y, pageWidth - 2 * margin, 7, 'F');
-      pdf.setTextColor(0, 0, 0);
+      pdf.setTextColor(255, 255, 255);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Total', cols[0], y + 5);
+      pdf.setFontSize(8);
+      pdf.text('CATEGORY TOTAL', cols[0], y + 5);
       pdf.text(`₹${fmt(total)}`, cols[3], y + 5);
       y += 12;
     };
 
-    // Draw medicine tables on Page 2
-    drawMedicineTable(bnxMedicines, 'BNX Medicines', [59, 130, 246], bnxTotal); // Blue
-    drawMedicineTable(tpnMedicines, 'TPN Medicines', [245, 158, 11], tpnTotal); // Amber
-    drawMedicineTable(pshyMedicines, 'PSHY Medicines', [139, 92, 246], pshyTotal); // Purple
+    // Draw medicine tables on Page 2 with category colors
+    drawMedicineTable(bnxMedicines, 'BNX Medicines', [59, 130, 246], [239, 246, 255], bnxTotal);
+    drawMedicineTable(tpnMedicines, 'TPN Medicines', [245, 158, 11], [255, 251, 235], tpnTotal);
+    drawMedicineTable(pshyMedicines, 'PSHY Medicines', [139, 92, 246], [245, 243, 255], pshyTotal);
+
+    // Grand total at end
+    if (y < 260) {
+      y += 4;
+      pdf.setFillColor(0, 51, 102);
+      pdf.rect(margin, y, pageWidth - 2 * margin, 10, 'F');
+      pdf.setTextColor(212, 175, 55);
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('GRAND TOTAL', margin + 6, y + 7);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text(`₹${fmt(bnxTotal + tpnTotal + pshyTotal)}`, pageWidth - margin - 6, y + 7, { align: 'right' });
+    }
+
+    // Add footer to last page
+    addFooter();
 
     pdf.save(`Day_Report_${reportDate}.pdf`);
-    toast.success('PDF exported with colors');
+    toast.success('PDF exported successfully');
   };
 
   const MedicineTable = ({ data, title, total }: { data: MedicineReportItem[], title: string, total: number }) => {
