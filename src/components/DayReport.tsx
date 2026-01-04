@@ -509,6 +509,9 @@ export default function DayReport() {
 
   const exportToExcel = (withColors: boolean = false) => {
     const workbook = XLSX.utils.book_new();
+    
+    // Helper to format numbers to 2 decimal places
+    const fmt = (n: number) => Number(n.toFixed(2));
 
     const reportData: any[][] = [
       [formatDate(reportDate)],
@@ -516,36 +519,36 @@ export default function DayReport() {
       ['BNX Details:', '', '', '', '', '', '', '', 'Pharmacy Sale:'],
       ['New Patients', newPatients, '', '', '', '', '', 'Tapentadol Patients', tapentadolPatients],
       ['Follow up Patients', followUpPatients, '', '', '', '', '', 'Psychiatry Patients', psychiatryPatients],
-      ['Total Patients', totalPatients, '', '', '', '', '', 'Fees', fees],
-      ['Brand', 'Qty sold', 'Rate', 'Amount', 'Opening', 'Stock Received', 'Closing', 'Lab Collection', labCollection],
+      ['Total Patients', totalPatients, '', '', '', '', '', 'Fees', fmt(fees)],
+      ['Brand', 'Qty sold', 'Rate', 'Amount', 'Opening', 'Stock Received', 'Closing', 'Lab Collection', fmt(labCollection)],
     ];
 
     bnxMedicines.forEach(m => {
-      reportData.push([m.brand, m.qtySold, m.rate, m.amount, m.opening, m.stockReceived, m.closing]);
+      reportData.push([m.brand, m.qtySold, fmt(m.rate), fmt(m.amount), m.opening, m.stockReceived, m.closing]);
     });
-    reportData.push(['BNX Total', '', '', bnxTotal]);
+    reportData.push(['BNX Total', '', '', fmt(bnxTotal)]);
     reportData.push([]);
 
     reportData.push(['Cash Management']);
-    reportData.push(['Cash in Hand (Previous Day)', cashPreviousDay]);
-    reportData.push(["Today's Collection", todaysCollection]);
-    reportData.push(['Expenses', totalExpenses]);
-    reportData.push(['Deposit in Bank', depositInBank]);
-    reportData.push(['Paytm/GPay', paytmGpay]);
-    reportData.push(['Cash H/O to Amarjeet Sir', cashHandoverAmarjeet]);
-    reportData.push(['Cash H/O to Mandeep Sir', cashHandoverMandeep]);
-    reportData.push(['Cash H/O to Sir', cashHandoverSir]);
-    reportData.push(['Adjustments', adjustments]);
-    reportData.push(['Cash left in hand (Today)', cashLeftInHand]);
+    reportData.push(['Cash in Hand (Previous Day)', fmt(cashPreviousDay)]);
+    reportData.push(["Today's Collection", fmt(todaysCollection)]);
+    reportData.push(['Expenses', fmt(totalExpenses)]);
+    reportData.push(['Deposit in Bank', fmt(depositInBank)]);
+    reportData.push(['Paytm/GPay', fmt(paytmGpay)]);
+    reportData.push(['Cash H/O to Amarjeet Sir', fmt(cashHandoverAmarjeet)]);
+    reportData.push(['Cash H/O to Mandeep Sir', fmt(cashHandoverMandeep)]);
+    reportData.push(['Cash H/O to Sir', fmt(cashHandoverSir)]);
+    reportData.push(['Adjustments', fmt(adjustments)]);
+    reportData.push(['Cash left in hand (Today)', fmt(cashLeftInHand)]);
     reportData.push([]);
 
     if (tpnMedicines.length > 0) {
       reportData.push(['TPN Medicines']);
       reportData.push(['Brand', 'Qty sold', 'Rate', 'Amount', 'Opening', 'Stock Received', 'Closing']);
       tpnMedicines.forEach(m => {
-        reportData.push([m.brand, m.qtySold, m.rate, m.amount, m.opening, m.stockReceived, m.closing]);
+        reportData.push([m.brand, m.qtySold, fmt(m.rate), fmt(m.amount), m.opening, m.stockReceived, m.closing]);
       });
-      reportData.push(['Total', '', '', tpnTotal]);
+      reportData.push(['Total', '', '', fmt(tpnTotal)]);
       reportData.push([]);
     }
 
@@ -553,30 +556,30 @@ export default function DayReport() {
       reportData.push(['PSHY Medicines']);
       reportData.push(['Brand', 'Qty sold', 'Rate', 'Amount', 'Opening', 'Stock Received', 'Closing']);
       pshyMedicines.forEach(m => {
-        reportData.push([m.brand, m.qtySold, m.rate, m.amount, m.opening, m.stockReceived, m.closing]);
+        reportData.push([m.brand, m.qtySold, fmt(m.rate), fmt(m.amount), m.opening, m.stockReceived, m.closing]);
       });
-      reportData.push(['Total', '', '', pshyTotal]);
+      reportData.push(['Total', '', '', fmt(pshyTotal)]);
       reportData.push([]);
     }
 
     reportData.push(['Summary']);
-    reportData.push(['BNX Collection', bnxTotal]);
-    reportData.push(['TPN Collection', tpnTotal]);
-    reportData.push(['PSHY Collection', pshyTotal]);
-    reportData.push(['Fees', fees]);
-    reportData.push(['Lab Collection', labCollection]);
-    reportData.push(['Total Sale', totalSale]);
+    reportData.push(['BNX Collection', fmt(bnxTotal)]);
+    reportData.push(['TPN Collection', fmt(tpnTotal)]);
+    reportData.push(['PSHY Collection', fmt(pshyTotal)]);
+    reportData.push(['Fees', fmt(fees)]);
+    reportData.push(['Lab Collection', fmt(labCollection)]);
+    reportData.push(['Total Sale', fmt(totalSale)]);
     reportData.push([]);
 
     reportData.push(['CASH DETAILS']);
     reportData.push(['Denomination', 'Count', 'Amount']);
     cashDetails.forEach(c => {
-      reportData.push([c.denomination, c.count, c.amount]);
+      reportData.push([c.denomination, c.count, fmt(c.amount)]);
     });
-    reportData.push(['TOTAL', '', totalCash]);
-    reportData.push(['TOTAL AS PER SHEET', '', totalAsPerSheet]);
-    reportData.push(['PAYTM', '', paytmGpay]);
-    reportData.push(['DIFFERENCE', '', difference]);
+    reportData.push(['TOTAL', '', fmt(totalCash)]);
+    reportData.push(['TOTAL AS PER SHEET', '', fmt(totalAsPerSheet)]);
+    reportData.push(['PAYTM', '', fmt(paytmGpay)]);
+    reportData.push(['DIFFERENCE', '', fmt(difference)]);
 
     const sheet = XLSX.utils.aoa_to_sheet(reportData);
     
