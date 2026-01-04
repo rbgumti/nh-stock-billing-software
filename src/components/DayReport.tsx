@@ -597,16 +597,17 @@ export default function DayReport() {
   };
 
   const exportToPDF = () => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 12;
-    let y = 0;
-    let pageNum = 1;
-    const totalPages = 2;
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 12;
+      let y = 0;
+      let pageNum = 1;
+      const totalPages = 2;
 
-    // Helper to format numbers to 2 decimal places
-    const fmt = (n: number) => n.toFixed(2);
+      // Helper to format numbers to 2 decimal places
+      const fmt = (n: number) => (n || 0).toFixed(2);
 
     // Helper to add page footer
     const addFooter = () => {
@@ -1096,6 +1097,10 @@ export default function DayReport() {
 
     pdf.save(`Day_Report_${reportDate}.pdf`);
     toast.success('PDF exported successfully');
+    } catch (error) {
+      console.error('PDF Export Error:', error);
+      toast.error('Failed to export PDF. Please try again.');
+    }
   };
 
   const MedicineTable = ({ data, title, total }: { data: MedicineReportItem[], title: string, total: number }) => {
