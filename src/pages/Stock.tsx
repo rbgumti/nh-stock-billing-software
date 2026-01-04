@@ -902,7 +902,7 @@ export default function Stock() {
           </DropdownMenu>
           <Button onClick={() => setShowAddForm(true)} className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
             <Plus className="h-4 w-4 mr-2" />
-            Add Stock Item
+            Add Item Master
           </Button>
           <Button onClick={() => setShowPOForm(true)} variant="outline" className="glass-subtle border-purple/20 hover:border-purple/40">
             <FileText className="h-4 w-4 mr-2" />
@@ -912,14 +912,201 @@ export default function Stock() {
       </div>
 
       {/* Tabs for different sections */}
-      <Tabs defaultValue="stock" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 glass-strong border-0 p-1">
-          <TabsTrigger value="stock" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple data-[state=active]:to-cyan data-[state=active]:text-white">Stock Items</TabsTrigger>
-          <TabsTrigger value="purchase-orders" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan data-[state=active]:to-teal data-[state=active]:text-white">Purchase Orders</TabsTrigger>
-          <TabsTrigger value="grn" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-emerald data-[state=active]:text-white">Goods Receipt</TabsTrigger>
+      <Tabs defaultValue="item-master" className="w-full">
+        <TabsList className="grid w-full grid-cols-6 glass-strong border-0 p-1">
+          <TabsTrigger value="item-master" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple data-[state=active]:to-cyan data-[state=active]:text-white">Item Master</TabsTrigger>
+          <TabsTrigger value="stock" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan data-[state=active]:to-teal data-[state=active]:text-white">Stock Items</TabsTrigger>
+          <TabsTrigger value="purchase-orders" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal data-[state=active]:to-emerald data-[state=active]:text-white">Purchase Orders</TabsTrigger>
+          <TabsTrigger value="grn" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald data-[state=active]:to-green data-[state=active]:text-white">Goods Receipt</TabsTrigger>
           <TabsTrigger value="payments" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gold data-[state=active]:to-orange data-[state=active]:text-white">Payments</TabsTrigger>
           <TabsTrigger value="suppliers" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink data-[state=active]:to-purple data-[state=active]:text-white">Suppliers</TabsTrigger>
         </TabsList>
+
+        {/* Item Master Tab */}
+        <TabsContent value="item-master" className="space-y-6">
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Items</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{stockItems.length}</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-cyan">
+                    <Package className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-orange-500/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">BNX Items</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
+                      {stockItems.filter(item => item.category === 'BNX').length}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-orange-500">
+                    <Pill className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-yellow-500/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">TPN Items</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">
+                      {stockItems.filter(item => item.category === 'TPN').length}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500">
+                    <Droplets className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">PSHY Items</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+                      {stockItems.filter(item => item.category === 'PSHY').length}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500">
+                    <Brain className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Search and Filter */}
+          <Card className="glass-strong border-0 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-transparent to-cyan/5" />
+            <CardContent className="pt-6 relative">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search items by name, category, or vendor..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 glass-subtle border-0"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  {categories.map((category) => {
+                    const style = getCategoryStyle(category);
+                    return (
+                      <Button
+                        key={category}
+                        variant={filterCategory === category ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setFilterCategory(category)}
+                        className={filterCategory === category ? style.badge : "glass-subtle border-0"}
+                      >
+                        {category === 'all' ? 'All' : category}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Item Master Table */}
+          <Card className="glass-strong border-0 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-purple/10 to-cyan/10 border-b">
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Item Master List
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold">Item Name</th>
+                      <th className="px-4 py-3 text-left font-semibold">Vendor</th>
+                      <th className="px-4 py-3 text-left font-semibold">Category</th>
+                      <th className="px-4 py-3 text-right font-semibold">Rate (₹)</th>
+                      <th className="px-4 py-3 text-right font-semibold">MRP (₹)</th>
+                      <th className="px-4 py-3 text-left font-semibold">Composition</th>
+                      <th className="px-4 py-3 text-left font-semibold">Packing</th>
+                      <th className="px-4 py-3 text-center font-semibold">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredItems.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                          No items found. Add your first item using the "Add Item Master" button.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredItems.map((item, idx) => {
+                        const style = getCategoryStyle(item.category);
+                        const IconComponent = style.Icon;
+                        return (
+                          <tr key={item.id} className={idx % 2 === 0 ? 'bg-muted/20' : ''}>
+                            <td className="px-4 py-3 font-medium">{item.name}</td>
+                            <td className="px-4 py-3">{item.supplier || '-'}</td>
+                            <td className="px-4 py-3">
+                              <Badge className={`${style.badge} flex items-center gap-1 w-fit`}>
+                                <IconComponent className="h-3 w-3" />
+                                {item.category}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 text-right">₹{item.unitPrice.toFixed(2)}</td>
+                            <td className="px-4 py-3 text-right">{item.mrp ? `₹${item.mrp.toFixed(2)}` : '-'}</td>
+                            <td className="px-4 py-3 text-xs max-w-[200px] truncate" title={item.composition}>
+                              {item.composition || '-'}
+                            </td>
+                            <td className="px-4 py-3">{item.packing || '-'}</td>
+                            <td className="px-4 py-3 text-center">
+                              <div className="flex justify-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingItem(item)}
+                                  className="h-8 w-8 p-0 hover:bg-purple/10"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setShowLedgerItem(item)}
+                                  className="h-8 w-8 p-0 hover:bg-cyan/10"
+                                >
+                                  <BookOpen className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="stock" className="space-y-6">
           {/* Quick Stats */}
