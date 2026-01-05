@@ -18,6 +18,7 @@ interface GRNItem {
 
 interface PrintableGRNProps {
   grnNumber: string;
+  grnDate?: string;
   invoiceNumber?: string;
   invoiceDate?: string;
   purchaseOrder: PurchaseOrder;
@@ -29,6 +30,7 @@ interface PrintableGRNProps {
 
 export function PrintableGRN({ 
   grnNumber, 
+  grnDate,
   invoiceNumber, 
   invoiceDate, 
   purchaseOrder, 
@@ -48,8 +50,23 @@ export function PrintableGRN({
     return stockItems.find(item => item.id === stockItemId);
   };
 
+  // Get cost price from PO items
+  const getCostPrice = (stockItemId: number) => {
+    const poItem = purchaseOrder.items.find(item => item.stockItemId === stockItemId);
+    return poItem?.unitPrice || 0;
+  };
+
   const totalReceivedQty = grnItems.reduce((sum, item) => sum + item.receivedQuantity, 0);
   const totalOrderedQty = grnItems.reduce((sum, item) => sum + item.orderedQuantity, 0);
+  
+  // Calculate total amount based on received quantity and cost price
+  const calculateItemTotal = (item: GRNItem) => {
+    const costPrice = getCostPrice(item.stockItemId);
+    return item.receivedQuantity * costPrice;
+  };
+  
+  const grandTotal = grnItems.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+  const grnDateFormatted = grnDate || new Date().toISOString().split('T')[0];
 
   const handleDownloadPDF = async () => {
     const doc = new jsPDF();
@@ -140,7 +157,7 @@ export function PrintableGRN({
     doc.setFont("helvetica", "bold");
     doc.text("GRN Date:", col2X, infoY);
     doc.setFont("helvetica", "normal");
-    doc.text(formatDate(new Date().toISOString()), col2X + 22, infoY);
+    doc.text(formatDate(grnDateFormatted), col2X + 22, infoY);
     infoY += 7;
 
     doc.setFont("helvetica", "bold");
@@ -181,19 +198,19 @@ export function PrintableGRN({
     doc.text(purchaseOrder.supplier, 45, yPos + 9);
     yPos += 20;
 
-    // Items Table Header
-    const colWidths = [12, 50, 28, 26, 24, 18, 18, 22];
-    const headers = ["Sr.", "Item Name", "Batch No.", "Expiry", "MRP (₹)", "Ord.", "Recv.", "Remarks"];
+    // Items Table Header - Updated columns: Sr, Item, Batch, Expiry, Cost Price, MRP, Qty, Total
+    const colWidths = [10, 42, 22, 22, 20, 20, 16, 24];
+    const headers = ["Sr.", "Item Name", "Batch", "Expiry", "Cost (₹)", "MRP (₹)", "Qty", "Total (₹)"];
     
     doc.setFillColor(0, 51, 102);
     doc.rect(14, yPos, pageWidth - 28, 9, "F");
     
     let xPos = 14;
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
     headers.forEach((header, i) => {
-      doc.text(header, xPos + 2, yPos + 6);
+      doc.text(header, xPos + 1, yPos + 6);
       xPos += colWidths[i];
     });
     yPos += 9;
@@ -201,17 +218,21 @@ export function PrintableGRN({
     // Items Rows with alternating colors
     doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
     grnItems.forEach((item, index) => {
       const stockItem = getStockItemDetails(item.stockItemId);
+      const costPrice = getCostPrice(item.stockItemId);
+      const itemTotal = calculateItemTotal(item);
+      
       const rowData = [
         (index + 1).toString(),
-        stockItem?.name?.substring(0, 22) || 'Unknown',
-        item.batchNo || '-',
+        stockItem?.name?.substring(0, 20) || 'Unknown',
+        item.batchNo?.substring(0, 10) || '-',
         item.expiryDate ? formatDate(item.expiryDate) : '-',
-        item.mrp ? `₹${item.mrp.toFixed(0)}` : '-',
-        item.orderedQuantity.toString(),
+        `₹${costPrice.toFixed(2)}`,
+        item.mrp ? `₹${item.mrp.toFixed(2)}` : '-',
         item.receivedQuantity.toString(),
-        item.remarks?.substring(0, 10) || '-'
+        `₹${itemTotal.toFixed(2)}`
       ];
 
       // Alternating row colors
@@ -224,7 +245,7 @@ export function PrintableGRN({
 
       xPos = 14;
       rowData.forEach((data, i) => {
-        doc.text(data, xPos + 2, yPos + 5);
+        doc.text(data, xPos + 1, yPos + 5);
         xPos += colWidths[i];
       });
       yPos += 7;
@@ -234,11 +255,12 @@ export function PrintableGRN({
     doc.setFillColor(0, 51, 102);
     doc.rect(14, yPos, pageWidth - 28, 8, "F");
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
-    doc.text("TOTAL", 18, yPos + 5.5);
-    xPos = 14 + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4];
-    doc.text(totalOrderedQty.toString(), xPos + 2, yPos + 5.5);
-    doc.text(totalReceivedQty.toString(), xPos + colWidths[5] + 2, yPos + 5.5);
+    doc.text("GRAND TOTAL", 18, yPos + 5.5);
+    // Position grand total at the last column
+    const totalXPos = 14 + colWidths.slice(0, 7).reduce((a, b) => a + b, 0);
+    doc.text(`₹${grandTotal.toFixed(2)}`, totalXPos + 1, yPos + 5.5);
     yPos += 14;
 
     // Notes
@@ -421,7 +443,7 @@ export function PrintableGRN({
             </div>
             <div className="flex">
               <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>GRN Date:</span>
-              <span>{formatDate(new Date().toISOString())}</span>
+              <span>{formatDate(grnDateFormatted)}</span>
             </div>
             <div className="flex">
               <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>PO Number:</span>
@@ -461,16 +483,18 @@ export function PrintableGRN({
                 <th className="p-2 text-left text-white font-bold border border-gray-300">Sr.</th>
                 <th className="p-2 text-left text-white font-bold border border-gray-300">Item Name</th>
                 <th className="p-2 text-left text-white font-bold border border-gray-300">Batch No.</th>
-                <th className="p-2 text-left text-white font-bold border border-gray-300">Expiry Date</th>
+                <th className="p-2 text-left text-white font-bold border border-gray-300">Expiry</th>
+                <th className="p-2 text-right text-white font-bold border border-gray-300">Cost Price (₹)</th>
                 <th className="p-2 text-right text-white font-bold border border-gray-300">MRP (₹)</th>
-                <th className="p-2 text-right text-white font-bold border border-gray-300">Ordered</th>
-                <th className="p-2 text-right text-white font-bold border border-gray-300">Received</th>
-                <th className="p-2 text-left text-white font-bold border border-gray-300">Remarks</th>
+                <th className="p-2 text-right text-white font-bold border border-gray-300">Qty</th>
+                <th className="p-2 text-right text-white font-bold border border-gray-300">Total (₹)</th>
               </tr>
             </thead>
             <tbody>
               {grnItems.map((item, index) => {
                 const stockItem = getStockItemDetails(item.stockItemId);
+                const costPrice = getCostPrice(item.stockItemId);
+                const itemTotal = calculateItemTotal(item);
                 return (
                   <tr 
                     key={index} 
@@ -480,19 +504,18 @@ export function PrintableGRN({
                     <td className="border border-gray-300 p-2 font-medium">{stockItem?.name || 'Unknown'}</td>
                     <td className="border border-gray-300 p-2">{item.batchNo || '-'}</td>
                     <td className="border border-gray-300 p-2">{item.expiryDate ? formatDate(item.expiryDate) : '-'}</td>
+                    <td className="border border-gray-300 p-2 text-right">₹{costPrice.toFixed(2)}</td>
                     <td className="border border-gray-300 p-2 text-right">{item.mrp ? `₹${item.mrp.toFixed(2)}` : '-'}</td>
-                    <td className="border border-gray-300 p-2 text-right">{item.orderedQuantity}</td>
                     <td className="border border-gray-300 p-2 text-right font-semibold">{item.receivedQuantity}</td>
-                    <td className="border border-gray-300 p-2">{item.remarks || '-'}</td>
+                    <td className="border border-gray-300 p-2 text-right font-semibold">₹{itemTotal.toFixed(2)}</td>
                   </tr>
                 );
               })}
               {/* Summary Row */}
               <tr style={{ backgroundColor: '#003366' }}>
-                <td className="border border-gray-300 p-2 text-white font-bold" colSpan={5}>TOTAL</td>
-                <td className="border border-gray-300 p-2 text-right text-white font-bold">{totalOrderedQty}</td>
+                <td className="border border-gray-300 p-2 text-white font-bold" colSpan={6}>GRAND TOTAL</td>
                 <td className="border border-gray-300 p-2 text-right text-white font-bold">{totalReceivedQty}</td>
-                <td className="border border-gray-300 p-2 text-white"></td>
+                <td className="border border-gray-300 p-2 text-right text-white font-bold">₹{grandTotal.toFixed(2)}</td>
               </tr>
             </tbody>
           </table>
