@@ -199,11 +199,13 @@ export function PrintableGRN({
     yPos += 20;
 
     // Items Table Header - Updated columns: Sr, Item, Batch, Expiry, Cost Price, MRP, Qty, Total
-    const colWidths = [10, 42, 22, 22, 20, 20, 16, 24];
+    // Page width is 210mm, margins 14mm each side = 182mm usable
+    const tableWidth = pageWidth - 28;
+    const colWidths = [12, 48, 24, 24, 22, 22, 14, 16]; // Total = 182
     const headers = ["Sr.", "Item Name", "Batch", "Expiry", "Cost (₹)", "MRP (₹)", "Qty", "Total (₹)"];
     
     doc.setFillColor(0, 51, 102);
-    doc.rect(14, yPos, pageWidth - 28, 9, "F");
+    doc.rect(14, yPos, tableWidth, 9, "F");
     
     let xPos = 14;
     doc.setFontSize(7);
@@ -226,22 +228,22 @@ export function PrintableGRN({
       
       const rowData = [
         (index + 1).toString(),
-        stockItem?.name?.substring(0, 20) || 'Unknown',
-        item.batchNo?.substring(0, 10) || '-',
+        stockItem?.name?.substring(0, 22) || 'Unknown',
+        item.batchNo?.substring(0, 12) || '-',
         item.expiryDate ? formatDate(item.expiryDate) : '-',
-        `₹${costPrice.toFixed(2)}`,
-        item.mrp ? `₹${item.mrp.toFixed(2)}` : '-',
+        costPrice.toFixed(2),
+        item.mrp ? item.mrp.toFixed(2) : '-',
         item.receivedQuantity.toString(),
-        `₹${itemTotal.toFixed(2)}`
+        itemTotal.toFixed(2)
       ];
 
       // Alternating row colors
       if (index % 2 === 0) {
         doc.setFillColor(248, 250, 252);
-        doc.rect(14, yPos, pageWidth - 28, 7, "F");
+        doc.rect(14, yPos, tableWidth, 7, "F");
       }
       doc.setDrawColor(200, 200, 200);
-      doc.rect(14, yPos, pageWidth - 28, 7);
+      doc.rect(14, yPos, tableWidth, 7);
 
       xPos = 14;
       rowData.forEach((data, i) => {
@@ -253,14 +255,14 @@ export function PrintableGRN({
 
     // Total Row
     doc.setFillColor(0, 51, 102);
-    doc.rect(14, yPos, pageWidth - 28, 8, "F");
+    doc.rect(14, yPos, tableWidth, 8, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
     doc.text("GRAND TOTAL", 18, yPos + 5.5);
     // Position grand total at the last column
     const totalXPos = 14 + colWidths.slice(0, 7).reduce((a, b) => a + b, 0);
-    doc.text(`₹${grandTotal.toFixed(2)}`, totalXPos + 1, yPos + 5.5);
+    doc.text(grandTotal.toFixed(2), totalXPos + 1, yPos + 5.5);
     yPos += 14;
 
     // Notes
