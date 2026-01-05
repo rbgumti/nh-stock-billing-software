@@ -204,8 +204,33 @@ export function PrintableGRN({
     const colWidths = [12, 48, 24, 24, 22, 22, 14, 16]; // Total = 182
     const headers = ["Sr.", "Item Name", "Batch", "Expiry", "Cost (₹)", "MRP (₹)", "Qty", "Total (₹)"];
     
+    // Helper function to draw vertical grid lines
+    const drawVerticalLines = (startY: number, height: number) => {
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.2);
+      let lineX = 14;
+      colWidths.forEach((width) => {
+        lineX += width;
+        if (lineX < 14 + tableWidth) {
+          doc.line(lineX, startY, lineX, startY + height);
+        }
+      });
+    };
+    
+    // Header row
     doc.setFillColor(0, 51, 102);
     doc.rect(14, yPos, tableWidth, 9, "F");
+    
+    // Draw header vertical lines (white for contrast)
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.3);
+    let lineX = 14;
+    colWidths.forEach((width) => {
+      lineX += width;
+      if (lineX < 14 + tableWidth) {
+        doc.line(lineX, yPos, lineX, yPos + 9);
+      }
+    });
     
     let xPos = 14;
     doc.setFontSize(7);
@@ -217,7 +242,7 @@ export function PrintableGRN({
     });
     yPos += 9;
 
-    // Items Rows with alternating colors
+    // Items Rows with alternating colors and vertical grid lines
     doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
@@ -242,8 +267,14 @@ export function PrintableGRN({
         doc.setFillColor(248, 250, 252);
         doc.rect(14, yPos, tableWidth, 7, "F");
       }
+      
+      // Draw row border
       doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.2);
       doc.rect(14, yPos, tableWidth, 7);
+      
+      // Draw vertical grid lines
+      drawVerticalLines(yPos, 7);
 
       xPos = 14;
       rowData.forEach((data, i) => {
@@ -256,6 +287,18 @@ export function PrintableGRN({
     // Total Row
     doc.setFillColor(0, 51, 102);
     doc.rect(14, yPos, tableWidth, 8, "F");
+    
+    // Draw total row vertical lines (white)
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.3);
+    lineX = 14;
+    colWidths.forEach((width) => {
+      lineX += width;
+      if (lineX < 14 + tableWidth) {
+        doc.line(lineX, yPos, lineX, yPos + 8);
+      }
+    });
+    
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
