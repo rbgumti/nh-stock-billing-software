@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Filter, RefreshCw, Pill, Droplets, Brain } from "lucide-react";
+import { Download, Calendar, Filter, RefreshCw, Pill, Droplets, Brain, Printer } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -292,6 +292,217 @@ export default function DailyStockReport() {
     XLSX.writeFile(workbook, `Daily_Stock_Report_${reportDate}.xlsx`);
   };
 
+  const handlePrint = () => {
+    const generateCategoryTable = (items: StockReportItem[], category: string, color: string) => {
+      const totalOpening = items.reduce((sum, item) => sum + item.stockOpening, 0);
+      const totalIssued = items.reduce((sum, item) => sum + item.issuedToPatients, 0);
+      const totalReceived = items.reduce((sum, item) => sum + item.stockReceived, 0);
+      const totalClosing = items.reduce((sum, item) => sum + item.stockClosing, 0);
+
+      if (items.length === 0) {
+        return `
+          <div class="category-section">
+            <h2 style="background: ${color}; color: white; padding: 10px; margin: 0; border-radius: 4px 4px 0 0;">${category} Stock (0 items)</h2>
+            <p style="padding: 20px; text-align: center; color: #666;">No ${category} stock data for this date</p>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="category-section" style="page-break-inside: avoid;">
+          <h2 style="background: ${color}; color: white; padding: 10px; margin: 0; border-radius: 4px 4px 0 0;">${category} Stock (${items.length} items)</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Medicine Name</th>
+                <th style="text-align: right;">Opening</th>
+                <th style="text-align: right;">Issued</th>
+                <th style="text-align: right;">Received</th>
+                <th style="text-align: right;">Closing</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map((item, index) => `
+                <tr style="background: ${index % 2 === 0 ? '#fff' : '#f9fafb'};">
+                  <td>${item.name}</td>
+                  <td style="text-align: right;">${item.stockOpening}</td>
+                  <td style="text-align: right; color: #d97706; font-weight: 600;">${item.issuedToPatients}</td>
+                  <td style="text-align: right; color: #16a34a;">${item.stockReceived}</td>
+                  <td style="text-align: right; font-weight: 600;">${item.stockClosing}</td>
+                </tr>
+              `).join('')}
+              <tr style="background: ${color}; color: white; font-weight: bold;">
+                <td>Total</td>
+                <td style="text-align: right;">${totalOpening}</td>
+                <td style="text-align: right;">${totalIssued}</td>
+                <td style="text-align: right;">${totalReceived}</td>
+                <td style="text-align: right;">${totalClosing}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    };
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const formattedDate = new Date(reportDate).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Daily Stock Report - ${reportDate}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: 'Segoe UI', Arial, sans-serif; 
+              padding: 20px; 
+              font-size: 11px; 
+              line-height: 1.4; 
+              color: #333;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 20px; 
+              padding-bottom: 15px; 
+              border-bottom: 3px double #003366; 
+            }
+            .header h1 { 
+              font-size: 24px; 
+              color: #003366; 
+              margin-bottom: 5px; 
+            }
+            .header p { 
+              font-size: 10px; 
+              color: #666; 
+            }
+            .report-info {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 15px;
+              padding: 10px;
+              background: #f8fafc;
+              border-radius: 4px;
+            }
+            .category-section { 
+              margin-bottom: 20px; 
+              border: 1px solid #e2e8f0;
+              border-radius: 4px;
+              overflow: hidden;
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+            }
+            th, td { 
+              border: 1px solid #e2e8f0; 
+              padding: 6px 8px; 
+              font-size: 10px;
+            }
+            th { 
+              background: #f1f5f9; 
+              font-weight: 600; 
+              text-align: left;
+            }
+            .grand-total {
+              background: #003366;
+              color: white;
+              padding: 15px;
+              border-radius: 4px;
+              margin-top: 20px;
+            }
+            .grand-total h3 {
+              margin-bottom: 10px;
+              font-size: 14px;
+            }
+            .grand-total-grid {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 15px;
+            }
+            .grand-total-item {
+              text-align: center;
+            }
+            .grand-total-item .label {
+              font-size: 9px;
+              opacity: 0.8;
+            }
+            .grand-total-item .value {
+              font-size: 18px;
+              font-weight: bold;
+            }
+            .footer {
+              margin-top: 30px;
+              text-align: center;
+              font-size: 9px;
+              color: #666;
+              border-top: 1px solid #e2e8f0;
+              padding-top: 10px;
+            }
+            @media print {
+              body { padding: 10mm; }
+              .category-section { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>NAVJEEVAN HOSPITAL</h1>
+            <p>Daily Stock Report</p>
+          </div>
+          
+          <div class="report-info">
+            <div><strong>Report Date:</strong> ${formattedDate}</div>
+            <div><strong>Generated:</strong> ${new Date().toLocaleString('en-IN')}</div>
+          </div>
+
+          ${generateCategoryTable(bnxItems, 'BNX', '#2563eb')}
+          ${generateCategoryTable(tpnItems, 'TPN', '#d97706')}
+          ${generateCategoryTable(pshyItems, 'PSHY', '#9333ea')}
+
+          <div class="grand-total">
+            <h3>Grand Total - All Categories</h3>
+            <div class="grand-total-grid">
+              <div class="grand-total-item">
+                <div class="label">Opening Stock</div>
+                <div class="value">${grandTotalOpening}</div>
+              </div>
+              <div class="grand-total-item">
+                <div class="label">Total Issued</div>
+                <div class="value" style="color: #fbbf24;">${grandTotalIssued}</div>
+              </div>
+              <div class="grand-total-item">
+                <div class="label">Stock Received</div>
+                <div class="value" style="color: #4ade80;">${grandTotalReceived}</div>
+              </div>
+              <div class="grand-total-item">
+                <div class="label">Closing Stock</div>
+                <div class="value">${grandTotalClosing}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>This is a computer generated document | NAVJEEVAN HOSPITAL</p>
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
   // Calculate grand totals
   const grandTotalOpening = reportData.reduce((sum, item) => sum + item.stockOpening, 0);
   const grandTotalIssued = reportData.reduce((sum, item) => sum + item.issuedToPatients, 0);
@@ -341,6 +552,10 @@ export default function DailyStockReport() {
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
+          <Button onClick={handlePrint} variant="outline" className="border-navy text-navy">
+            <Printer className="h-4 w-4 mr-2" />
+            Print
+          </Button>
           <Button onClick={exportToExcel} className="bg-gold hover:bg-gold/90 text-navy">
             <Download className="h-4 w-4 mr-2" />
             Export Excel
