@@ -38,6 +38,7 @@ interface GRNFormProps {
 
 export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFormProps) {
   const [grnNumber, setGrnNumber] = useState("");
+  const [grnDate, setGrnDate] = useState(new Date().toISOString().split('T')[0]);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -180,7 +181,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
             <CardTitle className="text-lg">GRN Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="grnNumber">GRN Number *</Label>
                 <Input
@@ -189,6 +190,15 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                   onChange={(e) => setGrnNumber(e.target.value)}
                   placeholder="Auto-generated"
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="grnDate">GRN Date</Label>
+                <Input
+                  id="grnDate"
+                  type="date"
+                  value={grnDate}
+                  onChange={(e) => setGrnDate(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -345,6 +355,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
       {showPrintPreview && (
         <PrintableGRN
           grnNumber={grnNumber}
+          grnDate={grnDate}
           invoiceNumber={invoiceNumber}
           invoiceDate={invoiceDate}
           purchaseOrder={purchaseOrder}
