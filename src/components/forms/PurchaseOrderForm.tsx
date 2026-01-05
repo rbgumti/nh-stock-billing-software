@@ -244,18 +244,30 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label>Stock Item</Label>
-                  <Select value={currentItem.stockItemId} onValueChange={(value) => 
-                    setCurrentItem({ ...currentItem, stockItemId: value })
-                  }>
+                  <Select value={currentItem.stockItemId} onValueChange={(value) => {
+                    const selectedItem = stockItems.find(item => item.id.toString() === value);
+                    setCurrentItem({ 
+                      ...currentItem, 
+                      stockItemId: value,
+                      unitPrice: selectedItem ? selectedItem.unitPrice.toString() : ''
+                    });
+                  }}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select item" />
+                      <SelectValue placeholder={formData.supplier ? "Select item" : "Select supplier first"} />
                     </SelectTrigger>
                     <SelectContent>
-                      {stockItems.map((item) => (
-                        <SelectItem key={item.id} value={item.id.toString()}>
-                          {item.name} - {item.category}
+                      {stockItems
+                        .filter(item => !formData.supplier || item.supplier === formData.supplier)
+                        .map((item) => (
+                          <SelectItem key={item.id} value={item.id.toString()}>
+                            {item.name} - {item.category}
+                          </SelectItem>
+                        ))}
+                      {formData.supplier && stockItems.filter(item => item.supplier === formData.supplier).length === 0 && (
+                        <SelectItem value="no-items" disabled>
+                          No items found for this supplier
                         </SelectItem>
-                      ))}
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -272,13 +284,13 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Unit Price (₹)</Label>
+                  <Label>Cost Price (₹)</Label>
                   <Input
                     type="number"
                     step="0.01"
                     value={currentItem.unitPrice}
                     onChange={(e) => setCurrentItem({ ...currentItem, unitPrice: e.target.value })}
-                    placeholder="0.00"
+                    placeholder="Auto-loaded from item"
                     min="0"
                   />
                 </div>

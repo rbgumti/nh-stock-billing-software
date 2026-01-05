@@ -201,7 +201,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="unitPrice">Rate/Price (₹) *</Label>
+                  <Label htmlFor="unitPrice">Rate - Cost Price (₹) *</Label>
                   <Input
                     id="unitPrice"
                     type="number"
@@ -209,12 +209,12 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
                     min="0"
                     value={formData.unitPrice}
                     onChange={(e) => handleInputChange("unitPrice", e.target.value)}
-                    placeholder="Purchase rate"
+                    placeholder="Purchase/Cost price"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="mrp">MRP (₹)</Label>
+                  <Label htmlFor="mrp">MRP - Selling Price (₹)</Label>
                   <Input
                     id="mrp"
                     type="number"
@@ -222,7 +222,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
                     min="0"
                     value={formData.mrp}
                     onChange={(e) => handleInputChange("mrp", e.target.value)}
-                    placeholder="Maximum retail price"
+                    placeholder="Selling price to customer"
                   />
                 </div>
               </div>
