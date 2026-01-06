@@ -40,7 +40,10 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
   const [currentItem, setCurrentItem] = useState({
     stockItemId: "",
     quantity: "",
-    unitPrice: ""
+    unitPrice: "",
+    packSize: "",
+    qtyInStrips: "",
+    qtyInTabs: ""
   });
 
   // Auto-generate PO number on load
@@ -66,24 +69,29 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
   }, [formData.supplierId, suppliers]);
 
   const addItem = () => {
-    if (!currentItem.stockItemId || !currentItem.quantity || !currentItem.unitPrice) return;
+    if (!currentItem.stockItemId || !currentItem.qtyInStrips) return;
 
     const stockItem = stockItems.find(item => item.id === parseInt(currentItem.stockItemId));
     if (!stockItem) return;
 
-    const quantity = parseInt(currentItem.quantity);
-    const unitPrice = parseFloat(currentItem.unitPrice);
+    const qtyInStrips = parseInt(currentItem.qtyInStrips) || 0;
+    const qtyInTabs = parseInt(currentItem.qtyInTabs) || 0;
+    const unitPrice = parseFloat(currentItem.unitPrice) || 0;
+    const packSize = currentItem.packSize || stockItem.packing || "";
 
     const newItem: PurchaseOrderItem = {
       stockItemId: stockItem.id,
       stockItemName: stockItem.name,
-      quantity,
+      quantity: qtyInStrips,
       unitPrice,
-      totalPrice: quantity * unitPrice
+      totalPrice: qtyInStrips * unitPrice,
+      packSize,
+      qtyInStrips,
+      qtyInTabs
     };
 
     setItems([...items, newItem]);
-    setCurrentItem({ stockItemId: "", quantity: "", unitPrice: "" });
+    setCurrentItem({ stockItemId: "", quantity: "", unitPrice: "", packSize: "", qtyInStrips: "", qtyInTabs: "" });
   };
 
   const removeItem = (index: number) => {
@@ -241,15 +249,16 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
               <CardTitle>Add Items</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                <div className="space-y-2 md:col-span-2">
                   <Label>Stock Item</Label>
                   <Select value={currentItem.stockItemId} onValueChange={(value) => {
                     const selectedItem = stockItems.find(item => item.id.toString() === value);
                     setCurrentItem({ 
                       ...currentItem, 
                       stockItemId: value,
-                      unitPrice: selectedItem ? selectedItem.unitPrice.toString() : ''
+                      unitPrice: selectedItem ? selectedItem.unitPrice.toString() : '',
+                      packSize: selectedItem?.packing || ''
                     });
                   }}>
                     <SelectTrigger>
@@ -273,24 +282,32 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Quantity</Label>
+                  <Label>Pack Size</Label>
                   <Input
-                    type="number"
-                    value={currentItem.quantity}
-                    onChange={(e) => setCurrentItem({ ...currentItem, quantity: e.target.value })}
-                    placeholder="0"
-                    min="1"
+                    value={currentItem.packSize}
+                    onChange={(e) => setCurrentItem({ ...currentItem, packSize: e.target.value })}
+                    placeholder="e.g., 10×10"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Cost Price (₹)</Label>
+                  <Label>Qty (Strips)</Label>
                   <Input
                     type="number"
-                    step="0.01"
-                    value={currentItem.unitPrice}
-                    onChange={(e) => setCurrentItem({ ...currentItem, unitPrice: e.target.value })}
-                    placeholder="Auto-loaded from item"
+                    value={currentItem.qtyInStrips}
+                    onChange={(e) => setCurrentItem({ ...currentItem, qtyInStrips: e.target.value })}
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Qty (Tabs)</Label>
+                  <Input
+                    type="number"
+                    value={currentItem.qtyInTabs}
+                    onChange={(e) => setCurrentItem({ ...currentItem, qtyInTabs: e.target.value })}
+                    placeholder="0"
                     min="0"
                   />
                 </div>
@@ -298,7 +315,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                 <div className="flex items-end">
                   <Button type="button" onClick={addItem} className="w-full">
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Item
+                    Add
                   </Button>
                 </div>
               </div>
@@ -306,20 +323,22 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
               {items.length > 0 && (
                 <div className="space-y-2">
                   <h4 className="font-medium">Order Items</h4>
-                  <div className="border rounded-lg">
-                    <div className="grid grid-cols-5 gap-4 p-3 bg-muted/50 font-medium text-sm">
+                  <div className="border rounded-lg overflow-x-auto">
+                    <div className="grid grid-cols-6 gap-4 p-3 bg-muted/50 font-medium text-sm min-w-[600px]">
                       <div>Item</div>
-                      <div>Quantity</div>
-                      <div>Unit Price</div>
-                      <div>Total</div>
+                      <div>Pack Size</div>
+                      <div>Qty (Strips)</div>
+                      <div>Qty (Tabs)</div>
+                      <div>Cost Price</div>
                       <div>Action</div>
                     </div>
                     {items.map((item, index) => (
-                      <div key={index} className="grid grid-cols-5 gap-4 p-3 border-t">
+                      <div key={index} className="grid grid-cols-6 gap-4 p-3 border-t min-w-[600px]">
                         <div className="font-medium">{item.stockItemName}</div>
-                        <div>{item.quantity}</div>
+                        <div>{item.packSize || '-'}</div>
+                        <div>{item.qtyInStrips?.toLocaleString() || '-'}</div>
+                        <div>{item.qtyInTabs?.toLocaleString() || '-'}</div>
                         <div>₹{item.unitPrice.toFixed(2)}</div>
-                        <div>₹{item.totalPrice.toFixed(2)}</div>
                         <div>
                           <Button
                             type="button"

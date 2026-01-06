@@ -36,7 +36,10 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
   const [currentItem, setCurrentItem] = useState({
     stockItemId: "",
     quantity: "",
-    unitPrice: ""
+    unitPrice: "",
+    packSize: "",
+    qtyInStrips: "",
+    qtyInTabs: ""
   });
 
   // Find supplier ID from name on load
@@ -62,43 +65,51 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
   }, [formData.supplierId, suppliers]);
 
   const addItem = () => {
-    if (!currentItem.stockItemId || !currentItem.quantity || !currentItem.unitPrice) return;
+    if (!currentItem.stockItemId || !currentItem.qtyInStrips) return;
 
     const stockItem = stockItems.find(item => item.id === parseInt(currentItem.stockItemId));
     if (!stockItem) return;
 
-    const quantity = parseInt(currentItem.quantity);
-    const unitPrice = parseFloat(currentItem.unitPrice);
+    const qtyInStrips = parseInt(currentItem.qtyInStrips) || 0;
+    const qtyInTabs = parseInt(currentItem.qtyInTabs) || 0;
+    const unitPrice = parseFloat(currentItem.unitPrice) || 0;
+    const packSize = currentItem.packSize || stockItem.packing || "";
 
     const newItem: PurchaseOrderItem = {
       stockItemId: stockItem.id,
       stockItemName: stockItem.name,
-      quantity,
+      quantity: qtyInStrips,
       unitPrice,
-      totalPrice: quantity * unitPrice
+      totalPrice: qtyInStrips * unitPrice,
+      packSize,
+      qtyInStrips,
+      qtyInTabs
     };
 
     setItems([...items, newItem]);
-    setCurrentItem({ stockItemId: "", quantity: "", unitPrice: "" });
+    setCurrentItem({ stockItemId: "", quantity: "", unitPrice: "", packSize: "", qtyInStrips: "", qtyInTabs: "" });
   };
 
   const removeItem = (index: number) => {
     setItems(items.filter((_, i) => i !== index));
   };
 
-  const updateItemQuantity = (index: number, quantity: string) => {
+  const updateItemField = (index: number, field: keyof PurchaseOrderItem, value: string | number) => {
     const newItems = [...items];
-    const qty = parseInt(quantity) || 0;
-    newItems[index].quantity = qty;
-    newItems[index].totalPrice = qty * newItems[index].unitPrice;
-    setItems(newItems);
-  };
-
-  const updateItemUnitPrice = (index: number, price: string) => {
-    const newItems = [...items];
-    const unitPrice = parseFloat(price) || 0;
-    newItems[index].unitPrice = unitPrice;
-    newItems[index].totalPrice = newItems[index].quantity * unitPrice;
+    if (field === 'qtyInStrips') {
+      const qtyInStrips = parseInt(value as string) || 0;
+      newItems[index].qtyInStrips = qtyInStrips;
+      newItems[index].quantity = qtyInStrips;
+      newItems[index].totalPrice = qtyInStrips * newItems[index].unitPrice;
+    } else if (field === 'qtyInTabs') {
+      newItems[index].qtyInTabs = parseInt(value as string) || 0;
+    } else if (field === 'packSize') {
+      newItems[index].packSize = value as string;
+    } else if (field === 'unitPrice') {
+      const unitPrice = parseFloat(value as string) || 0;
+      newItems[index].unitPrice = unitPrice;
+      newItems[index].totalPrice = newItems[index].quantity * unitPrice;
+    }
     setItems(newItems);
   };
 
@@ -236,24 +247,43 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
               {/* Existing Items */}
               {items.length > 0 && (
                 <div className="space-y-2">
-                  <div className="border rounded-lg">
-                    <div className="grid grid-cols-5 gap-4 p-3 bg-muted/50 font-medium text-sm">
+                  <div className="border rounded-lg overflow-x-auto">
+                    <div className="grid grid-cols-7 gap-3 p-3 bg-muted/50 font-medium text-sm min-w-[700px]">
                       <div>Item</div>
-                      <div>Quantity</div>
-                      <div>Unit Price</div>
+                      <div>Pack Size</div>
+                      <div>Qty (Strips)</div>
+                      <div>Qty (Tabs)</div>
+                      <div>Cost Price</div>
                       <div>Total</div>
                       <div>Action</div>
                     </div>
                     {items.map((item, index) => (
-                      <div key={index} className="grid grid-cols-5 gap-4 p-3 border-t items-center">
-                        <div className="font-medium">{item.stockItemName}</div>
+                      <div key={index} className="grid grid-cols-7 gap-3 p-3 border-t items-center min-w-[700px]">
+                        <div className="font-medium text-sm">{item.stockItemName}</div>
+                        <div>
+                          <Input
+                            value={item.packSize || ''}
+                            onChange={(e) => updateItemField(index, 'packSize', e.target.value)}
+                            className="w-20"
+                            placeholder="10×10"
+                          />
+                        </div>
                         <div>
                           <Input
                             type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateItemQuantity(index, e.target.value)}
-                            min="1"
-                            className="w-24"
+                            value={item.qtyInStrips || item.quantity}
+                            onChange={(e) => updateItemField(index, 'qtyInStrips', e.target.value)}
+                            min="0"
+                            className="w-20"
+                          />
+                        </div>
+                        <div>
+                          <Input
+                            type="number"
+                            value={item.qtyInTabs || ''}
+                            onChange={(e) => updateItemField(index, 'qtyInTabs', e.target.value)}
+                            min="0"
+                            className="w-20"
                           />
                         </div>
                         <div>
@@ -261,12 +291,12 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
                             type="number"
                             step="0.01"
                             value={item.unitPrice}
-                            onChange={(e) => updateItemUnitPrice(index, e.target.value)}
+                            onChange={(e) => updateItemField(index, 'unitPrice', e.target.value)}
                             min="0"
-                            className="w-24"
+                            className="w-20"
                           />
                         </div>
-                        <div>₹{item.totalPrice.toFixed(2)}</div>
+                        <div className="text-sm">₹{item.totalPrice.toFixed(2)}</div>
                         <div>
                           <Button
                             type="button"
@@ -290,15 +320,16 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
               )}
 
               {/* Add New Item */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4 pt-4 border-t">
+                <div className="space-y-2 md:col-span-2">
                   <Label>Add Stock Item</Label>
                   <Select value={currentItem.stockItemId} onValueChange={(value) => {
                     const selectedItem = stockItems.find(item => item.id.toString() === value);
                     setCurrentItem({ 
                       ...currentItem, 
                       stockItemId: value,
-                      unitPrice: selectedItem ? selectedItem.unitPrice.toString() : ''
+                      unitPrice: selectedItem ? selectedItem.unitPrice.toString() : '',
+                      packSize: selectedItem?.packing || ''
                     });
                   }}>
                     <SelectTrigger>
@@ -322,24 +353,32 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Quantity</Label>
+                  <Label>Pack Size</Label>
                   <Input
-                    type="number"
-                    value={currentItem.quantity}
-                    onChange={(e) => setCurrentItem({ ...currentItem, quantity: e.target.value })}
-                    placeholder="0"
-                    min="1"
+                    value={currentItem.packSize}
+                    onChange={(e) => setCurrentItem({ ...currentItem, packSize: e.target.value })}
+                    placeholder="e.g., 10×10"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Cost Price (₹)</Label>
+                  <Label>Qty (Strips)</Label>
                   <Input
                     type="number"
-                    step="0.01"
-                    value={currentItem.unitPrice}
-                    onChange={(e) => setCurrentItem({ ...currentItem, unitPrice: e.target.value })}
-                    placeholder="Auto-loaded from item"
+                    value={currentItem.qtyInStrips}
+                    onChange={(e) => setCurrentItem({ ...currentItem, qtyInStrips: e.target.value })}
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Qty (Tabs)</Label>
+                  <Input
+                    type="number"
+                    value={currentItem.qtyInTabs}
+                    onChange={(e) => setCurrentItem({ ...currentItem, qtyInTabs: e.target.value })}
+                    placeholder="0"
                     min="0"
                   />
                 </div>
@@ -347,7 +386,7 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
                 <div className="flex items-end">
                   <Button type="button" onClick={addItem} className="w-full">
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Item
+                    Add
                   </Button>
                 </div>
               </div>

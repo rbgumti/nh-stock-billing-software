@@ -667,7 +667,10 @@ export type Database = {
         Row: {
           created_at: string | null
           id: number
+          pack_size: string | null
           purchase_order_id: number
+          qty_in_strips: number | null
+          qty_in_tabs: number | null
           quantity: number
           stock_item_id: number
           stock_item_name: string
@@ -677,7 +680,10 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: number
+          pack_size?: string | null
           purchase_order_id: number
+          qty_in_strips?: number | null
+          qty_in_tabs?: number | null
           quantity: number
           stock_item_id: number
           stock_item_name: string
@@ -687,7 +693,10 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: number
+          pack_size?: string | null
           purchase_order_id?: number
+          qty_in_strips?: number | null
+          qty_in_tabs?: number | null
           quantity?: number
           stock_item_id?: number
           stock_item_name?: string

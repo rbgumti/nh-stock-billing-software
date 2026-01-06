@@ -8,6 +8,9 @@ export interface PurchaseOrderItem {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  packSize?: string;
+  qtyInStrips?: number;
+  qtyInTabs?: number;
 }
 
 export interface PurchaseOrder {
@@ -83,7 +86,10 @@ export function usePurchaseOrderStore() {
             stockItemName: item.stock_item_name,
             quantity: item.quantity,
             unitPrice: Number(item.unit_price),
-            totalPrice: Number(item.total_price)
+            totalPrice: Number(item.total_price),
+            packSize: item.pack_size || undefined,
+            qtyInStrips: item.qty_in_strips || undefined,
+            qtyInTabs: item.qty_in_tabs || undefined
           }));
 
         return {
@@ -155,7 +161,10 @@ export function usePurchaseOrderStore() {
         stock_item_name: item.stockItemName,
         quantity: item.quantity,
         unit_price: item.unitPrice,
-        total_price: item.totalPrice
+        total_price: item.totalPrice,
+        pack_size: item.packSize || null,
+        qty_in_strips: item.qtyInStrips || null,
+        qty_in_tabs: item.qtyInTabs || null
       }));
 
       const { error: itemsError } = await supabase
@@ -215,7 +224,10 @@ export function usePurchaseOrderStore() {
         stock_item_name: item.stockItemName,
         quantity: item.quantity,
         unit_price: item.unitPrice,
-        total_price: item.totalPrice
+        total_price: item.totalPrice,
+        pack_size: item.packSize || null,
+        qty_in_strips: item.qtyInStrips || null,
+        qty_in_tabs: item.qtyInTabs || null
       }));
 
       const { error: itemsError } = await supabase
