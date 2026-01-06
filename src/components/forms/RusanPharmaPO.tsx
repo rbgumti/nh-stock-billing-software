@@ -22,20 +22,17 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
     return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/\//g, '-');
   };
 
+  const getMonthYear = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const month = date.toLocaleDateString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return `${month} ${year}`;
+  };
+
   // Extract PO number suffix (e.g., "187" from "NH/PO-0187")
   const getPONumberSuffix = () => {
     const match = poNumber.match(/(\d+)$/);
     return match ? parseInt(match[1]).toString() : poNumber;
-  };
-
-  // Get fiscal year format like "25-26"
-  const getFiscalYear = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    // Fiscal year starts in April
-    const fiscalStartYear = month >= 3 ? year : year - 1;
-    return `${(fiscalStartYear % 100).toString().padStart(2, '0')}-${((fiscalStartYear + 1) % 100).toString().padStart(2, '0')}`;
   };
 
   const getStockItemDetails = (stockItemId: number) => {
@@ -59,13 +56,13 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Times New Roman', Times, serif; padding: 20px 25px; font-size: 14px; line-height: 1.5; }
-            .header-row { text-align: center; font-size: 12px; margin-bottom: 8px; }
-            .hospital-name { font-size: 26px; font-weight: bold; text-align: center; margin: 8px 0; }
-            .address-row { text-align: center; font-size: 12px; margin-bottom: 4px; }
+            .header-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
+            .hospital-name { font-size: 26px; font-weight: bold; text-align: center; margin: 10px 0; }
+            .address-row { text-align: center; font-size: 13px; margin-bottom: 5px; }
             .licence-row { text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 12px; }
-            .po-date-row { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 14px; }
+            .po-date-row { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 14px; font-weight: bold; }
             .to-section { margin-bottom: 10px; font-size: 13px; line-height: 1.6; }
-            .subject-line { font-size: 15px; font-weight: bold; text-decoration: underline; margin: 12px 0; }
+            .sub-line { font-size: 16px; font-weight: bold; margin: 10px 0; }
             .salutation { margin: 10px 0; font-size: 13px; }
             .intro-para { font-size: 13px; text-align: justify; margin-bottom: 12px; line-height: 1.6; }
             table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
@@ -76,8 +73,8 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             td.right { text-align: right; }
             .undertaking-title { font-weight: bold; font-size: 14px; margin: 14px 0 8px 0; text-decoration: underline; }
             .undertaking-text { font-size: 12px; text-align: justify; line-height: 1.5; margin-bottom: 14px; }
-            .for-line { font-size: 13px; margin: 18px 0 8px 0; }
-            .signature-line { border-top: 1px solid #000; width: 180px; margin-top: 40px; padding-top: 5px; }
+            .for-line { font-size: 13px; margin: 18px 0 35px 0; }
+            .signature-section { display: flex; justify-content: space-between; margin-top: 12px; font-size: 13px; }
             @media print {
               body { padding: 10mm 15mm; }
               @page { margin: 10mm; size: A4; }
@@ -104,69 +101,78 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
     const leftMargin = 15;
     let y = 18;
 
-    // Header row - Regd. Govt of Punjab centered
+    // Header row - Regd and Mob on same line
     pdf.setFontSize(12);
     pdf.setFont('times', 'normal');
-    pdf.text('Regd. Govt of Punjab', pageWidth / 2, y, { align: 'center' });
-    y += 10;
+    pdf.text('Regd. Govt of Punjab', leftMargin, y);
+    pdf.text('Mob: 6284942412', pageWidth - leftMargin, y, { align: 'right' });
+    y += 12;
 
     // Hospital Name (centered) - bold and larger
     pdf.setFontSize(24);
     pdf.setFont('times', 'bold');
     pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y, { align: 'center' });
-    y += 8;
+    y += 10;
 
     // Address
     pdf.setFontSize(12);
     pdf.setFont('times', 'normal');
-    pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,', pageWidth / 2, y, { align: 'center' });
-    y += 5;
-    pdf.text('Mob: 6284942412', pageWidth / 2, y, { align: 'center' });
-    y += 7;
+    pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib', pageWidth / 2, y, { align: 'center' });
+    y += 6;
 
-    // Licence - bold with separator
+    // Doctor name
+    pdf.text('Dr. metali Bhatti', pageWidth / 2, y, { align: 'center' });
+    y += 6;
+
+    // Licence - bold
     pdf.setFontSize(11);
     pdf.setFont('times', 'bold');
-    pdf.text('Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024', pageWidth / 2, y, { align: 'center' });
-    y += 12;
+    pdf.text('Licence No. PSMHC/Pb./2024/863 Dt. 2-5-2024', pageWidth / 2, y, { align: 'center' });
+    y += 10;
 
-    // PO Number and Date
+    // PO Number and Date - bold
     pdf.setFontSize(13);
-    pdf.setFont('times', 'normal');
-    pdf.text(`PO No.: NH-${getFiscalYear(poDate)}-${getPONumberSuffix()}`, leftMargin, y);
-    pdf.text(`Date: ${formatDate(poDate)}`, pageWidth - leftMargin, y, { align: 'right' });
+    pdf.setFont('times', 'bold');
+    pdf.text(`PO NO- NH-25-26 - ${getPONumberSuffix()}`, leftMargin, y);
+    pdf.text(`DATE - ${formatDate(poDate)}`, pageWidth - leftMargin, y, { align: 'right' });
     y += 12;
 
     // To Section
     pdf.setFontSize(12);
     pdf.setFont('times', 'normal');
-    pdf.text('To: Rusan Pharma Ltd.,', leftMargin, y);
+    pdf.text('To,', leftMargin, y);
     y += 6;
-    pdf.text('Khasra No. 122MI, Central Hope Town, Selaqui, Dehradun, Uttarakhand-248197', leftMargin, y);
-    y += 12;
+    pdf.setFont('times', 'bold');
+    pdf.text('Rusan Pharma Ltd.', leftMargin, y);
+    y += 6;
+    pdf.setFont('times', 'normal');
+    pdf.text('Khasra No. 122MI, Central Hope Town,', leftMargin, y);
+    y += 6;
+    pdf.text('Selaqui, Dehradun, Uttarakhand-248197', leftMargin, y);
+    y += 10;
 
-    // Subject line - bold and underlined
+    // Sub line - bold and larger
     pdf.setFontSize(14);
     pdf.setFont('times', 'bold');
-    pdf.text('Subject: Purchase Order', leftMargin, y);
-    pdf.line(leftMargin, y + 1, leftMargin + 50, y + 1);
+    pdf.text('Sub: Purchase Order', leftMargin, y);
     y += 10;
 
     // Salutation
     pdf.setFontSize(12);
     pdf.setFont('times', 'normal');
-    pdf.text('Dear Sir/Madam,', leftMargin, y);
+    pdf.text("Dear Sir, ma'am", leftMargin, y);
     y += 8;
 
     // Intro paragraph
-    const introText = "We place a purchase order with authorized doctor's stamp and signature. Terms per telephone discussion. Payment by cheque to your bank account.";
+    pdf.setFontSize(12);
+    const introText = "We hereby placing a purchase order with Stamp and Sign of our current working doctor's. Terms and Conditions will remain same as our discussion on phonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.";
     const splitIntro = pdf.splitTextToSize(introText, pageWidth - 30);
     pdf.text(splitIntro, leftMargin, y);
-    y += splitIntro.length * 5 + 8;
+    y += splitIntro.length * 6 + 8;
 
-    // Table - Updated columns: Sr., Product, Compositions, Pack, Strips, Tablets
-    const tableHeaders = ['Sr.', 'Product', 'Compositions', 'Pack', 'Strips', 'Tablets'];
-    const colWidths = [12, 30, 60, 20, 28, 30];
+    // Table
+    const tableHeaders = ['Sr. No.', 'Product Name', 'Compositions', 'Packing', 'Qty.In Strips', 'Qty.In Tablets'];
+    const colWidths = [15, 35, 55, 20, 25, 30];
     let x = leftMargin;
 
     // Table header
@@ -185,13 +191,13 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
     pdf.setFont('times', 'normal');
     items.forEach((item, index) => {
       const stockItem = getStockItemDetails(item.stockItemId);
-      const packing = stockItem?.packing || "10×10";
-      const packingMatch = packing.match(/(\d+)[×x*](\d+)/i);
-      const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 100;
+      const packing = stockItem?.packing || "10*10";
+      const packingMatch = packing.match(/(\d+)\*(\d+)/);
+      const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 10;
       const qtyInTablets = item.quantity * tabletsPerStrip;
 
       const rowData = [
-        `${index + 1}`,
+        `${index + 1}.`,
         item.stockItemName,
         stockItem?.composition || '-',
         packing,
@@ -204,21 +210,14 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         pdf.rect(cellX, y, colWidths[i], 8);
         const align = i === 0 || i === 3 ? 'center' : i >= 4 ? 'right' : 'left';
         const textX = align === 'center' ? cellX + colWidths[i] / 2 : align === 'right' ? cellX + colWidths[i] - 2 : cellX + 2;
-        
-        // Handle long text for compositions
-        if (i === 2 && cell.length > 35) {
-          const truncated = cell.substring(0, 32) + '...';
-          pdf.text(truncated, textX, y + 5.5, { align });
-        } else {
-          pdf.text(cell, textX, y + 5.5, { align });
-        }
+        pdf.text(cell, textX, y + 5.5, { align });
         cellX += colWidths[i];
       });
       y += 8;
     });
     y += 10;
 
-    // Undertaking - Updated to match document format
+    // Undertaking
     pdf.setFont('times', 'bold');
     pdf.setFontSize(12);
     pdf.text('UNDERTAKING:', leftMargin, y);
@@ -226,22 +225,25 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
 
     pdf.setFont('times', 'normal');
     pdf.setFontSize(11);
-    const undertakingText = `We confirm purchase from Rusan Pharma Ltd. under P.O. No. ${getPONumberSuffix()}/A (${formatDate(poDate)}). These controlled substances per Narcotic Drugs and Psychotropic Substances Act, 1985, shall be maintained with full records. Form-6 (Consignment Note) will be submitted upon receipt. Products are exclusively for our De-addiction Centre and qualified doctors only, licensed under PSMHC/Punjab/2024/863, sales within India only, no retail or export. Rusan Pharma Ltd. not liable for non-compliance by us.`;
+    const undertakingText = `We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN, SELAQUI, DEHRADUN, UTTARAKHAND. 248197 Our P O. No: ${getPONumberSuffix()}/A (${getMonthYear(poDate)}) : date ${formatDate(poDate)}. These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our License No. PSMHC/Punjab/2024/863 we are fully aware These product containing controlled substances as per Narcotic Drugs & Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6 (Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation & for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any non-compliance of statutory provisions committed by us intentionally or unintentionally.`;
     const splitUndertaking = pdf.splitTextToSize(undertakingText, pageWidth - 30);
     pdf.text(splitUndertaking, leftMargin, y);
-    y += splitUndertaking.length * 5 + 12;
+    y += splitUndertaking.length * 5 + 10;
 
     // For line
     pdf.setFontSize(12);
-    pdf.text('For Navjeevan Hospital,', leftMargin, y);
-    y += 6;
-    pdf.text('Opp. New Bus Stand, G.T. Road, Sirhind', leftMargin, y);
-    y += 30; // Space for stamp and signature
+    pdf.text('For Navjeevan hospital, opp. New Bus Stand, G.t. Road, Sirhind', leftMargin, y);
+    y += 10;
 
-    // Signature line and name
-    pdf.line(leftMargin, y, leftMargin + 50, y);
-    y += 5;
-    pdf.text(`Dr. Metali Bhatti    Date: ${formatDate(poDate)}`, leftMargin, y);
+    // Date
+    pdf.setFontSize(12);
+    pdf.text(`Date: ${formatDate(poDate)}`, leftMargin, y);
+    y += 25; // Space for stamp and signature
+
+    // Signature section
+    pdf.setFontSize(12);
+    pdf.text('(Navjeevan hospital)', pageWidth / 3, y, { align: 'center' });
+    pdf.text('(Dr. metali Bhatti)', (pageWidth * 2) / 3, y, { align: 'center' });
 
     pdf.save(`PO-${poNumber}-Rusan-Pharma.pdf`);
   };
@@ -266,71 +268,78 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         </DialogHeader>
 
         <div ref={printRef} className="p-6 bg-white text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '14px', lineHeight: '1.6' }}>
-          {/* Header - Regd. Govt of Punjab centered */}
-          <p className="text-center text-[12px] mb-2">Regd. Govt of Punjab</p>
+          {/* Header Row - Regd and Mob on same line */}
+          <div className="flex justify-between text-[13px] mb-3">
+            <span>Regd. Govt of Punjab</span>
+            <span>Mob: 6284942412</span>
+          </div>
 
           {/* Hospital Name */}
-          <h1 className="text-2xl font-bold text-center mb-2">NAVJEEVAN HOSPITAL</h1>
+          <h1 className="text-2xl font-bold text-center my-3">NAVJEEVAN HOSPITAL</h1>
 
           {/* Address Row */}
-          <p className="text-center text-[12px] mb-1">
-            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,
-          </p>
-          <p className="text-center text-[12px] mb-2">
-            Mob: 6284942412
+          <p className="text-center text-[13px] mb-1">
+            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib
           </p>
 
-          {/* Licence Row with separator */}
+          {/* Doctor Name */}
+          <p className="text-center text-[13px] mb-1">
+            Dr. metali Bhatti
+          </p>
+
+          {/* Licence Row */}
           <p className="text-center text-[12px] font-bold mb-4">
-            Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024
+            Licence No. PSMHC/Pb./2024/863 Dt. 2-5-2024
           </p>
 
           {/* PO Number and Date Row */}
-          <div className="flex justify-between text-[14px] mb-5">
-            <span>PO No.: NH-{getFiscalYear(poDate)}-{getPONumberSuffix()}</span>
-            <span>Date: {formatDate(poDate)}</span>
+          <div className="flex justify-between font-bold text-[14px] mb-5">
+            <span>PO NO- NH-25-26 - {getPONumberSuffix()}</span>
+            <span>DATE - {formatDate(poDate)}</span>
           </div>
 
-          {/* To Section - Single line format */}
+          {/* To Section */}
           <div className="text-[13px] mb-3 leading-relaxed">
-            <p className="mb-1">To: Rusan Pharma Ltd.,</p>
-            <p>Khasra No. 122MI, Central Hope Town, Selaqui, Dehradun, Uttarakhand-248197</p>
+            <p className="mb-1">To,</p>
+            <p className="font-bold">Rusan Pharma Ltd.</p>
+            <p>Khasra No. 122MI, Central Hope Town,</p>
+            <p>Selaqui, Dehradun, Uttarakhand-248197</p>
           </div>
 
-          {/* Subject line - bold and underlined */}
-          <p className="font-bold text-[15px] my-4 underline">Subject: Purchase Order</p>
+          {/* Sub line */}
+          <p className="font-bold text-[16px] my-4">Sub: Purchase Order</p>
 
           {/* Salutation */}
-          <p className="text-[13px] my-3">Dear Sir/Madam,</p>
+          <p className="text-[13px] my-3">Dear Sir, ma&apos;am</p>
 
-          {/* Intro Paragraph - Shortened version */}
+          {/* Intro Paragraph */}
           <p className="text-[13px] text-justify mb-4 leading-relaxed">
-            We place a purchase order with authorized doctor&apos;s stamp and signature. Terms per telephone discussion. Payment by cheque to your bank account.
+            We hereby placing a purchase order with Stamp and Sign of our current working doctor&apos;s. Terms and Conditions will remain same as our discussion on phonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
           </p>
 
-          {/* Items Table - Updated columns */}
+          {/* Items Table */}
           <table className="w-full border-collapse my-4 text-[13px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black px-2 py-2 text-center">Sr.</th>
-                <th className="border border-black px-2 py-2 text-center">Product</th>
+                <th className="border border-black px-2 py-2 text-center">Sr. No.</th>
+                <th className="border border-black px-2 py-2 text-center">Product Name</th>
                 <th className="border border-black px-2 py-2 text-center">Compositions</th>
-                <th className="border border-black px-2 py-2 text-center">Pack</th>
-                <th className="border border-black px-2 py-2 text-center">Strips</th>
-                <th className="border border-black px-2 py-2 text-center">Tablets</th>
+                <th className="border border-black px-2 py-2 text-center">Packing</th>
+                <th className="border border-black px-2 py-2 text-center">Qty.In Strips</th>
+                <th className="border border-black px-2 py-2 text-center">Qty.In Tablets</th>
               </tr>
             </thead>
             <tbody>
               {items.map((item, index) => {
                 const stockItem = getStockItemDetails(item.stockItemId);
-                const packing = stockItem?.packing || "10×10";
-                const packingMatch = packing.match(/(\d+)[×x*](\d+)/i);
-                const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 100;
+                const packing = stockItem?.packing || "10*10";
+                const packingMatch = packing.match(/(\d+)\*(\d+)/);
+                const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 10;
                 const qtyInTablets = item.quantity * tabletsPerStrip;
                 
                 return (
                   <tr key={index}>
-                    <td className="border border-black px-2 py-2 text-center">{index + 1}</td>
+                    <td className="border border-black px-2 py-2 text-center">{index + 1}.</td>
                     <td className="border border-black px-2 py-2">{item.stockItemName}</td>
                     <td className="border border-black px-2 py-2">{stockItem?.composition || '-'}</td>
                     <td className="border border-black px-2 py-2 text-center">{packing}</td>
@@ -342,24 +351,32 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </tbody>
           </table>
 
-          {/* Undertaking - Updated text */}
+          {/* Undertaking */}
           <p className="font-bold text-[14px] mb-2 underline">UNDERTAKING:</p>
           <p className="text-[12px] text-justify leading-relaxed mb-5">
-            We confirm purchase from Rusan Pharma Ltd. under P.O. No. {getPONumberSuffix()}/A ({formatDate(poDate)}). These controlled substances per Narcotic Drugs and Psychotropic Substances Act, 1985, shall be maintained with full records. Form-6 (Consignment Note) will be submitted upon receipt. Products are exclusively for our De-addiction Centre and qualified doctors only, licensed under PSMHC/Punjab/2024/863, sales within India only, no retail or export. Rusan Pharma Ltd. not liable for non-compliance by us.
+            We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN, SELAQUI, DEHRADUN, UTTARAKHAND. 248197 Our P O. No: {getPONumberSuffix()}/A ({getMonthYear(poDate)}) : date {formatDate(poDate)}. These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our License No. PSMHC/Punjab/2024/863 we are fully aware These product containing controlled substances as per Narcotic Drugs &amp; Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6 (Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation &amp; for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any non-compliance of statutory provisions committed by us intentionally or unintentionally.
           </p>
 
-          <p className="text-[13px] mb-1">For Navjeevan Hospital,</p>
-          <p className="text-[13px] mb-3">Opp. New Bus Stand, G.T. Road, Sirhind</p>
+          <p className="text-[13px] mb-3">
+            For Navjeevan hospital, opp. New Bus Stand, G.t. Road, Sirhind
+          </p>
+
+          <p className="text-[13px] mb-3">
+            Date: {formatDate(poDate)}
+          </p>
 
           {/* Space for stamp and signature */}
-          <div className="h-16 my-4">
+          <div className="h-20 my-5">
             {/* Space for stamp and signature */}
           </div>
 
-          {/* Signature Section - Updated format */}
-          <div className="text-[13px]">
-            <div className="border-t border-black w-48 pt-1">
-              Dr. Metali Bhatti &nbsp;&nbsp;&nbsp;&nbsp; Date: {formatDate(poDate)}
+          {/* Signature Section */}
+          <div className="flex justify-around items-end text-[13px]">
+            <div className="text-center">
+              <p>(Navjeevan hospital)</p>
+            </div>
+            <div className="text-center">
+              <p>(Dr. metali Bhatti)</p>
             </div>
           </div>
         </div>
