@@ -1,4 +1,4 @@
-import { Settings, Zap, Minimize2 } from "lucide-react";
+import { Settings, Zap, Minimize2, User } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +10,11 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 export function SettingsDialog() {
-  const { performanceMode, setPerformanceMode, compactMode, setCompactMode } = useAppSettings();
+  const { performanceMode, setPerformanceMode, compactMode, setCompactMode, doctorName, setDoctorName } = useAppSettings();
 
   return (
     <Dialog>
@@ -31,6 +32,30 @@ export function SettingsDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
+          {/* Doctor Name */}
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-green-500/10">
+              <User className="w-5 h-5 text-green-500" />
+            </div>
+            <div className="space-y-2 flex-1">
+              <Label htmlFor="doctor-name" className="text-sm font-medium">
+                Doctor Name
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Used in purchase orders and other documents
+              </p>
+              <Input
+                id="doctor-name"
+                value={doctorName}
+                onChange={(e) => setDoctorName(e.target.value)}
+                placeholder="Enter doctor name"
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Performance Mode */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-start gap-3">
