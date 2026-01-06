@@ -182,18 +182,22 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
     pdf.setFont('times', 'normal');
     items.forEach((item, index) => {
       const stockItem = getStockItemDetails(item.stockItemId);
-      const packing = stockItem?.packing || "10×10";
-      const packingMatch = packing.match(/(\d+)[×x*](\d+)/i);
-      const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 10;
-      const qtyInTablets = item.quantity * tabletsPerStrip;
+      // Use stored values if available, otherwise calculate from stock item
+      const packing = item.packSize || stockItem?.packing || "10×10";
+      const qtyInStrips = item.qtyInStrips || item.quantity;
+      const qtyInTabs = item.qtyInTabs || (() => {
+        const packingMatch = packing.match(/(\d+)[×x*](\d+)/i);
+        const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 10;
+        return qtyInStrips * tabletsPerStrip;
+      })();
 
       const rowData = [
         `${index + 1}`,
         item.stockItemName,
         stockItem?.composition || '-',
         packing.replace('*', '×'),
-        item.quantity.toLocaleString(),
-        qtyInTablets.toLocaleString()
+        qtyInStrips.toLocaleString(),
+        qtyInTabs.toLocaleString()
       ];
 
       let cellX = x;
@@ -332,10 +336,14 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             <tbody>
               {items.map((item, index) => {
                 const stockItem = getStockItemDetails(item.stockItemId);
-                const packing = stockItem?.packing || "10×10";
-                const packingMatch = packing.match(/(\d+)[×x*](\d+)/i);
-                const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 10;
-                const qtyInTablets = item.quantity * tabletsPerStrip;
+                // Use stored values if available, otherwise calculate from stock item
+                const packing = item.packSize || stockItem?.packing || "10×10";
+                const qtyInStrips = item.qtyInStrips || item.quantity;
+                const qtyInTabs = item.qtyInTabs || (() => {
+                  const packingMatch = packing.match(/(\d+)[×x*](\d+)/i);
+                  const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 10;
+                  return qtyInStrips * tabletsPerStrip;
+                })();
                 
                 return (
                   <tr key={index}>
@@ -343,8 +351,8 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
                     <td className="border border-black px-2 py-2">{item.stockItemName}</td>
                     <td className="border border-black px-2 py-2">{stockItem?.composition || '-'}</td>
                     <td className="border border-black px-2 py-2 text-center">{packing.replace('*', '×')}</td>
-                    <td className="border border-black px-2 py-2 text-right">{item.quantity.toLocaleString()}</td>
-                    <td className="border border-black px-2 py-2 text-right">{qtyInTablets.toLocaleString()}</td>
+                    <td className="border border-black px-2 py-2 text-right">{qtyInStrips.toLocaleString()}</td>
+                    <td className="border border-black px-2 py-2 text-right">{qtyInTabs.toLocaleString()}</td>
                   </tr>
                 );
               })}
