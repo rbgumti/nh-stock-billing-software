@@ -166,27 +166,43 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="supplier">Vendor/Supplier *</Label>
-                  <Select value={formData.supplier} onValueChange={(value) => handleInputChange("supplier", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select vendor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {suppliers.length > 0 ? (
-                        suppliers.map((supplier) => (
-                          <SelectItem key={supplier.id} value={supplier.name}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-suppliers" disabled>
-                          No suppliers found - Add suppliers first
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Add suppliers in the Suppliers tab first
-                  </p>
+                  {isEditing && initialData?.supplier ? (
+                    <>
+                      <Input
+                        id="supplier"
+                        value={formData.supplier}
+                        disabled
+                        className="bg-muted"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Vendor cannot be changed once assigned
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Select value={formData.supplier} onValueChange={(value) => handleInputChange("supplier", value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select vendor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {suppliers.length > 0 ? (
+                            suppliers.map((supplier) => (
+                              <SelectItem key={supplier.id} value={supplier.name}>
+                                {supplier.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="no-suppliers" disabled>
+                              No suppliers found - Add suppliers first
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Add suppliers in the Suppliers tab first
+                      </p>
+                    </>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="batchNo">Batch Number</Label>
