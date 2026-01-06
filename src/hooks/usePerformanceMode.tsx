@@ -5,12 +5,15 @@ interface AppSettingsContextType {
   setPerformanceMode: (enabled: boolean) => void;
   compactMode: boolean;
   setCompactMode: (enabled: boolean) => void;
+  doctorName: string;
+  setDoctorName: (name: string) => void;
 }
 
 const AppSettingsContext = createContext<AppSettingsContextType | undefined>(undefined);
 
 const PERFORMANCE_KEY = "performance_mode";
 const COMPACT_KEY = "compact_mode";
+const DOCTOR_NAME_KEY = "doctor_name";
 
 export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
   const [performanceMode, setPerformanceModeState] = useState(() => {
@@ -23,6 +26,11 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     return stored === "true";
   });
 
+  const [doctorName, setDoctorNameState] = useState(() => {
+    const stored = localStorage.getItem(DOCTOR_NAME_KEY);
+    return stored || "Dr. Metali Bhatti";
+  });
+
   const setPerformanceMode = (enabled: boolean) => {
     setPerformanceModeState(enabled);
     localStorage.setItem(PERFORMANCE_KEY, String(enabled));
@@ -31,6 +39,11 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   const setCompactMode = (enabled: boolean) => {
     setCompactModeState(enabled);
     localStorage.setItem(COMPACT_KEY, String(enabled));
+  };
+
+  const setDoctorName = (name: string) => {
+    setDoctorNameState(name);
+    localStorage.setItem(DOCTOR_NAME_KEY, name);
   };
 
   // Apply mode classes to document root
@@ -55,7 +68,9 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
       performanceMode, 
       setPerformanceMode, 
       compactMode, 
-      setCompactMode 
+      setCompactMode,
+      doctorName,
+      setDoctorName
     }}>
       {children}
     </AppSettingsContext.Provider>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Printer, Download } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
+import { useAppSettings } from "@/hooks/usePerformanceMode";
 import jsPDF from "jspdf";
 
 interface RusanPharmaPOProps {
@@ -16,6 +17,7 @@ interface RusanPharmaPOProps {
 
 export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: RusanPharmaPOProps) {
   const printRef = useRef<HTMLDivElement>(null);
+  const { doctorName } = useAppSettings();
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -243,7 +245,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
 
     // Dr name and date
     pdf.setFontSize(12);
-    pdf.text('Dr. Metali Bhatti', leftMargin, y);
+    pdf.text(doctorName, leftMargin, y);
     pdf.text(`Date: ${formatDate(poDate)}`, leftMargin + 60, y);
 
     pdf.save(`PO-${poNumber}-Rusan-Pharma.pdf`);
@@ -369,7 +371,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
 
           {/* Signature Section */}
           <div className="flex gap-16 items-end text-[13px]">
-            <p>Dr. Metali Bhatti</p>
+            <p>{doctorName}</p>
             <p>Date: {formatDate(poDate)}</p>
           </div>
         </div>
