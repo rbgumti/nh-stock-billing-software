@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X, Package } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { X, Package, Unlock } from "lucide-react";
 import { useSupplierStore } from "@/hooks/useSupplierStore";
 
 interface AddStockItemFormProps {
@@ -17,6 +18,7 @@ interface AddStockItemFormProps {
 
 export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = false }: AddStockItemFormProps) {
   const { suppliers } = useSupplierStore();
+  const [vendorUnlocked, setVendorUnlocked] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -166,16 +168,39 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="supplier">Vendor/Supplier *</Label>
-                  {isEditing && initialData?.supplier ? (
+                  {isEditing && initialData?.supplier && !vendorUnlocked ? (
                     <>
-                      <Input
-                        id="supplier"
-                        value={formData.supplier}
-                        disabled
-                        className="bg-muted"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          id="supplier"
+                          value={formData.supplier}
+                          disabled
+                          className="bg-muted flex-1"
+                        />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button type="button" variant="outline" size="icon" className="shrink-0">
+                              <Unlock className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Change Vendor?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action requires admin confirmation. Changing the vendor for an item may affect existing purchase orders and stock records. Are you sure you want to proceed?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => setVendorUnlocked(true)}>
+                                Confirm & Unlock
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Vendor cannot be changed once assigned
+                        Click unlock to change vendor (requires confirmation)
                       </p>
                     </>
                   ) : (
@@ -199,7 +224,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Add suppliers in the Suppliers tab first
+                        {vendorUnlocked ? "Vendor unlocked - select new vendor" : "Add suppliers in the Suppliers tab first"}
                       </p>
                     </>
                   )}
