@@ -178,7 +178,7 @@ export default function EditInvoice() {
             updatedItem.mrp = medicine.mrp || 0;
             updatedItem.unitPrice = medicine.unitPrice;
             updatedItem.availableStock = medicine.currentStock;
-            updatedItem.total = updatedItem.quantity * updatedItem.unitPrice;
+            updatedItem.total = updatedItem.quantity * updatedItem.mrp;
           }
         }
         
@@ -189,12 +189,12 @@ export default function EditInvoice() {
           const freqOption = FREQUENCY_OPTIONS.find(f => f.value === freq);
           if (freqOption && days && days > 0) {
             updatedItem.quantity = freqOption.multiplier * days;
-            updatedItem.total = updatedItem.quantity * updatedItem.unitPrice;
+            updatedItem.total = updatedItem.quantity * updatedItem.mrp;
           }
         }
         
         if (field === "quantity") {
-          updatedItem.total = (value as number) * updatedItem.unitPrice;
+          updatedItem.total = (value as number) * updatedItem.mrp;
         }
         
         return updatedItem;
@@ -336,7 +336,7 @@ export default function EditInvoice() {
         if (item) {
           // Increase stock
           await increaseStock(item.medicineId, returnQty);
-          totalReturnAmount += returnQty * item.unitPrice;
+          totalReturnAmount += returnQty * item.mrp;
         }
       }
 
@@ -349,7 +349,7 @@ export default function EditInvoice() {
             ...item,
             quantity: newQuantity,
             originalQuantity: newQuantity,
-            total: newQuantity * item.unitPrice
+            total: newQuantity * item.mrp
           };
         }
         return item;

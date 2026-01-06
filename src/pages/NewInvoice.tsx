@@ -141,7 +141,7 @@ export default function NewInvoice() {
               mrp: matchedMedicine.mrp || 0,
               quantity: item.quantity,
               unitPrice: matchedMedicine.unitPrice,
-              total: item.quantity * matchedMedicine.unitPrice,
+              total: item.quantity * (matchedMedicine.mrp || 0),
               availableStock: matchedMedicine.currentStock,
               stockAfterInvoice: matchedMedicine.currentStock - item.quantity,
               fromPrescription: true
@@ -229,7 +229,7 @@ export default function NewInvoice() {
             updatedItem.unitPrice = medicine.unitPrice;
             updatedItem.availableStock = medicine.currentStock;
             updatedItem.stockAfterInvoice = medicine.currentStock - updatedItem.quantity;
-            updatedItem.total = updatedItem.quantity * updatedItem.unitPrice;
+            updatedItem.total = updatedItem.quantity * updatedItem.mrp;
           }
         }
         
@@ -241,14 +241,14 @@ export default function NewInvoice() {
           if (freqOption && days && days > 0) {
             updatedItem.quantity = freqOption.multiplier * days;
             updatedItem.stockAfterInvoice = updatedItem.availableStock - updatedItem.quantity;
-            updatedItem.total = updatedItem.quantity * updatedItem.unitPrice;
+            updatedItem.total = updatedItem.quantity * updatedItem.mrp;
           }
         }
         
         // Recalculate when quantity changes directly
         if (field === "quantity") {
           updatedItem.stockAfterInvoice = updatedItem.availableStock - (value as number);
-          updatedItem.total = (value as number) * updatedItem.unitPrice;
+          updatedItem.total = (value as number) * updatedItem.mrp;
         }
         
         return updatedItem;
