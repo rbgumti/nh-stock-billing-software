@@ -329,7 +329,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                       <div>Pack Size</div>
                       <div>Qty (Strips)</div>
                       <div>Qty (Tabs)</div>
-                      <div>Cost Price</div>
+                      <div>Cost/Tab</div>
                       <div>Action</div>
                     </div>
                     {items.map((item, index) => (

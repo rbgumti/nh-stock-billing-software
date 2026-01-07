@@ -236,7 +236,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                   <div>Received Qty</div>
                   <div>Batch No</div>
                   <div>Expiry Date</div>
-                  <div>MRP (₹)</div>
+                  <div>MRP/Tab (₹)</div>
                   <div>Status</div>
                   <div>Remarks</div>
                 </div>

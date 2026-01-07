@@ -253,7 +253,7 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
                       <div>Pack Size</div>
                       <div>Qty (Strips)</div>
                       <div>Qty (Tabs)</div>
-                      <div>Cost Price</div>
+                      <div>Cost/Tab</div>
                       <div>Total</div>
                       <div>Action</div>
                     </div>

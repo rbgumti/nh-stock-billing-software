@@ -1043,8 +1043,8 @@ export default function Stock() {
                       <th className="px-4 py-3 text-left font-semibold">Item Name</th>
                       <th className="px-4 py-3 text-left font-semibold">Vendor</th>
                       <th className="px-4 py-3 text-left font-semibold">Category</th>
-                      <th className="px-4 py-3 text-right font-semibold">Cost Price (₹)</th>
-                      <th className="px-4 py-3 text-right font-semibold">Selling Price (₹)</th>
+                      <th className="px-4 py-3 text-right font-semibold">Cost/Tab (₹)</th>
+                      <th className="px-4 py-3 text-right font-semibold">MRP/Tab (₹)</th>
                       <th className="px-4 py-3 text-left font-semibold">Composition</th>
                       <th className="px-4 py-3 text-left font-semibold">Packing</th>
                       <th className="px-4 py-3 text-center font-semibold">Actions</th>
