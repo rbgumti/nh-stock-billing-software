@@ -534,22 +534,22 @@ export default function NewInvoice() {
                             onChange={(e) => updateItem(item.id, "expiryDate", e.target.value)}
                           />
                         </div>
-                        <div>
-                          <Label htmlFor={`mrp-${item.id}`}>MRP (₹)</Label>
-                          <Input
-                            id={`mrp-${item.id}`}
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={item.mrp}
-                            onChange={(e) => updateItem(item.id, "mrp", parseFloat(e.target.value) || 0)}
-                            placeholder="0.00"
-                          />
-                        </div>
+                      <div>
+                        <Label htmlFor={`mrp-${item.id}`}>MRP/Tab (₹)</Label>
+                        <Input
+                          id={`mrp-${item.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={item.mrp}
+                          onChange={(e) => updateItem(item.id, "mrp", parseFloat(e.target.value) || 0)}
+                          placeholder="0.00"
+                        />
                       </div>
+                    </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg text-sm">
                         <div>
-                          <span className="font-medium text-gray-600">Unit Price:</span>
+                          <span className="font-medium text-gray-600">Cost/Tab:</span>
                           <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
                         </div>
                         <div>

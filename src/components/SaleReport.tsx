@@ -228,7 +228,7 @@ export default function SaleReport() {
     const data: any[][] = [
       [`Sale Report - ${formatDate(reportDate)}`],
       [],
-      ['S. No.', 'Medicine Name', 'Medicine Category', 'Opening Stock', 'Current Stock', 'Sale Qty', 'Rate', 'Value', 'Stock Received', 'Closing Stock', 'Discrepancy'],
+      ['S. No.', 'Medicine Name', 'Medicine Category', 'Opening Stock', 'Current Stock', 'Sale Qty', 'Rate/Tab', 'Value', 'Stock Received', 'Closing Stock', 'Discrepancy'],
     ];
 
     allSorted.forEach(item => {
@@ -288,7 +288,7 @@ export default function SaleReport() {
               <TableHead className="text-right font-bold">Opening Stock</TableHead>
               <TableHead className="text-right font-bold">Current Stock</TableHead>
               <TableHead className="text-right font-bold">Sale Qty</TableHead>
-              <TableHead className="text-right font-bold">Rate</TableHead>
+              <TableHead className="text-right font-bold">Rate/Tab</TableHead>
               <TableHead className="text-right font-bold">Value</TableHead>
               <TableHead className="text-right font-bold">Stock Received</TableHead>
               <TableHead className="text-right font-bold">Closing</TableHead>

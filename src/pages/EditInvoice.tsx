@@ -585,7 +585,7 @@ export default function EditInvoice() {
                         <span className="text-muted-foreground">Expiry:</span> {item.expiryDate}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Unit Price:</span> ₹{item.unitPrice.toFixed(2)}
+                        <span className="text-muted-foreground">Cost/Tab:</span> ₹{item.unitPrice.toFixed(2)}
                       </div>
                       <div>
                         <span className="text-muted-foreground font-semibold">Total:</span>{" "}

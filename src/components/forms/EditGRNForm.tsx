@@ -210,7 +210,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                   <div>Received</div>
                   <div>Batch No</div>
                   <div>Expiry</div>
-                  <div>MRP</div>
+                  <div>MRP/Tab</div>
                   <div>Status</div>
                 </div>
 
