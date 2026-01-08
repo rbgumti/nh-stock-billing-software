@@ -34,6 +34,7 @@ import { formatLocalISODate } from "@/lib/dateUtils";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [poTypeFilter, setPoTypeFilter] = useState<"all" | "Stock" | "Service">("all");
   const [filterCategory, setFilterCategory] = useState("all");
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -1378,31 +1379,66 @@ export default function Stock() {
         </TabsContent>
 
         <TabsContent value="purchase-orders" className="space-y-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">Purchase Orders</h2>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="bg-gradient-to-r from-cyan to-teal hover:shadow-glow text-white">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Purchase Order
-                  <ChevronDown className="h-4 w-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="glass-strong border-0">
-                <DropdownMenuItem onClick={() => setShowPOForm(true)}>
-                  <Package className="h-4 w-4 mr-2" />
-                  Stock PO (Medicines)
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowServicePOForm(true)}>
-                  <Wrench className="h-4 w-4 mr-2" />
-                  Service PO
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex gap-3 items-center">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Filter:</span>
+                <div className="flex gap-1">
+                  <Button
+                    variant={poTypeFilter === "all" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPoTypeFilter("all")}
+                    className={poTypeFilter === "all" ? "bg-gradient-to-r from-cyan to-teal text-white" : "glass-subtle border-cyan/20 hover:border-cyan/40"}
+                  >
+                    All
+                  </Button>
+                  <Button
+                    variant={poTypeFilter === "Stock" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPoTypeFilter("Stock")}
+                    className={poTypeFilter === "Stock" ? "bg-gradient-to-r from-cyan to-teal text-white" : "glass-subtle border-cyan/20 hover:border-cyan/40"}
+                  >
+                    <Package className="h-3 w-3 mr-1" />
+                    Stock
+                  </Button>
+                  <Button
+                    variant={poTypeFilter === "Service" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPoTypeFilter("Service")}
+                    className={poTypeFilter === "Service" ? "bg-gradient-to-r from-purple to-cyan text-white" : "glass-subtle border-purple/20 hover:border-purple/40"}
+                  >
+                    <Wrench className="h-3 w-3 mr-1" />
+                    Service
+                  </Button>
+                </div>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-gradient-to-r from-cyan to-teal hover:shadow-glow text-white">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Purchase Order
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="glass-strong border-0">
+                  <DropdownMenuItem onClick={() => setShowPOForm(true)}>
+                    <Package className="h-4 w-4 mr-2" />
+                    Stock PO (Medicines)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowServicePOForm(true)}>
+                    <Wrench className="h-4 w-4 mr-2" />
+                    Service PO
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {purchaseOrders.map((po, index) => (
+            {purchaseOrders
+              .filter(po => poTypeFilter === "all" || (po.poType || "Stock") === poTypeFilter)
+              .map((po, index) => (
               <Card key={po.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
                 <div className={`absolute inset-0 bg-gradient-to-br ${
                   index % 4 === 0 ? 'from-cyan/5 via-transparent to-teal/5' :
