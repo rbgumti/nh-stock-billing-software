@@ -46,8 +46,8 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
   const [grnItems, setGRNItems] = useState<GRNItem[]>(
     purchaseOrder.items.map(item => ({
       stockItemId: item.stockItemId,
-      orderedQuantity: item.quantity,
-      receivedQuantity: item.quantity,
+      orderedQuantity: item.qtyInTabs || item.quantity, // Use tabs as primary quantity
+      receivedQuantity: item.qtyInTabs || item.quantity,
       batchNo: "",
       expiryDate: "",
       mrp: 0,

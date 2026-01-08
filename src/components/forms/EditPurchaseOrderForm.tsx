@@ -65,7 +65,7 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
   }, [formData.supplierId, suppliers]);
 
   const addItem = () => {
-    if (!currentItem.stockItemId || !currentItem.qtyInStrips) return;
+    if (!currentItem.stockItemId || !currentItem.qtyInTabs) return;
 
     const stockItem = stockItems.find(item => item.id === parseInt(currentItem.stockItemId));
     if (!stockItem) return;
@@ -78,9 +78,9 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
     const newItem: PurchaseOrderItem = {
       stockItemId: stockItem.id,
       stockItemName: stockItem.name,
-      quantity: qtyInStrips,
+      quantity: qtyInTabs, // Primary quantity is now tabs
       unitPrice,
-      totalPrice: qtyInStrips * unitPrice,
+      totalPrice: qtyInTabs * unitPrice, // Calculate based on tabs
       packSize,
       qtyInStrips,
       qtyInTabs
@@ -96,19 +96,19 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
 
   const updateItemField = (index: number, field: keyof PurchaseOrderItem, value: string | number) => {
     const newItems = [...items];
-    if (field === 'qtyInStrips') {
-      const qtyInStrips = parseInt(value as string) || 0;
-      newItems[index].qtyInStrips = qtyInStrips;
-      newItems[index].quantity = qtyInStrips;
-      newItems[index].totalPrice = qtyInStrips * newItems[index].unitPrice;
-    } else if (field === 'qtyInTabs') {
-      newItems[index].qtyInTabs = parseInt(value as string) || 0;
+    if (field === 'qtyInTabs') {
+      const qtyInTabs = parseInt(value as string) || 0;
+      newItems[index].qtyInTabs = qtyInTabs;
+      newItems[index].quantity = qtyInTabs; // Primary quantity is tabs
+      newItems[index].totalPrice = qtyInTabs * newItems[index].unitPrice;
+    } else if (field === 'qtyInStrips') {
+      newItems[index].qtyInStrips = parseInt(value as string) || 0;
     } else if (field === 'packSize') {
       newItems[index].packSize = value as string;
     } else if (field === 'unitPrice') {
       const unitPrice = parseFloat(value as string) || 0;
       newItems[index].unitPrice = unitPrice;
-      newItems[index].totalPrice = newItems[index].quantity * unitPrice;
+      newItems[index].totalPrice = (newItems[index].qtyInTabs || newItems[index].quantity) * unitPrice;
     }
     setItems(newItems);
   };

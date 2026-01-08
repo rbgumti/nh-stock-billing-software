@@ -42,8 +42,8 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
       const stockItem = stockItems.find(s => s.id === item.stockItemId);
       return {
         stockItemId: item.stockItemId,
-        orderedQuantity: item.quantity,
-        receivedQuantity: item.quantity, // Assume all received
+        orderedQuantity: item.qtyInTabs || item.quantity, // Use tabs as primary quantity
+        receivedQuantity: item.qtyInTabs || item.quantity, // Assume all received
         batchNo: stockItem?.batchNo || "",
         expiryDate: stockItem?.expiryDate || "",
         mrp: stockItem?.mrp || 0,

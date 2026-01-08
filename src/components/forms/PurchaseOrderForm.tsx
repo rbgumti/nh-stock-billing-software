@@ -69,7 +69,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
   }, [formData.supplierId, suppliers]);
 
   const addItem = () => {
-    if (!currentItem.stockItemId || !currentItem.qtyInStrips) return;
+    if (!currentItem.stockItemId || !currentItem.qtyInTabs) return;
 
     const stockItem = stockItems.find(item => item.id === parseInt(currentItem.stockItemId));
     if (!stockItem) return;
@@ -82,9 +82,9 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
     const newItem: PurchaseOrderItem = {
       stockItemId: stockItem.id,
       stockItemName: stockItem.name,
-      quantity: qtyInStrips,
+      quantity: qtyInTabs, // Primary quantity is now tabs
       unitPrice,
-      totalPrice: qtyInStrips * unitPrice,
+      totalPrice: qtyInTabs * unitPrice, // Calculate based on tabs
       packSize,
       qtyInStrips,
       qtyInTabs
