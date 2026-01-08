@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
 import { EditPurchaseOrderForm } from "@/components/forms/EditPurchaseOrderForm";
 import { GRNForm } from "@/components/forms/GRNForm";
 import { EditGRNForm } from "@/components/forms/EditGRNForm";
+import { ServicePOForm } from "@/components/forms/ServicePOForm";
+import { ServiceGRNForm } from "@/components/forms/ServiceGRNForm";
 import { SupplierForm } from "@/components/forms/SupplierForm";
 import { SupplierPaymentForm } from "@/components/forms/SupplierPaymentForm";
 import { StockLedger } from "@/components/StockLedger";
@@ -36,7 +38,9 @@ export default function Stock() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [showPOForm, setShowPOForm] = useState(false);
+  const [showServicePOForm, setShowServicePOForm] = useState(false);
   const [showGRNForm, setShowGRNForm] = useState(false);
+  const [showServiceGRNForm, setShowServiceGRNForm] = useState(false);
   const [selectedPO, setSelectedPO] = useState<any>(null);
   const [editingPO, setEditingPO] = useState<PurchaseOrder | null>(null);
   const [editingGRN, setEditingGRN] = useState<PurchaseOrder | null>(null);
@@ -242,6 +246,28 @@ export default function Stock() {
     toast({
       title: "Success",
       description: `GRN ${grnData.grnNumber} has been processed successfully! Stock levels updated.`
+    });
+  };
+
+  const handleServiceGRN = (grnData: { grnNumber: string; purchaseOrderId: number; notes?: string; invoiceNumber?: string; invoiceDate?: string }) => {
+    const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
+    if (po) {
+      // Update PO status with GRN number, invoice number and date (no stock update for service)
+      updatePurchaseOrder(po.id, {
+        ...po,
+        status: 'Received',
+        grnDate: formatLocalISODate(),
+        grnNumber: grnData.grnNumber,
+        invoiceNumber: grnData.invoiceNumber,
+        invoiceDate: grnData.invoiceDate
+      });
+    }
+    
+    setShowServiceGRNForm(false);
+    setSelectedPO(null);
+    toast({
+      title: "Success",
+      description: `Service GRN ${grnData.grnNumber} has been processed successfully!`
     });
   };
 
@@ -1354,10 +1380,25 @@ export default function Stock() {
         <TabsContent value="purchase-orders" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">Purchase Orders</h2>
-            <Button onClick={() => setShowPOForm(true)} className="bg-gradient-to-r from-cyan to-teal hover:shadow-glow text-white">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Purchase Order
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-gradient-to-r from-cyan to-teal hover:shadow-glow text-white">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Purchase Order
+                  <ChevronDown className="h-4 w-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="glass-strong border-0">
+                <DropdownMenuItem onClick={() => setShowPOForm(true)}>
+                  <Package className="h-4 w-4 mr-2" />
+                  Stock PO (Medicines)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowServicePOForm(true)}>
+                  <Wrench className="h-4 w-4 mr-2" />
+                  Service PO
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -1372,7 +1413,15 @@ export default function Stock() {
                 <CardHeader className="relative">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">PO #{po.poNumber}</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">PO #{po.poNumber}</CardTitle>
+                        {po.poType === 'Service' && (
+                          <Badge variant="outline" className="text-xs border-purple/40 text-purple">
+                            <Wrench className="h-3 w-3 mr-1" />
+                            Service
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">{po.supplier}</p>
                     </div>
                     <Badge className={`${
@@ -1394,27 +1443,40 @@ export default function Stock() {
                       <p className="text-muted-foreground">Total Amount</p>
                       <p className="font-semibold text-lg bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{po.totalAmount.toFixed(2)}</p>
                     </div>
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Items</p>
-                      <p className="font-medium">{po.items.length} item(s)</p>
-                    </div>
+                    {po.poType === 'Service' ? (
+                      <div className="text-sm">
+                        <p className="text-muted-foreground">Service Description</p>
+                        <p className="font-medium line-clamp-2">{po.serviceDescription || 'N/A'}</p>
+                      </div>
+                    ) : (
+                      <div className="text-sm">
+                        <p className="text-muted-foreground">Items</p>
+                        <p className="font-medium">{po.items.length} item(s)</p>
+                      </div>
+                    )}
                     <div className="flex gap-2 mt-4">
                       {po.status === 'Pending' && (
                         <>
-                          <Button 
-                            variant="outline"
-                            size="sm"
-                            className="glass-subtle border-purple/20 hover:border-purple/40"
-                            onClick={() => setEditingPO(po)}
-                          >
-                            <Pencil className="h-4 w-4 mr-1 text-purple" />
-                            Edit
-                          </Button>
+                          {po.poType !== 'Service' && (
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              className="glass-subtle border-purple/20 hover:border-purple/40"
+                              onClick={() => setEditingPO(po)}
+                            >
+                              <Pencil className="h-4 w-4 mr-1 text-purple" />
+                              Edit
+                            </Button>
+                          )}
                           <Button 
                             className="flex-1 bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white" 
                             onClick={() => {
                               setSelectedPO(po);
-                              setShowGRNForm(true);
+                              if (po.poType === 'Service') {
+                                setShowServiceGRNForm(true);
+                              } else {
+                                setShowGRNForm(true);
+                              }
                             }}
                           >
                             <Truck className="h-4 w-4 mr-2" />
@@ -2068,6 +2130,24 @@ export default function Stock() {
           items={showRusanPharmaPO.items}
           stockItems={stockItems}
           onClose={() => setShowRusanPharmaPO(null)}
+        />
+      )}
+
+      {showServicePOForm && (
+        <ServicePOForm
+          onClose={() => setShowServicePOForm(false)}
+          onSubmit={handleAddPurchaseOrder}
+        />
+      )}
+
+      {showServiceGRNForm && selectedPO && (
+        <ServiceGRNForm
+          onClose={() => {
+            setShowServiceGRNForm(false);
+            setSelectedPO(null);
+          }}
+          onSubmit={handleServiceGRN}
+          purchaseOrder={selectedPO}
         />
       )}
     </div>

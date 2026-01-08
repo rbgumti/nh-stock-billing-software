@@ -730,6 +730,9 @@ export type Database = {
           payment_notes: string | null
           payment_status: string | null
           po_number: string
+          po_type: string
+          service_amount: number | null
+          service_description: string | null
           status: string
           supplier: string
           total_amount: number
@@ -751,6 +754,9 @@ export type Database = {
           payment_notes?: string | null
           payment_status?: string | null
           po_number: string
+          po_type?: string
+          service_amount?: number | null
+          service_description?: string | null
           status: string
           supplier: string
           total_amount: number
@@ -772,6 +778,9 @@ export type Database = {
           payment_notes?: string | null
           payment_status?: string | null
           po_number?: string
+          po_type?: string
+          service_amount?: number | null
+          service_description?: string | null
           status?: string
           supplier?: string
           total_amount?: number

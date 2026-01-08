@@ -33,6 +33,10 @@ export interface PurchaseOrder {
   paymentDate?: string;
   paymentAmount?: number;
   paymentNotes?: string;
+  // PO Type: Stock (default) or Service
+  poType?: 'Stock' | 'Service';
+  serviceDescription?: string;
+  serviceAmount?: number;
 }
 
 export function usePurchaseOrderStore() {
@@ -110,7 +114,10 @@ export function usePurchaseOrderStore() {
           paymentDueDate: po.payment_due_date || undefined,
           paymentDate: po.payment_date || undefined,
           paymentAmount: po.payment_amount ? Number(po.payment_amount) : undefined,
-          paymentNotes: po.payment_notes || undefined
+          paymentNotes: po.payment_notes || undefined,
+          poType: (po.po_type as 'Stock' | 'Service') || 'Stock',
+          serviceDescription: po.service_description || undefined,
+          serviceAmount: po.service_amount ? Number(po.service_amount) : undefined
         };
       });
 
@@ -147,7 +154,10 @@ export function usePurchaseOrderStore() {
           payment_due_date: po.paymentDueDate || null,
           payment_date: po.paymentDate || null,
           payment_amount: po.paymentAmount || null,
-          payment_notes: po.paymentNotes || null
+          payment_notes: po.paymentNotes || null,
+          po_type: po.poType || 'Stock',
+          service_description: po.serviceDescription || null,
+          service_amount: po.serviceAmount || null
         })
         .select()
         .single();
@@ -203,7 +213,10 @@ export function usePurchaseOrderStore() {
           payment_due_date: updatedPO.paymentDueDate || null,
           payment_date: updatedPO.paymentDate || null,
           payment_amount: updatedPO.paymentAmount || null,
-          payment_notes: updatedPO.paymentNotes || null
+          payment_notes: updatedPO.paymentNotes || null,
+          po_type: updatedPO.poType || 'Stock',
+          service_description: updatedPO.serviceDescription || null,
+          service_amount: updatedPO.serviceAmount || null
         })
         .eq('id', id);
 
