@@ -101,11 +101,13 @@ export default function DailyStockReport() {
       if (grnOrderIds.length > 0) {
         const { data: poItems } = await supabase
           .from('purchase_order_items')
-          .select('stock_item_name, quantity')
+          .select('stock_item_name, qty_in_tabs, quantity')
           .in('purchase_order_id', grnOrderIds);
 
         receivedQuantities = (poItems || []).reduce((acc: Record<string, number>, item) => {
-          acc[item.stock_item_name] = (acc[item.stock_item_name] || 0) + item.quantity;
+          // Use qty_in_tabs as primary (tab-based), fallback to quantity
+          const tabQty = item.qty_in_tabs || item.quantity || 0;
+          acc[item.stock_item_name] = (acc[item.stock_item_name] || 0) + tabQty;
           return acc;
         }, {});
       }

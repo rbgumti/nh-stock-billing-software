@@ -101,14 +101,16 @@ export default function SaleReport() {
       if (grnOrderIds.length > 0) {
         const { data: poItems } = await supabase
           .from('purchase_order_items')
-          .select('stock_item_id, stock_item_name, quantity')
+          .select('stock_item_id, stock_item_name, qty_in_tabs, quantity')
           .in('purchase_order_id', grnOrderIds);
 
         (poItems || []).forEach((it) => {
+          // Use qty_in_tabs as primary (tab-based calculations), fallback to quantity
+          const tabQty = it.qty_in_tabs || it.quantity || 0;
           // name-based (legacy)
-          receivedQuantitiesByName[it.stock_item_name] = (receivedQuantitiesByName[it.stock_item_name] || 0) + it.quantity;
+          receivedQuantitiesByName[it.stock_item_name] = (receivedQuantitiesByName[it.stock_item_name] || 0) + tabQty;
           // id-based (robust)
-          receivedQuantitiesById[it.stock_item_id] = (receivedQuantitiesById[it.stock_item_id] || 0) + it.quantity;
+          receivedQuantitiesById[it.stock_item_id] = (receivedQuantitiesById[it.stock_item_id] || 0) + tabQty;
         });
       }
 

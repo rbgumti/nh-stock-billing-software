@@ -121,6 +121,7 @@ export function StockLedger({ stockItem, onClose }: StockLedgerProps) {
         .from('purchase_order_items')
         .select(`
           id,
+          qty_in_tabs,
           quantity,
           created_at,
           purchase_orders (
@@ -144,11 +145,13 @@ export function StockLedger({ stockItem, onClose }: StockLedgerProps) {
             const grnDate = po.grn_date;
             // Check if within date range
             if (grnDate >= dateFrom && grnDate <= dateTo) {
+              // Use qty_in_tabs as primary (tab-based), fallback to quantity
+              const tabQty = item.qty_in_tabs || item.quantity || 0;
               entries.push({
                 id: `grn-${item.id}`,
                 date: grnDate,
                 type: 'IN',
-                quantity: item.quantity,
+                quantity: tabQty,
                 balance: 0, // Will calculate later
                 reference: po.grn_number || po.po_number,
                 referenceType: 'GRN',
