@@ -12,6 +12,7 @@ import { EditPurchaseOrderForm } from "@/components/forms/EditPurchaseOrderForm"
 import { GRNForm } from "@/components/forms/GRNForm";
 import { EditGRNForm } from "@/components/forms/EditGRNForm";
 import { ServicePOForm } from "@/components/forms/ServicePOForm";
+import { EditServicePOForm } from "@/components/forms/EditServicePOForm";
 import { ServiceGRNForm } from "@/components/forms/ServiceGRNForm";
 import { SupplierForm } from "@/components/forms/SupplierForm";
 import { SupplierPaymentForm } from "@/components/forms/SupplierPaymentForm";
@@ -44,6 +45,7 @@ export default function Stock() {
   const [showServiceGRNForm, setShowServiceGRNForm] = useState(false);
   const [selectedPO, setSelectedPO] = useState<any>(null);
   const [editingPO, setEditingPO] = useState<PurchaseOrder | null>(null);
+  const [editingServicePO, setEditingServicePO] = useState<PurchaseOrder | null>(null);
   const [editingGRN, setEditingGRN] = useState<PurchaseOrder | null>(null);
   const [showSupplierForm, setShowSupplierForm] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -1493,7 +1495,17 @@ export default function Stock() {
                     <div className="flex gap-2 mt-4">
                       {po.status === 'Pending' && (
                         <>
-                          {po.poType !== 'Service' && (
+                          {po.poType === 'Service' ? (
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              className="glass-subtle border-purple/20 hover:border-purple/40"
+                              onClick={() => setEditingServicePO(po)}
+                            >
+                              <Pencil className="h-4 w-4 mr-1 text-purple" />
+                              Edit
+                            </Button>
+                          ) : (
                             <Button 
                               variant="outline"
                               size="sm"
@@ -2184,6 +2196,29 @@ export default function Stock() {
           }}
           onSubmit={handleServiceGRN}
           purchaseOrder={selectedPO}
+        />
+      )}
+
+      {editingServicePO && (
+        <EditServicePOForm
+          purchaseOrder={editingServicePO}
+          onClose={() => setEditingServicePO(null)}
+          onSubmit={async (updatedPO) => {
+            try {
+              await updatePurchaseOrder(updatedPO.id, updatedPO);
+              setEditingServicePO(null);
+              toast({
+                title: "Success",
+                description: "Service PO has been updated successfully!"
+              });
+            } catch (error) {
+              toast({
+                title: "Error",
+                description: "Failed to update service PO",
+                variant: "destructive"
+              });
+            }
+          }}
         />
       )}
     </div>
