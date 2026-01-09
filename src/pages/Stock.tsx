@@ -4,7 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
 import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
@@ -58,6 +63,9 @@ export default function Stock() {
   const [showVyadoHealthcarePO, setShowVyadoHealthcarePO] = useState<PurchaseOrder | null>(null);
   const [showVeeEssPharmaPO, setShowVeeEssPharmaPO] = useState<PurchaseOrder | null>(null);
   const [showRusanPharmaPO, setShowRusanPharmaPO] = useState<PurchaseOrder | null>(null);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportStartDate, setExportStartDate] = useState<Date | undefined>(undefined);
+  const [exportEndDate, setExportEndDate] = useState<Date | undefined>(undefined);
   const { stockItems, addStockItem, updateStockItem, subscribe } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
@@ -454,6 +462,96 @@ export default function Stock() {
   const upcomingPayments = getUpcomingPayments();
   const totalOutstanding = payments.filter(p => p.status !== 'Completed').reduce((sum, p) => sum + p.amount, 0);
   const unpaidPOs = purchaseOrders.filter(po => po.paymentStatus !== 'Paid');
+
+  const exportPOsToExcel = () => {
+    if (!exportStartDate || !exportEndDate) {
+      toast({
+        title: "Error",
+        description: "Please select both start and end dates",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const startDateStr = format(exportStartDate, 'yyyy-MM-dd');
+    const endDateStr = format(exportEndDate, 'yyyy-MM-dd');
+
+    // Filter POs based on date range and current type filter
+    const filteredPOs = purchaseOrders.filter(po => {
+      const poDate = po.orderDate;
+      const matchesDateRange = poDate >= startDateStr && poDate <= endDateStr;
+      const matchesTypeFilter = poTypeFilter === "all" || (po.poType || "Stock") === poTypeFilter;
+      return matchesDateRange && matchesTypeFilter;
+    });
+
+    if (filteredPOs.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No purchase orders found in the selected date range",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Prepare data for Excel
+    const exportData = filteredPOs.map(po => ({
+      'PO Number': po.poNumber,
+      'Type': po.poType || 'Stock',
+      'Supplier': po.supplier,
+      'Order Date': po.orderDate,
+      'Expected Delivery': po.expectedDelivery,
+      'Status': po.status,
+      'Total Amount': po.totalAmount,
+      'Payment Status': po.paymentStatus || 'Pending',
+      'Payment Due Date': po.paymentDueDate || '-',
+      'GRN Number': po.grnNumber || '-',
+      'GRN Date': po.grnDate || '-',
+      'Invoice Number': po.invoiceNumber || '-',
+      'Invoice Date': po.invoiceDate || '-',
+      'Items Count': po.poType === 'Service' ? '-' : po.items.length,
+      'Service Description': po.poType === 'Service' ? (po.serviceDescription || '-') : '-',
+      'Notes': po.notes || '-'
+    }));
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 15 }, // PO Number
+      { wch: 10 }, // Type
+      { wch: 20 }, // Supplier
+      { wch: 12 }, // Order Date
+      { wch: 15 }, // Expected Delivery
+      { wch: 10 }, // Status
+      { wch: 12 }, // Total Amount
+      { wch: 12 }, // Payment Status
+      { wch: 15 }, // Payment Due Date
+      { wch: 15 }, // GRN Number
+      { wch: 12 }, // GRN Date
+      { wch: 15 }, // Invoice Number
+      { wch: 12 }, // Invoice Date
+      { wch: 10 }, // Items Count
+      { wch: 30 }, // Service Description
+      { wch: 25 }  // Notes
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Purchase Orders');
+
+    // Generate filename with date range
+    const filename = `PurchaseOrders_${startDateStr}_to_${endDateStr}.xlsx`;
+    XLSX.writeFile(wb, filename);
+
+    toast({
+      title: "Success",
+      description: `Exported ${filteredPOs.length} purchase order(s) to Excel`
+    });
+
+    setShowExportDialog(false);
+    setExportStartDate(undefined);
+    setExportEndDate(undefined);
+  };
 
   const downloadPurchaseOrder = (po: any) => {
     const doc = new jsPDF();
@@ -1415,6 +1513,14 @@ export default function Stock() {
                   </Button>
                 </div>
               </div>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowExportDialog(true)}
+                className="glass-subtle border-emerald/20 hover:border-emerald/40"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button className="bg-gradient-to-r from-cyan to-teal hover:shadow-glow text-white">
@@ -2221,6 +2327,97 @@ export default function Stock() {
           }}
         />
       )}
+
+      {/* Export POs Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="glass-strong border-0 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">
+              Export Purchase Orders
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Start Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal glass-subtle border-purple/20",
+                      !exportStartDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {exportStartDate ? format(exportStartDate, "PPP") : <span>Select start date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={exportStartDate}
+                    onSelect={setExportStartDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">End Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal glass-subtle border-purple/20",
+                      !exportEndDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {exportEndDate ? format(exportEndDate, "PPP") : <span>Select end date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={exportEndDate}
+                    onSelect={setExportEndDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            {poTypeFilter !== "all" && (
+              <p className="text-sm text-muted-foreground">
+                Exporting only <strong>{poTypeFilter}</strong> POs based on current filter.
+              </p>
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowExportDialog(false);
+                setExportStartDate(undefined);
+                setExportEndDate(undefined);
+              }}
+              className="glass-subtle border-purple/20"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={exportPOsToExcel}
+              disabled={!exportStartDate || !exportEndDate}
+              className="bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white"
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Export to Excel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
