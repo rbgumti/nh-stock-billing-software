@@ -5,6 +5,7 @@ import { Printer, Download } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
+import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 interface VyadoHealthcarePOProps {
   poNumber: string;
@@ -16,6 +17,7 @@ interface VyadoHealthcarePOProps {
 
 export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose }: VyadoHealthcarePOProps) {
   const printRef = useRef<HTMLDivElement>(null);
+  const { doctorName } = useAppSettings();
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -99,7 +101,7 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
     // Address - bold
     pdf.setFontSize(13);
     pdf.setFont('times', 'bold');
-    pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib    Dr. Metali Bhatti', pageWidth / 2, y, { align: 'center' });
+    pdf.text(`Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib    ${doctorName}`, pageWidth / 2, y, { align: 'center' });
     y += 7;
 
     // Licence - bold
@@ -233,7 +235,7 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
 
           {/* Address Row */}
           <p className="text-center text-[14px] font-bold mb-2">
-            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;Dr. Metali Bhatti
+            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;{doctorName}
           </p>
 
           {/* Licence Row */}

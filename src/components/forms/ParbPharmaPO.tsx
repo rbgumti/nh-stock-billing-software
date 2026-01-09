@@ -5,6 +5,7 @@ import { Printer, Download } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
+import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 interface ParbPharmaPOProps {
   poNumber: string;
@@ -16,6 +17,7 @@ interface ParbPharmaPOProps {
 
 export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: ParbPharmaPOProps) {
   const printRef = useRef<HTMLDivElement>(null);
+  const { doctorName } = useAppSettings();
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -231,7 +233,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     // Signature line
     pdf.line(15, y, 65, y);
     y += 5;
-    pdf.text('Dr. Metali Bhatti', 15, y);
+    pdf.text(doctorName, 15, y);
     pdf.text(`Date: ${formatDate(poDate)}`, 55, y);
 
     pdf.save(`PO-${poNumber}-Parb-Pharma.pdf`);
@@ -352,7 +354,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             <p>Opp. New Bus Stand, G.T. Road, Sirhind</p>
             <div className="mt-8 w-48 border-b border-black"></div>
             <div className="flex gap-8 mt-1">
-              <span>Dr. Metali Bhatti</span>
+              <span>{doctorName}</span>
               <span>Date: {formatDate(poDate)}</span>
             </div>
           </div>

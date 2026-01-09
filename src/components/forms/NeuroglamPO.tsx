@@ -5,6 +5,7 @@ import { Printer, Download } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
+import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 interface NeuroglamPOProps {
   poNumber: string;
@@ -16,6 +17,7 @@ interface NeuroglamPOProps {
 
 export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: NeuroglamPOProps) {
   const printRef = useRef<HTMLDivElement>(null);
+  const { doctorName } = useAppSettings();
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -118,7 +120,7 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
     // Doctor Name - bold
     pdf.setFontSize(11);
     pdf.setFont('times', 'bold');
-    pdf.text('Dr. Metali Bhatti', pageWidth / 2, y, { align: 'center' });
+    pdf.text(doctorName, pageWidth / 2, y, { align: 'center' });
     y += 5;
 
     // Licence
@@ -268,7 +270,7 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
     pdf.setFontSize(10);
     pdf.text(`Date: ${formatDate(poDate)}`, 15, y);
     pdf.text('(Navjeevanhospital)', pageWidth / 2, y, { align: 'center' });
-    pdf.text('(Dr. Metali Bhatti.)', pageWidth - 15, y, { align: 'right' });
+    pdf.text(`(${doctorName}.)`, pageWidth - 15, y, { align: 'right' });
 
     pdf.save(`PO-${poNumber}-Neuroglam.pdf`);
   };
@@ -305,7 +307,7 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           </p>
 
           {/* Doctor Name */}
-          <p className="text-center text-[11px] font-bold mb-1">Dr. Metali Bhatti</p>
+          <p className="text-center text-[11px] font-bold mb-1">{doctorName}</p>
 
           {/* Licence Row */}
           <p className="text-center text-[10px] mb-3">
@@ -405,7 +407,7 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
               <p>(Navjeevanhospital)</p>
             </div>
             <div className="text-right">
-              <p>(Dr. Metali Bhatti.)</p>
+              <p>({doctorName}.)</p>
             </div>
           </div>
         </div>
