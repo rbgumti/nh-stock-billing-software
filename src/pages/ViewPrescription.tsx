@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, FileText, Printer, Pencil, Download } from "lucide-react";
 import { usePrescriptionStore, Prescription } from "@/hooks/usePrescriptionStore";
+import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import hospitalLogo from "@/assets/NH_LOGO.png";
@@ -13,6 +14,7 @@ export default function ViewPrescription() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { prescriptions, loading, getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
+  const { doctorName } = useAppSettings();
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [localLoading, setLocalLoading] = useState(true);
 
@@ -208,14 +210,14 @@ export default function ViewPrescription() {
     
     y += 5;
     doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(0, 0, 0);
-    doc.text("Doctor's Signature", signatureX + 30, y, { align: "center" });
-    
-    y += 8;
-    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(27, 53, 97);
+    doc.text(doctorName, signatureX + 30, y, { align: "center" });
+    
+    y += 6;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
     doc.text("Navjeevan Hospital", signatureX + 30, y, { align: "center" });
     
     y += 5;

@@ -10,6 +10,7 @@ import jsPDF from 'jspdf';
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
+import { useAppSettings } from "@/hooks/usePerformanceMode";
 import hospitalLogo from "@/assets/NH_LOGO.png";
 
 export default function Invoices() {
@@ -18,6 +19,7 @@ export default function Invoices() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const { doctorName } = useAppSettings();
 
   // Load invoices from Supabase
   useEffect(() => {
@@ -273,6 +275,23 @@ export default function Invoices() {
     doc.text("IFSC: SBIN0XXXXXX", bankX, y);
     y += 5;
     doc.text("UPI: navjeevan@sbi", bankX, y);
+
+    // Doctor Signature Section
+    y += 15;
+    const signatureX = pageWidth - margin - 60;
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.line(signatureX, y, pageWidth - margin, y);
+    y += 5;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(27, 53, 97);
+    doc.text(doctorName, signatureX + 30, y, { align: "center" });
+    y += 6;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text("Navjeevan Hospital", signatureX + 30, y, { align: "center" });
     
     // Footer
     y = doc.internal.pageSize.getHeight() - 25;
