@@ -287,6 +287,11 @@ export function StockLedger({ stockItem, onClose }: StockLedgerProps) {
     XLSX.writeFile(wb, fileName);
   };
 
+  const exportFullLedgerToExcel = () => {
+    // Export with the current date range (already filterable in UI)
+    exportToExcel();
+  };
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">

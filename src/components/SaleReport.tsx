@@ -10,7 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Loader2, RefreshCw } from "lucide-react";
+import { Download, Calendar, Loader2, RefreshCw, CalendarRange } from "lucide-react";
+import { DateRangeExportDialog } from "./DateRangeExportDialog";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -36,6 +38,7 @@ export default function SaleReport() {
   const [loading, setLoading] = useState(false);
   const [reportItems, setReportItems] = useState<SaleReportItem[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [showDateRangeExport, setShowDateRangeExport] = useState(false);
 
   // Check if report date is today
   const isToday = reportDate === formatLocalISODate();
@@ -278,6 +281,114 @@ export default function SaleReport() {
     toast.success('Report exported successfully');
   };
 
+  const exportDateRangeToExcel = async (startDate: Date, endDate: Date) => {
+    const startDateStr = format(startDate, 'yyyy-MM-dd');
+    const endDateStr = format(endDate, 'yyyy-MM-dd');
+
+    // Get stock items
+    const { data: stockItems, error: stockError } = await supabase
+      .from('stock_items')
+      .select('item_id, name, category, unit_price, mrp')
+      .order('name');
+
+    if (stockError) throw stockError;
+
+    // Get invoices in date range
+    const { data: invoiceData } = await supabase
+      .from('invoices')
+      .select('id, invoice_date')
+      .gte('invoice_date', startDateStr)
+      .lte('invoice_date', endDateStr);
+
+    const invoiceIds = invoiceData?.map(inv => inv.id) || [];
+
+    let soldQuantitiesById: Record<number, number> = {};
+    let soldAmountsById: Record<number, number> = {};
+
+    if (invoiceIds.length > 0) {
+      const { data: invoiceItems } = await supabase
+        .from('invoice_items')
+        .select('medicine_id, quantity, mrp, unit_price')
+        .in('invoice_id', invoiceIds);
+
+      (invoiceItems || []).forEach((it) => {
+        soldQuantitiesById[it.medicine_id] = (soldQuantitiesById[it.medicine_id] || 0) + it.quantity;
+        const price = it.mrp || it.unit_price || 0;
+        soldAmountsById[it.medicine_id] = (soldAmountsById[it.medicine_id] || 0) + (it.quantity * price);
+      });
+    }
+
+    // Get stock received in date range
+    const { data: grnOrders } = await supabase
+      .from('purchase_orders')
+      .select('id')
+      .gte('grn_date', startDateStr)
+      .lte('grn_date', endDateStr)
+      .eq('status', 'Received');
+
+    const grnOrderIds = grnOrders?.map(po => po.id) || [];
+    let receivedQuantitiesById: Record<number, number> = {};
+
+    if (grnOrderIds.length > 0) {
+      const { data: poItems } = await supabase
+        .from('purchase_order_items')
+        .select('stock_item_id, qty_in_tabs, quantity')
+        .in('purchase_order_id', grnOrderIds);
+
+      (poItems || []).forEach((it) => {
+        const tabQty = it.qty_in_tabs || it.quantity || 0;
+        receivedQuantitiesById[it.stock_item_id] = (receivedQuantitiesById[it.stock_item_id] || 0) + tabQty;
+      });
+    }
+
+    // Build report data
+    const items = (stockItems || []).map((item, index) => {
+      const saleQty = soldQuantitiesById[item.item_id] || 0;
+      const rate = item.mrp || item.unit_price || 0;
+      const value = soldAmountsById[item.item_id] || (saleQty * rate);
+      const stockReceived = receivedQuantitiesById[item.item_id] || 0;
+
+      return {
+        sNo: index + 1,
+        medicineName: item.name,
+        category: item.category,
+        saleQty,
+        rate,
+        value,
+        stockReceived,
+      };
+    }).filter(item => item.saleQty > 0 || item.stockReceived > 0);
+
+    // Group by category
+    const bnx = items.filter(i => i.category === 'BNX');
+    const tpn = items.filter(i => i.category === 'TPN');
+    const pshy = items.filter(i => i.category === 'PSHY');
+
+    const workbook = XLSX.utils.book_new();
+    const data: any[][] = [
+      [`Sale Report - ${format(startDate, 'dd MMM yyyy')} to ${format(endDate, 'dd MMM yyyy')}`],
+      [],
+      ['S. No.', 'Medicine Name', 'Category', 'Sale Qty', 'Rate/Tab', 'Value', 'Stock Received'],
+    ];
+
+    let sNo = 1;
+    [...bnx, ...tpn, ...pshy].forEach(item => {
+      data.push([sNo++, item.medicineName, item.category, item.saleQty, item.rate, item.value, item.stockReceived]);
+    });
+
+    data.push([]);
+    data.push(['TOTAL BNX', '', 'BNX', bnx.reduce((s, i) => s + i.saleQty, 0), '', bnx.reduce((s, i) => s + i.value, 0), '']);
+    data.push(['TOTAL TPN', '', 'TPN', tpn.reduce((s, i) => s + i.saleQty, 0), '', tpn.reduce((s, i) => s + i.value, 0), '']);
+    data.push(['TOTAL PSHY', '', 'PSHY', pshy.reduce((s, i) => s + i.saleQty, 0), '', pshy.reduce((s, i) => s + i.value, 0), '']);
+    data.push(['GRAND TOTAL', '', '', items.reduce((s, i) => s + i.saleQty, 0), '', items.reduce((s, i) => s + i.value, 0), '']);
+
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    worksheet['!cols'] = [{ wch: 8 }, { wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sale Report');
+    XLSX.writeFile(workbook, `sale-report-${startDateStr}-to-${endDateStr}.xlsx`);
+    toast.success('Report exported successfully');
+  };
+
   const renderCategoryTable = (items: SaleReportItem[], categoryLabel: string, totalQty: number, totalValue: number) => (
     <div className="space-y-2">
       <h3 className="font-semibold text-lg text-foreground">{categoryLabel}</h3>
@@ -382,8 +493,20 @@ export default function SaleReport() {
             <Download className="h-4 w-4 mr-2" />
             Export Excel
           </Button>
+          <Button variant="outline" onClick={() => setShowDateRangeExport(true)} disabled={loading}>
+            <CalendarRange className="h-4 w-4 mr-2" />
+            Date Range Export
+          </Button>
         </div>
       </CardHeader>
+      
+      <DateRangeExportDialog
+        open={showDateRangeExport}
+        onOpenChange={setShowDateRangeExport}
+        onExport={exportDateRangeToExcel}
+        title="Export Sale Report"
+        description="Select date range to export sales data"
+      />
       <CardContent className="space-y-6">
         {loading ? (
           <div className="flex items-center justify-center py-12">

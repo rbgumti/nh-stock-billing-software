@@ -10,7 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Filter, RefreshCw, Pill, Droplets, Brain, Printer } from "lucide-react";
+import { Download, Calendar, Filter, RefreshCw, Pill, Droplets, Brain, Printer, CalendarRange } from "lucide-react";
+import { DateRangeExportDialog } from "./DateRangeExportDialog";
+import { format } from "date-fns";
 import { useStockStore } from "@/hooks/useStockStore";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -34,6 +36,7 @@ export default function DailyStockReport() {
   const [showOnlyActive, setShowOnlyActive] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showDateRangeExport, setShowDateRangeExport] = useState(false);
 
   useEffect(() => {
     loadReportData();
@@ -292,6 +295,99 @@ export default function DailyStockReport() {
     XLSX.utils.book_append_sheet(workbook, pshySheet, 'PSHY Stock');
 
     XLSX.writeFile(workbook, `Daily_Stock_Report_${reportDate}.xlsx`);
+  };
+
+  const exportDateRangeToExcel = async (startDate: Date, endDate: Date) => {
+    const startDateStr = format(startDate, 'yyyy-MM-dd');
+    const endDateStr = format(endDate, 'yyyy-MM-dd');
+
+    // Get all stock items
+    const { data: allStockItems, error: stockError } = await supabase
+      .from('stock_items')
+      .select('item_id, name, category, current_stock')
+      .order('name');
+
+    if (stockError) throw stockError;
+
+    // Get invoices in date range
+    const { data: invoiceData } = await supabase
+      .from('invoices')
+      .select('id, invoice_date')
+      .gte('invoice_date', startDateStr)
+      .lte('invoice_date', endDateStr);
+
+    const invoiceIds = invoiceData?.map(inv => inv.id) || [];
+
+    let issuedQuantities: Record<string, number> = {};
+    if (invoiceIds.length > 0) {
+      const { data: invoiceItems } = await supabase
+        .from('invoice_items')
+        .select('medicine_name, quantity')
+        .in('invoice_id', invoiceIds);
+
+      issuedQuantities = (invoiceItems || []).reduce((acc: Record<string, number>, item) => {
+        acc[item.medicine_name] = (acc[item.medicine_name] || 0) + item.quantity;
+        return acc;
+      }, {});
+    }
+
+    // Get stock received in date range
+    const { data: grnOrders } = await supabase
+      .from('purchase_orders')
+      .select('id')
+      .gte('grn_date', startDateStr)
+      .lte('grn_date', endDateStr)
+      .eq('status', 'Received');
+
+    const grnOrderIds = grnOrders?.map(po => po.id) || [];
+    let receivedQuantities: Record<string, number> = {};
+
+    if (grnOrderIds.length > 0) {
+      const { data: poItems } = await supabase
+        .from('purchase_order_items')
+        .select('stock_item_name, qty_in_tabs, quantity')
+        .in('purchase_order_id', grnOrderIds);
+
+      receivedQuantities = (poItems || []).reduce((acc: Record<string, number>, item) => {
+        const tabQty = item.qty_in_tabs || item.quantity || 0;
+        acc[item.stock_item_name] = (acc[item.stock_item_name] || 0) + tabQty;
+        return acc;
+      }, {});
+    }
+
+    // Build report data
+    const items = (allStockItems || []).map(item => ({
+      name: item.name,
+      category: item.category || 'BNX',
+      issuedToPatients: issuedQuantities[item.name] || 0,
+      stockReceived: receivedQuantities[item.name] || 0,
+    })).filter(item => item.issuedToPatients > 0 || item.stockReceived > 0);
+
+    const bnx = items.filter(i => i.category === 'BNX');
+    const tpn = items.filter(i => i.category === 'TPN');
+    const pshy = items.filter(i => i.category === 'PSHY');
+
+    const workbook = XLSX.utils.book_new();
+
+    const createSheet = (data: typeof items, sheetName: string) => {
+      const sheetData = data.map(item => ({
+        'Medicine Name': item.name,
+        'Issued to Patients': item.issuedToPatients,
+        'Stock Received': item.stockReceived,
+      }));
+      sheetData.push({
+        'Medicine Name': 'TOTAL',
+        'Issued to Patients': data.reduce((sum, item) => sum + item.issuedToPatients, 0),
+        'Stock Received': data.reduce((sum, item) => sum + item.stockReceived, 0),
+      });
+      return XLSX.utils.json_to_sheet(sheetData);
+    };
+
+    XLSX.utils.book_append_sheet(workbook, createSheet(bnx, 'BNX Stock'), 'BNX Stock');
+    XLSX.utils.book_append_sheet(workbook, createSheet(tpn, 'TPN Stock'), 'TPN Stock');
+    XLSX.utils.book_append_sheet(workbook, createSheet(pshy, 'PSHY Stock'), 'PSHY Stock');
+
+    XLSX.writeFile(workbook, `Daily_Stock_Report_${startDateStr}_to_${endDateStr}.xlsx`);
   };
 
   const handlePrint = () => {
@@ -562,8 +658,20 @@ export default function DailyStockReport() {
             <Download className="h-4 w-4 mr-2" />
             Export Excel
           </Button>
+          <Button variant="outline" onClick={() => setShowDateRangeExport(true)}>
+            <CalendarRange className="h-4 w-4 mr-2" />
+            Date Range Export
+          </Button>
         </div>
       </div>
+
+      <DateRangeExportDialog
+        open={showDateRangeExport}
+        onOpenChange={setShowDateRangeExport}
+        onExport={exportDateRangeToExcel}
+        title="Export Daily Stock Report"
+        description="Select date range to export stock movement data"
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

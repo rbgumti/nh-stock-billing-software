@@ -10,8 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Loader2, Check, RefreshCw, ToggleLeft, ToggleRight, Save, FileSpreadsheet, FileText, ChevronDown } from "lucide-react";
+import { Download, Calendar, Loader2, Check, RefreshCw, ToggleLeft, ToggleRight, Save, FileSpreadsheet, FileText, ChevronDown, CalendarRange } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DateRangeExportDialog } from "./DateRangeExportDialog";
+import { format } from "date-fns";
 import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -54,6 +56,7 @@ export default function DayReport() {
   const [isRefreshingMedicine, setIsRefreshingMedicine] = useState(false);
   const [isRefreshingPrevCash, setIsRefreshingPrevCash] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showDateRangeExport, setShowDateRangeExport] = useState(false);
   
   // Patient counts
   const [newPatients, setNewPatients] = useState(0);
@@ -594,6 +597,136 @@ export default function DayReport() {
     XLSX.utils.book_append_sheet(workbook, sheet, 'Day Report');
     XLSX.writeFile(workbook, `Day_Report_${reportDate}${withColors ? '_Color' : ''}.xlsx`);
     toast.success(`Excel exported ${withColors ? 'with colors' : 'successfully'}`);
+  };
+
+  const exportDateRangeToExcel = async (startDate: Date, endDate: Date) => {
+    const startDateStr = format(startDate, 'yyyy-MM-dd');
+    const endDateStr = format(endDate, 'yyyy-MM-dd');
+    const fmt = (n: number) => Number(n.toFixed(2));
+
+    // Fetch day reports in date range
+    const { data: dayReports, error } = await supabase
+      .from('day_reports')
+      .select('*')
+      .gte('report_date', startDateStr)
+      .lte('report_date', endDateStr)
+      .order('report_date', { ascending: true });
+
+    if (error) throw error;
+
+    if (!dayReports || dayReports.length === 0) {
+      toast.error('No day reports found for the selected date range');
+      return;
+    }
+
+    // Get invoices in date range for medicine data
+    const { data: invoiceData } = await supabase
+      .from('invoices')
+      .select('id, invoice_date')
+      .gte('invoice_date', startDateStr)
+      .lte('invoice_date', endDateStr);
+
+    const invoiceIds = invoiceData?.map(inv => inv.id) || [];
+
+    // Get stock items for category mapping
+    const { data: allStockItems } = await supabase
+      .from('stock_items')
+      .select('item_id, name, category, mrp, unit_price');
+
+    const stockItemMap = new Map((allStockItems || []).map(s => [s.item_id, s]));
+
+    let salesByCategory: Record<string, number> = { BNX: 0, TPN: 0, PSHY: 0 };
+
+    if (invoiceIds.length > 0) {
+      const { data: invoiceItems } = await supabase
+        .from('invoice_items')
+        .select('medicine_id, quantity, mrp, unit_price')
+        .in('invoice_id', invoiceIds);
+
+      (invoiceItems || []).forEach((it) => {
+        const stockItem = stockItemMap.get(it.medicine_id);
+        const category = stockItem?.category?.toUpperCase() || 'BNX';
+        const price = it.mrp || it.unit_price || stockItem?.mrp || stockItem?.unit_price || 0;
+        const amount = it.quantity * price;
+        if (category === 'BNX' || category === 'TPN' || category === 'PSHY') {
+          salesByCategory[category] += amount;
+        } else {
+          salesByCategory['BNX'] += amount;
+        }
+      });
+    }
+
+    const workbook = XLSX.utils.book_new();
+
+    // Summary sheet with all day reports
+    const summaryData: any[][] = [
+      [`Day's Report Summary - ${format(startDate, 'dd MMM yyyy')} to ${format(endDate, 'dd MMM yyyy')}`],
+      [],
+      ['Date', 'New Patients', 'Follow-Up', 'Total Patients', 'Fees', 'Lab Collection', 'Cash Previous', 'Bank Deposit', 'Paytm/GPay', 'Adjustments'],
+    ];
+
+    let totalNewPatients = 0;
+    let totalFollowUp = 0;
+    let totalFees = 0;
+    let totalLab = 0;
+    let totalDeposit = 0;
+    let totalPaytm = 0;
+
+    dayReports.forEach(report => {
+      const dateStr = new Date(report.report_date).toLocaleDateString('en-IN');
+      const newP = report.new_patients || 0;
+      const followP = report.follow_up_patients || 0;
+      totalNewPatients += newP;
+      totalFollowUp += followP;
+      totalFees += Number(report.fees) || 0;
+      totalLab += Number(report.lab_collection) || 0;
+      totalDeposit += Number(report.deposit_in_bank) || 0;
+      totalPaytm += Number(report.paytm_gpay) || 0;
+
+      summaryData.push([
+        dateStr,
+        newP,
+        followP,
+        newP + followP,
+        fmt(Number(report.fees) || 0),
+        fmt(Number(report.lab_collection) || 0),
+        fmt(Number(report.cash_previous_day) || 0),
+        fmt(Number(report.deposit_in_bank) || 0),
+        fmt(Number(report.paytm_gpay) || 0),
+        fmt(Number(report.adjustments) || 0),
+      ]);
+    });
+
+    summaryData.push([]);
+    summaryData.push([
+      'TOTAL',
+      totalNewPatients,
+      totalFollowUp,
+      totalNewPatients + totalFollowUp,
+      fmt(totalFees),
+      fmt(totalLab),
+      '',
+      fmt(totalDeposit),
+      fmt(totalPaytm),
+      '',
+    ]);
+
+    summaryData.push([]);
+    summaryData.push(['Medicine Sales Summary']);
+    summaryData.push(['Category', 'Total Sales']);
+    summaryData.push(['BNX', fmt(salesByCategory['BNX'])]);
+    summaryData.push(['TPN', fmt(salesByCategory['TPN'])]);
+    summaryData.push(['PSHY', fmt(salesByCategory['PSHY'])]);
+    summaryData.push(['GRAND TOTAL', fmt(salesByCategory['BNX'] + salesByCategory['TPN'] + salesByCategory['PSHY'])]);
+
+    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+    summarySheet['!cols'] = [
+      { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 12 }
+    ];
+    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+
+    XLSX.writeFile(workbook, `Day_Reports_${startDateStr}_to_${endDateStr}.xlsx`);
+    toast.success('Day reports exported successfully');
   };
 
   const exportToPDF = () => {
@@ -1291,10 +1424,22 @@ export default function DayReport() {
                 <FileSpreadsheet className="h-4 w-4 mr-2" />
                 Excel (Plain)
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowDateRangeExport(true)}>
+                <CalendarRange className="h-4 w-4 mr-2 text-blue-500" />
+                Date Range Export
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
+
+      <DateRangeExportDialog
+        open={showDateRangeExport}
+        onOpenChange={setShowDateRangeExport}
+        onExport={exportDateRangeToExcel}
+        title="Export Day's Report"
+        description="Select date range to export Day's Report data"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left Column - BNX Details & Medicines */}
