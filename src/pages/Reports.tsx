@@ -30,7 +30,8 @@ import {
   Activity,
   AlertTriangle,
   Clock,
-  ShoppingCart
+  ShoppingCart,
+  CalendarIcon
 } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import * as XLSX from "xlsx";
@@ -39,12 +40,26 @@ import DayReport from "@/components/DayReport";
 import SaleReport from "@/components/SaleReport";
 import FollowUpReport from "@/components/FollowUpReport";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export default function Reports() {
   const { stockItems } = useStockStore();
   const [patients, setPatients] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
+  
+  // Export dialog state
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportStartDate, setExportStartDate] = useState<Date | undefined>(undefined);
+  const [exportEndDate, setExportEndDate] = useState<Date | undefined>(undefined);
+  const [exportType, setExportType] = useState<'patients' | 'stock' | 'invoices'>('invoices');
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     // Load data from localStorage
@@ -260,6 +275,218 @@ export default function Reports() {
     XLSX.writeFile(workbook, filename);
   };
 
+  const openExportDialog = (type: 'patients' | 'stock' | 'invoices') => {
+    setExportType(type);
+    // Default to last 30 days
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    setExportStartDate(thirtyDaysAgo);
+    setExportEndDate(today);
+    setShowExportDialog(true);
+  };
+
+  const exportWithDateRange = async () => {
+    if (!exportStartDate || !exportEndDate) {
+      toast({
+        title: "Please select date range",
+        description: "Both start and end dates are required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setExporting(true);
+    const startDateStr = format(exportStartDate, 'yyyy-MM-dd');
+    const endDateStr = format(exportEndDate, 'yyyy-MM-dd');
+
+    try {
+      let data: any[] = [];
+      let filename = "";
+
+      switch (exportType) {
+        case 'patients':
+          // Fetch patients from Supabase within date range
+          const { data: patientsData, error: patientsError } = await supabase
+            .from('patients')
+            .select('*')
+            .order('id', { ascending: true });
+
+          if (patientsError) throw patientsError;
+
+          if (!patientsData || patientsData.length === 0) {
+            toast({
+              title: "No data found",
+              description: "No patients found",
+              variant: "destructive"
+            });
+            setExporting(false);
+            return;
+          }
+
+          data = patientsData.map((patient, index) => ({
+            'S.No': index + 1,
+            'Patient ID': patient.id,
+            'S.No (File)': patient.s_no || '',
+            'File No': patient.file_no || '',
+            'Patient Name': patient.patient_name || '',
+            'Father Name': patient.father_name || '',
+            'Age': patient.age || '',
+            'Phone': patient.phone || '',
+            'Address': patient.address || '',
+            'Govt ID': patient.govt_id || '',
+            'New Govt ID': patient.new_govt_id || '',
+            'Aadhar Card': patient.aadhar_card || '',
+            'Category': patient.category || ''
+          }));
+          filename = `patients-report-${startDateStr}.xlsx`;
+          break;
+
+        case 'stock':
+          // Fetch stock items from Supabase
+          const { data: stockData, error: stockError } = await supabase
+            .from('stock_items')
+            .select('*')
+            .order('name', { ascending: true });
+
+          if (stockError) throw stockError;
+
+          if (!stockData || stockData.length === 0) {
+            toast({
+              title: "No data found",
+              description: "No stock items found",
+              variant: "destructive"
+            });
+            setExporting(false);
+            return;
+          }
+
+          data = stockData.map((item, index) => ({
+            'S.No': index + 1,
+            'Item ID': item.item_id,
+            'Medicine Name': item.name || '',
+            'Category': item.category || '',
+            'Batch No': item.batch_no || '',
+            'Packing': item.packing || '',
+            'Composition': item.composition || '',
+            'Current Stock': item.current_stock || 0,
+            'Minimum Stock': item.minimum_stock || 0,
+            'Unit Price': item.unit_price || 0,
+            'MRP': item.mrp || 0,
+            'Supplier': item.supplier || '',
+            'Expiry Date': item.expiry_date || '',
+            'Status': item.status || ''
+          }));
+          filename = `stock-report-${startDateStr}.xlsx`;
+          break;
+
+        case 'invoices':
+          // Fetch invoices from Supabase within date range
+          const { data: invoicesData, error: invoicesError } = await supabase
+            .from('invoices')
+            .select(`
+              *,
+              invoice_items (*)
+            `)
+            .gte('invoice_date', startDateStr)
+            .lte('invoice_date', endDateStr)
+            .order('invoice_date', { ascending: true });
+
+          if (invoicesError) throw invoicesError;
+
+          if (!invoicesData || invoicesData.length === 0) {
+            toast({
+              title: "No data found",
+              description: "No invoices found for the selected date range",
+              variant: "destructive"
+            });
+            setExporting(false);
+            return;
+          }
+
+          // Flatten invoice items
+          invoicesData.forEach(invoice => {
+            if (invoice.invoice_items && invoice.invoice_items.length > 0) {
+              invoice.invoice_items.forEach((item: any) => {
+                data.push({
+                  'Invoice No': invoice.invoice_number || '',
+                  'Date': invoice.invoice_date || '',
+                  'Patient ID': invoice.patient_id || '',
+                  'Patient Name': invoice.patient_name || '',
+                  'Patient Phone': invoice.patient_phone || '',
+                  'Medicine Name': item.medicine_name || '',
+                  'Quantity': item.quantity || 0,
+                  'Unit Price': item.unit_price || 0,
+                  'MRP': item.mrp || 0,
+                  'Total': item.total || 0,
+                  'Batch No': item.batch_no || '',
+                  'Expiry Date': item.expiry_date || '',
+                  'Frequency': item.frequency || '',
+                  'Duration (Days)': item.duration_days || '',
+                  'Invoice Total': invoice.total || 0,
+                  'Status': invoice.status || '',
+                  'Follow-Up Date': invoice.follow_up_date || ''
+                });
+              });
+            } else {
+              data.push({
+                'Invoice No': invoice.invoice_number || '',
+                'Date': invoice.invoice_date || '',
+                'Patient ID': invoice.patient_id || '',
+                'Patient Name': invoice.patient_name || '',
+                'Patient Phone': invoice.patient_phone || '',
+                'Medicine Name': 'N/A',
+                'Quantity': 0,
+                'Unit Price': 0,
+                'MRP': 0,
+                'Total': 0,
+                'Batch No': '',
+                'Expiry Date': '',
+                'Frequency': '',
+                'Duration (Days)': '',
+                'Invoice Total': invoice.total || 0,
+                'Status': invoice.status || '',
+                'Follow-Up Date': invoice.follow_up_date || ''
+              });
+            }
+          });
+          filename = `invoices-report-${startDateStr}-to-${endDateStr}.xlsx`;
+          break;
+      }
+
+      if (data.length === 0) {
+        toast({
+          title: "No data found",
+          description: "No data available for export",
+          variant: "destructive"
+        });
+        setExporting(false);
+        return;
+      }
+
+      // Create workbook and export
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      XLSX.utils.book_append_sheet(workbook, worksheet, exportType.charAt(0).toUpperCase() + exportType.slice(1));
+      XLSX.writeFile(workbook, filename);
+
+      toast({
+        title: "Export successful",
+        description: `Exported ${data.length} records to ${filename}`
+      });
+
+      setShowExportDialog(false);
+    } catch (error: any) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export failed",
+        description: error.message || "Failed to export data",
+        variant: "destructive"
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 relative">
       <FloatingOrbs />
@@ -382,7 +609,7 @@ export default function Reports() {
         <TabsContent value="patients" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-pink to-purple bg-clip-text text-transparent">Patient Reports</h2>
-            <Button onClick={() => exportReport('patients')} className="bg-gradient-to-r from-pink to-purple hover:shadow-glow text-white">
+            <Button onClick={() => openExportDialog('patients')} className="bg-gradient-to-r from-pink to-purple hover:shadow-glow text-white">
               <Download className="h-4 w-4 mr-2" />
               Export Excel
             </Button>
@@ -539,7 +766,7 @@ export default function Reports() {
         <TabsContent value="stock" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">Stock Reports</h2>
-            <Button onClick={() => exportReport('stock')} className="bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white">
+            <Button onClick={() => openExportDialog('stock')} className="bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white">
               <Download className="h-4 w-4 mr-2" />
               Export Excel
             </Button>
@@ -670,7 +897,7 @@ export default function Reports() {
         <TabsContent value="invoices" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-purple to-pink bg-clip-text text-transparent">Invoice Reports</h2>
-            <Button onClick={() => exportReport('invoices')} className="bg-gradient-to-r from-purple to-pink hover:shadow-glow text-white">
+            <Button onClick={() => openExportDialog('invoices')} className="bg-gradient-to-r from-purple to-pink hover:shadow-glow text-white">
               <Download className="h-4 w-4 mr-2" />
               Export Excel
             </Button>
@@ -942,6 +1169,99 @@ export default function Reports() {
           <FollowUpReport />
         </TabsContent>
       </Tabs>
+
+      {/* Date Range Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Export {exportType.charAt(0).toUpperCase() + exportType.slice(1)} Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Start Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !exportStartDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {exportStartDate ? format(exportStartDate, "PPP") : "Select start date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={exportStartDate}
+                    onSelect={setExportStartDate}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">End Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !exportEndDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {exportEndDate ? format(exportEndDate, "PPP") : "Select end date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={exportEndDate}
+                    onSelect={setExportEndDate}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            {exportType === 'invoices' && (
+              <p className="text-sm text-muted-foreground">
+                Invoices will be filtered by invoice date within the selected range.
+              </p>
+            )}
+            {exportType === 'patients' && (
+              <p className="text-sm text-muted-foreground">
+                All patients will be exported (date range shown in filename).
+              </p>
+            )}
+            {exportType === 'stock' && (
+              <p className="text-sm text-muted-foreground">
+                Current stock snapshot will be exported.
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={exportWithDateRange} 
+              disabled={exporting}
+              className="bg-gradient-to-r from-purple to-pink text-white"
+            >
+              {exporting ? "Exporting..." : "Export"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
