@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { formatLocalISODate } from "@/lib/dateUtils";
+import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 
 interface SaleReportItem {
   sNo: number;
@@ -244,8 +245,8 @@ export default function SaleReport() {
         item.openingStock,
         item.currentStock,
         item.saleQty,
-        item.rate,
-        item.value,
+        roundTo2(item.rate),
+        roundTo2(item.value),
         item.stockReceived,
         item.closingStock,
         item.discrepancy,
@@ -254,10 +255,10 @@ export default function SaleReport() {
 
     // Add totals
     data.push([]);
-    data.push(['TOTAL SALE (BNX)', '', 'BNX', '', '', bnxTotalQty, '', bnxTotalValue, '', '', '']);
-    data.push(['TOTAL SALE (TPN)', '', 'TPN', '', '', tpnTotalQty, '', tpnTotalValue, '', '', '']);
-    data.push(['TOTAL SALE (PSHY)', '', 'PSHY', '', '', pshyTotalQty, '', pshyTotalValue, '', '', '']);
-    data.push(['GRAND TOTAL', '', 'BNX+TPN+PSHY', '', '', '', '', grandTotalValue, '', '', '']);
+    data.push(['TOTAL SALE (BNX)', '', 'BNX', '', '', bnxTotalQty, '', roundTo2(bnxTotalValue), '', '', '']);
+    data.push(['TOTAL SALE (TPN)', '', 'TPN', '', '', tpnTotalQty, '', roundTo2(tpnTotalValue), '', '', '']);
+    data.push(['TOTAL SALE (PSHY)', '', 'PSHY', '', '', pshyTotalQty, '', roundTo2(pshyTotalValue), '', '', '']);
+    data.push(['GRAND TOTAL', '', 'BNX+TPN+PSHY', '', '', '', '', roundTo2(grandTotalValue), '', '', '']);
 
     const worksheet = XLSX.utils.aoa_to_sheet(data);
     
@@ -373,14 +374,14 @@ export default function SaleReport() {
 
     let sNo = 1;
     [...bnx, ...tpn, ...pshy].forEach(item => {
-      data.push([sNo++, item.medicineName, item.category, item.saleQty, item.rate, item.value, item.stockReceived]);
+      data.push([sNo++, item.medicineName, item.category, item.saleQty, roundTo2(item.rate), roundTo2(item.value), item.stockReceived]);
     });
 
     data.push([]);
-    data.push(['TOTAL BNX', '', 'BNX', bnx.reduce((s, i) => s + i.saleQty, 0), '', bnx.reduce((s, i) => s + i.value, 0), '']);
-    data.push(['TOTAL TPN', '', 'TPN', tpn.reduce((s, i) => s + i.saleQty, 0), '', tpn.reduce((s, i) => s + i.value, 0), '']);
-    data.push(['TOTAL PSHY', '', 'PSHY', pshy.reduce((s, i) => s + i.saleQty, 0), '', pshy.reduce((s, i) => s + i.value, 0), '']);
-    data.push(['GRAND TOTAL', '', '', items.reduce((s, i) => s + i.saleQty, 0), '', items.reduce((s, i) => s + i.value, 0), '']);
+    data.push(['TOTAL BNX', '', 'BNX', bnx.reduce((s, i) => s + i.saleQty, 0), '', roundTo2(bnx.reduce((s, i) => s + i.value, 0)), '']);
+    data.push(['TOTAL TPN', '', 'TPN', tpn.reduce((s, i) => s + i.saleQty, 0), '', roundTo2(tpn.reduce((s, i) => s + i.value, 0)), '']);
+    data.push(['TOTAL PSHY', '', 'PSHY', pshy.reduce((s, i) => s + i.saleQty, 0), '', roundTo2(pshy.reduce((s, i) => s + i.value, 0)), '']);
+    data.push(['GRAND TOTAL', '', '', items.reduce((s, i) => s + i.saleQty, 0), '', roundTo2(items.reduce((s, i) => s + i.value, 0)), '']);
 
     const worksheet = XLSX.utils.aoa_to_sheet(data);
     worksheet['!cols'] = [{ wch: 8 }, { wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 14 }];
@@ -433,8 +434,8 @@ export default function SaleReport() {
                   </TableCell>
                   <TableCell className="text-right py-1">{item.currentStock}</TableCell>
                   <TableCell className="text-right py-1">{item.saleQty}</TableCell>
-                  <TableCell className="text-right py-1">₹{item.rate.toFixed(2)}</TableCell>
-                  <TableCell className="text-right py-1 font-medium">₹{item.value.toFixed(2)}</TableCell>
+                  <TableCell className="text-right py-1">₹{formatNumber(item.rate)}</TableCell>
+                  <TableCell className="text-right py-1 font-medium">₹{formatNumber(item.value)}</TableCell>
                   <TableCell className="text-right py-1">{item.stockReceived}</TableCell>
                   <TableCell className="text-right py-1">{item.closingStock}</TableCell>
                   <TableCell className={`text-right py-1 font-medium ${
@@ -453,7 +454,7 @@ export default function SaleReport() {
               <TableCell colSpan={4} className="py-2">TOTAL ({categoryLabel})</TableCell>
               <TableCell className="text-right py-2">{totalQty}</TableCell>
               <TableCell></TableCell>
-              <TableCell className="text-right py-2">₹{totalValue.toFixed(2)}</TableCell>
+              <TableCell className="text-right py-2">₹{formatNumber(totalValue)}</TableCell>
               <TableCell colSpan={3}></TableCell>
             </TableRow>
           </TableBody>
@@ -528,7 +529,7 @@ export default function SaleReport() {
             <div className="border rounded-lg p-4 bg-primary/5">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-bold">GRAND TOTAL (BNX + TPN + PSHY)</span>
-                <span className="text-2xl font-bold text-primary">₹{grandTotalValue.toFixed(2)}</span>
+                <span className="text-2xl font-bold text-primary">₹{formatNumber(grandTotalValue)}</span>
               </div>
             </div>
           </>

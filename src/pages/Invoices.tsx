@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
+import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
 
 export default function Invoices() {
@@ -202,9 +203,9 @@ export default function Invoices() {
       doc.text(item.name.substring(0, 20), margin + 3, y);
       doc.text(item.batchNo || "N/A", 70, y);
       doc.text(item.expiryDate || "N/A", 100, y);
-      doc.text(`₹${(item.mrp || 0).toFixed(2)}`, 130, y);
+      doc.text(`₹${formatNumber(item.mrp || 0)}`, 130, y);
       doc.text(item.quantity.toString(), 150, y);
-      doc.text(`₹${item.price.toFixed(2)}`, 170, y);
+      doc.text(`₹${formatNumber(item.price)}`, 170, y);
       y += 10;
       
       if (y > 250) {
@@ -223,7 +224,7 @@ export default function Invoices() {
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(27, 53, 97);
-    doc.text(`Total Amount: ₹${invoice.amount.toFixed(2)}`, pageWidth - margin, y, { align: "right" });
+    doc.text(`Total Amount: ₹${formatNumber(invoice.amount)}`, pageWidth - margin, y, { align: "right" });
     y += 15;
 
     // Payment Terms & Bank Details Section
@@ -412,10 +413,10 @@ export default function Invoices() {
   const viewInvoiceDetails = (invoice: any) => {
     // Create a detailed view modal or alert
     const itemsList = invoice.items.map((item: any, index: number) => 
-      `${index + 1}. ${item.name} - Qty: ${item.quantity} - ₹${item.price.toFixed(2)}`
+      `${index + 1}. ${item.name} - Qty: ${item.quantity} - ₹${formatNumber(item.price)}`
     ).join('\n');
     
-    alert(`INVOICE DETAILS\n\nInvoice ID: ${invoice.id}\nPatient: ${invoice.patientName}\nDate: ${invoice.date}\nStatus: ${invoice.status}\n\nITEMS:\n${itemsList}\n\nTotal Amount: ₹${invoice.amount.toFixed(2)}`);
+    alert(`INVOICE DETAILS\n\nInvoice ID: ${invoice.id}\nPatient: ${invoice.patientName}\nDate: ${invoice.date}\nStatus: ${invoice.status}\n\nITEMS:\n${itemsList}\n\nTotal Amount: ₹${formatNumber(invoice.amount)}`);
   };
 
   if (loading) {
@@ -475,7 +476,7 @@ export default function Invoices() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{totalAmount.toFixed(2)}</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{formatNumber(totalAmount)}</p>
               </div>
             </div>
           </CardContent>
@@ -490,7 +491,7 @@ export default function Invoices() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Paid</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">₹{paidAmount.toFixed(2)}</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">₹{formatNumber(paidAmount)}</p>
               </div>
             </div>
           </CardContent>
@@ -505,7 +506,7 @@ export default function Invoices() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">₹{pendingAmount.toFixed(2)}</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">₹{formatNumber(pendingAmount)}</p>
               </div>
             </div>
           </CardContent>

@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import { formatLocalISODate } from "@/lib/dateUtils";
+import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 
 interface MedicineReportItem {
   brand: string;
@@ -1299,8 +1300,8 @@ export default function DayReport() {
                       </span>
                     </TableCell>
                     <TableCell className="text-right py-1">{item.qtySold}</TableCell>
-                    <TableCell className="text-right py-1">₹{item.rate}</TableCell>
-                    <TableCell className="text-right py-1 font-semibold">₹{item.amount}</TableCell>
+                    <TableCell className="text-right py-1">₹{formatNumber(item.rate)}</TableCell>
+                    <TableCell className="text-right py-1 font-semibold">₹{formatNumber(item.amount)}</TableCell>
                     <TableCell className="text-right py-1">
                       <span className="flex items-center justify-end gap-1">
                         {showLiveStock ? item.liveStock : item.opening}
@@ -1320,7 +1321,7 @@ export default function DayReport() {
                   <TableCell>Total {categoryFilter && `(${categoryFilter})`}</TableCell>
                   <TableCell className="text-right">{filteredData.reduce((s, i) => s + i.qtySold, 0)}</TableCell>
                   <TableCell></TableCell>
-                  <TableCell className="text-right">₹{filteredTotal}</TableCell>
+                  <TableCell className="text-right">₹{formatNumber(filteredTotal)}</TableCell>
                   <TableCell colSpan={3}></TableCell>
                 </TableRow>
               </>
@@ -1542,7 +1543,7 @@ export default function DayReport() {
               </div>
               <div className="flex justify-between items-center font-bold border-t pt-2">
                 <span className="text-xs">Total Collection</span>
-                <span>₹{totalCollection}</span>
+                <span>₹{formatNumber(totalCollection)}</span>
               </div>
             </CardContent>
           </Card>
@@ -1587,11 +1588,11 @@ export default function DayReport() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs">Today's Collection</span>
-                <span className="font-semibold">₹{todaysCollection.toFixed(2)}</span>
+                <span className="font-semibold">₹{formatNumber(todaysCollection)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs">Expenses</span>
-                <span className="text-red-600">₹{totalExpenses}</span>
+                <span className="text-red-600">₹{formatNumber(totalExpenses)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs">Deposit in Bank A/c</span>
@@ -1649,7 +1650,7 @@ export default function DayReport() {
               </div>
               <div className="flex justify-between items-center font-bold border-t pt-2 bg-green-50 -mx-3 px-3 py-1">
                 <span className="text-xs">Cash left in hand (Today)</span>
-                <span className="text-green-700">₹{cashLeftInHand.toFixed(2)}</span>
+                <span className="text-green-700">₹{formatNumber(cashLeftInHand)}</span>
               </div>
             </CardContent>
           </Card>
@@ -1682,7 +1683,7 @@ export default function DayReport() {
               </Button>
               <div className="flex justify-between font-bold border-t pt-2">
                 <span>Total</span>
-                <span className="text-red-600">₹{totalExpenses}</span>
+                <span className="text-red-600">₹{formatNumber(totalExpenses)}</span>
               </div>
             </CardContent>
           </Card>
@@ -1714,24 +1715,24 @@ export default function DayReport() {
                           className="w-16 h-6 text-center mx-auto"
                         />
                       </TableCell>
-                      <TableCell className="text-right py-1">₹{item.amount}</TableCell>
+                      <TableCell className="text-right py-1">₹{formatNumber(item.amount)}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="bg-navy/10 font-bold text-xs">
                     <TableCell colSpan={2} className="py-1">TOTAL</TableCell>
-                    <TableCell className="text-right py-1">₹{totalCash}</TableCell>
+                    <TableCell className="text-right py-1">₹{formatNumber(totalCash)}</TableCell>
                   </TableRow>
                   <TableRow className="bg-gold/30 font-bold text-xs">
                     <TableCell colSpan={2} className="py-1">TOTAL AS PER SHEET</TableCell>
-                    <TableCell className="text-right py-1">₹{totalAsPerSheet.toFixed(2)}</TableCell>
+                    <TableCell className="text-right py-1">₹{formatNumber(totalAsPerSheet)}</TableCell>
                   </TableRow>
                   <TableRow className="text-xs">
                     <TableCell colSpan={2} className="py-1">PAYTM</TableCell>
-                    <TableCell className="text-right py-1">₹{paytmGpay}</TableCell>
+                    <TableCell className="text-right py-1">₹{formatNumber(paytmGpay)}</TableCell>
                   </TableRow>
                   <TableRow className={`font-bold text-xs ${difference === 0 ? 'bg-green-100' : difference > 0 ? 'bg-red-100' : 'bg-yellow-100'}`}>
                     <TableCell colSpan={2} className="py-1">DIFFERENCE</TableCell>
-                    <TableCell className="text-right py-1">₹{difference.toFixed(2)}</TableCell>
+                    <TableCell className="text-right py-1">₹{formatNumber(difference)}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -1745,32 +1746,32 @@ export default function DayReport() {
         <Card className="border-l-4 border-l-gold">
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">BNX Collection</p>
-            <p className="text-lg font-bold text-navy">₹{bnxTotal}</p>
+            <p className="text-lg font-bold text-navy">₹{formatNumber(bnxTotal)}</p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-blue-500">
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">TPN Collection</p>
-            <p className="text-lg font-bold text-navy">₹{tpnTotal}</p>
+            <p className="text-lg font-bold text-navy">₹{formatNumber(tpnTotal)}</p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-purple-500">
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">PSHY Collection</p>
-            <p className="text-lg font-bold text-navy">₹{pshyTotal}</p>
+            <p className="text-lg font-bold text-navy">₹{formatNumber(pshyTotal)}</p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-green-500">
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">Total Sale</p>
-            <p className="text-lg font-bold text-navy">₹{totalSale.toFixed(2)}</p>
+            <p className="text-lg font-bold text-navy">₹{formatNumber(totalSale)}</p>
           </CardContent>
         </Card>
         <Card className={`border-l-4 ${difference === 0 ? 'border-l-green-500' : 'border-l-red-500'}`}>
           <CardContent className="pt-4 pb-3">
             <p className="text-xs text-muted-foreground">Difference</p>
             <p className={`text-lg font-bold ${difference === 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ₹{difference.toFixed(2)}
+              ₹{formatNumber(difference)}
             </p>
           </CardContent>
         </Card>
