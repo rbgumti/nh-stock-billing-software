@@ -250,7 +250,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
               <CardTitle>Add Items</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
                 <div className="space-y-2 md:col-span-2">
                   <Label>Stock Item</Label>
                   <Select value={currentItem.stockItemId} onValueChange={(value) => {
@@ -309,6 +309,18 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                     value={currentItem.qtyInTabs}
                     onChange={(e) => setCurrentItem({ ...currentItem, qtyInTabs: e.target.value })}
                     placeholder="0"
+                    min="0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Cost/Tab</Label>
+                  <Input
+                    type="number"
+                    step="0.00001"
+                    value={currentItem.unitPrice}
+                    onChange={(e) => setCurrentItem({ ...currentItem, unitPrice: e.target.value })}
+                    placeholder="0.00"
                     min="0"
                   />
                 </div>
