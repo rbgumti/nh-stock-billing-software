@@ -45,6 +45,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -598,7 +599,7 @@ export default function Reports() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-                    <p className="text-2xl font-bold">₹{invoiceStats.totalRevenue.toFixed(2)}</p>
+                    <p className="text-2xl font-bold">₹{formatNumber(invoiceStats.totalRevenue)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -798,7 +799,7 @@ export default function Reports() {
               <CardContent className="pt-6 relative">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                  <p className="text-2xl font-bold text-emerald">₹{stockStats.totalValue.toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-emerald">₹{formatNumber(stockStats.totalValue)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -858,8 +859,8 @@ export default function Reports() {
                           </div>
                           <div className="text-right space-y-1">
                             <p className="text-sm font-medium">Stock: {item.currentStock}/{item.minimumStock}</p>
-                            <p className="text-sm text-gray-600">₹{item.unitPrice} per unit</p>
-                            <p className="text-xs text-gray-500">Value: ₹{(item.currentStock * item.unitPrice).toFixed(2)}</p>
+                            <p className="text-sm text-gray-600">₹{formatNumber(item.unitPrice)} per unit</p>
+                            <p className="text-xs text-gray-500">Value: ₹{formatNumber(item.currentStock * item.unitPrice)}</p>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -939,7 +940,7 @@ export default function Reports() {
               <CardContent className="pt-6 relative">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-                  <p className="text-2xl font-bold text-cyan">₹{invoiceStats.totalRevenue.toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-cyan">₹{formatNumber(invoiceStats.totalRevenue)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -989,7 +990,7 @@ export default function Reports() {
                           <Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Pending' ? 'secondary' : 'destructive'}>
                             {invoice.status || 'Pending'}
                           </Badge>
-                          <p className="font-semibold mt-1">₹{(invoice.total || 0).toFixed(2)}</p>
+                          <p className="font-semibold mt-1">₹{formatNumber(invoice.total || 0)}</p>
                         </div>
                       </div>
                       
@@ -999,7 +1000,7 @@ export default function Reports() {
                           {invoice.items.map((item: any, index: number) => (
                             <div key={index} className="flex justify-between text-sm bg-gray-50 p-2 rounded">
                               <span>{item.medicineName || item.name}</span>
-                              <span>Qty: {item.quantity} | ₹{((item.unitPrice || 0) * (item.quantity || 0)).toFixed(2)}</span>
+                              <span>Qty: {item.quantity} | ₹{formatNumber((item.unitPrice || 0) * (item.quantity || 0))}</span>
                             </div>
                           ))}
                         </div>
@@ -1060,7 +1061,7 @@ export default function Reports() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Total Sales Value</p>
                     <p className="text-2xl font-bold">
-                      ₹{invoices.reduce((sum, inv) => sum + (inv.total || 0), 0).toFixed(2)}
+                      ₹{formatNumber(invoices.reduce((sum, inv) => sum + (inv.total || 0), 0))}
                     </p>
                   </div>
                 </div>
@@ -1109,9 +1110,9 @@ export default function Reports() {
                           </div>
                           <div className="text-right space-y-1">
                             <p className="text-lg font-bold">Qty: {item.quantity}</p>
-                            <p className="text-sm text-gray-600">Unit Price: ₹{(item.unitPrice || 0).toFixed(2)}</p>
+                            <p className="text-sm text-gray-600">Unit Price: ₹{formatNumber(item.unitPrice || 0)}</p>
                             <p className="text-lg font-semibold text-green-600">
-                              Total: ₹{((item.unitPrice || 0) * (item.quantity || 0)).toFixed(2)}
+                              Total: ₹{formatNumber((item.unitPrice || 0) * (item.quantity || 0))}
                             </p>
                           </div>
                         </div>
