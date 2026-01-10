@@ -22,3 +22,20 @@ export const roundTo2 = (value: number): number => {
 export const formatQuantity = (value: number): string => {
   return value.toLocaleString('en-IN');
 };
+
+/**
+ * Format a number to max 5 decimal places for PO/GRN (removes trailing zeros)
+ */
+export const formatPrecision = (value: number): string => {
+  return value.toLocaleString('en-IN', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 5
+  });
+};
+
+/**
+ * Round a number to 5 decimal places
+ */
+export const roundTo5 = (value: number): number => {
+  return Number(value.toFixed(5));
+};

@@ -12,6 +12,7 @@ import { PurchaseOrder, PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore"
 import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
 import { RusanPharmaPO } from "./RusanPharmaPO";
+import { formatPrecision } from "@/lib/formatUtils";
 
 interface PurchaseOrderFormProps {
   onClose: () => void;
@@ -338,7 +339,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                         <div>{item.packSize || '-'}</div>
                         <div>{item.qtyInStrips?.toLocaleString() || '-'}</div>
                         <div>{item.qtyInTabs?.toLocaleString() || '-'}</div>
-                        <div>₹{item.unitPrice.toFixed(2)}</div>
+                        <div>₹{formatPrecision(item.unitPrice)}</div>
                         <div>
                           <Button
                             type="button"
@@ -354,7 +355,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                     <div className="p-3 border-t bg-muted/50">
                       <div className="flex justify-between font-bold">
                         <span>Total Amount:</span>
-                        <span>₹{totalAmount.toFixed(2)}</span>
+                        <span>₹{formatPrecision(totalAmount)}</span>
                       </div>
                     </div>
                   </div>

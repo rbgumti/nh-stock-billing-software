@@ -6,6 +6,7 @@ import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
+import { formatPrecision, roundTo5 } from "@/lib/formatUtils";
 interface GRNItem {
   stockItemId: number;
   orderedQuantity: number;
@@ -256,10 +257,10 @@ export function PrintableGRN({
         stockItem?.name?.substring(0, 22) || 'Unknown',
         item.batchNo?.substring(0, 12) || '-',
         item.expiryDate ? formatDate(item.expiryDate) : '-',
-        costPrice.toFixed(2),
-        item.mrp ? item.mrp.toFixed(2) : '-',
+        roundTo5(costPrice).toString(),
+        item.mrp ? roundTo5(item.mrp).toString() : '-',
         item.receivedQuantity.toString(),
-        itemTotal.toFixed(2)
+        roundTo5(itemTotal).toString()
       ];
 
       // Alternating row colors
@@ -305,7 +306,7 @@ export function PrintableGRN({
     doc.text("GRAND TOTAL", 18, yPos + 5.5);
     // Position grand total at the last column
     const totalXPos = 14 + colWidths.slice(0, 7).reduce((a, b) => a + b, 0);
-    doc.text(grandTotal.toFixed(2), totalXPos + 1, yPos + 5.5);
+    doc.text(roundTo5(grandTotal).toString(), totalXPos + 1, yPos + 5.5);
     yPos += 14;
 
     // Notes
@@ -549,10 +550,10 @@ export function PrintableGRN({
                     <td className="border border-gray-300 p-2 font-medium">{stockItem?.name || 'Unknown'}</td>
                     <td className="border border-gray-300 p-2">{item.batchNo || '-'}</td>
                     <td className="border border-gray-300 p-2">{item.expiryDate ? formatDate(item.expiryDate) : '-'}</td>
-                    <td className="border border-gray-300 p-2 text-right">₹{costPrice.toFixed(2)}</td>
-                    <td className="border border-gray-300 p-2 text-right">{item.mrp ? `₹${item.mrp.toFixed(2)}` : '-'}</td>
+                    <td className="border border-gray-300 p-2 text-right">₹{formatPrecision(costPrice)}</td>
+                    <td className="border border-gray-300 p-2 text-right">{item.mrp ? `₹${formatPrecision(item.mrp)}` : '-'}</td>
                     <td className="border border-gray-300 p-2 text-right font-semibold">{item.receivedQuantity}</td>
-                    <td className="border border-gray-300 p-2 text-right font-semibold">₹{itemTotal.toFixed(2)}</td>
+                    <td className="border border-gray-300 p-2 text-right font-semibold">₹{formatPrecision(itemTotal)}</td>
                   </tr>
                 );
               })}
@@ -560,7 +561,7 @@ export function PrintableGRN({
               <tr style={{ backgroundColor: '#003366' }}>
                 <td className="border border-gray-300 p-2 text-white font-bold" colSpan={6}>GRAND TOTAL</td>
                 <td className="border border-gray-300 p-2 text-right text-white font-bold">{totalReceivedQty}</td>
-                <td className="border border-gray-300 p-2 text-right text-white font-bold">₹{grandTotal.toFixed(2)}</td>
+                <td className="border border-gray-300 p-2 text-right text-white font-bold">₹{formatPrecision(grandTotal)}</td>
               </tr>
             </tbody>
           </table>

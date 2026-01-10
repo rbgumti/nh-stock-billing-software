@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
+import { formatPrecision } from "@/lib/formatUtils";
 
 interface GRNItem {
   stockItemId: number;
@@ -143,7 +144,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                 </div>
                 <div>
                   <p className="text-muted-foreground">Total Amount</p>
-                  <p className="font-medium">₹{purchaseOrder.totalAmount.toFixed(2)}</p>
+                  <p className="font-medium">₹{formatPrecision(purchaseOrder.totalAmount)}</p>
                 </div>
               </div>
             </CardContent>
