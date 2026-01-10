@@ -260,7 +260,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                       <div>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="0.00001"
                           value={grnItem.mrp || ""}
                           onChange={(e) => updateMRP(index, e.target.value)}
                           placeholder="0"

@@ -287,7 +287,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                       <div>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="0.00001"
                           value={grnItem.mrp || ""}
                           onChange={(e) => updateMRP(index, e.target.value)}
                           placeholder="0.00"
