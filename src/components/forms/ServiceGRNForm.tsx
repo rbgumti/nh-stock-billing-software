@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPrecision } from "@/lib/formatUtils";
 
 interface ServiceGRNFormProps {
   onClose: () => void;
@@ -89,7 +90,7 @@ export function ServiceGRNForm({ onClose, onSubmit, purchaseOrder }: ServiceGRNF
                 </div>
                 <div>
                   <p className="text-muted-foreground">Amount</p>
-                  <p className="font-semibold text-lg">₹{purchaseOrder.totalAmount.toFixed(2)}</p>
+                  <p className="font-semibold text-lg">₹{formatPrecision(purchaseOrder.totalAmount)}</p>
                 </div>
               </div>
               {purchaseOrder.serviceDescription && (

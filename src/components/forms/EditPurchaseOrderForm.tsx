@@ -10,6 +10,7 @@ import { Plus, Trash2, Loader2 } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder, PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
+import { formatPrecision } from "@/lib/formatUtils";
 
 interface EditPurchaseOrderFormProps {
   purchaseOrder: PurchaseOrder;
@@ -296,7 +297,7 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
                             className="w-20"
                           />
                         </div>
-                        <div className="text-sm">₹{item.totalPrice.toFixed(2)}</div>
+                        <div className="text-sm">₹{formatPrecision(item.totalPrice)}</div>
                         <div>
                           <Button
                             type="button"
@@ -312,7 +313,7 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
                     <div className="p-3 border-t bg-muted/50">
                       <div className="flex justify-between font-bold">
                         <span>Total Amount:</span>
-                        <span>₹{totalAmount.toFixed(2)}</span>
+                        <span>₹{formatPrecision(totalAmount)}</span>
                       </div>
                     </div>
                   </div>

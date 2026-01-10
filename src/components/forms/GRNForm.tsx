@@ -11,6 +11,7 @@ import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { supabase } from "@/integrations/supabase/client";
 import { PrintableGRN } from "./PrintableGRN";
+import { formatPrecision } from "@/lib/formatUtils";
 
 interface GRNItem {
   stockItemId: number;
@@ -168,7 +169,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                 </div>
                 <div>
                   <p className="text-muted-foreground">Total Amount</p>
-                  <p className="font-medium">₹{purchaseOrder.totalAmount.toFixed(2)}</p>
+                  <p className="font-medium">₹{formatPrecision(purchaseOrder.totalAmount)}</p>
                 </div>
               </div>
             </CardContent>
