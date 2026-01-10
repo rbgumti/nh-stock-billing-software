@@ -246,7 +246,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
                   <Input
                     id="unitPrice"
                     type="number"
-                    step="0.01"
+                    step="0.00001"
                     min="0"
                     value={formData.unitPrice}
                     onChange={(e) => handleInputChange("unitPrice", e.target.value)}
@@ -259,7 +259,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
                   <Input
                     id="mrp"
                     type="number"
-                    step="0.01"
+                    step="0.00001"
                     min="0"
                     value={formData.mrp}
                     onChange={(e) => handleInputChange("mrp", e.target.value)}
