@@ -14,7 +14,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -44,15 +44,6 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pendingFollowUps, setPendingFollowUps] = useState(0);
-  const [scrollY, setScrollY] = useState(0);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  // Parallax scroll handler
-  const handleScroll = useCallback(() => {
-    if (contentRef.current) {
-      setScrollY(contentRef.current.scrollTop);
-    }
-  }, []);
 
   // Fetch pending follow-ups count
   useEffect(() => {
@@ -91,11 +82,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0 transition-all duration-500 ease-out`} collapsible="icon">
-      <SidebarContent 
-        ref={contentRef}
-        onScroll={handleScroll}
-        className="relative overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20"
-      >
+      <SidebarContent className="relative overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20">
         {/* Enhanced Glossy Glass Background */}
         <div className="absolute inset-0 sidebar-glass sidebar-rainbow-border" />
         
@@ -106,27 +93,12 @@ export function AppSidebar() {
         <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 via-fuchsia-600/5 to-cyan-600/8" />
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-pink-500/5 to-amber-500/5" />
         
-        {/* Parallax Ambient Orbs - different speeds for depth effect */}
-        <div 
-          className="absolute top-20 right-2 w-36 h-36 rounded-full sidebar-orb-purple pointer-events-none"
-          style={{ transform: `translateY(${scrollY * 0.15}px)` }}
-        />
-        <div 
-          className="absolute top-1/3 left-0 w-32 h-32 rounded-full sidebar-orb-cyan pointer-events-none"
-          style={{ transform: `translateY(${scrollY * 0.08}px) translateX(${scrollY * 0.03}px)` }}
-        />
-        <div 
-          className="absolute bottom-1/4 right-0 w-28 h-28 rounded-full sidebar-orb-pink pointer-events-none"
-          style={{ transform: `translateY(${scrollY * -0.12}px)` }}
-        />
-        <div 
-          className="absolute bottom-20 left-2 w-24 h-24 rounded-full sidebar-orb-gold pointer-events-none"
-          style={{ transform: `translateY(${scrollY * -0.06}px) translateX(${scrollY * -0.02}px)` }}
-        />
-        <div 
-          className="absolute top-1/2 right-4 w-20 h-20 rounded-full sidebar-orb-purple opacity-50 pointer-events-none"
-          style={{ transform: `translateY(${scrollY * 0.1}px) scale(${1 + scrollY * 0.0005})` }}
-        />
+        {/* Enhanced Ambient Orbs - more colorful */}
+        <div className="absolute top-20 right-2 w-36 h-36 rounded-full sidebar-orb-purple" />
+        <div className="absolute top-1/3 left-0 w-32 h-32 rounded-full sidebar-orb-cyan" />
+        <div className="absolute bottom-1/4 right-0 w-28 h-28 rounded-full sidebar-orb-pink" />
+        <div className="absolute bottom-20 left-2 w-24 h-24 rounded-full sidebar-orb-gold" />
+        <div className="absolute top-1/2 right-4 w-20 h-20 rounded-full sidebar-orb-purple opacity-50" />
         
         {/* Glossy Top Highlight */}
         <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none" />
