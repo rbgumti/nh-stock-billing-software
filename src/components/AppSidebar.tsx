@@ -81,76 +81,69 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0 transition-all duration-500 ease-out`} collapsible="icon">
+    <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0 transition-all duration-300`} collapsible="icon">
       <SidebarContent className="relative overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20">
-        {/* Enhanced Glossy Glass Background */}
-        <div className="absolute inset-0 sidebar-glass sidebar-rainbow-border" />
+        {/* Optimized Glass Background */}
+        <div className="absolute inset-0 sidebar-glass" />
         
-        {/* Glossy Overlay for Depth */}
-        <div className="absolute inset-0 sidebar-glossy-overlay" />
+        {/* Simplified Gradient Mesh - static for performance */}
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/8 via-transparent to-cyan-600/6" />
         
-        {/* Rich Gradient Mesh with more colors */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 via-fuchsia-600/5 to-cyan-600/8" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-pink-500/5 to-amber-500/5" />
+        {/* Reduced Ambient Blobs - fewer elements, less blur */}
+        <div className="absolute top-16 right-0 w-32 h-32 bg-gradient-radial from-violet-500/20 to-transparent rounded-full blur-2xl" />
+        <div className="absolute bottom-1/4 right-0 w-28 h-28 bg-gradient-radial from-pink-500/15 to-transparent rounded-full blur-2xl" />
+        <div className="absolute bottom-16 left-0 w-24 h-24 bg-gradient-radial from-amber-400/20 to-transparent rounded-full blur-xl" />
         
-        {/* Enhanced Ambient Orbs - more colorful */}
-        <div className="absolute top-20 right-2 w-36 h-36 rounded-full sidebar-orb-purple" />
-        <div className="absolute top-1/3 left-0 w-32 h-32 rounded-full sidebar-orb-cyan" />
-        <div className="absolute bottom-1/4 right-0 w-28 h-28 rounded-full sidebar-orb-pink" />
-        <div className="absolute bottom-20 left-2 w-24 h-24 rounded-full sidebar-orb-gold" />
-        <div className="absolute top-1/2 right-4 w-20 h-20 rounded-full sidebar-orb-purple opacity-50" />
+        {/* Top Accent Line */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         
-        {/* Glossy Top Highlight */}
-        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/[0.04] to-transparent pointer-events-none" />
+        {/* Side Accent */}
+        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-violet-500/30 via-transparent to-cyan-500/30" />
         
-        {/* Side Accent with gradient */}
-        <div className="absolute top-0 left-0 w-[2px] h-full bg-gradient-to-b from-violet-500/40 via-pink-500/20 to-cyan-500/40" />
-        
-        {/* Enhanced Compact Header with Glossy Effect */}
-        <div className="relative p-3 border-b border-white/[0.08]">
-          {/* Glossy panel behind header */}
-          <div className="absolute inset-2 rounded-2xl bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-violet-500/[0.05] border border-white/[0.12] shadow-lg shadow-violet-500/5" />
+        {/* Compact Header */}
+        <div className="relative p-2 border-b border-white/5">
+          {/* Glass panel behind header */}
+          <div className="absolute inset-1 rounded-xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/10" />
           
           {!collapsed ? (
-            <div className="flex items-center gap-3 relative z-10 px-1">
-              {/* Logo with glossy ring */}
+            <div className="flex items-center gap-2 relative z-10 px-0.5">
+              {/* Logo */}
               <div className="relative group flex-shrink-0">
-                <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-violet-500/30 via-pink-500/20 to-cyan-500/30 blur-md opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-slate-800/95 to-slate-900/95 border-2 border-white/20 group-hover:border-white/40 flex items-center justify-center overflow-hidden transition-all duration-500 shadow-lg shadow-violet-500/20 sidebar-icon-glossy">
+                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-white/15 group-hover:border-white/30 flex items-center justify-center overflow-hidden transition-colors duration-200">
                   <img 
                     src={navjeevanLogo} 
                     alt="Navjeevan Hospital Logo" 
-                    className="w-11 h-11 object-contain relative z-10"
+                    className="w-12 h-12 object-contain"
                   />
                 </div>
               </div>
               
-              {/* Hospital Name with enhanced gradient */}
+              {/* Hospital Name */}
               <div className="min-w-0 flex-1 pl-1">
-                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent leading-tight drop-shadow-sm">
+                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white to-violet-200 bg-clip-text text-transparent leading-tight">
                   NAVJEEVAN
                 </h2>
-                <p className="text-[10px] font-semibold tracking-wider bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+                <p className="text-[10px] font-medium tracking-wide text-amber-400">
                   Hospital Sirhind
                 </p>
               </div>
 
-              {/* Enhanced Notification Bell */}
+              {/* Notification Bell */}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <NavLink to="/reports" className="relative group">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.03] hover:from-white/[0.15] hover:to-white/[0.08] border border-white/[0.12] hover:border-white/25 flex items-center justify-center transition-all duration-300 shadow-lg shadow-violet-500/10 hover:shadow-violet-500/20">
-                        <Bell className="h-4 w-4 text-slate-400 group-hover:text-violet-300 transition-colors duration-300" />
+                    <NavLink to="/reports" className="relative">
+                      <div className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors duration-200">
+                        <Bell className="h-4 w-4 text-slate-400 hover:text-white" />
                         {pendingFollowUps > 0 && (
-                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-[10px] font-bold text-white flex items-center justify-center shadow-lg shadow-rose-500/40 animate-pulse">
+                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center">
                             {pendingFollowUps > 9 ? '9+' : pendingFollowUps}
                           </span>
                         )}
                       </div>
                     </NavLink>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="bg-slate-800/95 border-white/10 backdrop-blur-xl">
+                  <TooltipContent side="bottom" className="bg-slate-800/95 border-white/10">
                     <p className="text-xs">{pendingFollowUps} pending follow-ups</p>
                   </TooltipContent>
                 </Tooltip>
@@ -246,52 +239,50 @@ export function AppSidebar() {
           )}
         </div>
         
-        {/* Navigation - Enhanced Glossy Design */}
-        <SidebarGroup className="relative z-10 px-2.5 pt-4">
-          <SidebarGroupLabel className="text-slate-400/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
-            <div className="w-4 h-[1px] bg-gradient-to-r from-violet-500/60 to-transparent" />
-            <span className="bg-gradient-to-r from-slate-400 to-violet-300/80 bg-clip-text text-transparent">Navigate</span>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        {/* Navigation - Optimized for performance */}
+        <SidebarGroup className="relative z-10 px-2 pt-4">
+          <SidebarGroupLabel className="text-slate-500/90 uppercase text-[10px] tracking-[0.2em] font-semibold mb-3 px-3">
+            Navigate
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1.5">
+            <SidebarMenu className="space-y-1">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
-                      className={`group relative rounded-xl transition-all duration-300 ease-out flex items-center sidebar-nav-item ${
+                      className={`relative rounded-xl transition-colors duration-150 flex items-center ${
                         isActive(item.url) 
-                          ? "bg-gradient-to-r from-white/[0.12] to-white/[0.06] border border-white/[0.15] sidebar-active-glow" 
-                          : "hover:bg-gradient-to-r hover:from-white/[0.08] hover:to-transparent border border-transparent hover:border-white/[0.08]"
+                          ? "bg-white/10 border border-white/15" 
+                          : "hover:bg-white/5"
                       }`}
                     >
-                      {/* Enhanced Active indicator with glow */}
+                      {/* Active indicator */}
                       {isActive(item.url) && (
-                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b ${item.color} rounded-full shadow-lg`} style={{boxShadow: `0 0 10px hsl(var(--purple) / 0.5)`}} />
+                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b ${item.color} rounded-full`} />
                       )}
                       
-                      {/* Icon container with glossy effect */}
-                      <div className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 sidebar-icon-glossy ${
+                      {/* Icon container */}
+                      <div className={`flex items-center justify-center w-9 h-9 rounded-xl ${
                         isActive(item.url) 
-                          ? `bg-gradient-to-br ${item.color} shadow-lg` 
-                          : "bg-gradient-to-br from-white/[0.08] to-white/[0.02] group-hover:from-white/[0.12] group-hover:to-white/[0.05]"
+                          ? `bg-gradient-to-br ${item.color}` 
+                          : "bg-white/5"
                       }`}>
-                        <item.icon className={`h-5 w-5 transition-all duration-300 ${
-                          isActive(item.url) ? 'text-white drop-shadow-md' : 'text-slate-400 group-hover:text-slate-200'
+                        <item.icon className={`h-5 w-5 ${
+                          isActive(item.url) ? 'text-white' : 'text-slate-400'
                         }`} />
                       </div>
                       
                       {!collapsed && (
                         <>
-                          <span className={`ml-3 font-medium transition-all duration-300 ${
-                            isActive(item.url) ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'
+                          <span className={`ml-3 font-medium ${
+                            isActive(item.url) ? 'text-white' : 'text-slate-400'
                           }`}>
                             {item.title}
                           </span>
                           
                           {isActive(item.url) && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-white/70" />
+                            <ChevronRight className="ml-auto h-4 w-4 text-white/60" />
                           )}
                         </>
                       )}
@@ -303,34 +294,34 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Quick Actions with Enhanced Glossy Cards */}
-        <SidebarGroup className="relative z-10 mt-5 px-2.5">
-          <SidebarGroupLabel className="text-slate-400/80 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
-            <div className="w-4 h-[1px] bg-gradient-to-r from-amber-500/70 to-transparent" />
-            <span className="bg-gradient-to-r from-amber-400/90 to-orange-400/80 bg-clip-text text-transparent">Quick Add</span>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+        {/* Quick Actions with Enhanced Glass Cards */}
+        <SidebarGroup className="relative z-10 mt-4 px-2">
+          <SidebarGroupLabel className="text-slate-500/90 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
+            <div className="w-6 h-[1px] bg-gradient-to-r from-amber-500/60 to-transparent" />
+            <span className="bg-gradient-to-r from-slate-400 to-slate-500 bg-clip-text text-transparent">Quick Add</span>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
+            <SidebarMenu className="space-y-1.5">
               {quickActions.map((action) => (
                 <SidebarMenuItem key={action.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={action.url} 
-                      className="group relative rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.06] via-white/[0.03] to-transparent hover:from-white/[0.12] hover:via-white/[0.06] hover:to-white/[0.02] hover:border-white/25 transition-all duration-500 overflow-hidden hover:shadow-xl hover:shadow-violet-500/10"
+                      className="relative rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.04] to-transparent backdrop-blur-sm hover:from-white/[0.1] hover:to-white/[0.02] hover:border-white/20 transition-all duration-500 group overflow-hidden hover:shadow-lg"
                     >
-                      {/* Multi-color shimmer effect */}
+                      {/* Enhanced shimmer effect */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-400/15 via-50% to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/12 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
                       </div>
                       
-                      {/* Icon with glossy effect and rotation */}
-                      <div className={`relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br ${action.color} shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-90 group-hover:shadow-xl sidebar-icon-glossy`}>
-                        <Plus className="h-4 w-4 text-white relative z-10 drop-shadow-sm" />
+                      {/* Icon with enhanced glass container and rotation */}
+                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-90 group-hover:shadow-xl group-hover:shadow-current/30`}>
+                        <Plus className="h-4 w-4 text-white relative z-10" />
                       </div>
                       
                       {!collapsed && (
-                        <span className={`ml-3 font-semibold bg-gradient-to-r ${action.color} bg-clip-text text-transparent group-hover:opacity-100 opacity-80 transition-all duration-500 group-hover:translate-x-1`}>
+                        <span className={`ml-3 font-medium bg-gradient-to-r ${action.color} bg-clip-text text-transparent group-hover:opacity-100 opacity-75 transition-all duration-500 group-hover:translate-x-0.5`}>
                           {action.title}
                         </span>
                       )}
@@ -344,55 +335,55 @@ export function AppSidebar() {
 
         {/* Settings Section */}
         {!collapsed && (
-          <SidebarGroup className="relative z-10 mt-3">
+          <SidebarGroup className="relative z-10 mt-2">
             <SidebarGroupContent>
-              <div className="px-2.5">
+              <div className="px-2">
                 <SettingsDialog />
               </div>
             </SidebarGroupContent>
           </SidebarGroup>
         )}
 
-        {/* Toggle Button with Glossy Effect */}
+        {/* Toggle Button with Enhanced Glass Effect */}
         <div className="mt-auto relative z-10">
-          <div className={`px-3 py-4 ${collapsed ? 'flex justify-center' : ''}`}>
+          <div className={`px-3 py-3 ${collapsed ? 'flex justify-center' : ''}`}>
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className={`group relative overflow-hidden rounded-xl border border-white/[0.12] bg-gradient-to-r from-white/[0.07] via-white/[0.04] to-transparent hover:from-white/[0.14] hover:via-white/[0.08] hover:to-white/[0.02] hover:border-white/25 transition-all duration-500 backdrop-blur-md hover:shadow-xl hover:shadow-violet-500/15 ${
+              className={`group relative overflow-hidden rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.05] to-transparent hover:from-white/[0.12] hover:to-white/[0.04] hover:border-white/20 transition-all duration-500 backdrop-blur-md hover:shadow-lg hover:shadow-purple-500/10 ${
                 collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
               }`}
             >
-              {/* Rainbow shimmer effect */}
+              {/* Enhanced glass shimmer effect */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/15 via-30% via-pink-500/10 via-60% to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/15 via-cyan-500/15 to-violet-500/15 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
               </div>
               
               {!collapsed && (
-                <span className="text-slate-400 text-xs font-medium group-hover:text-slate-200 transition-all duration-500 relative z-10">
+                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-all duration-500 relative z-10">
                   Collapse
                 </span>
               )}
               
               <div className={`relative flex items-center justify-center transition-all duration-500 ${
-                collapsed ? '' : 'bg-gradient-to-br from-violet-500/25 via-purple-500/20 to-cyan-500/25 rounded-lg p-1.5 border border-white/15'
+                collapsed ? '' : 'bg-gradient-to-br from-violet-500/20 to-cyan-500/20 rounded-lg p-1.5 border border-white/10'
               }`}>
                 {collapsed ? (
                   <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 transition-all duration-500 group-hover:scale-110" />
                 ) : (
-                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-violet-300 transition-all duration-500 group-hover:scale-110" />
+                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-violet-400 transition-all duration-500 group-hover:scale-110" />
                 )}
               </div>
             </Button>
           </div>
 
-          {/* Footer with Glossy Separator */}
+          {/* Footer with Enhanced Glass Separator */}
           {!collapsed && (
             <div className="text-center px-4 pb-4">
-              <div className="h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent mb-3" />
-              <p className="text-[10px] text-slate-500/90 tracking-wider font-medium">
-                Powered by <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent font-bold animate-pulse">Lovable</span>
+              <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-3" />
+              <p className="text-[10px] text-slate-600/80 tracking-wider font-medium">
+                Powered by <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-semibold">Lovable</span>
               </p>
             </div>
           )}
