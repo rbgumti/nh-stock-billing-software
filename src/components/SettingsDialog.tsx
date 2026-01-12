@@ -1,4 +1,4 @@
-import { Settings, Zap, Minimize2, User } from "lucide-react";
+import { Settings, Zap, Minimize2, User, Sun, Moon, Monitor } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,12 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
+import { useTheme } from "next-themes";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export function SettingsDialog() {
   const { performanceMode, setPerformanceMode, compactMode, setCompactMode, doctorName, setDoctorName } = useAppSettings();
+  const { theme, setTheme } = useTheme();
 
   return (
     <Dialog>
@@ -51,6 +54,54 @@ export function SettingsDialog() {
                 placeholder="Enter doctor name"
                 className="mt-1"
               />
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Theme Selection */}
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-violet-500/10">
+              <Sun className="w-5 h-5 text-violet-500" />
+            </div>
+            <div className="space-y-2 flex-1">
+              <Label className="text-sm font-medium">
+                Theme
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Choose your preferred color scheme
+              </p>
+              <ToggleGroup
+                type="single"
+                value={theme}
+                onValueChange={(value) => value && setTheme(value)}
+                className="justify-start mt-2"
+              >
+                <ToggleGroupItem
+                  value="light"
+                  aria-label="Light theme"
+                  className="flex items-center gap-2 data-[state=on]:bg-amber-500/20 data-[state=on]:text-amber-600 dark:data-[state=on]:text-amber-400"
+                >
+                  <Sun className="h-4 w-4" />
+                  Light
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="dark"
+                  aria-label="Dark theme"
+                  className="flex items-center gap-2 data-[state=on]:bg-violet-500/20 data-[state=on]:text-violet-600 dark:data-[state=on]:text-violet-400"
+                >
+                  <Moon className="h-4 w-4" />
+                  Dark
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="system"
+                  aria-label="System theme"
+                  className="flex items-center gap-2 data-[state=on]:bg-cyan-500/20 data-[state=on]:text-cyan-600 dark:data-[state=on]:text-cyan-400"
+                >
+                  <Monitor className="h-4 w-4" />
+                  System
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
           </div>
 
