@@ -1,11 +1,12 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Loader2 } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface RusanPharmaPOProps {
   poNumber: string;
@@ -18,6 +19,7 @@ interface RusanPharmaPOProps {
 export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: RusanPharmaPOProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const { doctorName } = useAppSettings();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -113,178 +115,36 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
     }, 250);
   };
 
-  const handleDownloadPDF = () => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const leftMargin = 15;
-    const rightMargin = 15;
-    const contentWidth = pageWidth - leftMargin - rightMargin;
-    let y = 18;
+  const handleDownloadPDF = async () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
 
-    // Header row - Regd on right side
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'normal');
-    pdf.text('Regd. Govt of Punjab', pageWidth - rightMargin, y, { align: 'right' });
-    y += 12;
-
-    // Hospital Name (centered) - bold and larger
-    pdf.setFontSize(24);
-    pdf.setFont('times', 'bold');
-    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y, { align: 'center' });
-    y += 10;
-
-    // Address
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'normal');
-    pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,', pageWidth / 2, y, { align: 'center' });
-    y += 6;
-
-    // Mobile
-    pdf.text('Mob: 6284942412', pageWidth / 2, y, { align: 'center' });
-    y += 8;
-
-    // Licence with pipe separator - bold
-    pdf.setFontSize(11);
-    pdf.setFont('times', 'bold');
-    pdf.text('Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024', pageWidth / 2, y, { align: 'center' });
-    y += 14;
-
-    // PO Number and Date - bold
-    pdf.setFontSize(14);
-    pdf.setFont('times', 'bold');
-    pdf.text(`PO No.: NH-25-26-${getPONumberSuffix()}`, leftMargin, y);
-    pdf.text(`Date: ${formatDate(poDate)}`, pageWidth - rightMargin, y, { align: 'right' });
-    y += 14;
-
-    // To Section
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'normal');
-    pdf.text('To: Rusan Pharma Ltd.,', leftMargin, y);
-    y += 6;
-    pdf.text('Khasra No. 122MI, Central Hope Town, Selaqui, Dehradun, Uttarakhand-248197', leftMargin, y);
-    y += 14;
-
-    // Subject line - bold and underlined
-    pdf.setFontSize(13);
-    pdf.setFont('times', 'bold');
-    pdf.text('Subject: Purchase Order', leftMargin, y);
-    const subjectWidth = pdf.getTextWidth('Subject: Purchase Order');
-    pdf.line(leftMargin, y + 1, leftMargin + subjectWidth, y + 1);
-    y += 12;
-
-    // Salutation
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'normal');
-    pdf.text("Dear Sir/Madam,", leftMargin, y);
-    y += 10;
-
-    // Intro paragraph
-    pdf.setFontSize(12);
-    const introText = "We place a purchase order with authorized doctor's stamp and signature. Terms per telephone discussion. Payment by cheque to your bank account.";
-    const splitIntro = pdf.splitTextToSize(introText, contentWidth);
-    pdf.text(splitIntro, leftMargin, y);
-    y += splitIntro.length * 6 + 10;
-
-    // Table - Calculate dynamic row height
-    const tableHeaders = ['Sr.', 'Product', 'Compositions', 'Pack', 'Strips', 'Tablets'];
-    const colWidths = [12, 32, 58, 20, 25, 28];
-    let x = leftMargin;
-
-    // Calculate available space for table
-    const tableStartY = y;
-    const reservedBottomSpace = 70;
-    const availableTableHeight = pageHeight - tableStartY - reservedBottomSpace;
-    const minRowHeight = 10;
-    const headerHeight = 10;
-    const rowHeight = Math.max(minRowHeight, Math.min(14, (availableTableHeight - headerHeight) / Math.max(items.length, 1)));
-
-    // Table header
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(x, y, contentWidth + 5, headerHeight, 'F');
-    pdf.setFontSize(11);
-    pdf.setFont('times', 'bold');
-    tableHeaders.forEach((header, i) => {
-      pdf.rect(x + colWidths.slice(0, i).reduce((a, b) => a + b, 0), y, colWidths[i], headerHeight);
-      pdf.text(header, x + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + colWidths[i] / 2, y + 7, { align: 'center' });
-    });
-    y += headerHeight;
-
-    // Table rows
-    pdf.setFontSize(11);
-    pdf.setFont('times', 'normal');
-    items.forEach((item, index) => {
-      const stockItem = getStockItemDetails(item.stockItemId);
-      const packing = item.packSize || stockItem?.packing || "10×10";
-      const qtyInStrips = item.qtyInStrips || item.quantity;
-      const qtyInTabs = item.qtyInTabs || (() => {
-        const packingMatch = packing.match(/(\d+)[×x*](\d+)/i);
-        const tabletsPerStrip = packingMatch ? parseInt(packingMatch[1]) * parseInt(packingMatch[2]) : 10;
-        return qtyInStrips * tabletsPerStrip;
-      })();
-
-      const rowData = [
-        `${index + 1}`,
-        item.stockItemName,
-        stockItem?.composition || '-',
-        packing.replace('*', '×'),
-        qtyInStrips.toLocaleString(),
-        qtyInTabs.toLocaleString()
-      ];
-
-      let cellX = x;
-      rowData.forEach((cell, i) => {
-        pdf.rect(cellX, y, colWidths[i], rowHeight);
-        const align = i === 0 || i === 3 ? 'center' : i >= 4 ? 'right' : 'left';
-        const textX = align === 'center' ? cellX + colWidths[i] / 2 : align === 'right' ? cellX + colWidths[i] - 2 : cellX + 2;
-        let displayText = cell;
-        if (i === 2) {
-          const maxWidth = colWidths[i] - 4;
-          while (pdf.getTextWidth(displayText) > maxWidth && displayText.length > 3) {
-            displayText = displayText.slice(0, -4) + '...';
-          }
-        }
-        pdf.text(displayText, textX, y + rowHeight / 2 + 1.5, { align });
-        cellX += colWidths[i];
+    setIsGeneratingPDF(true);
+    
+    try {
+      const canvas = await html2canvas(printContent, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
       });
-      y += rowHeight;
-    });
 
-    // Position undertaking at bottom
-    y = pageHeight - reservedBottomSpace + 5;
-
-    // Undertaking
-    pdf.setFont('times', 'bold');
-    pdf.setFontSize(12);
-    pdf.text('UNDERTAKING:', leftMargin, y);
-    const undertakingWidth = pdf.getTextWidth('UNDERTAKING:');
-    pdf.line(leftMargin, y + 1, leftMargin + undertakingWidth, y + 1);
-    y += 7;
-
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(10);
-    const undertakingText = `We confirm purchase from Rusan Pharma Ltd. under P.O. No. ${getPONumberSuffix()}/A (${formatDate(poDate)}). These controlled substances per Narcotic Drugs and Psychotropic Substances Act, 1985, shall be maintained with full records. Form-6 (Consignment Note) will be submitted upon receipt. Products are exclusively for our De-addiction Centre and qualified doctors only, licensed under PSMHC/Punjab/2024/863, sales within India only, no retail or export. Rusan Pharma Ltd. not liable for non-compliance by us.`;
-    const splitUndertaking = pdf.splitTextToSize(undertakingText, contentWidth);
-    pdf.text(splitUndertaking, leftMargin, y);
-    y += splitUndertaking.length * 4 + 10;
-
-    // For line
-    pdf.setFontSize(11);
-    pdf.text('For Navjeevan Hospital,', leftMargin, y);
-    y += 5;
-    pdf.text('Opp. New Bus Stand, G.T. Road, Sirhind', leftMargin, y);
-    y += 16;
-
-    // Signature line
-    pdf.line(leftMargin, y, leftMargin + 50, y);
-    y += 6;
-
-    // Dr name and date
-    pdf.setFontSize(11);
-    pdf.text(doctorName, leftMargin, y);
-    pdf.text(`Date: ${formatDate(poDate)}`, leftMargin + 60, y);
-
-    pdf.save(`PO-${poNumber}-Rusan-Pharma.pdf`);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+      
+      pdf.save(`PO-${poNumber}-Rusan-Pharma.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   return (
@@ -294,8 +154,8 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           <DialogTitle className="flex items-center justify-between">
             <span>Rusan Pharma Purchase Order Format</span>
             <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
+              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2" disabled={isGeneratingPDF}>
+                {isGeneratingPDF ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                 PDF
               </Button>
               <Button onClick={handlePrint} size="sm" className="flex items-center gap-2">
@@ -408,7 +268,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </p>
 
             {/* Space for stamp and signature */}
-            <div className="h-10 my-3 border-b border-black w-48">
+            <div className="h-16 my-3 border-b border-black w-48">
             </div>
 
             {/* Signature Section */}
