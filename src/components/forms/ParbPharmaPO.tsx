@@ -263,7 +263,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     pdf.text('For Navjeevan Hospital,', leftMargin, y);
     y += 5;
     pdf.text('Opp. New Bus Stand, G.T. Road, Sirhind', leftMargin, y);
-    y += 40; // More space for sign and stamp
+    y += 55; // Maximum space for sign and stamp
 
     // Signature line
     pdf.line(leftMargin, y, leftMargin + 50, y);
@@ -395,8 +395,8 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
               <p>For Navjeevan Hospital,</p>
               <p>Opp. New Bus Stand, G.T. Road, Sirhind</p>
               
-            {/* More space for sign and stamp */}
-              <div className="h-20"></div>
+            {/* Maximum space for sign and stamp */}
+              <div className="h-32"></div>
               
               <div className="w-48 border-b border-black"></div>
               <div className="flex gap-10 mt-2">
