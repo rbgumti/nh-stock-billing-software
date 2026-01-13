@@ -68,11 +68,10 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             .header-row { text-align: center; font-size: 11pt; margin-bottom: 6px; }
             .hospital-name { font-size: 24pt; font-weight: bold; text-align: center; margin: 8px 0; }
             .address-row { text-align: center; font-size: 11pt; margin-bottom: 4px; }
-            .licence-row { text-align: center; font-size: 11pt; margin-bottom: 12px; }
-            .po-date-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 12pt; font-weight: bold; }
-            .to-section { margin-bottom: 10px; font-size: 11pt; line-height: 1.5; }
-            .subject { font-weight: bold; text-decoration: underline; margin: 10px 0; font-size: 12pt; }
-            .salutation { margin: 8px 0 6px 0; font-size: 11pt; }
+            .licence-row { text-align: center; font-size: 11pt; margin-bottom: 24px; }
+            .to-section { margin-bottom: 24px; font-size: 11pt; line-height: 1.5; }
+            .subject { font-weight: bold; text-decoration: underline; margin: 0 0 24px 0; font-size: 12pt; }
+            .salutation { margin: 0 0 24px 0; font-size: 11pt; }
             .intro-para { font-size: 11pt; text-align: justify; margin-bottom: 12px; line-height: 1.5; }
             table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 11pt; }
             th, td { border: 1px solid #000; padding: 8px 10px; }
@@ -83,8 +82,10 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             .flex-spacer { flex: 1; min-height: 20px; }
             .undertaking-title { font-weight: bold; font-size: 12pt; margin: 12px 0 6px 0; text-decoration: underline; }
             .undertaking-text { font-size: 10pt; text-align: justify; line-height: 1.4; margin-bottom: 14px; }
+            .undertaking-spacing { height: 42px; }
             .signature-section { margin-top: 20px; font-size: 11pt; }
-            .signature-line { border-bottom: 1px solid #000; width: 200px; margin: 25px 0 5px 0; }
+            .signature-spacing { height: 30px; }
+            .signature-line { border-bottom: 1px solid #000; width: 200px; margin: 5px 0; }
             @media print {
               body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             }
@@ -115,7 +116,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     const contentWidth = pageWidth - leftMargin - rightMargin;
     let y = 15;
 
-    // Header - Regd. Govt of Punjab
+    // Header - Regd. Govt of Punjab (centered)
     pdf.setFontSize(12);
     pdf.setFont('times', 'normal');
     pdf.text('Regd. Govt of Punjab', pageWidth / 2, y, { align: 'center' });
@@ -127,20 +128,20 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y, { align: 'center' });
     y += 8;
 
-    // Address
+    // Address (centered)
     pdf.setFontSize(12);
     pdf.setFont('times', 'normal');
     pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,', pageWidth / 2, y, { align: 'center' });
     y += 6;
 
-    // Mobile
+    // Mobile (centered)
     pdf.text('Mob: 6284942412', pageWidth / 2, y, { align: 'center' });
     y += 7;
 
-    // Licence
+    // Licence (centered)
     pdf.setFontSize(11);
     pdf.text('Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024', pageWidth / 2, y, { align: 'center' });
-    y += 12;
+    y += 18; // 2 row space after licence before To
 
     // PO Number and Date
     pdf.setFontSize(13);
@@ -161,18 +162,18 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     pdf.text('E-9, INDUSTRIAL AREA SIIDCUL, SILAQULI', leftMargin, y);
     y += 6;
     pdf.text('DEHRADUN UTTARAKHAND', leftMargin, y);
-    y += 12;
+    y += 18; // 2 row space after address before Subject
 
     // Subject - underlined
     pdf.setFont('times', 'bold');
     pdf.text('Subject: Purchase Order', leftMargin, y);
     pdf.line(leftMargin, y + 1, leftMargin + pdf.getTextWidth('Subject: Purchase Order'), y + 1);
-    y += 10;
+    y += 14; // 2 row space after Subject before Dear Sir/Madam
 
     // Salutation
     pdf.setFont('times', 'normal');
     pdf.text('Dear Sir/Madam,', leftMargin, y);
-    y += 10;
+    y += 14; // 2 row space after Dear Sir/Madam before intro paragraph
 
     // Intro paragraph
     pdf.setFontSize(11);
@@ -240,8 +241,8 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
       y += rowHeight;
     });
 
-    // Position undertaking at bottom
-    y = pageHeight - reservedBottomSpace + 5;
+    // Position undertaking at bottom with more space
+    y = pageHeight - reservedBottomSpace;
 
     // Undertaking
     pdf.setFont('times', 'bold');
@@ -255,14 +256,14 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     const undertakingText = `We hereby confirm that the products which we intend to buy from PARA PHARMACEUTICALS PVT. LTD. E-9, INDUSTRIAL AREA SIIDCUL, SILAQUI DEHRADUN UTTARAKHAND INDIA Our P.O.NO ${poNumber}. .dt- ${formatDate(poDate)}. These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License no PSMHC/Pb./2024/863. We are full aware these products containing controlled substance as per Narcotic drugs & psychotropic substance Act 1985, and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation & for its sale within india only & not meant for export.`;
     const splitUndertaking = pdf.splitTextToSize(undertakingText, contentWidth);
     pdf.text(splitUndertaking, leftMargin, y);
-    y += splitUndertaking.length * 4 + 10;
+    y += splitUndertaking.length * 4 + 42; // 7 row space after undertaking
 
-    // Signature section
+    // Signature section - For Navjeevan Hospital
     pdf.setFontSize(11);
     pdf.text('For Navjeevan Hospital,', leftMargin, y);
     y += 5;
     pdf.text('Opp. New Bus Stand, G.T. Road, Sirhind', leftMargin, y);
-    y += 14;
+    y += 28; // 4-5 rows space for sign and stamp
 
     // Signature line
     pdf.line(leftMargin, y, leftMargin + 50, y);
@@ -293,24 +294,24 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
         </DialogHeader>
 
         <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', lineHeight: '1.5' }}>
-          {/* Header - Regd. Govt of Punjab */}
+          {/* Header - Regd. Govt of Punjab (centered) */}
           <p className="text-center text-[12pt] mb-3">Regd. Govt of Punjab</p>
 
-          {/* Hospital Name */}
+          {/* Hospital Name (centered) */}
           <h1 className="text-[24pt] font-bold text-center mb-3">NAVJEEVAN HOSPITAL</h1>
 
-          {/* Address Row */}
+          {/* Address Row (centered) */}
           <p className="text-center text-[12pt] mb-1">
             Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,
           </p>
 
-          {/* Mobile */}
+          {/* Mobile (centered) */}
           <p className="text-center text-[12pt] mb-3">
             Mob: 6284942412
           </p>
 
-          {/* Licence Row */}
-          <p className="text-center text-[11pt] mb-5">
+          {/* Licence Row (centered) - 2 row space after */}
+          <p className="text-center text-[11pt] mb-8">
             Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024
           </p>
 
@@ -320,21 +321,21 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             <span>Date: {formatDate(poDate)}</span>
           </div>
 
-          {/* To Section */}
-          <div className="text-[12pt] mb-4 leading-relaxed">
+          {/* To Section - 2 row space after */}
+          <div className="text-[12pt] mb-8 leading-relaxed">
             <p className="mb-1">To,</p>
             <p className="font-bold">PARB PHARMACEUTICALS PVT. LTD.</p>
             <p>E-9, INDUSTRIAL AREA SIIDCUL, SILAQULI</p>
             <p>DEHRADUN UTTARAKHAND</p>
           </div>
 
-          {/* Subject */}
-          <p className="text-[12pt] mb-4 font-bold">
+          {/* Subject - 2 row space after */}
+          <p className="text-[12pt] mb-8 font-bold">
             <span className="underline">Subject: Purchase Order</span>
           </p>
 
-          {/* Salutation */}
-          <p className="text-[12pt] mb-4">Dear Sir/Madam,</p>
+          {/* Salutation - 2 row space after */}
+          <p className="text-[12pt] mb-8">Dear Sir/Madam,</p>
 
           {/* Intro Paragraph */}
           <p className="text-[11pt] text-justify mb-5 leading-relaxed">
@@ -382,15 +383,22 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             <p className="font-bold text-[12pt] mb-2">
               <span className="underline">UNDERTAKING:</span>
             </p>
-            <p className="text-[10pt] text-justify leading-relaxed mb-5">
+            <p className="text-[10pt] text-justify leading-relaxed">
               We hereby confirm that the products which we intend to buy from PARA PHARMACEUTICALS PVT. LTD. E-9, INDUSTRIAL AREA SIIDCUL, SILAQUI DEHRADUN UTTARAKHAND INDIA Our P.O.NO {poNumber}. .dt- {formatDate(poDate)}. These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License no PSMHC/Pb./2024/863. We are full aware these products containing controlled substance as per Narcotic drugs &amp; psychotropic substance Act 1985, and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation &amp; for its sale within india only &amp; not meant for export.
             </p>
 
+            {/* 7 row space after undertaking */}
+            <div className="h-16"></div>
+
             {/* Signature Section */}
-            <div className="text-[11pt] mt-6">
+            <div className="text-[11pt]">
               <p>For Navjeevan Hospital,</p>
               <p>Opp. New Bus Stand, G.T. Road, Sirhind</p>
-              <div className="mt-6 w-48 border-b border-black"></div>
+              
+              {/* 4-5 rows space for sign and stamp */}
+              <div className="h-12"></div>
+              
+              <div className="w-48 border-b border-black"></div>
               <div className="flex gap-10 mt-2">
                 <span>{doctorName}</span>
                 <span>Date: {formatDate(poDate)}</span>
