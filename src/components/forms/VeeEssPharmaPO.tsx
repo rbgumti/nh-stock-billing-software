@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Loader2 } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 interface VeeEssPharmaPOProps {
@@ -18,6 +19,7 @@ interface VeeEssPharmaPOProps {
 export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }: VeeEssPharmaPOProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const { doctorName } = useAppSettings();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -104,155 +106,36 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
     }, 250);
   };
 
-  const handleDownloadPDF = () => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const leftMargin = 15;
-    const rightMargin = 15;
-    const contentWidth = pageWidth - leftMargin - rightMargin;
-    let y = 18;
+  const handleDownloadPDF = async () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
 
-    // Header row - centered and bold
-    pdf.setFontSize(14);
-    pdf.setFont('times', 'bold');
-    pdf.text('Regd. Govt of Punjab', pageWidth / 2, y, { align: 'center' });
-    y += 7;
-    pdf.text('Mob: 6284942412', pageWidth / 2, y, { align: 'center' });
-    y += 12;
-
-    // Hospital Name (centered) - bold
-    pdf.setFontSize(26);
-    pdf.setFont('times', 'bold');
-    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y, { align: 'center' });
-    y += 12;
-
-    // Address - bold
-    pdf.setFontSize(14);
-    pdf.setFont('times', 'bold');
-    pdf.text(`Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib    ${doctorName}`, pageWidth / 2, y, { align: 'center' });
-    y += 8;
-
-    // Licence - bold
-    pdf.setFontSize(13);
-    pdf.setFont('times', 'bold');
-    pdf.text('Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024', pageWidth / 2, y, { align: 'center' });
-    y += 14;
-
-    // PO Number and Date - bold
-    pdf.setFontSize(15);
-    pdf.setFont('times', 'bold');
-    pdf.text(`PO NO: ${poNumber}`, leftMargin + 10, y);
-    pdf.text(`DATE: ${formatDate(poDate)}`, pageWidth - rightMargin - 10, y, { align: 'right' });
-    y += 14;
-
-    // To Section
-    pdf.setFontSize(14);
-    pdf.setFont('times', 'normal');
-    const toMargin = leftMargin + 15;
-    pdf.text('To', toMargin, y);
-    y += 7;
-    pdf.setFont('times', 'bold');
-    pdf.text('VEE ESS PHARMACEUTICALS', toMargin, y);
-    y += 7;
-    pdf.setFont('times', 'normal');
-    pdf.text('PATRAN ROAD DRB,SANGRUR', toMargin, y);
-    y += 7;
-    pdf.text('PUNJAB-148035', toMargin, y);
-    y += 10;
-
-    pdf.text('Subject:Medicine order', toMargin, y);
-    y += 8;
-    pdf.text("Dear Sir,Ma'am", toMargin, y);
-    y += 8;
-    pdf.text('Kindly provide us :-', toMargin, y);
-    y += 12;
-
-    // Table - Calculate dynamic row height
-    const tableHeaders = ['Sr. No.', 'Product name', 'Pack', 'Qty.'];
-    const colWidths = [22, 95, 35, 28];
-    let x = leftMargin;
-
-    // Calculate available space for table
-    const tableStartY = y;
-    const reservedBottomSpace = 80;
-    const availableTableHeight = pageHeight - tableStartY - reservedBottomSpace;
-    const minRowHeight = 10;
-    const headerHeight = 12;
-    // Add minimum 4 rows for table consistency
-    const totalRows = Math.max(items.length, 4);
-    const rowHeight = Math.max(minRowHeight, Math.min(14, (availableTableHeight - headerHeight) / totalRows));
-
-    // Table header
-    pdf.setFillColor(245, 245, 245);
-    pdf.rect(x, y, contentWidth, headerHeight, 'F');
-    pdf.setFontSize(13);
-    pdf.setFont('times', 'bold');
-    tableHeaders.forEach((header, i) => {
-      const cellX = x + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-      pdf.rect(cellX, y, colWidths[i], headerHeight);
-      pdf.text(header, cellX + colWidths[i] / 2, y + 8, { align: 'center' });
-    });
-    y += headerHeight;
-
-    // Table rows
-    pdf.setFontSize(13);
-    pdf.setFont('times', 'normal');
-    items.forEach((item, index) => {
-      const stockItem = getStockItemDetails(item.stockItemId);
-      const packing = stockItem?.packing || "10*10";
-
-      const rowData = [
-        `${index + 1}.`,
-        item.stockItemName,
-        packing,
-        `${item.quantity}TAB`
-      ];
-
-      let cellX = x;
-      rowData.forEach((cell, i) => {
-        pdf.rect(cellX, y, colWidths[i], rowHeight);
-        const align = i === 0 || i >= 2 ? 'center' : 'left';
-        const textX = align === 'center' ? cellX + colWidths[i] / 2 : cellX + 4;
-        pdf.text(cell, textX, y + rowHeight / 2 + 2, { align });
-        cellX += colWidths[i];
+    setIsGeneratingPDF(true);
+    
+    try {
+      const canvas = await html2canvas(printContent, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
       });
-      y += rowHeight;
-    });
 
-    // Empty rows to fill table space
-    const emptyRows = Math.max(0, 4 - items.length);
-    for (let i = 0; i < emptyRows; i++) {
-      let cellX = x;
-      colWidths.forEach((width) => {
-        pdf.rect(cellX, y, width, rowHeight);
-        cellX += width;
-      });
-      y += rowHeight;
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+      
+      pdf.save(`PO-${poNumber}-VEE-ESS-Pharma.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsGeneratingPDF(false);
     }
-
-    // Position footer at bottom
-    y = pageHeight - reservedBottomSpace + 10;
-
-    // Footer Section
-    pdf.setFontSize(13);
-    pdf.text('For our centre Navjeevan hospital at below written address at the earliest.', toMargin, y);
-    y += 8;
-    pdf.text('Address: Navjeevan hospital Opp.Busstand,Vill.Bara,Sirhind,distt. Fatehgarh sahib.', toMargin, y);
-    y += 10;
-    pdf.text('Thanking you', toMargin, y);
-    y += 7;
-    pdf.text('Yours Sincerely,', toMargin, y);
-    y += 10;
-    pdf.text('Navjeevanhospital,Sirhind', toMargin, y);
-    y += 7;
-    pdf.text(`Date: ${formatDateSlash(poDate)}`, toMargin, y);
-    y += 8;
-    pdf.text('OPP.NEW BUS STAND,', toMargin, y);
-    y += 7;
-    pdf.text('G.T.ROAD, BARA ,SIRHIND', toMargin, y);
-
-    pdf.save(`PO-${poNumber}-VEE-ESS-Pharma.pdf`);
   };
 
   return (
@@ -262,8 +145,8 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
           <DialogTitle className="flex items-center justify-between">
             <span>VEE ESS Pharmaceuticals Purchase Order Format</span>
             <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
+              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2" disabled={isGeneratingPDF}>
+                {isGeneratingPDF ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                 PDF
               </Button>
               <Button onClick={handlePrint} size="sm" className="flex items-center gap-2">

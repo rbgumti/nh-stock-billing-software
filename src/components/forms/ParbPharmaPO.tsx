@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Loader2 } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 interface ParbPharmaPOProps {
@@ -18,6 +19,7 @@ interface ParbPharmaPOProps {
 export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: ParbPharmaPOProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const { doctorName } = useAppSettings();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -107,171 +109,36 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     }, 250);
   };
 
-  const handleDownloadPDF = () => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const leftMargin = 15;
-    const rightMargin = 15;
-    const contentWidth = pageWidth - leftMargin - rightMargin;
-    let y = 15;
+  const handleDownloadPDF = async () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
 
-    // Header - Regd. Govt of Punjab (centered)
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'normal');
-    pdf.text('Regd. Govt of Punjab', pageWidth / 2, y, { align: 'center' });
-    y += 10;
-
-    // Hospital Name (centered) - bold
-    pdf.setFontSize(24);
-    pdf.setFont('times', 'bold');
-    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y, { align: 'center' });
-    y += 8;
-
-    // Address (centered)
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'normal');
-    pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,', pageWidth / 2, y, { align: 'center' });
-    y += 6;
-
-    // Mobile (centered)
-    pdf.text('Mob: 6284942412', pageWidth / 2, y, { align: 'center' });
-    y += 7;
-
-    // Licence (centered)
-    pdf.setFontSize(11);
-    pdf.text('Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024', pageWidth / 2, y, { align: 'center' });
-    y += 18; // 2 row space after licence before To
-
-    // PO Number and Date
-    pdf.setFontSize(13);
-    pdf.setFont('times', 'bold');
-    pdf.text(`PO No.: ${poNumber}`, leftMargin, y);
-    pdf.text(`Date: ${formatDate(poDate)}`, pageWidth - rightMargin, y, { align: 'right' });
-    y += 12;
-
-    // To Section
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'normal');
-    pdf.text('To,', leftMargin, y);
-    y += 6;
-    pdf.setFont('times', 'bold');
-    pdf.text('PARB PHARMACEUTICALS PVT. LTD.', leftMargin, y);
-    y += 6;
-    pdf.setFont('times', 'normal');
-    pdf.text('E-9, INDUSTRIAL AREA SIIDCUL, SILAQULI', leftMargin, y);
-    y += 6;
-    pdf.text('DEHRADUN UTTARAKHAND', leftMargin, y);
-    y += 18; // 2 row space after address before Subject
-
-    // Subject - underlined
-    pdf.setFont('times', 'bold');
-    pdf.text('Subject: Purchase Order', leftMargin, y);
-    pdf.line(leftMargin, y + 1, leftMargin + pdf.getTextWidth('Subject: Purchase Order'), y + 1);
-    y += 14; // 2 row space after Subject before Dear Sir/Madam
-
-    // Salutation
-    pdf.setFont('times', 'normal');
-    pdf.text('Dear Sir/Madam,', leftMargin, y);
-    y += 14; // 2 row space after Dear Sir/Madam before intro paragraph
-
-    // Intro paragraph
-    pdf.setFontSize(11);
-    const introText = "We hereby placing a purchase order, Terms and Conditions will remain same as Our discussion telephonically. Payment of product shall be done through cheque to your bank account. The name and composition of product give below, please supply as early as possible:";
-    const splitIntro = pdf.splitTextToSize(introText, contentWidth);
-    pdf.text(splitIntro, leftMargin, y);
-    y += splitIntro.length * 5 + 8;
-
-    // Table - Calculate dynamic row height
-    const tableHeaders = ['Sr.', 'Product', 'Compositions', 'Pack', 'Strips', 'Tablets'];
-    const colWidths = [12, 35, 63, 20, 25, 25];
-    let x = leftMargin;
-
-    // Calculate available space for table
-    const tableStartY = y;
-    const reservedBottomSpace = 70;
-    const availableTableHeight = pageHeight - tableStartY - reservedBottomSpace;
-    const minRowHeight = 9;
-    const headerHeight = 10;
-    const rowHeight = Math.max(minRowHeight, Math.min(14, (availableTableHeight - headerHeight) / Math.max(items.length, 1)));
-
-    // Table header
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(x, y, contentWidth, headerHeight, 'F');
-    pdf.setFontSize(11);
-    pdf.setFont('times', 'bold');
-    tableHeaders.forEach((header, i) => {
-      pdf.rect(x + colWidths.slice(0, i).reduce((a, b) => a + b, 0), y, colWidths[i], headerHeight);
-      pdf.text(header, x + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + colWidths[i] / 2, y + 7, { align: 'center' });
-    });
-    y += headerHeight;
-
-    // Table rows
-    pdf.setFontSize(11);
-    pdf.setFont('times', 'normal');
-    items.forEach((item, index) => {
-      const stockItem = getStockItemDetails(item.stockItemId);
-      const packing = item.packSize || stockItem?.packing || "10×10";
-      const qtyInStrips = item.qtyInStrips || item.quantity;
-      const qtyInTabs = item.qtyInTabs || (qtyInStrips * 10);
-
-      const rowData = [
-        `${index + 1}`,
-        item.stockItemName,
-        stockItem?.composition || '-',
-        packing,
-        qtyInStrips.toLocaleString(),
-        qtyInTabs.toLocaleString()
-      ];
-
-      let cellX = x;
-      rowData.forEach((cell, i) => {
-        pdf.rect(cellX, y, colWidths[i], rowHeight);
-        const align = i === 0 || i >= 3 ? 'center' : 'left';
-        const textX = align === 'center' ? cellX + colWidths[i] / 2 : cellX + 2;
-        
-        // Handle long text wrapping for composition
-        let displayText = cell;
-        if (i === 2 && cell.length > 35) {
-          displayText = cell.substring(0, 32) + '...';
-        }
-        pdf.text(displayText, textX, y + rowHeight / 2 + 1.5, { align });
-        cellX += colWidths[i];
+    setIsGeneratingPDF(true);
+    
+    try {
+      const canvas = await html2canvas(printContent, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
       });
-      y += rowHeight;
-    });
 
-    // Position undertaking at bottom with more space
-    y = pageHeight - reservedBottomSpace;
-
-    // Undertaking
-    pdf.setFont('times', 'bold');
-    pdf.setFontSize(12);
-    pdf.text('UNDERTAKING:', leftMargin, y);
-    pdf.line(leftMargin, y + 1, leftMargin + pdf.getTextWidth('UNDERTAKING:'), y + 1);
-    y += 7;
-
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(10);
-    const undertakingText = `We hereby confirm that the products which we intend to buy from PARA PHARMACEUTICALS PVT. LTD. E-9, INDUSTRIAL AREA SIIDCUL, SILAQUI DEHRADUN UTTARAKHAND INDIA Our P.O.NO ${poNumber}. .dt- ${formatDate(poDate)}. These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License no PSMHC/Pb./2024/863. We are full aware these products containing controlled substance as per Narcotic drugs & psychotropic substance Act 1985, and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation & for its sale within india only & not meant for export.`;
-    const splitUndertaking = pdf.splitTextToSize(undertakingText, contentWidth);
-    pdf.text(splitUndertaking, leftMargin, y);
-    y += splitUndertaking.length * 4 + 42; // 7 row space after undertaking
-
-    // Signature section - For Navjeevan Hospital
-    pdf.setFontSize(11);
-    pdf.text('For Navjeevan Hospital,', leftMargin, y);
-    y += 5;
-    pdf.text('Opp. New Bus Stand, G.T. Road, Sirhind', leftMargin, y);
-    y += 55; // Maximum space for sign and stamp
-
-    // Signature line
-    pdf.line(leftMargin, y, leftMargin + 50, y);
-    y += 5;
-    pdf.text(doctorName, leftMargin, y);
-    pdf.text(`Date: ${formatDate(poDate)}`, leftMargin + 60, y);
-
-    pdf.save(`PO-${poNumber}-Parb-Pharma.pdf`);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+      
+      pdf.save(`PO-${poNumber}-Parb-Pharma.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   return (
@@ -281,8 +148,8 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
           <DialogTitle className="flex items-center justify-between">
             <span>Parb Pharma Purchase Order Format</span>
             <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
+              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2" disabled={isGeneratingPDF}>
+                {isGeneratingPDF ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                 PDF
               </Button>
               <Button onClick={handlePrint} size="sm" className="flex items-center gap-2">
@@ -395,7 +262,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
               <p>For Navjeevan Hospital,</p>
               <p>Opp. New Bus Stand, G.T. Road, Sirhind</p>
               
-            {/* Maximum space for sign and stamp */}
+              {/* Maximum space for sign and stamp */}
               <div className="h-32"></div>
               
               <div className="w-48 border-b border-black"></div>

@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Loader2 } from "lucide-react";
 import { PurchaseOrderItem } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 interface NeuroglamPOProps {
@@ -18,6 +19,7 @@ interface NeuroglamPOProps {
 export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: NeuroglamPOProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const { doctorName } = useAppSettings();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -117,200 +119,36 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
     }, 250);
   };
 
-  const handleDownloadPDF = () => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const leftMargin = 15;
-    const rightMargin = 15;
-    const contentWidth = pageWidth - leftMargin - rightMargin;
-    let y = 15;
+  const handleDownloadPDF = async () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
 
-    // Regd. Govt of Punjab - centered and bold
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'bold');
-    pdf.text('Regd. Govt of Punjab', pageWidth / 2, y, { align: 'center' });
-    y += 7;
-
-    // Hospital Name - bold
-    pdf.setFontSize(22);
-    pdf.setFont('times', 'bold');
-    pdf.text('NAVJEEVAN HOSPITAL', pageWidth / 2, y, { align: 'center' });
-    y += 8;
-
-    // Address
-    pdf.setFontSize(11);
-    pdf.setFont('times', 'normal');
-    pdf.text('Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib', pageWidth / 2, y, { align: 'center' });
-    y += 6;
-
-    // Doctor Name - bold
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'bold');
-    pdf.text(doctorName, pageWidth / 2, y, { align: 'center' });
-    y += 6;
-
-    // Licence
-    pdf.setFontSize(11);
-    pdf.setFont('times', 'normal');
-    pdf.text('Licence No. PSMHC/Pb./2024/863 Dt. 2-5-2024', pageWidth / 2, y, { align: 'center' });
-    y += 12;
-
-    // PO Number and Date - bold
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'bold');
-    pdf.text(`PO NO: ${poNumber}`, leftMargin, y);
-    pdf.text(`DATE: ${formatDate(poDate)}`, pageWidth - rightMargin, y, { align: 'right' });
-    y += 12;
-
-    // To Section
-    pdf.setFontSize(11);
-    pdf.setFont('times', 'normal');
-    pdf.text('To,', leftMargin, y);
-    y += 5;
-    pdf.setFont('times', 'bold');
-    pdf.text('Neuroglam', leftMargin, y);
-    y += 5;
-    pdf.setFont('times', 'normal');
-    pdf.text('Address: Village – Ajnoud, Tehsil – Payal', leftMargin, y);
-    y += 5;
-    pdf.text('Ludhiana – 141421 (Punjab)', leftMargin, y);
-    y += 10;
-
-    // Subject - centered bold
-    pdf.setFont('times', 'bold');
-    pdf.setFontSize(12);
-    pdf.text('Sub: Purchase Order', pageWidth / 2, y, { align: 'center' });
-    y += 8;
-
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(11);
-    pdf.text("Dear Sir, ma'am", leftMargin, y);
-    y += 7;
-
-    // Intro paragraph
-    pdf.setFontSize(10);
-    const introText = "We hereby placing a purchase order with Stamp and Sign of our current working doctor's. Terms and Conditions will remain same as our discussion on phonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.";
-    const splitIntro = pdf.splitTextToSize(introText, contentWidth);
-    pdf.text(splitIntro, leftMargin, y);
-    y += splitIntro.length * 4.5 + 6;
-
-    // Table - Calculate row height based on items
-    const tableHeaders = ['Sr. No.', 'Product Name', 'Compositions', 'Packing', 'Qty.In Strips', 'Qty.In Tablets'];
-    const colWidths = [14, 38, 58, 20, 25, 25];
-    let x = leftMargin;
-
-    // Calculate available space for table
-    const tableStartY = y;
-    const reservedBottomSpace = 85; // Space needed for undertaking + signature
-    const availableTableHeight = pageHeight - tableStartY - reservedBottomSpace;
-    const minRowHeight = 7;
-    const headerHeight = 8;
-    const rowHeight = Math.max(minRowHeight, Math.min(12, (availableTableHeight - headerHeight) / Math.max(items.length, 1)));
-
-    // Table header
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(x, y, contentWidth, headerHeight, 'F');
-    pdf.setFontSize(10);
-    pdf.setFont('times', 'bold');
-    tableHeaders.forEach((header, i) => {
-      pdf.rect(x + colWidths.slice(0, i).reduce((a, b) => a + b, 0), y, colWidths[i], headerHeight);
-      pdf.text(header, x + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + colWidths[i] / 2, y + 5.5, { align: 'center' });
-    });
-    y += headerHeight;
-
-    // Table rows
-    pdf.setFontSize(10);
-    pdf.setFont('times', 'normal');
-    items.forEach((item, index) => {
-      const stockItem = getStockItemDetails(item.stockItemId);
-      const packing = item.packSize || stockItem?.packing || "10*10";
-      const qtyInStrips = item.qtyInStrips || item.quantity;
-      const qtyInTabs = item.qtyInTabs || qtyInStrips * 10;
-
-      const rowData = [
-        `${index + 1}.`,
-        item.stockItemName,
-        stockItem?.composition || '-',
-        packing,
-        qtyInStrips.toLocaleString(),
-        qtyInTabs.toLocaleString()
-      ];
-
-      let cellX = x;
-      rowData.forEach((cell, i) => {
-        pdf.rect(cellX, y, colWidths[i], rowHeight);
-        const align = i === 0 || i === 3 ? 'center' : i >= 4 ? 'right' : 'left';
-        const textX = align === 'center' ? cellX + colWidths[i] / 2 : align === 'right' ? cellX + colWidths[i] - 2 : cellX + 2;
-        const maxWidth = colWidths[i] - 4;
-        let displayText = cell;
-        while (pdf.getTextWidth(displayText) > maxWidth && displayText.length > 3) {
-          displayText = displayText.slice(0, -1);
-        }
-        if (displayText !== cell) displayText += '...';
-        pdf.text(displayText, textX, y + rowHeight / 2 + 1.5, { align });
-        cellX += colWidths[i];
+    setIsGeneratingPDF(true);
+    
+    try {
+      const canvas = await html2canvas(printContent, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
       });
-      y += rowHeight;
-    });
 
-    // Calculate remaining space and position undertaking section at bottom
-    const undertakingY = pageHeight - reservedBottomSpace + 5;
-    y = undertakingY;
-
-    // Undertaking
-    pdf.setFont('times', 'bold');
-    pdf.setFontSize(11);
-    pdf.text('UNDERTAKING:', leftMargin, y);
-    y += 5;
-
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(9);
-    const undertaking1 = `We hereby confirm that the product containing the psychotropic substance Buprenorphine, which we intend to procure from Neuroglam, Village Ajnoud, Tehsil Payal, Ludhiana – 141421 (Punjab), is covered under our Purchase Order No. ${poNumber.replace('NH/PO-', '')} dated ${formatDate(poDate)} (${getMonthYear(poDate)}).`;
-    const splitUndertaking1 = pdf.splitTextToSize(undertaking1, contentWidth);
-    pdf.text(splitUndertaking1, leftMargin, y);
-    y += splitUndertaking1.length * 3.5 + 2;
-
-    const undertaking2 = `The products purchased by us will be exclusively supplied to De-Addiction Centres and qualified Doctors under our valid License No. PSMHC/Punjab/2024/863. We are fully aware that this product contains controlled substances regulated under the Narcotic Drugs and Psychotropic Substances Act, 1985, and we shall maintain all statutory records pertaining to its sale and purchase.`;
-    const splitUndertaking2 = pdf.splitTextToSize(undertaking2, contentWidth);
-    pdf.text(splitUndertaking2, leftMargin, y);
-    y += splitUndertaking2.length * 3.5 + 2;
-
-    const undertaking3 = `We further assure that an Acknowledgement (Form-6 Consignment Note) for the receipt of the above substance will be issued to the supplier immediately upon delivery.`;
-    const splitUndertaking3 = pdf.splitTextToSize(undertaking3, contentWidth);
-    pdf.text(splitUndertaking3, leftMargin, y);
-    y += splitUndertaking3.length * 3.5 + 2;
-
-    const undertaking4 = `Additionally, we undertake that the procured product will be used only for the formulations and sales mentioned below and will be marketed within India only. These products are not intended for retail counter sale or export.`;
-    const splitUndertaking4 = pdf.splitTextToSize(undertaking4, contentWidth);
-    pdf.text(splitUndertaking4, leftMargin, y);
-    y += splitUndertaking4.length * 3.5 + 4;
-
-    // Neuroglam Liability Acknowledgment
-    pdf.setFont('times', 'bold');
-    pdf.setFontSize(10);
-    pdf.text('Neuroglam Liability Acknowledgment', leftMargin, y);
-    y += 5;
-
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(9);
-    const liability = `We acknowledge that Neuroglam shall not be held liable for any non-compliance with statutory provisions committed by us, whether intentionally or unintentionally.`;
-    const splitLiability = pdf.splitTextToSize(liability, contentWidth);
-    pdf.text(splitLiability, leftMargin, y);
-    y += splitLiability.length * 3.5 + 6;
-
-    // For section
-    pdf.setFontSize(10);
-    pdf.text('For Navjeevanhospital, opp. New Bus Stand, G.t. Road, Sirhind', leftMargin, y);
-    y += 12;
-
-    // Signature section - positioned at bottom
-    pdf.setFontSize(11);
-    pdf.text(`Date: ${formatDate(poDate)}`, leftMargin, y);
-    pdf.text('(Navjeevanhospital)', pageWidth / 2, y, { align: 'center' });
-    pdf.text(`(${doctorName}.)`, pageWidth - rightMargin, y, { align: 'right' });
-
-    pdf.save(`PO-${poNumber}-Neuroglam.pdf`);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+      
+      pdf.save(`PO-${poNumber}-Neuroglam.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   return (
@@ -320,8 +158,8 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           <DialogTitle className="flex items-center justify-between">
             <span>Neuroglam Purchase Order Format</span>
             <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
+              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2" disabled={isGeneratingPDF}>
+                {isGeneratingPDF ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                 PDF
               </Button>
               <Button onClick={handlePrint} size="sm" className="flex items-center gap-2">
@@ -415,31 +253,32 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
 
           {/* Undertaking */}
           <div className="mt-auto">
-            <p className="font-bold text-[11pt] mb-2">UNDERTAKING:</p>
-            <p className="text-[9pt] text-justify leading-snug mb-1">
+            <p className="font-bold text-[11pt] mb-1">UNDERTAKING:</p>
+            <p className="text-[9pt] text-justify leading-snug mb-2">
               We hereby confirm that the product containing the psychotropic substance Buprenorphine, which we intend to procure from Neuroglam, Village Ajnoud, Tehsil Payal, Ludhiana – 141421 (Punjab), is covered under our Purchase Order No. {poNumber.replace('NH/PO-', '')} dated {formatDate(poDate)} ({getMonthYear(poDate)}).
             </p>
-            <p className="text-[9pt] text-justify leading-snug mb-1">
+            <p className="text-[9pt] text-justify leading-snug mb-2">
               The products purchased by us will be exclusively supplied to De-Addiction Centres and qualified Doctors under our valid License No. PSMHC/Punjab/2024/863. We are fully aware that this product contains controlled substances regulated under the Narcotic Drugs and Psychotropic Substances Act, 1985, and we shall maintain all statutory records pertaining to its sale and purchase.
             </p>
-            <p className="text-[9pt] text-justify leading-snug mb-1">
+            <p className="text-[9pt] text-justify leading-snug mb-2">
               We further assure that an Acknowledgement (Form-6 Consignment Note) for the receipt of the above substance will be issued to the supplier immediately upon delivery.
             </p>
-            <p className="text-[9pt] text-justify leading-snug mb-2">
+            <p className="text-[9pt] text-justify leading-snug mb-3">
               Additionally, we undertake that the procured product will be used only for the formulations and sales mentioned below and will be marketed within India only. These products are not intended for retail counter sale or export.
             </p>
 
             {/* Neuroglam Liability Acknowledgment */}
             <p className="font-bold text-[10pt] mb-1">Neuroglam Liability Acknowledgment</p>
-            <p className="text-[9pt] text-justify leading-snug mb-3">
+            <p className="text-[9pt] text-justify leading-snug mb-4">
               We acknowledge that Neuroglam shall not be held liable for any non-compliance with statutory provisions committed by us, whether intentionally or unintentionally.
             </p>
 
+            {/* For Section */}
             <p className="text-[10pt] mb-4">
               For Navjeevanhospital, opp. New Bus Stand, G.t. Road, Sirhind
             </p>
 
-            {/* Signature Section */}
+            {/* Signature Section - three columns */}
             <div className="flex justify-between text-[11pt] mt-4">
               <span>Date: {formatDate(poDate)}</span>
               <span>(Navjeevanhospital)</span>
