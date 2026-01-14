@@ -1,12 +1,13 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, Download } from "lucide-react";
+import { Printer, Download, Loader2 } from "lucide-react";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
-import { formatPrecision, roundTo5 } from "@/lib/formatUtils";
+import { formatPrecision } from "@/lib/formatUtils";
 interface GRNItem {
   stockItemId: number;
   orderedQuantity: number;
@@ -41,6 +42,7 @@ export function PrintableGRN({
   onClose 
 }: PrintableGRNProps) {
   const printRef = useRef<HTMLDivElement>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -70,295 +72,44 @@ export function PrintableGRN({
   const grnDateFormatted = grnDate || new Date().toISOString().split('T')[0];
 
   const handleDownloadPDF = async () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    let yPos = 20;
-
-    // Load and add logo
+    if (!printRef.current) return;
+    
+    setIsGenerating(true);
     try {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = navjeevanLogo;
+      // Use html2canvas to capture the preview exactly as rendered
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false
       });
-      // Add logo centered at top
-      const logoWidth = 25;
-      const logoHeight = 25;
-      doc.addImage(img, 'PNG', (pageWidth - logoWidth) / 2, yPos - 5, logoWidth, logoHeight);
-      yPos += 22;
-    } catch (e) {
-      console.log('Logo loading failed', e);
-    }
 
-    // Hospital Name with decorative styling
-    doc.setFontSize(22);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 51, 102); // Dark blue
-    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, yPos, { align: "center" });
-    yPos += 7;
-
-    // Tagline
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(100, 100, 100);
-    doc.text("Healthcare with Compassion", pageWidth / 2, yPos, { align: "center" });
-    yPos += 6;
-
-    // Address
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(60, 60, 60);
-    doc.text("Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)", pageWidth / 2, yPos, { align: "center" });
-    yPos += 5;
-
-    // Contact and License
-    doc.setFontSize(8);
-    doc.text("Phone: 6284942412 | Dr. Metali Bhatti", pageWidth / 2, yPos, { align: "center" });
-    yPos += 4;
-    doc.text("Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab", pageWidth / 2, yPos, { align: "center" });
-    yPos += 6;
-
-    // Decorative line
-    doc.setDrawColor(0, 51, 102);
-    doc.setLineWidth(1);
-    doc.line(14, yPos, pageWidth - 14, yPos);
-    doc.setLineWidth(0.3);
-    doc.line(14, yPos + 2, pageWidth - 14, yPos + 2);
-    yPos += 12;
-
-    // GRN Title with box
-    doc.setFillColor(0, 51, 102);
-    doc.roundedRect(pageWidth / 2 - 40, yPos - 5, 80, 10, 2, 2, 'F');
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 255, 255);
-    doc.text("GOODS RECEIPT NOTE", pageWidth / 2, yPos + 2, { align: "center" });
-    yPos += 14;
-
-    // Reset text color
-    doc.setTextColor(0, 0, 0);
-
-    // Info box with rounded corners
-    doc.setFillColor(248, 250, 252);
-    doc.setDrawColor(200, 200, 200);
-    doc.roundedRect(14, yPos, pageWidth - 28, 28, 3, 3, 'FD');
-    
-    doc.setFontSize(9);
-    const col1X = 20;
-    const col2X = pageWidth / 2 + 10;
-    let infoY = yPos + 7;
-
-    doc.setFont("helvetica", "bold");
-    doc.text("GRN Number:", col1X, infoY);
-    doc.setFont("helvetica", "normal");
-    doc.text(grnNumber, col1X + 28, infoY);
-
-    doc.setFont("helvetica", "bold");
-    doc.text("GRN Date:", col2X, infoY);
-    doc.setFont("helvetica", "normal");
-    doc.text(formatDate(grnDateFormatted), col2X + 22, infoY);
-    infoY += 7;
-
-    doc.setFont("helvetica", "bold");
-    doc.text("PO Number:", col1X, infoY);
-    doc.setFont("helvetica", "normal");
-    doc.text(purchaseOrder.poNumber, col1X + 28, infoY);
-
-    doc.setFont("helvetica", "bold");
-    doc.text("PO Date:", col2X, infoY);
-    doc.setFont("helvetica", "normal");
-    doc.text(formatDate(purchaseOrder.orderDate), col2X + 22, infoY);
-    infoY += 7;
-
-    if (invoiceNumber) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Invoice No:", col1X, infoY);
-      doc.setFont("helvetica", "normal");
-      doc.text(invoiceNumber, col1X + 28, infoY);
-    }
-    if (invoiceDate) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Invoice Date:", col2X, infoY);
-      doc.setFont("helvetica", "normal");
-      doc.text(formatDate(invoiceDate), col2X + 28, infoY);
-    }
-    yPos += 34;
-
-    // Supplier Box
-    doc.setFillColor(240, 247, 255);
-    doc.setDrawColor(0, 102, 204);
-    doc.roundedRect(14, yPos, pageWidth - 28, 14, 2, 2, 'FD');
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 51, 102);
-    doc.text("SUPPLIER:", 18, yPos + 9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(0, 0, 0);
-    doc.text(purchaseOrder.supplier, 45, yPos + 9);
-    yPos += 20;
-
-    // Items Table Header - Updated columns: Sr, Item, Batch, Expiry, Cost Price, MRP, Qty, Total
-    // Page width is 210mm, margins 14mm each side = 182mm usable
-    const tableWidth = pageWidth - 28;
-    const colWidths = [12, 48, 24, 24, 22, 22, 14, 16]; // Total = 182
-    const headers = ["Sr.", "Item Name", "Batch", "Expiry", "Cost (₹)", "MRP (₹)", "Qty", "Total (₹)"];
-    
-    // Helper function to draw vertical grid lines
-    const drawVerticalLines = (startY: number, height: number) => {
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.2);
-      let lineX = 14;
-      colWidths.forEach((width) => {
-        lineX += width;
-        if (lineX < 14 + tableWidth) {
-          doc.line(lineX, startY, lineX, startY + height);
-        }
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
       });
-    };
-    
-    // Header row
-    doc.setFillColor(0, 51, 102);
-    doc.rect(14, yPos, tableWidth, 9, "F");
-    
-    // Draw header vertical lines (white for contrast)
-    doc.setDrawColor(255, 255, 255);
-    doc.setLineWidth(0.3);
-    let lineX = 14;
-    colWidths.forEach((width) => {
-      lineX += width;
-      if (lineX < 14 + tableWidth) {
-        doc.line(lineX, yPos, lineX, yPos + 9);
-      }
-    });
-    
-    let xPos = 14;
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 255, 255);
-    headers.forEach((header, i) => {
-      doc.text(header, xPos + 1, yPos + 6);
-      xPos += colWidths[i];
-    });
-    yPos += 9;
 
-    // Items Rows with alternating colors and vertical grid lines
-    doc.setTextColor(0, 0, 0);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    grnItems.forEach((item, index) => {
-      const stockItem = getStockItemDetails(item.stockItemId);
-      const costPrice = getCostPrice(item.stockItemId);
-      const itemTotal = calculateItemTotal(item);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      const rowData = [
-        (index + 1).toString(),
-        stockItem?.name?.substring(0, 22) || 'Unknown',
-        item.batchNo?.substring(0, 12) || '-',
-        item.expiryDate ? formatDate(item.expiryDate) : '-',
-        roundTo5(costPrice).toString(),
-        item.mrp ? roundTo5(item.mrp).toString() : '-',
-        item.receivedQuantity.toString(),
-        roundTo5(itemTotal).toString()
-      ];
-
-      // Alternating row colors
-      if (index % 2 === 0) {
-        doc.setFillColor(248, 250, 252);
-        doc.rect(14, yPos, tableWidth, 7, "F");
-      }
+      // Calculate aspect ratio
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
       
-      // Draw row border
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.2);
-      doc.rect(14, yPos, tableWidth, 7);
-      
-      // Draw vertical grid lines
-      drawVerticalLines(yPos, 7);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
 
-      xPos = 14;
-      rowData.forEach((data, i) => {
-        doc.text(data, xPos + 1, yPos + 5);
-        xPos += colWidths[i];
-      });
-      yPos += 7;
-    });
-
-    // Total Row
-    doc.setFillColor(0, 51, 102);
-    doc.rect(14, yPos, tableWidth, 8, "F");
-    
-    // Draw total row vertical lines (white)
-    doc.setDrawColor(255, 255, 255);
-    doc.setLineWidth(0.3);
-    lineX = 14;
-    colWidths.forEach((width) => {
-      lineX += width;
-      if (lineX < 14 + tableWidth) {
-        doc.line(lineX, yPos, lineX, yPos + 8);
-      }
-    });
-    
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(255, 255, 255);
-    doc.text("GRAND TOTAL", 18, yPos + 5.5);
-    // Position grand total at the last column
-    const totalXPos = 14 + colWidths.slice(0, 7).reduce((a, b) => a + b, 0);
-    doc.text(roundTo5(grandTotal).toString(), totalXPos + 1, yPos + 5.5);
-    yPos += 14;
-
-    // Notes
-    doc.setTextColor(0, 0, 0);
-    if (notes) {
-      doc.setFillColor(255, 253, 240);
-      doc.setDrawColor(200, 180, 100);
-      doc.roundedRect(14, yPos, pageWidth - 28, 16, 2, 2, 'FD');
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(9);
-      doc.text("Notes:", 18, yPos + 6);
-      doc.setFont("helvetica", "normal");
-      doc.text(notes.substring(0, 80), 35, yPos + 6);
-      yPos += 20;
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.save(`GRN-${grnNumber}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsGenerating(false);
     }
-
-    // Signatures
-    yPos = Math.max(yPos + 10, 230);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(80, 80, 80);
-    
-    const sig1X = 30;
-    const sig2X = pageWidth / 2;
-    const sig3X = pageWidth - 45;
-    
-    doc.setDrawColor(100, 100, 100);
-    doc.setLineWidth(0.5);
-    doc.line(sig1X - 15, yPos, sig1X + 25, yPos);
-    doc.line(sig2X - 20, yPos, sig2X + 20, yPos);
-    doc.line(sig3X - 20, yPos, sig3X + 25, yPos);
-    
-    yPos += 5;
-    doc.text("Received By", sig1X - 5, yPos);
-    doc.text("Checked By", sig2X - 10, yPos);
-    doc.text("Authorized Signatory", sig3X - 15, yPos);
-
-    // Footer
-    yPos = 272;
-    doc.setDrawColor(0, 51, 102);
-    doc.setLineWidth(0.5);
-    doc.line(14, yPos, pageWidth - 14, yPos);
-    yPos += 5;
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    doc.text("This is a computer generated document | For queries contact: 6284942412", pageWidth / 2, yPos, { align: "center" });
-    yPos += 4;
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 51, 102);
-    doc.text("NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)", pageWidth / 2, yPos, { align: "center" });
-
-    doc.save(`GRN-${grnNumber}.pdf`);
   };
 
   const handlePrint = () => {
@@ -425,9 +176,9 @@ export function PrintableGRN({
           <DialogTitle className="flex items-center justify-between">
             <span>Goods Receipt Note Preview</span>
             <div className="flex gap-2">
-              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Download PDF
+              <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2" disabled={isGenerating}>
+                {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                {isGenerating ? 'Generating...' : 'Download PDF'}
               </Button>
               <Button onClick={handlePrint} size="sm" className="flex items-center gap-2">
                 <Printer className="h-4 w-4" />
