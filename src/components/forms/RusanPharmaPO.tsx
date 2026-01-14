@@ -166,63 +166,65 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '12pt', lineHeight: '1.6' }}>
-          {/* Header Row - Regd on right */}
-          <div className="flex justify-end text-[12pt] mb-3">
-            <span>Regd. Govt of Punjab</span>
-          </div>
+        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', lineHeight: '1.5' }}>
+          {/* Header - Regd. Govt of Punjab (centered) */}
+          <p className="text-center text-[12pt] mb-3">Regd. Govt of Punjab</p>
 
-          {/* Hospital Name */}
-          <h1 className="text-[24pt] font-bold text-center my-3">NAVJEEVAN HOSPITAL</h1>
+          {/* Hospital Name (centered) */}
+          <h1 className="text-[24pt] font-bold text-center mb-3">NAVJEEVAN HOSPITAL</h1>
 
-          {/* Address Row */}
+          {/* Address Row (centered) */}
           <p className="text-center text-[12pt] mb-1">
             Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,
           </p>
 
-          {/* Mobile */}
+          {/* Mobile (centered) */}
           <p className="text-center text-[12pt] mb-3">
             Mob: 6284942412
           </p>
 
-          {/* Licence Row with pipe separator */}
-          <p className="text-center text-[11pt] font-bold mb-5">
+          {/* Licence Row (centered) - 2 row space after */}
+          <p className="text-center text-[11pt] mb-8">
             Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024
           </p>
 
           {/* PO Number and Date Row */}
-          <div className="flex justify-between font-bold text-[14pt] mb-6">
+          <div className="flex justify-between font-bold text-[13pt] mb-5">
             <span>PO No.: NH-25-26-{getPONumberSuffix()}</span>
             <span>Date: {formatDate(poDate)}</span>
           </div>
 
-          {/* To Section - inline format */}
-          <div className="text-[12pt] mb-4 leading-relaxed">
-            <p className="mb-1">To: <span className="font-bold">Rusan Pharma Ltd.,</span></p>
-            <p>Khasra No. 122MI, Central Hope Town, Selaqui, Dehradun, Uttarakhand-248197</p>
+          {/* To Section - 2 row space after */}
+          <div className="text-[12pt] mb-8 leading-relaxed">
+            <p className="mb-1">To,</p>
+            <p className="font-bold">RUSAN PHARMA LTD.</p>
+            <p>Khasra No. 122MI, Central Hope Town, Selaqui</p>
+            <p>Dehradun, Uttarakhand - 248197</p>
           </div>
 
-          {/* Subject line */}
-          <p className="font-bold text-[13pt] my-4 underline">Subject: Purchase Order</p>
+          {/* Subject - 2 row space after */}
+          <p className="text-[12pt] mb-8 font-bold">
+            <span className="underline">Subject: Purchase Order</span>
+          </p>
 
-          {/* Salutation */}
-          <p className="text-[12pt] my-4">Dear Sir/Madam,</p>
+          {/* Salutation - 2 row space after */}
+          <p className="text-[12pt] mb-8">Dear Sir/Madam,</p>
 
-          {/* Intro Paragraph - concise version */}
-          <p className="text-[12pt] text-justify mb-5 leading-relaxed">
-            We place a purchase order with authorized doctor&apos;s stamp and signature. Terms per telephone discussion. Payment by cheque to your bank account.
+          {/* Intro Paragraph */}
+          <p className="text-[11pt] text-justify mb-5 leading-relaxed">
+            We place a purchase order with authorized doctor's stamp and signature. Terms per telephone discussion. Payment by cheque to your bank account.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse my-5 text-[12pt]">
+          <table className="w-full border-collapse mb-5 text-[11pt]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black px-2 py-3 text-center w-[7%]">Sr.</th>
-                <th className="border border-black px-2 py-3 text-center w-[18%]">Product</th>
-                <th className="border border-black px-2 py-3 text-center w-[35%]">Compositions</th>
-                <th className="border border-black px-2 py-3 text-center w-[12%]">Pack</th>
-                <th className="border border-black px-2 py-3 text-center w-[14%]">Strips</th>
-                <th className="border border-black px-2 py-3 text-center w-[14%]">Tablets</th>
+                <th className="border border-black px-2 py-2 text-center w-[7%]">Sr.</th>
+                <th className="border border-black px-2 py-2 text-center w-[20%]">Product</th>
+                <th className="border border-black px-2 py-2 text-center w-[37%]">Compositions</th>
+                <th className="border border-black px-2 py-2 text-center w-[12%]">Pack</th>
+                <th className="border border-black px-2 py-2 text-center w-[12%]">Strips</th>
+                <th className="border border-black px-2 py-2 text-center w-[12%]">Tablets</th>
               </tr>
             </thead>
             <tbody>
@@ -238,12 +240,12 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
                 
                 return (
                   <tr key={index}>
-                    <td className="border border-black px-2 py-3 text-center">{index + 1}</td>
-                    <td className="border border-black px-2 py-3">{item.stockItemName}</td>
-                    <td className="border border-black px-2 py-3">{stockItem?.composition || '-'}</td>
-                    <td className="border border-black px-2 py-3 text-center">{packing.replace('*', '×')}</td>
-                    <td className="border border-black px-2 py-3 text-right">{qtyInStrips.toLocaleString()}</td>
-                    <td className="border border-black px-2 py-3 text-right">{qtyInTabs.toLocaleString()}</td>
+                    <td className="border border-black px-2 py-2 text-center">{index + 1}</td>
+                    <td className="border border-black px-2 py-2">{item.stockItemName}</td>
+                    <td className="border border-black px-2 py-2">{stockItem?.composition || '-'}</td>
+                    <td className="border border-black px-2 py-2 text-center">{packing.replace('*', '×')}</td>
+                    <td className="border border-black px-2 py-2 text-center">{qtyInStrips.toLocaleString()}</td>
+                    <td className="border border-black px-2 py-2 text-center">{qtyInTabs.toLocaleString()}</td>
                   </tr>
                 );
               })}
@@ -255,26 +257,29 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
 
           {/* Undertaking */}
           <div className="mt-auto">
-            <p className="font-bold text-[12pt] mb-2 underline">UNDERTAKING:</p>
-            <p className="text-[11pt] text-justify leading-relaxed mb-5">
+            <p className="font-bold text-[12pt] mb-2">
+              <span className="underline">UNDERTAKING:</span>
+            </p>
+            <p className="text-[10pt] text-justify leading-relaxed">
               We confirm purchase from Rusan Pharma Ltd. under P.O. No. {getPONumberSuffix()}/A ({formatDate(poDate)}). These controlled substances per Narcotic Drugs and Psychotropic Substances Act, 1985, shall be maintained with full records. Form-6 (Consignment Note) will be submitted upon receipt. Products are exclusively for our De-addiction Centre and qualified doctors only, licensed under PSMHC/Punjab/2024/863, sales within India only, no retail or export. Rusan Pharma Ltd. not liable for non-compliance by us.
             </p>
 
-            <p className="text-[12pt] mb-1">
-              For Navjeevan Hospital,
-            </p>
-            <p className="text-[12pt] mb-5">
-              Opp. New Bus Stand, G.T. Road, Sirhind
-            </p>
-
-            {/* Space for stamp and signature */}
-            <div className="h-16 my-3 border-b border-black w-48">
-            </div>
+            {/* 7 row space after undertaking */}
+            <div className="h-16"></div>
 
             {/* Signature Section */}
-            <div className="flex gap-16 items-end text-[12pt]">
-              <p>{doctorName}</p>
-              <p>Date: {formatDate(poDate)}</p>
+            <div className="text-[11pt]">
+              <p>For Navjeevan Hospital,</p>
+              <p>Opp. New Bus Stand, G.T. Road, Sirhind</p>
+              
+              {/* Maximum space for sign and stamp */}
+              <div className="h-32"></div>
+              
+              <div className="w-48 border-b border-black"></div>
+              <div className="flex gap-10 mt-2">
+                <span>{doctorName}</span>
+                <span>Date: {formatDate(poDate)}</span>
+              </div>
             </div>
           </div>
         </div>
