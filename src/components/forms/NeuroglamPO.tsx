@@ -7,6 +7,7 @@ import { StockItem } from "@/hooks/useStockStore";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
+import navjeevanLogo from "@/assets/NH_LOGO.png";
 
 interface NeuroglamPOProps {
   poNumber: string;
@@ -23,7 +24,7 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/\//g, '-');
+    return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
   };
 
   const getMonthYear = (dateStr: string) => {
@@ -44,8 +45,6 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const printHTML = printContent.innerHTML;
-
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -53,61 +52,12 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           <title>Purchase Order - ${poNumber}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            @page { 
-              size: A4; 
-              margin: 10mm 12mm;
-            }
-            html, body { 
-              height: 100%; 
-              font-family: 'Times New Roman', Times, serif; 
-              font-size: 11pt; 
-              line-height: 1.4;
-            }
-            body { 
-              padding: 0;
-              display: flex;
-              flex-direction: column;
-              min-height: 100vh;
-            }
-            .content-wrapper {
-              flex: 1;
-              display: flex;
-              flex-direction: column;
-            }
-            .header-regd { text-align: center; font-size: 11pt; font-weight: bold; margin-bottom: 4px; }
-            .hospital-name { font-size: 22pt; font-weight: bold; text-align: center; margin: 6px 0; }
-            .address-row { text-align: center; font-size: 10pt; margin-bottom: 3px; }
-            .doctor-name { text-align: center; font-size: 11pt; font-weight: bold; margin-bottom: 3px; }
-            .licence-row { text-align: center; font-size: 10pt; margin-bottom: 12px; }
-            .po-date-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 12pt; font-weight: bold; }
-            .to-section { margin-bottom: 10px; font-size: 11pt; line-height: 1.5; }
-            .subject-row { font-size: 12pt; font-weight: bold; text-align: center; margin: 10px 0; }
-            .salutation { margin: 8px 0; font-size: 11pt; }
-            .intro-para { font-size: 10pt; text-align: justify; margin-bottom: 10px; line-height: 1.4; }
-            table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10pt; }
-            th, td { border: 1px solid #000; padding: 6px 8px; }
-            th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
-            td { text-align: left; }
-            td.center { text-align: center; }
-            td.right { text-align: right; }
-            .flex-spacer { flex: 1; min-height: 20px; }
-            .undertaking-section { margin-top: auto; }
-            .undertaking-title { font-weight: bold; font-size: 11pt; margin: 10px 0 6px 0; }
-            .undertaking-text { font-size: 9pt; text-align: justify; line-height: 1.35; margin-bottom: 6px; }
-            .liability-title { font-weight: bold; font-size: 11pt; margin: 10px 0 6px 0; }
-            .liability-text { font-size: 9pt; text-align: justify; line-height: 1.35; margin-bottom: 10px; }
-            .for-section { font-size: 10pt; margin-top: 12px; }
-            .signature-section { display: flex; justify-content: space-between; margin-top: 25px; font-size: 11pt; }
-            @media print {
-              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            }
+            @page { size: A4; margin: 10mm; }
+            body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.4; padding: 15px; }
+            @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
           </style>
         </head>
-        <body>
-          <div class="content-wrapper">
-            ${printHTML}
-          </div>
-        </body>
+        <body>${printContent.innerHTML}</body>
       </html>
     `);
 
@@ -170,65 +120,66 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', lineHeight: '1.5' }}>
-          {/* Header - Regd. Govt of Punjab (centered) */}
-          <p className="text-center text-[12pt] mb-3">Regd. Govt of Punjab</p>
-
-          {/* Hospital Name (centered) */}
-          <h1 className="text-[24pt] font-bold text-center mb-3">NAVJEEVAN HOSPITAL</h1>
-
-          {/* Address Row (centered) */}
-          <p className="text-center text-[12pt] mb-1">
-            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,
-          </p>
-
-          {/* Mobile (centered) */}
-          <p className="text-center text-[12pt] mb-3">
-            Mob: 6284942412
-          </p>
-
-          {/* Licence Row (centered) - 2 row space after */}
-          <p className="text-center text-[11pt] mb-8">
-            Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024
-          </p>
-
-          {/* PO Number and Date Row */}
-          <div className="flex justify-between font-bold text-[13pt] mb-5">
-            <span>PO No.: {poNumber}</span>
-            <span>Date: {formatDate(poDate)}</span>
+        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5' }}>
+          {/* Header with Logo */}
+          <div className="text-center mb-4 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
+            <div className="flex justify-center mb-2">
+              <img src={navjeevanLogo} alt="Logo" className="w-16 h-16 object-contain" />
+            </div>
+            <h1 className="text-2xl font-bold mb-1" style={{ color: '#003366', letterSpacing: '1px' }}>
+              NAVJEEVAN HOSPITAL
+            </h1>
+            <p className="text-xs italic text-gray-500 mb-1">Healthcare with Compassion</p>
+            <p className="text-xs text-gray-700 mb-1">
+              Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
+            </p>
+            <p className="text-xs text-gray-600">Phone: 6284942412 | Dr. Metali Bhatti</p>
+            <p className="text-xs text-gray-500">Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab</p>
           </div>
 
-          {/* To Section - 2 row space after */}
-          <div className="text-[12pt] mb-8 leading-relaxed">
-            <p className="mb-1">To,</p>
-            <p className="font-bold">NEUROGLAM</p>
-            <p>Village – Ajnoud, Tehsil – Payal</p>
-            <p>Ludhiana – 141421 (Punjab)</p>
+          {/* PO Title Badge */}
+          <div className="flex justify-center mb-4">
+            <div className="px-6 py-1.5 rounded-lg text-white font-bold text-sm tracking-wide" style={{ backgroundColor: '#003366' }}>
+              PURCHASE ORDER
+            </div>
           </div>
 
-          {/* Subject - 2 row space after */}
-          <p className="text-[12pt] mb-8 font-bold">
-            <span className="underline">Subject: Purchase Order</span>
-          </p>
+          {/* PO Info Grid */}
+          <div className="grid grid-cols-2 gap-3 mb-4 p-3 rounded-lg text-xs" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            <div className="flex">
+              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>PO Number:</span>
+              <span className="font-semibold">{poNumber}</span>
+            </div>
+            <div className="flex">
+              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>PO Date:</span>
+              <span>{formatDate(poDate)}</span>
+            </div>
+          </div>
 
-          {/* Salutation - 2 row space after */}
-          <p className="text-[12pt] mb-8">Dear Sir/Madam,</p>
+          {/* Supplier Box */}
+          <div className="p-3 mb-4 rounded-lg text-xs" style={{ backgroundColor: '#f0f7ff', border: '2px solid #0066cc' }}>
+            <span className="font-bold" style={{ color: '#003366' }}>TO: </span>
+            <span className="font-semibold">NEUROGLAM</span>
+            <p className="text-gray-700 mt-1">Village – Ajnoud, Tehsil – Payal, Ludhiana – 141421 (Punjab)</p>
+          </div>
 
-          {/* Intro Paragraph */}
-          <p className="text-[11pt] text-justify mb-5 leading-relaxed">
+          {/* Subject & Salutation */}
+          <p className="text-xs mb-2"><span className="font-bold" style={{ color: '#003366' }}>Subject:</span> Purchase Order</p>
+          <p className="text-xs mb-3">Dear Sir/Madam,</p>
+          <p className="text-xs text-justify mb-4 text-gray-700">
             We hereby placing a purchase order with Stamp and Sign of our current working doctor's. Terms and Conditions will remain same as our discussion telephonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-5 text-[11pt]">
+          <table className="w-full border-collapse mb-4 text-xs" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-black px-2 py-2 text-center w-[7%]">Sr.</th>
-                <th className="border border-black px-2 py-2 text-center w-[20%]">Product</th>
-                <th className="border border-black px-2 py-2 text-center w-[37%]">Compositions</th>
-                <th className="border border-black px-2 py-2 text-center w-[12%]">Pack</th>
-                <th className="border border-black px-2 py-2 text-center w-[12%]">Strips</th>
-                <th className="border border-black px-2 py-2 text-center w-[12%]">Tablets</th>
+              <tr style={{ backgroundColor: '#003366' }}>
+                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[6%]">Sr.</th>
+                <th className="p-2 text-left text-white font-bold border border-gray-300 w-[18%]">Product</th>
+                <th className="p-2 text-left text-white font-bold border border-gray-300 w-[36%]">Compositions</th>
+                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[12%]">Pack</th>
+                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[14%]">Strips</th>
+                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[14%]">Tablets</th>
               </tr>
             </thead>
             <tbody>
@@ -239,65 +190,67 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
                 const qtyInTabs = item.qtyInTabs || qtyInStrips * 10;
                 
                 return (
-                  <tr key={index}>
-                    <td className="border border-black px-2 py-2 text-center">{index + 1}</td>
-                    <td className="border border-black px-2 py-2">{item.stockItemName}</td>
-                    <td className="border border-black px-2 py-2">{stockItem?.composition || '-'}</td>
-                    <td className="border border-black px-2 py-2 text-center">{packing}</td>
-                    <td className="border border-black px-2 py-2 text-center">{qtyInStrips.toLocaleString()}</td>
-                    <td className="border border-black px-2 py-2 text-center">{qtyInTabs.toLocaleString()}</td>
+                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                    <td className="border border-gray-300 p-2 text-center">{index + 1}</td>
+                    <td className="border border-gray-300 p-2 font-medium">{item.stockItemName}</td>
+                    <td className="border border-gray-300 p-2">{stockItem?.composition || '-'}</td>
+                    <td className="border border-gray-300 p-2 text-center">{packing}</td>
+                    <td className="border border-gray-300 p-2 text-center font-semibold">{qtyInStrips.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-2 text-center font-semibold">{qtyInTabs.toLocaleString()}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
 
-          {/* Flex spacer to push undertaking to bottom */}
-          <div className="flex-1 min-h-4"></div>
+          {/* Flex spacer */}
+          <div className="flex-1 min-h-2"></div>
 
           {/* Undertaking */}
           <div className="mt-auto">
-            <p className="font-bold text-[12pt] mb-2">
-              <span className="underline">UNDERTAKING:</span>
-            </p>
-            <p className="text-[10pt] text-justify leading-relaxed mb-2">
+            <p className="font-bold text-xs mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
+            <p className="text-[10px] text-justify leading-relaxed text-gray-700 mb-1">
               We hereby confirm that the product containing the psychotropic substance Buprenorphine, which we intend to procure from Neuroglam, Village Ajnoud, Tehsil Payal, Ludhiana – 141421 (Punjab), is covered under our Purchase Order No. {poNumber.replace('NH/PO-', '')} dated {formatDate(poDate)} ({getMonthYear(poDate)}).
             </p>
-            <p className="text-[10pt] text-justify leading-relaxed mb-2">
+            <p className="text-[10px] text-justify leading-relaxed text-gray-700 mb-1">
               The products purchased by us will be exclusively supplied to De-Addiction Centres and qualified Doctors under our valid License No. PSMHC/Punjab/2024/863. We are fully aware that this product contains controlled substances regulated under the Narcotic Drugs and Psychotropic Substances Act, 1985, and we shall maintain all statutory records pertaining to its sale and purchase.
             </p>
-            <p className="text-[10pt] text-justify leading-relaxed mb-2">
+            <p className="text-[10px] text-justify leading-relaxed text-gray-700 mb-1">
               We further assure that an Acknowledgement (Form-6 Consignment Note) for the receipt of the above substance will be issued to the supplier immediately upon delivery.
             </p>
-            <p className="text-[10pt] text-justify leading-relaxed">
+            <p className="text-[10px] text-justify leading-relaxed text-gray-700 mb-2">
               Additionally, we undertake that the procured product will be used only for the formulations and sales mentioned below and will be marketed within India only. These products are not intended for retail counter sale or export.
             </p>
-
-            {/* Neuroglam Liability Acknowledgment */}
-            <p className="font-bold text-[11pt] mt-3 mb-1">
-              <span className="underline">Neuroglam Liability Acknowledgment:</span>
-            </p>
-            <p className="text-[10pt] text-justify leading-relaxed">
+            
+            <p className="font-bold text-[10px] mb-1" style={{ color: '#003366' }}>Neuroglam Liability Acknowledgment:</p>
+            <p className="text-[10px] text-justify leading-relaxed text-gray-700">
               We acknowledge that Neuroglam shall not be held liable for any non-compliance with statutory provisions committed by us, whether intentionally or unintentionally.
             </p>
 
-            {/* 7 row space after undertaking */}
-            <div className="h-16"></div>
+            <div className="h-8"></div>
 
             {/* Signature Section */}
-            <div className="text-[11pt]">
-              <p>For Navjeevan Hospital,</p>
-              <p>Opp. New Bus Stand, G.T. Road, Sirhind</p>
-              
-              {/* Maximum space for sign and stamp */}
-              <div className="h-32"></div>
-              
-              <div className="w-48 border-b border-black"></div>
-              <div className="flex gap-10 mt-2">
-                <span>{doctorName}</span>
-                <span>Date: {formatDate(poDate)}</span>
+            <div className="flex justify-between text-xs px-2">
+              <div className="text-left">
+                <p className="font-semibold" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
+                <p className="text-gray-600 text-[10px]">Opp. New Bus Stand, G.T. Road, Sirhind</p>
+                <div className="mt-10 pt-2 border-t-2 border-gray-500 min-w-[150px]">
+                  <span className="font-semibold text-gray-700">{doctorName}</span>
+                </div>
+              </div>
+              <div className="text-center min-w-[120px]">
+                <div className="mt-10 pt-2 border-t-2 border-gray-500">
+                  <span className="font-semibold text-gray-700">Date: {formatDate(poDate)}</span>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-6 text-center text-[10px] pt-3" style={{ borderTop: '2px solid #003366' }}>
+            <p className="font-bold" style={{ color: '#003366' }}>
+              NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
+            </p>
           </div>
         </div>
       </DialogContent>
