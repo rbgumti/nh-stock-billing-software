@@ -7,6 +7,7 @@ import { StockItem } from "@/hooks/useStockStore";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import navjeevanLogo from "@/assets/NH_LOGO.png";
 
 interface RusanPharmaPOProps {
   poNumber: string;
@@ -23,10 +24,9 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/\//g, '-');
+    return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
   };
 
-  // Extract PO number suffix (e.g., "187" from "NH/PO-0187")
   const getPONumberSuffix = () => {
     const match = poNumber.match(/(\d+)$/);
     return match ? parseInt(match[1]).toString() : poNumber;
@@ -43,8 +43,6 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const printHTML = printContent.innerHTML;
-
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -52,58 +50,12 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           <title>Purchase Order - ${poNumber}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            @page { 
-              size: A4; 
-              margin: 10mm 12mm;
-            }
-            html, body { 
-              height: 100%; 
-              font-family: 'Times New Roman', Times, serif; 
-              font-size: 11pt; 
-              line-height: 1.5;
-            }
-            body { 
-              padding: 0;
-              display: flex;
-              flex-direction: column;
-              min-height: 100vh;
-            }
-            .content-wrapper {
-              flex: 1;
-              display: flex;
-              flex-direction: column;
-            }
-            .header-row { display: flex; justify-content: flex-end; margin-bottom: 6px; font-size: 12pt; }
-            .hospital-name { font-size: 24pt; font-weight: bold; text-align: center; margin: 8px 0; }
-            .address-row { text-align: center; font-size: 12pt; margin-bottom: 5px; }
-            .licence-row { text-align: center; font-size: 11pt; font-weight: bold; margin-bottom: 14px; }
-            .po-date-row { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 13pt; font-weight: bold; }
-            .to-section { margin-bottom: 12px; font-size: 12pt; line-height: 1.6; }
-            .sub-line { font-size: 13pt; font-weight: bold; margin: 12px 0; text-decoration: underline; }
-            .salutation { margin: 10px 0; font-size: 12pt; }
-            .intro-para { font-size: 12pt; text-align: justify; margin-bottom: 12px; line-height: 1.5; }
-            table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12pt; }
-            th, td { border: 1px solid #000; padding: 8px 10px; }
-            th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
-            td { text-align: left; }
-            td.center { text-align: center; }
-            td.right { text-align: right; }
-            .flex-spacer { flex: 1; min-height: 20px; }
-            .undertaking-title { font-weight: bold; font-size: 12pt; margin: 14px 0 8px 0; text-decoration: underline; }
-            .undertaking-text { font-size: 11pt; text-align: justify; line-height: 1.5; margin-bottom: 14px; }
-            .for-line { font-size: 12pt; margin: 14px 0 25px 0; }
-            .signature-section { display: flex; justify-content: flex-start; margin-top: 12px; font-size: 12pt; }
-            .signature-line { border-bottom: 1px solid #000; width: 200px; margin: 20px 0 8px 0; }
-            @media print {
-              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            }
+            @page { size: A4; margin: 10mm; }
+            body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.4; padding: 15px; }
+            @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
           </style>
         </head>
-        <body>
-          <div class="content-wrapper">
-            ${printHTML}
-          </div>
-        </body>
+        <body>${printContent.innerHTML}</body>
       </html>
     `);
 
@@ -166,65 +118,66 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', lineHeight: '1.5' }}>
-          {/* Header - Regd. Govt of Punjab (centered) */}
-          <p className="text-center text-[12pt] mb-3">Regd. Govt of Punjab</p>
-
-          {/* Hospital Name (centered) */}
-          <h1 className="text-[24pt] font-bold text-center mb-3">NAVJEEVAN HOSPITAL</h1>
-
-          {/* Address Row (centered) */}
-          <p className="text-center text-[12pt] mb-1">
-            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,
-          </p>
-
-          {/* Mobile (centered) */}
-          <p className="text-center text-[12pt] mb-3">
-            Mob: 6284942412
-          </p>
-
-          {/* Licence Row (centered) - 2 row space after */}
-          <p className="text-center text-[11pt] mb-8">
-            Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024
-          </p>
-
-          {/* PO Number and Date Row */}
-          <div className="flex justify-between font-bold text-[13pt] mb-5">
-            <span>PO No.: NH-25-26-{getPONumberSuffix()}</span>
-            <span>Date: {formatDate(poDate)}</span>
+        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5' }}>
+          {/* Header with Logo */}
+          <div className="text-center mb-4 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
+            <div className="flex justify-center mb-2">
+              <img src={navjeevanLogo} alt="Logo" className="w-16 h-16 object-contain" />
+            </div>
+            <h1 className="text-2xl font-bold mb-1" style={{ color: '#003366', letterSpacing: '1px' }}>
+              NAVJEEVAN HOSPITAL
+            </h1>
+            <p className="text-xs italic text-gray-500 mb-1">Healthcare with Compassion</p>
+            <p className="text-xs text-gray-700 mb-1">
+              Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
+            </p>
+            <p className="text-xs text-gray-600">Phone: 6284942412 | Dr. Metali Bhatti</p>
+            <p className="text-xs text-gray-500">Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab</p>
           </div>
 
-          {/* To Section - 2 row space after */}
-          <div className="text-[12pt] mb-8 leading-relaxed">
-            <p className="mb-1">To,</p>
-            <p className="font-bold">RUSAN PHARMA LTD.</p>
-            <p>Khasra No. 122MI, Central Hope Town, Selaqui</p>
-            <p>Dehradun, Uttarakhand - 248197</p>
+          {/* PO Title Badge */}
+          <div className="flex justify-center mb-4">
+            <div className="px-6 py-1.5 rounded-lg text-white font-bold text-sm tracking-wide" style={{ backgroundColor: '#003366' }}>
+              PURCHASE ORDER
+            </div>
           </div>
 
-          {/* Subject - 2 row space after */}
-          <p className="text-[12pt] mb-8 font-bold">
-            <span className="underline">Subject: Purchase Order</span>
-          </p>
+          {/* PO Info Grid */}
+          <div className="grid grid-cols-2 gap-3 mb-4 p-3 rounded-lg text-xs" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            <div className="flex">
+              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>PO Number:</span>
+              <span className="font-semibold">NH-25-26-{getPONumberSuffix()}</span>
+            </div>
+            <div className="flex">
+              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>PO Date:</span>
+              <span>{formatDate(poDate)}</span>
+            </div>
+          </div>
 
-          {/* Salutation - 2 row space after */}
-          <p className="text-[12pt] mb-8">Dear Sir/Madam,</p>
+          {/* Supplier Box */}
+          <div className="p-3 mb-4 rounded-lg text-xs" style={{ backgroundColor: '#f0f7ff', border: '2px solid #0066cc' }}>
+            <span className="font-bold" style={{ color: '#003366' }}>TO: </span>
+            <span className="font-semibold">RUSAN PHARMA LTD.</span>
+            <p className="text-gray-700 mt-1">Khasra No. 122MI, Central Hope Town, Selaqui, Dehradun, Uttarakhand - 248197</p>
+          </div>
 
-          {/* Intro Paragraph */}
-          <p className="text-[11pt] text-justify mb-5 leading-relaxed">
+          {/* Subject & Salutation */}
+          <p className="text-xs mb-2"><span className="font-bold" style={{ color: '#003366' }}>Subject:</span> Purchase Order</p>
+          <p className="text-xs mb-3">Dear Sir/Madam,</p>
+          <p className="text-xs text-justify mb-4 text-gray-700">
             We place a purchase order with authorized doctor's stamp and signature. Terms per telephone discussion. Payment by cheque to your bank account.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-5 text-[11pt]">
+          <table className="w-full border-collapse mb-4 text-xs" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-black px-2 py-2 text-center w-[7%]">Sr.</th>
-                <th className="border border-black px-2 py-2 text-center w-[20%]">Product</th>
-                <th className="border border-black px-2 py-2 text-center w-[37%]">Compositions</th>
-                <th className="border border-black px-2 py-2 text-center w-[12%]">Pack</th>
-                <th className="border border-black px-2 py-2 text-center w-[12%]">Strips</th>
-                <th className="border border-black px-2 py-2 text-center w-[12%]">Tablets</th>
+              <tr style={{ backgroundColor: '#003366' }}>
+                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[6%]">Sr.</th>
+                <th className="p-2 text-left text-white font-bold border border-gray-300 w-[18%]">Product</th>
+                <th className="p-2 text-left text-white font-bold border border-gray-300 w-[36%]">Compositions</th>
+                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[12%]">Pack</th>
+                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[14%]">Strips</th>
+                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[14%]">Tablets</th>
               </tr>
             </thead>
             <tbody>
@@ -239,48 +192,53 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
                 })();
                 
                 return (
-                  <tr key={index}>
-                    <td className="border border-black px-2 py-2 text-center">{index + 1}</td>
-                    <td className="border border-black px-2 py-2">{item.stockItemName}</td>
-                    <td className="border border-black px-2 py-2">{stockItem?.composition || '-'}</td>
-                    <td className="border border-black px-2 py-2 text-center">{packing.replace('*', '×')}</td>
-                    <td className="border border-black px-2 py-2 text-center">{qtyInStrips.toLocaleString()}</td>
-                    <td className="border border-black px-2 py-2 text-center">{qtyInTabs.toLocaleString()}</td>
+                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                    <td className="border border-gray-300 p-2 text-center">{index + 1}</td>
+                    <td className="border border-gray-300 p-2 font-medium">{item.stockItemName}</td>
+                    <td className="border border-gray-300 p-2">{stockItem?.composition || '-'}</td>
+                    <td className="border border-gray-300 p-2 text-center">{packing.replace('*', '×')}</td>
+                    <td className="border border-gray-300 p-2 text-center font-semibold">{qtyInStrips.toLocaleString()}</td>
+                    <td className="border border-gray-300 p-2 text-center font-semibold">{qtyInTabs.toLocaleString()}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
 
-          {/* Flex spacer to push undertaking to bottom */}
-          <div className="flex-1 min-h-4"></div>
+          {/* Flex spacer */}
+          <div className="flex-1 min-h-2"></div>
 
           {/* Undertaking */}
           <div className="mt-auto">
-            <p className="font-bold text-[12pt] mb-2">
-              <span className="underline">UNDERTAKING:</span>
-            </p>
-            <p className="text-[10pt] text-justify leading-relaxed">
+            <p className="font-bold text-xs mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
+            <p className="text-[10px] text-justify leading-relaxed text-gray-700">
               We confirm purchase from Rusan Pharma Ltd. under P.O. No. {getPONumberSuffix()}/A ({formatDate(poDate)}). These controlled substances per Narcotic Drugs and Psychotropic Substances Act, 1985, shall be maintained with full records. Form-6 (Consignment Note) will be submitted upon receipt. Products are exclusively for our De-addiction Centre and qualified doctors only, licensed under PSMHC/Punjab/2024/863, sales within India only, no retail or export. Rusan Pharma Ltd. not liable for non-compliance by us.
             </p>
 
-            {/* 7 row space after undertaking */}
-            <div className="h-16"></div>
+            <div className="h-10"></div>
 
             {/* Signature Section */}
-            <div className="text-[11pt]">
-              <p>For Navjeevan Hospital,</p>
-              <p>Opp. New Bus Stand, G.T. Road, Sirhind</p>
-              
-              {/* Maximum space for sign and stamp */}
-              <div className="h-32"></div>
-              
-              <div className="w-48 border-b border-black"></div>
-              <div className="flex gap-10 mt-2">
-                <span>{doctorName}</span>
-                <span>Date: {formatDate(poDate)}</span>
+            <div className="flex justify-between text-xs px-2">
+              <div className="text-left">
+                <p className="font-semibold" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
+                <p className="text-gray-600 text-[10px]">Opp. New Bus Stand, G.T. Road, Sirhind</p>
+                <div className="mt-10 pt-2 border-t-2 border-gray-500 min-w-[150px]">
+                  <span className="font-semibold text-gray-700">{doctorName}</span>
+                </div>
+              </div>
+              <div className="text-center min-w-[120px]">
+                <div className="mt-10 pt-2 border-t-2 border-gray-500">
+                  <span className="font-semibold text-gray-700">Date: {formatDate(poDate)}</span>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-6 text-center text-[10px] pt-3" style={{ borderTop: '2px solid #003366' }}>
+            <p className="font-bold" style={{ color: '#003366' }}>
+              NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
+            </p>
           </div>
         </div>
       </DialogContent>
