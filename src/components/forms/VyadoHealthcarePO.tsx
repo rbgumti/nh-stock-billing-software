@@ -155,70 +155,76 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-8 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '13pt', lineHeight: '1.6' }}>
-          {/* Header Row - Centered */}
-          <div className="text-center text-[14pt] font-bold mb-3">
-            <p>Regd. Govt of Punjab</p>
-            <p>Mob: 6284942412</p>
-          </div>
+        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', lineHeight: '1.5' }}>
+          {/* Header - Regd. Govt of Punjab (centered) */}
+          <p className="text-center text-[12pt] mb-3">Regd. Govt of Punjab</p>
 
-          {/* Hospital Header */}
-          <div className="my-4">
-            <h1 className="text-[26pt] font-bold text-center">NAVJEEVAN HOSPITAL</h1>
-          </div>
+          {/* Hospital Name (centered) */}
+          <h1 className="text-[24pt] font-bold text-center mb-3">NAVJEEVAN HOSPITAL</h1>
 
-          {/* Address Row */}
-          <p className="text-center text-[14pt] font-bold mb-3">
-            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib&nbsp;&nbsp;&nbsp;&nbsp;{doctorName}
+          {/* Address Row (centered) */}
+          <p className="text-center text-[12pt] mb-1">
+            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,
           </p>
 
-          {/* Licence Row */}
-          <p className="text-center text-[13pt] font-bold mb-6">
-            Licence No. PSMHC/Pb./2024/863 Dt.2-5-2024
+          {/* Mobile (centered) */}
+          <p className="text-center text-[12pt] mb-3">
+            Mob: 6284942412
           </p>
 
-          {/* PO NO and Date */}
-          <div className="flex justify-between text-[15pt] font-bold mb-6 px-6">
-            <span>PO NO: {poNumber}</span>
+          {/* Licence Row (centered) - 2 row space after */}
+          <p className="text-center text-[11pt] mb-8">
+            Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024
+          </p>
+
+          {/* PO Number and Date Row */}
+          <div className="flex justify-between font-bold text-[13pt] mb-5">
+            <span>PO No.: {poNumber}</span>
             <span>Date: {formatDate(poDate)}</span>
           </div>
 
-          {/* To Section */}
-          <div className="text-[13pt] mb-5 leading-relaxed ml-6">
-            <p className="mb-2">To</p>
+          {/* To Section - 2 row space after */}
+          <div className="text-[12pt] mb-8 leading-relaxed">
+            <p className="mb-1">To,</p>
             <p className="font-bold">VYADO HEALTHCARE PVT LTD</p>
-            <p>Gali no.4,VinodNagar,Hisar</p>
+            <p>Gali No.4, Vinod Nagar, Hisar</p>
             <p>125001</p>
           </div>
 
-          {/* Subject Section */}
-          <div className="text-[13pt] mb-5 ml-6">
-            <p>Subject: Medicine order</p>
-            <p className="mt-4">Respected Sir/Ma&apos;am</p>
-            <p className="mt-4">Kindly provide us :-</p>
-          </div>
+          {/* Subject - 2 row space after */}
+          <p className="text-[12pt] mb-8 font-bold">
+            <span className="underline">Subject: Medicine Order</span>
+          </p>
+
+          {/* Salutation - 2 row space after */}
+          <p className="text-[12pt] mb-8">Respected Sir/Madam,</p>
+
+          {/* Intro Paragraph */}
+          <p className="text-[11pt] text-justify mb-5 leading-relaxed">
+            Kindly provide us the following medicines for our centre Navjeevan Hospital at the below written address at the earliest.
+          </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-6 text-[13pt]">
+          <table className="w-full border-collapse mb-5 text-[11pt]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black px-4 py-3 text-center w-[12%]">SR.NO.</th>
-                <th className="border border-black px-4 py-3 text-center w-[52%]">PRODUCT NAME</th>
-                <th className="border border-black px-4 py-3 text-center w-[18%]">PACKING</th>
-                <th className="border border-black px-4 py-3 text-center w-[18%]">QTY.</th>
+                <th className="border border-black px-2 py-2 text-center w-[10%]">Sr.</th>
+                <th className="border border-black px-2 py-2 text-center w-[50%]">Product Name</th>
+                <th className="border border-black px-2 py-2 text-center w-[20%]">Packing</th>
+                <th className="border border-black px-2 py-2 text-center w-[20%]">Qty.</th>
               </tr>
             </thead>
             <tbody>
               {items.map((item, index) => {
                 const stockItem = getStockItemDetails(item.stockItemId);
-                const packing = stockItem?.packing || "10*10";
+                const packing = stockItem?.packing || "10×10";
                 
                 return (
                   <tr key={index}>
-                    <td className="border border-black px-4 py-3 text-center">{index + 1}</td>
-                    <td className="border border-black px-4 py-3">{item.stockItemName}</td>
-                    <td className="border border-black px-4 py-3 text-center">{packing}</td>
-                    <td className="border border-black px-4 py-3 text-center">{item.quantity}TAB</td>
+                    <td className="border border-black px-2 py-2 text-center">{index + 1}</td>
+                    <td className="border border-black px-2 py-2">{item.stockItemName}</td>
+                    <td className="border border-black px-2 py-2 text-center">{packing}</td>
+                    <td className="border border-black px-2 py-2 text-center">{item.quantity} TAB</td>
                   </tr>
                 );
               })}
@@ -226,25 +232,31 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </table>
 
           {/* Flex spacer to push footer to bottom */}
-          <div className="flex-1 min-h-6"></div>
+          <div className="flex-1 min-h-4"></div>
 
           {/* Footer Section */}
           <div className="mt-auto">
-            <div className="text-[13pt] ml-6 leading-relaxed">
-              <p>For our centre Navjeevan hospital at below written address at the earliest.</p>
-              <p className="mt-4">Address: Navjeevan hospital Opp.Busstand,Vill.Bara,Sirhind,distt. Fatehgarh sahib.</p>
-            </div>
+            <p className="text-[11pt] leading-relaxed">
+              Address: Navjeevan Hospital, Opp. Bus Stand, Vill. Bara, Sirhind, Distt. Fatehgarh Sahib.
+            </p>
+
+            {/* 7 row space after content */}
+            <div className="h-16"></div>
 
             {/* Signature Section */}
-            <div className="text-[13pt] mt-8 ml-6 leading-relaxed">
-              <p>Thanking you</p>
+            <div className="text-[11pt]">
+              <p>Thanking You,</p>
               <p>Yours Sincerely,</p>
-              <div className="h-16 border-b border-dashed border-gray-400 my-4" style={{ width: '200px' }}>
-                {/* Space for stamp and signature */}
+              
+              {/* Maximum space for sign and stamp */}
+              <div className="h-32"></div>
+              
+              <div className="w-48 border-b border-black"></div>
+              <div className="flex gap-10 mt-2">
+                <span>{doctorName}</span>
+                <span>Date: {formatDate(poDate)}</span>
               </div>
-              <p>Navjeevan Hospital,</p>
-              <p>OPP.NEW BUS STAND,</p>
-              <p>G.T.ROAD, BARA,SIRHIND,</p>
+              <p className="mt-2">Navjeevan Hospital, Sirhind</p>
             </div>
           </div>
         </div>
