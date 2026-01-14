@@ -170,78 +170,82 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', lineHeight: '1.4' }}>
-          {/* Regd. Govt of Punjab */}
-          <p className="text-center text-[12pt] font-bold mb-1">Regd. Govt of Punjab</p>
+        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', lineHeight: '1.5' }}>
+          {/* Header - Regd. Govt of Punjab (centered) */}
+          <p className="text-center text-[12pt] mb-3">Regd. Govt of Punjab</p>
 
-          {/* Hospital Name */}
-          <h1 className="text-[22pt] font-bold text-center my-2">NAVJEEVAN HOSPITAL</h1>
+          {/* Hospital Name (centered) */}
+          <h1 className="text-[24pt] font-bold text-center mb-3">NAVJEEVAN HOSPITAL</h1>
 
-          {/* Address */}
-          <p className="text-center text-[11pt] mb-1">
-            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib
+          {/* Address Row (centered) */}
+          <p className="text-center text-[12pt] mb-1">
+            Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib,
           </p>
 
-          {/* Doctor Name */}
-          <p className="text-center text-[12pt] font-bold mb-1">{doctorName}</p>
+          {/* Mobile (centered) */}
+          <p className="text-center text-[12pt] mb-3">
+            Mob: 6284942412
+          </p>
 
-          {/* Licence Row */}
-          <p className="text-center text-[11pt] mb-4">
-            Licence No. PSMHC/Pb./2024/863 Dt. 2-5-2024
+          {/* Licence Row (centered) - 2 row space after */}
+          <p className="text-center text-[11pt] mb-8">
+            Licence No.: PSMHC/Pb./2024/863 | Dt. 2-5-2024
           </p>
 
           {/* PO Number and Date Row */}
-          <div className="flex justify-between font-bold text-[12pt] mb-4">
-            <span>PO NO: {poNumber}</span>
-            <span>DATE: {formatDate(poDate)}</span>
+          <div className="flex justify-between font-bold text-[13pt] mb-5">
+            <span>PO No.: {poNumber}</span>
+            <span>Date: {formatDate(poDate)}</span>
           </div>
 
-          {/* To Section */}
-          <div className="text-[11pt] mb-3 leading-snug">
+          {/* To Section - 2 row space after */}
+          <div className="text-[12pt] mb-8 leading-relaxed">
             <p className="mb-1">To,</p>
-            <p className="font-bold">Neuroglam</p>
-            <p>Address: Village – Ajnoud, Tehsil – Payal</p>
+            <p className="font-bold">NEUROGLAM</p>
+            <p>Village – Ajnoud, Tehsil – Payal</p>
             <p>Ludhiana – 141421 (Punjab)</p>
           </div>
 
-          {/* Subject - centered bold */}
-          <p className="text-[12pt] font-bold text-center my-3">Sub: Purchase Order</p>
+          {/* Subject - 2 row space after */}
+          <p className="text-[12pt] mb-8 font-bold">
+            <span className="underline">Subject: Purchase Order</span>
+          </p>
 
-          {/* Salutation */}
-          <p className="text-[11pt] my-2">Dear Sir, ma&apos;am</p>
+          {/* Salutation - 2 row space after */}
+          <p className="text-[12pt] mb-8">Dear Sir/Madam,</p>
 
           {/* Intro Paragraph */}
-          <p className="text-[10pt] text-justify mb-3 leading-snug">
-            We hereby placing a purchase order with Stamp and Sign of our current working doctor&apos;s. Terms and Conditions will remain same as our discussion on phonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
+          <p className="text-[11pt] text-justify mb-5 leading-relaxed">
+            We hereby placing a purchase order with Stamp and Sign of our current working doctor's. Terms and Conditions will remain same as our discussion telephonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-3 text-[10pt]">
+          <table className="w-full border-collapse mb-5 text-[11pt]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black px-2 py-2 text-center">Sr. No.</th>
-                <th className="border border-black px-2 py-2 text-center">Product Name</th>
-                <th className="border border-black px-2 py-2 text-center">Compositions</th>
-                <th className="border border-black px-2 py-2 text-center">Packing</th>
-                <th className="border border-black px-2 py-2 text-center">Qty.In Strips</th>
-                <th className="border border-black px-2 py-2 text-center">Qty.In Tablets</th>
+                <th className="border border-black px-2 py-2 text-center w-[7%]">Sr.</th>
+                <th className="border border-black px-2 py-2 text-center w-[20%]">Product</th>
+                <th className="border border-black px-2 py-2 text-center w-[37%]">Compositions</th>
+                <th className="border border-black px-2 py-2 text-center w-[12%]">Pack</th>
+                <th className="border border-black px-2 py-2 text-center w-[12%]">Strips</th>
+                <th className="border border-black px-2 py-2 text-center w-[12%]">Tablets</th>
               </tr>
             </thead>
             <tbody>
               {items.map((item, index) => {
                 const stockItem = getStockItemDetails(item.stockItemId);
-                const packing = item.packSize || stockItem?.packing || "10*10";
+                const packing = item.packSize || stockItem?.packing || "10×10";
                 const qtyInStrips = item.qtyInStrips || item.quantity;
                 const qtyInTabs = item.qtyInTabs || qtyInStrips * 10;
                 
                 return (
                   <tr key={index}>
-                    <td className="border border-black px-2 py-2 text-center">{index + 1}.</td>
+                    <td className="border border-black px-2 py-2 text-center">{index + 1}</td>
                     <td className="border border-black px-2 py-2">{item.stockItemName}</td>
                     <td className="border border-black px-2 py-2">{stockItem?.composition || '-'}</td>
                     <td className="border border-black px-2 py-2 text-center">{packing}</td>
-                    <td className="border border-black px-2 py-2 text-right">{qtyInStrips.toLocaleString()}</td>
-                    <td className="border border-black px-2 py-2 text-right">{qtyInTabs.toLocaleString()}</td>
+                    <td className="border border-black px-2 py-2 text-center">{qtyInStrips.toLocaleString()}</td>
+                    <td className="border border-black px-2 py-2 text-center">{qtyInTabs.toLocaleString()}</td>
                   </tr>
                 );
               })}
@@ -253,36 +257,46 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
 
           {/* Undertaking */}
           <div className="mt-auto">
-            <p className="font-bold text-[11pt] mb-1">UNDERTAKING:</p>
-            <p className="text-[9pt] text-justify leading-snug mb-2">
+            <p className="font-bold text-[12pt] mb-2">
+              <span className="underline">UNDERTAKING:</span>
+            </p>
+            <p className="text-[10pt] text-justify leading-relaxed mb-2">
               We hereby confirm that the product containing the psychotropic substance Buprenorphine, which we intend to procure from Neuroglam, Village Ajnoud, Tehsil Payal, Ludhiana – 141421 (Punjab), is covered under our Purchase Order No. {poNumber.replace('NH/PO-', '')} dated {formatDate(poDate)} ({getMonthYear(poDate)}).
             </p>
-            <p className="text-[9pt] text-justify leading-snug mb-2">
+            <p className="text-[10pt] text-justify leading-relaxed mb-2">
               The products purchased by us will be exclusively supplied to De-Addiction Centres and qualified Doctors under our valid License No. PSMHC/Punjab/2024/863. We are fully aware that this product contains controlled substances regulated under the Narcotic Drugs and Psychotropic Substances Act, 1985, and we shall maintain all statutory records pertaining to its sale and purchase.
             </p>
-            <p className="text-[9pt] text-justify leading-snug mb-2">
+            <p className="text-[10pt] text-justify leading-relaxed mb-2">
               We further assure that an Acknowledgement (Form-6 Consignment Note) for the receipt of the above substance will be issued to the supplier immediately upon delivery.
             </p>
-            <p className="text-[9pt] text-justify leading-snug mb-3">
+            <p className="text-[10pt] text-justify leading-relaxed">
               Additionally, we undertake that the procured product will be used only for the formulations and sales mentioned below and will be marketed within India only. These products are not intended for retail counter sale or export.
             </p>
 
             {/* Neuroglam Liability Acknowledgment */}
-            <p className="font-bold text-[10pt] mb-1">Neuroglam Liability Acknowledgment</p>
-            <p className="text-[9pt] text-justify leading-snug mb-4">
+            <p className="font-bold text-[11pt] mt-3 mb-1">
+              <span className="underline">Neuroglam Liability Acknowledgment:</span>
+            </p>
+            <p className="text-[10pt] text-justify leading-relaxed">
               We acknowledge that Neuroglam shall not be held liable for any non-compliance with statutory provisions committed by us, whether intentionally or unintentionally.
             </p>
 
-            {/* For Section */}
-            <p className="text-[10pt] mb-4">
-              For Navjeevanhospital, opp. New Bus Stand, G.t. Road, Sirhind
-            </p>
+            {/* 7 row space after undertaking */}
+            <div className="h-16"></div>
 
-            {/* Signature Section - three columns */}
-            <div className="flex justify-between text-[11pt] mt-4">
-              <span>Date: {formatDate(poDate)}</span>
-              <span>(Navjeevanhospital)</span>
-              <span>({doctorName}.)</span>
+            {/* Signature Section */}
+            <div className="text-[11pt]">
+              <p>For Navjeevan Hospital,</p>
+              <p>Opp. New Bus Stand, G.T. Road, Sirhind</p>
+              
+              {/* Maximum space for sign and stamp */}
+              <div className="h-32"></div>
+              
+              <div className="w-48 border-b border-black"></div>
+              <div className="flex gap-10 mt-2">
+                <span>{doctorName}</span>
+                <span>Date: {formatDate(poDate)}</span>
+              </div>
             </div>
           </div>
         </div>
