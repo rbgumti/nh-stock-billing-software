@@ -121,8 +121,9 @@ export default function Invoices() {
   const generatePDF = async (invoice: any) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
-    let y = 15;
+    let y = 12;
 
     // Load and add hospital logo
     try {
@@ -131,185 +132,232 @@ export default function Invoices() {
       await new Promise((resolve) => {
         img.onload = resolve;
       });
-      const logoWidth = 25;
-      const logoHeight = 25;
+      const logoWidth = 22;
+      const logoHeight = 22;
       doc.addImage(img, "PNG", pageWidth / 2 - logoWidth / 2, y, logoWidth, logoHeight);
-      y += logoHeight + 5;
+      y += logoHeight + 3;
     } catch (error) {
       console.error("Error loading logo:", error);
-      y += 10;
+      y += 8;
     }
 
     // Hospital Name
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(27, 53, 97); // Navy color
-    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
-    y += 7;
-
-    // Hospital tagline
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    doc.text("De-Addiction & Rehabilitation Centre", pageWidth / 2, y, { align: "center" });
-    y += 12;
-
-    // Invoice title
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 0, 0);
-    doc.text("INVOICE", pageWidth / 2, y, { align: "center" });
-    y += 10;
+    doc.setTextColor(0, 51, 102); // Navy #003366
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
+    y += 5;
 
-    // Divider line
-    doc.setDrawColor(212, 175, 55); // Gold color
-    doc.setLineWidth(0.5);
+    // Hospital tagline
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(120, 120, 120);
+    doc.text("Healthcare with Compassion", pageWidth / 2, y, { align: "center" });
+    y += 5;
+
+    // Address
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(80, 80, 80);
+    doc.text("Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)", pageWidth / 2, y, { align: "center" });
+    y += 4;
+
+    // Phone and Doctor
+    doc.text(`Phone: 6284942412 | ${doctorName}`, pageWidth / 2, y, { align: "center" });
+    y += 4;
+
+    // Licence
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab", pageWidth / 2, y, { align: "center" });
+    y += 6;
+
+    // Header border
+    doc.setDrawColor(0, 51, 102);
+    doc.setLineWidth(0.8);
     doc.line(margin, y, pageWidth - margin, y);
-    y += 10;
-    
-    // Invoice details
+    y += 8;
+
+    // Invoice title badge
+    doc.setFillColor(0, 51, 102);
+    doc.roundedRect(pageWidth / 2 - 25, y - 4, 50, 10, 2, 2, 'F');
     doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("INVOICE", pageWidth / 2, y + 3, { align: "center" });
+    y += 14;
+
+    // Invoice Info Box
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(margin, y - 3, pageWidth - margin * 2, 22, 2, 2, 'FD');
+    y += 3;
+
+    doc.setFontSize(9);
+    doc.setTextColor(0, 51, 102);
+    doc.setFont("helvetica", "bold");
+    doc.text("Invoice Number:", margin + 3, y);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
-    doc.text(`Invoice Number: ${invoice.id}`, margin, y);
-    doc.text(`Date: ${invoice.date}`, pageWidth - margin, y, { align: "right" });
-    y += 8;
-    doc.text(`Patient: ${invoice.patientName}`, margin, y);
-    doc.text(`Status: ${invoice.status}`, pageWidth - margin, y, { align: "right" });
-    y += 15;
+    doc.text(invoice.id, margin + 35, y);
     
-    // Items table header
-    doc.setFillColor(27, 53, 97); // Navy background
-    doc.rect(margin, y - 5, pageWidth - margin * 2, 10, "F");
-    doc.setFontSize(10);
+    doc.setTextColor(0, 51, 102);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 255, 255); // White text
+    doc.text("Date:", pageWidth / 2 + 10, y);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text(invoice.date, pageWidth / 2 + 25, y);
+    y += 6;
+
+    doc.setTextColor(0, 51, 102);
+    doc.setFont("helvetica", "bold");
+    doc.text("Patient:", margin + 3, y);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text(invoice.patientName, margin + 23, y);
+    
+    doc.setTextColor(0, 51, 102);
+    doc.setFont("helvetica", "bold");
+    doc.text("Status:", pageWidth / 2 + 10, y);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    doc.text(invoice.status, pageWidth / 2 + 28, y);
+    y += 12;
+
+    // Items table header
+    doc.setFillColor(0, 51, 102);
+    doc.rect(margin, y - 4, pageWidth - margin * 2, 8, "F");
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
     doc.text("Item", margin + 3, y);
-    doc.text("Batch", 70, y);
-    doc.text("Expiry", 100, y);
-    doc.text("MRP", 130, y);
+    doc.text("Batch", 68, y);
+    doc.text("Expiry", 95, y);
+    doc.text("MRP", 125, y);
     doc.text("Qty", 150, y);
-    doc.text("Price", 170, y);
-    y += 10;
+    doc.text("Total (Rs.)", 170, y);
+    y += 8;
     
     // Items list
     doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
     invoice.items.forEach((item: any, index: number) => {
       if (index % 2 === 0) {
-        doc.setFillColor(245, 245, 245);
-        doc.rect(margin, y - 5, pageWidth - margin * 2, 10, "F");
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, y - 4, pageWidth - margin * 2, 8, "F");
       }
-      doc.text(item.name.substring(0, 20), margin + 3, y);
-      doc.text(item.batchNo || "N/A", 70, y);
-      doc.text(item.expiryDate || "N/A", 100, y);
-      doc.text(`₹${formatNumber(item.mrp || 0)}`, 130, y);
+      doc.text(item.name.substring(0, 22), margin + 3, y);
+      doc.text(item.batchNo || "-", 68, y);
+      doc.text(item.expiryDate || "-", 95, y);
+      doc.text(formatNumber(item.mrp || 0), 125, y);
       doc.text(item.quantity.toString(), 150, y);
-      doc.text(`₹${formatNumber(item.price)}`, 170, y);
-      y += 10;
+      doc.text(formatNumber(item.price * item.quantity), 170, y);
+      y += 8;
       
-      if (y > 250) {
+      if (y > pageHeight - 100) {
         doc.addPage();
         y = 30;
       }
     });
     
     // Total section
-    y += 5;
-    doc.setDrawColor(212, 175, 55);
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 10;
-    
-    doc.setFontSize(14);
+    y += 3;
+    doc.setFillColor(0, 51, 102);
+    doc.rect(margin, y - 4, pageWidth - margin * 2, 10, "F");
+    doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(27, 53, 97);
-    doc.text(`Total Amount: ₹${formatNumber(invoice.amount)}`, pageWidth - margin, y, { align: "right" });
+    doc.setTextColor(255, 255, 255);
+    doc.text("GRAND TOTAL", margin + 3, y + 2);
+    doc.text(`Rs. ${formatNumber(invoice.amount)}`, pageWidth - margin - 3, y + 2, { align: "right" });
     y += 15;
 
     // Payment Terms & Bank Details Section
-    doc.setDrawColor(212, 175, 55);
+    doc.setDrawColor(0, 51, 102);
     doc.setLineWidth(0.3);
     doc.line(margin, y, pageWidth - margin, y);
-    y += 10;
+    y += 8;
 
-    // Two-column layout: Payment Terms (left) and Bank Details (right)
     const colWidth = (pageWidth - margin * 2) / 2 - 5;
     
     // Payment Terms (left column)
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(27, 53, 97);
+    doc.setTextColor(0, 51, 102);
     doc.text("Payment Terms:", margin, y);
-    y += 6;
+    y += 5;
     
     doc.setFont("helvetica", "normal");
     doc.setTextColor(60, 60, 60);
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     const paymentTermsY = y;
     doc.text("• Payment due within 7 days", margin, y);
-    y += 5;
+    y += 4;
     doc.text("• Cash / UPI / Bank Transfer accepted", margin, y);
-    y += 5;
-    doc.text("• No refund on medicines dispensed", margin, y);
-    y += 5;
-    doc.text("• Keep this invoice for your records", margin, y);
-    
+    y += 4;
+    doc.text("• No refund on medicines", margin, y);
+
     // Bank Details (right column)
-    const bankX = margin + colWidth + 10;
-    y = paymentTermsY - 6;
-    doc.setFontSize(10);
+    const bankX = pageWidth / 2 + 5;
+    y = paymentTermsY - 5;
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(27, 53, 97);
+    doc.setTextColor(0, 51, 102);
     doc.text("Bank Details:", bankX, y);
-    y += 6;
+    y += 5;
     
     doc.setFont("helvetica", "normal");
     doc.setTextColor(60, 60, 60);
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     doc.text("Bank: State Bank of India", bankX, y);
-    y += 5;
+    y += 4;
     doc.text("A/C Name: Navjeevan Hospital", bankX, y);
-    y += 5;
+    y += 4;
     doc.text("A/C No: XXXXXXXXXXXX", bankX, y);
-    y += 5;
+    y += 4;
     doc.text("IFSC: SBIN0XXXXXX", bankX, y);
-    y += 5;
+    y += 4;
     doc.text("UPI: navjeevan@sbi", bankX, y);
 
-    // Doctor Signature Section
-    y += 15;
-    const signatureX = pageWidth - margin - 60;
-    doc.setDrawColor(0, 0, 0);
+    // Doctor Signature Section - positioned near bottom
+    const signatureY = Math.max(y + 15, pageHeight - 50);
+    
+    // For Navjeevan Hospital text
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 51, 102);
+    doc.text("For Navjeevan Hospital,", pageWidth - margin - 50, signatureY, { align: "center" });
+    
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    doc.text("Opp. New Bus Stand, G.T. Road, Sirhind", pageWidth - margin - 50, signatureY + 4, { align: "center" });
+    
+    // Signature line
+    doc.setDrawColor(100, 100, 100);
     doc.setLineWidth(0.3);
-    doc.line(signatureX, y, pageWidth - margin, y);
-    y += 5;
+    doc.line(pageWidth - margin - 80, signatureY + 20, pageWidth - margin - 20, signatureY + 20);
+    
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(27, 53, 97);
-    doc.text(doctorName, signatureX + 30, y, { align: "center" });
-    y += 6;
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(0, 0, 0);
-    doc.text("Navjeevan Hospital", signatureX + 30, y, { align: "center" });
-    
+    doc.setTextColor(0, 51, 102);
+    doc.text(doctorName, pageWidth - margin - 50, signatureY + 25, { align: "center" });
+
     // Footer
-    y = doc.internal.pageSize.getHeight() - 25;
-    doc.setDrawColor(212, 175, 55);
+    const footerY = pageHeight - 12;
+    doc.setDrawColor(0, 51, 102);
     doc.setLineWidth(0.5);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 8;
+    doc.line(margin, footerY - 8, pageWidth - margin, footerY - 8);
     
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(27, 53, 97);
-    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
-    y += 5;
-    
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
-    doc.text("Thank you for choosing us!", pageWidth / 2, y, { align: "center" });
+    doc.text("This is a computer generated document | For queries contact: 6284942412", pageWidth / 2, footerY - 3, { align: "center" });
+    
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 51, 102);
+    doc.text("NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)", pageWidth / 2, footerY + 2, { align: "center" });
     
     // Save the PDF
     doc.save(`invoice-${invoice.id}.pdf`);

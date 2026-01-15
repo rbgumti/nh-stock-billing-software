@@ -71,8 +71,9 @@ export default function ViewPrescription() {
 
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
-    let y = 15;
+    let y = 12;
 
     // Load and add hospital logo
     try {
@@ -81,58 +82,76 @@ export default function ViewPrescription() {
       await new Promise((resolve) => {
         img.onload = resolve;
       });
-      // Add logo (centered, 30x30)
-      const logoWidth = 25;
-      const logoHeight = 25;
+      const logoWidth = 22;
+      const logoHeight = 22;
       doc.addImage(img, "PNG", pageWidth / 2 - logoWidth / 2, y, logoWidth, logoHeight);
-      y += logoHeight + 5;
+      y += logoHeight + 3;
     } catch (error) {
       console.error("Error loading logo:", error);
-      y += 10;
+      y += 8;
     }
 
     // Hospital Name
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(27, 53, 97); // Navy color
-    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
-    y += 7;
-
-    // Hospital tagline/address
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    doc.text("De-Addiction & Rehabilitation Centre", pageWidth / 2, y, { align: "center" });
-    y += 12;
-
-    // Reset text color
-    doc.setTextColor(0, 0, 0);
-
-    // Prescription title
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text("PRESCRIPTION", pageWidth / 2, y, { align: "center" });
+    doc.setTextColor(0, 51, 102); // Navy #003366
+    doc.text("NAVJEEVAN HOSPITAL", pageWidth / 2, y, { align: "center" });
+    y += 5;
+
+    // Hospital tagline
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(120, 120, 120);
+    doc.text("Healthcare with Compassion", pageWidth / 2, y, { align: "center" });
+    y += 5;
+
+    // Address
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(80, 80, 80);
+    doc.text("Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)", pageWidth / 2, y, { align: "center" });
+    y += 4;
+
+    // Phone and Doctor
+    doc.text(`Phone: 6284942412 | ${doctorName}`, pageWidth / 2, y, { align: "center" });
+    y += 4;
+
+    // Licence
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab", pageWidth / 2, y, { align: "center" });
+    y += 6;
+
+    // Header border
+    doc.setDrawColor(0, 51, 102);
+    doc.setLineWidth(0.8);
+    doc.line(margin, y, pageWidth - margin, y);
     y += 8;
 
+    // Prescription title badge
+    doc.setFillColor(0, 51, 102);
+    doc.roundedRect(pageWidth / 2 - 30, y - 4, 60, 10, 2, 2, 'F');
     doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("PRESCRIPTION", pageWidth / 2, y + 3, { align: "center" });
+    y += 12;
+
+    // Prescription number
+    doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 51, 102);
     doc.text(prescription.prescription_number, pageWidth / 2, y, { align: "center" });
     y += 10;
 
-    // Divider line
-    doc.setDrawColor(212, 175, 55); // Gold color
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 10;
+    // Patient Information Box
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(margin, y - 3, pageWidth - margin * 2, 38, 2, 2, 'FD');
+    y += 3;
 
-    // Patient Information
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Patient Information", margin, y);
-    y += 8;
-
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
     
     const patientInfo = [
       ["Patient Name:", prescription.patient_name],
@@ -144,98 +163,109 @@ export default function ViewPrescription() {
 
     patientInfo.forEach(([label, value]) => {
       doc.setFont("helvetica", "bold");
-      doc.text(label, margin, y);
+      doc.setTextColor(0, 51, 102);
+      doc.text(label, margin + 3, y);
       doc.setFont("helvetica", "normal");
+      doc.setTextColor(0, 0, 0);
       doc.text(value, margin + 35, y);
-      y += 7;
+      y += 6;
     });
 
     if (prescription.notes) {
       doc.setFont("helvetica", "bold");
-      doc.text("Notes:", margin, y);
+      doc.setTextColor(0, 51, 102);
+      doc.text("Notes:", margin + 3, y);
       doc.setFont("helvetica", "normal");
-      const notesLines = doc.splitTextToSize(prescription.notes, pageWidth - margin * 2 - 35);
+      doc.setTextColor(0, 0, 0);
+      const notesLines = doc.splitTextToSize(prescription.notes, pageWidth - margin * 2 - 40);
       doc.text(notesLines, margin + 35, y);
-      y += notesLines.length * 7;
+      y += notesLines.length * 5;
     }
 
-    y += 10;
+    y += 8;
 
-    // Divider line
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 10;
-
-    // Medicines
-    doc.setFontSize(14);
+    // Medicines Section
+    doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 51, 102);
     doc.text("Prescribed Medicines", margin, y);
-    y += 10;
+    y += 8;
 
     prescription.items.forEach((item, index) => {
-      // Check if we need a new page
-      if (y > 260) {
+      if (y > pageHeight - 80) {
         doc.addPage();
         y = 20;
       }
 
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text(`${index + 1}. ${item.medicine_name}`, margin, y);
-      y += 7;
-
       doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text(`${index + 1}. ${item.medicine_name}`, margin, y);
+      y += 6;
+
+      doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
-      
+      doc.setTextColor(60, 60, 60);
       const medicineDetails = `Dosage: ${item.dosage} | Frequency: ${item.frequency} | Duration: ${item.duration} days | Qty: ${item.quantity}`;
       doc.text(medicineDetails, margin + 5, y);
-      y += 6;
+      y += 5;
 
       if (item.instructions) {
         doc.setFont("helvetica", "italic");
         doc.text(`Instructions: ${item.instructions}`, margin + 5, y);
-        y += 6;
+        y += 5;
       }
 
-      y += 5;
+      y += 4;
     });
 
-    // Doctor Signature Section
-    y = Math.max(y + 15, doc.internal.pageSize.getHeight() - 70);
+    // Doctor Signature Section - positioned near bottom
+    const signatureY = Math.max(y + 20, pageHeight - 55);
     
-    // Signature line on the right side
-    const signatureX = pageWidth - margin - 60;
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.3);
-    doc.line(signatureX, y, pageWidth - margin, y);
-    
-    y += 5;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(27, 53, 97);
-    doc.text(doctorName, signatureX + 30, y, { align: "center" });
-    
-    y += 6;
+    // For Navjeevan Hospital text
     doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(0, 0, 0);
-    doc.text("Navjeevan Hospital", signatureX + 30, y, { align: "center" });
-    
-    y += 5;
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    doc.text("Date: " + format(new Date(prescription.prescription_date), "dd/MM/yyyy"), signatureX + 30, y, { align: "center" });
-
-    // Footer
-    y = doc.internal.pageSize.getHeight() - 20;
-    doc.setDrawColor(212, 175, 55); // Gold color
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 6;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 51, 102);
+    doc.text("For Navjeevan Hospital,", pageWidth - margin - 50, signatureY, { align: "center" });
     
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    doc.text("Opp. New Bus Stand, G.T. Road, Sirhind", pageWidth - margin - 50, signatureY + 4, { align: "center" });
+    
+    // Signature line
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.3);
+    doc.line(pageWidth - margin - 80, signatureY + 25, pageWidth - margin - 20, signatureY + 25);
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 51, 102);
+    doc.text(doctorName, pageWidth - margin - 50, signatureY + 30, { align: "center" });
+    
+    // Date on left side
+    doc.setDrawColor(100, 100, 100);
+    doc.line(margin + 20, signatureY + 25, margin + 80, signatureY + 25);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    doc.text("Date: " + format(new Date(prescription.prescription_date), "dd-MM-yyyy"), margin + 50, signatureY + 30, { align: "center" });
+
+    // Footer
+    const footerY = pageHeight - 15;
+    doc.setDrawColor(0, 51, 102);
+    doc.setLineWidth(0.5);
+    doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
+    
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
-    doc.text("This is a computer-generated prescription.", pageWidth / 2, y, { align: "center" });
+    doc.text("This is a computer generated document | For queries contact: 6284942412", pageWidth / 2, footerY, { align: "center" });
+    
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 51, 102);
+    doc.text("NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)", pageWidth / 2, footerY + 5, { align: "center" });
 
     // Download PDF
     doc.save(`${prescription.prescription_number}.pdf`);
