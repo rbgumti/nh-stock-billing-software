@@ -118,7 +118,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5' }}>
+        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5', minHeight: '1123px', height: '1123px' }}>
           {/* Header with Logo */}
           <div className="text-center mb-4 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
             <div className="flex justify-center mb-2">
@@ -205,8 +205,8 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </tbody>
           </table>
 
-          {/* Flex spacer */}
-          <div className="flex-1 min-h-2"></div>
+          {/* Flex spacer to push content to fill page */}
+          <div className="flex-grow"></div>
 
           {/* Undertaking */}
           <div className="mt-auto">
@@ -215,7 +215,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
               We confirm purchase from Rusan Pharma Ltd. under P.O. No. {getPONumberSuffix()}/A ({formatDate(poDate)}). These controlled substances per Narcotic Drugs and Psychotropic Substances Act, 1985, shall be maintained with full records. Form-6 (Consignment Note) will be submitted upon receipt. Products are exclusively for our De-addiction Centre and qualified doctors only, licensed under PSMHC/Punjab/2024/863, sales within India only, no retail or export. Rusan Pharma Ltd. not liable for non-compliance by us.
             </p>
 
-            <div className="h-10"></div>
+            <div className="flex-grow min-h-16"></div>
 
             {/* Signature Section */}
             <div className="flex justify-between text-xs px-2">

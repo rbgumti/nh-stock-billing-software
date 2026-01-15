@@ -120,7 +120,7 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5' }}>
+        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5', minHeight: '1123px', height: '1123px' }}>
           {/* Header with Logo */}
           <div className="text-center mb-4 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
             <div className="flex justify-center mb-2">
@@ -203,8 +203,8 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
             </tbody>
           </table>
 
-          {/* Flex spacer */}
-          <div className="flex-1 min-h-2"></div>
+          {/* Flex spacer to push content to fill page */}
+          <div className="flex-grow"></div>
 
           {/* Undertaking */}
           <div className="mt-auto">
@@ -227,7 +227,7 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
               We acknowledge that Neuroglam shall not be held liable for any non-compliance with statutory provisions committed by us, whether intentionally or unintentionally.
             </p>
 
-            <div className="h-8"></div>
+            <div className="flex-grow min-h-16"></div>
 
             {/* Signature Section */}
             <div className="flex justify-between text-xs px-2">
