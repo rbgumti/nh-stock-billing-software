@@ -126,7 +126,7 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
             <p className="text-xs text-gray-700 mb-1">
               Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
-            <p className="text-xs text-gray-600">Phone: 6284942412 | Dr. Metali Bhatti</p>
+            <p className="text-xs text-gray-600">Phone: 6284942412 | {doctorName}</p>
             <p className="text-xs text-gray-500">Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab</p>
           </div>
 
