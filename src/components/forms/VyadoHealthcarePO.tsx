@@ -204,13 +204,13 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
               <div className="text-left">
                 <p className="text-gray-700">Thanking You,</p>
                 <p className="text-gray-700 mb-2">Yours Sincerely,</p>
-                <div className="mt-10 pt-2 border-t-2 border-gray-500 min-w-[150px]">
+                <div className="mt-24 pt-2 border-t-2 border-gray-500 min-w-[150px]">
                   <span className="font-semibold text-gray-700">{doctorName}</span>
                   <p className="text-gray-600 text-[10px]">Navjeevan Hospital, Sirhind</p>
                 </div>
               </div>
               <div className="text-center min-w-[120px]">
-                <div className="mt-12 pt-2 border-t-2 border-gray-500">
+                <div className="mt-24 pt-2 border-t-2 border-gray-500">
                   <span className="font-semibold text-gray-700">Date: {formatDate(poDate)}</span>
                 </div>
               </div>
