@@ -113,7 +113,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5' }}>
+        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5', minHeight: '1123px', height: '1123px' }}>
           {/* Header with Logo */}
           <div className="text-center mb-4 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
             <div className="flex justify-center mb-2">
@@ -196,8 +196,8 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             </tbody>
           </table>
 
-          {/* Flex spacer */}
-          <div className="flex-1 min-h-2"></div>
+          {/* Flex spacer to push content to fill page */}
+          <div className="flex-grow"></div>
 
           {/* Undertaking */}
           <div className="mt-auto">
@@ -206,7 +206,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
               We hereby confirm that the products which we intend to buy from PARA PHARMACEUTICALS PVT. LTD. E-9, INDUSTRIAL AREA SIIDCUL, SILAQUI DEHRADUN UTTARAKHAND INDIA Our P.O.NO {poNumber}. .dt- {formatDate(poDate)}. These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License no PSMHC/Pb./2024/863. We are full aware these products containing controlled substance as per Narcotic drugs & psychotropic substance Act 1985, and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation & for its sale within india only & not meant for export.
             </p>
 
-            <div className="h-12"></div>
+            <div className="flex-grow min-h-16"></div>
 
             {/* Signature Section */}
             <div className="flex justify-between text-xs px-2">

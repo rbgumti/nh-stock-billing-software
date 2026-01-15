@@ -113,7 +113,7 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black min-h-[842px] flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5' }}>
+        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5', minHeight: '1123px', height: '1123px' }}>
           {/* Header with Logo */}
           <div className="text-center mb-4 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
             <div className="flex justify-center mb-2">
@@ -190,8 +190,8 @@ export function VeeEssPharmaPO({ poNumber, poDate, items, stockItems, onClose }:
             </tbody>
           </table>
 
-          {/* Flex spacer */}
-          <div className="flex-1 min-h-4"></div>
+          {/* Flex spacer to push content to fill page */}
+          <div className="flex-grow min-h-24"></div>
 
           {/* Footer Section */}
           <div className="mt-auto">
