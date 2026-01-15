@@ -162,76 +162,77 @@ export function PrintableGRN({
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5', minHeight: '1123px', height: '1123px' }}>
+        <div ref={printRef} className="p-8 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.5', minHeight: '1123px', height: '1123px' }}>
           {/* Header with Logo */}
-          <div className="text-center mb-4 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
-            <div className="flex justify-center mb-2">
-              <img src={navjeevanLogo} alt="Logo" className="w-16 h-16 object-contain" />
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-3">
+              <img src={navjeevanLogo} alt="Logo" className="w-20 h-20 object-contain" />
             </div>
-            <h1 className="text-2xl font-bold mb-1" style={{ color: '#003366', letterSpacing: '1px' }}>
+            <h1 className="text-3xl font-bold mb-1 tracking-wide" style={{ color: '#003366' }}>
               NAVJEEVAN HOSPITAL
             </h1>
-            <p className="text-xs italic text-gray-500 mb-1">Healthcare with Compassion</p>
-            <p className="text-xs text-gray-700 mb-1">
+            <p className="text-sm italic text-gray-500 mb-2">Healthcare with Compassion</p>
+            <p className="text-sm text-gray-700 mb-1">
               Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
-            <p className="text-xs text-gray-600">Phone: 6284942412 | {doctorName}</p>
-            <p className="text-xs text-gray-500">Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab</p>
+            <p className="text-sm text-gray-600 mb-1">Phone: 6284942412 | {doctorName}</p>
+            <p className="text-sm text-gray-500">Licence No: PSMHC/Pb./2024/863 | Regd. Govt of Punjab</p>
           </div>
 
+          {/* Navy Blue Divider Line */}
+          <div className="w-full h-1 mb-6" style={{ backgroundColor: '#003366' }}></div>
+
           {/* GRN Title Badge */}
-          <div className="flex justify-center mb-4">
-            <div className="px-6 py-1.5 rounded-lg text-white font-bold text-sm tracking-wide" style={{ backgroundColor: '#003366' }}>
+          <div className="flex justify-center mb-6">
+            <div className="px-8 py-2 rounded-full text-white font-bold text-base tracking-wide" style={{ backgroundColor: '#0078d4' }}>
               GOODS RECEIPT NOTE
             </div>
           </div>
 
-          {/* GRN Info Grid */}
-          <div className="grid grid-cols-2 gap-3 mb-4 p-3 rounded-lg text-xs" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-            <div className="flex">
-              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>GRN Number:</span>
-              <span className="font-semibold">{grnNumber}</span>
-            </div>
-            <div className="flex">
-              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>GRN Date:</span>
-              <span>{formatDate(grnDateFormatted)}</span>
-            </div>
-            <div className="flex">
-              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>PO Number:</span>
-              <span>{purchaseOrder.poNumber}</span>
-            </div>
-            <div className="flex">
-              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>PO Date:</span>
-              <span>{formatDate(purchaseOrder.orderDate)}</span>
-            </div>
-            <div className="flex">
-              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>Invoice Number:</span>
-              <span>{invoiceNumber || '-'}</span>
-            </div>
-            <div className="flex">
-              <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>Invoice Date:</span>
-              <span>{invoiceDate ? formatDate(invoiceDate) : '-'}</span>
+          {/* GRN Info Grid - Rounded Box */}
+          <div className="mb-6 p-5 rounded-xl" style={{ border: '1px solid #e5e7eb' }}>
+            <div className="grid grid-cols-2 gap-y-4 text-sm">
+              <div className="flex">
+                <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>GRN Number:</span>
+                <span className="font-medium">{grnNumber}</span>
+              </div>
+              <div className="flex">
+                <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>GRN Date:</span>
+                <span>{formatDate(grnDateFormatted)}</span>
+              </div>
+              <div className="flex">
+                <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>PO Number:</span>
+                <span>{purchaseOrder.poNumber}</span>
+              </div>
+              <div className="flex">
+                <span className="font-bold min-w-[100px]" style={{ color: '#003366' }}>PO Date:</span>
+                <span>{formatDate(purchaseOrder.orderDate)}</span>
+              </div>
+              <div className="flex col-span-2">
+                <span className="font-bold min-w-[120px]" style={{ color: '#003366' }}>Invoice Date:</span>
+                <span>{invoiceDate ? formatDate(invoiceDate) : '-'}</span>
+              </div>
             </div>
           </div>
 
-          {/* Supplier Box */}
-          <div className="p-3 mb-4 rounded-lg text-xs" style={{ backgroundColor: '#f0f7ff', border: '2px solid #0066cc' }}>
-            <span className="font-bold" style={{ color: '#003366' }}>SUPPLIER: </span>
-            <span className="font-semibold">{purchaseOrder.supplier}</span>
+          {/* Supplier Box - Rounded */}
+          <div className="p-4 mb-6 rounded-xl text-sm" style={{ backgroundColor: '#f8fafc', border: '1px solid #e5e7eb' }}>
+            <span className="font-bold" style={{ color: '#0078d4' }}>SUPPLIER: </span>
+            <span className="font-medium">{purchaseOrder.supplier}</span>
           </div>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-4 text-xs" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <table className="w-full border-collapse mb-6 text-sm">
             <thead>
               <tr style={{ backgroundColor: '#003366' }}>
-                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[6%]">Sr.</th>
-                <th className="p-2 text-left text-white font-bold border border-gray-300 w-[24%]">Item Name</th>
-                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[12%]">Batch No.</th>
-                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[10%]">Expiry</th>
-                <th className="p-2 text-right text-white font-bold border border-gray-300 w-[12%]">Cost Price (Rs.)</th>
-                <th className="p-2 text-right text-white font-bold border border-gray-300 w-[12%]">MRP (Rs.)</th>
-                <th className="p-2 text-center text-white font-bold border border-gray-300 w-[8%]">Qty</th>
-                <th className="p-2 text-right text-white font-bold border border-gray-300 w-[16%]">Total (Rs.)</th>
+                <th className="p-3 text-center text-white font-bold border border-gray-300 w-[6%]">Sr.</th>
+                <th className="p-3 text-left text-white font-bold border border-gray-300 w-[24%]">Item Name</th>
+                <th className="p-3 text-center text-white font-bold border border-gray-300 w-[12%]">Batch No.</th>
+                <th className="p-3 text-center text-white font-bold border border-gray-300 w-[10%]">Expiry</th>
+                <th className="p-3 text-right text-white font-bold border border-gray-300 w-[12%]">Cost Price (₹)</th>
+                <th className="p-3 text-right text-white font-bold border border-gray-300 w-[12%]">MRP (₹)</th>
+                <th className="p-3 text-center text-white font-bold border border-gray-300 w-[8%]">Qty</th>
+                <th className="p-3 text-right text-white font-bold border border-gray-300 w-[16%]">Total (₹)</th>
               </tr>
             </thead>
             <tbody>
@@ -240,61 +241,58 @@ export function PrintableGRN({
                 const costPrice = getCostPrice(item.stockItemId);
                 const itemTotal = calculateItemTotal(item);
                 return (
-                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
-                    <td className="border border-gray-300 p-2 text-center">{index + 1}</td>
-                    <td className="border border-gray-300 p-2 font-medium">{stockItem?.name || 'Unknown'}</td>
-                    <td className="border border-gray-300 p-2 text-center">{item.batchNo || '-'}</td>
-                    <td className="border border-gray-300 p-2 text-center">{item.expiryDate ? formatDate(item.expiryDate) : '-'}</td>
-                    <td className="border border-gray-300 p-2 text-right">{formatPrecision(costPrice)}</td>
-                    <td className="border border-gray-300 p-2 text-right">{item.mrp ? formatPrecision(item.mrp) : '-'}</td>
-                    <td className="border border-gray-300 p-2 text-center font-semibold">{item.receivedQuantity}</td>
-                    <td className="border border-gray-300 p-2 text-right font-semibold">{Number(itemTotal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  <tr key={index} style={{ backgroundColor: '#ffffff' }}>
+                    <td className="border border-gray-300 p-3 text-center">{index + 1}</td>
+                    <td className="border border-gray-300 p-3 font-medium">{stockItem?.name || 'Unknown'}</td>
+                    <td className="border border-gray-300 p-3 text-center">{item.batchNo || '-'}</td>
+                    <td className="border border-gray-300 p-3 text-center">{item.expiryDate ? formatDate(item.expiryDate) : '-'}</td>
+                    <td className="border border-gray-300 p-3 text-right">₹{formatPrecision(costPrice)}</td>
+                    <td className="border border-gray-300 p-3 text-right">{item.mrp ? `₹${formatPrecision(item.mrp)}` : '-'}</td>
+                    <td className="border border-gray-300 p-3 text-center font-semibold">{item.receivedQuantity}</td>
+                    <td className="border border-gray-300 p-3 text-right font-semibold">₹{Number(itemTotal).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
                   </tr>
                 );
               })}
               {/* Grand Total Row */}
               <tr style={{ backgroundColor: '#003366' }}>
-                <td className="border border-gray-300 p-2 text-white font-bold" colSpan={6}>GRAND TOTAL</td>
-                <td className="border border-gray-300 p-2 text-center text-white font-bold">{totalReceivedQty}</td>
-                <td className="border border-gray-300 p-2 text-right text-white font-bold">{Number(grandTotal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td className="border border-gray-300 p-3 text-white font-bold" colSpan={6}>GRAND TOTAL</td>
+                <td className="border border-gray-300 p-3 text-center text-white font-bold">{totalReceivedQty}</td>
+                <td className="border border-gray-300 p-3 text-right text-white font-bold">₹{Number(grandTotal).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
               </tr>
             </tbody>
           </table>
 
           {/* Notes Section */}
           {notes && (
-            <div className="p-3 mb-4 rounded-lg text-xs" style={{ backgroundColor: '#fffdf0', border: '1px solid #e6d69c' }}>
+            <div className="p-4 mb-6 rounded-lg text-sm" style={{ backgroundColor: '#fffdf0', border: '1px solid #e6d69c' }}>
               <p className="font-bold mb-1" style={{ color: '#8b7700' }}>Notes:</p>
               <p className="text-gray-700">{notes}</p>
             </div>
           )}
 
-          {/* Flex spacer to push content to fill page */}
-          <div className="flex-grow min-h-8"></div>
+          {/* Flex spacer to push signature and footer to bottom */}
+          <div className="flex-grow min-h-12"></div>
 
           {/* Signature Section */}
-          <div className="mt-auto">
-            <div className="flex justify-between text-xs px-2">
-              <div className="text-center min-w-[120px]">
-                <div className="mt-20 pt-2 border-t-2 border-gray-500">
-                  <span className="font-semibold text-gray-700">Received By</span>
-                </div>
+          <div className="mb-8">
+            <div className="flex justify-between text-sm px-4">
+              <div className="text-center min-w-[140px]">
+                <div className="w-32 h-0 border-t border-gray-800 mb-2"></div>
+                <span className="text-gray-700">Received By</span>
               </div>
-              <div className="text-center min-w-[120px]">
-                <div className="mt-20 pt-2 border-t-2 border-gray-500">
-                  <span className="font-semibold text-gray-700">Checked By</span>
-                </div>
+              <div className="text-center min-w-[140px]">
+                <div className="w-32 h-0 border-t border-gray-800 mb-2"></div>
+                <span className="text-gray-700">Checked By</span>
               </div>
-              <div className="text-center min-w-[120px]">
-                <div className="mt-20 pt-2 border-t-2 border-gray-500">
-                  <span className="font-semibold text-gray-700">Authorized Signatory</span>
-                </div>
+              <div className="text-center min-w-[140px]">
+                <div className="w-32 h-0 border-t border-gray-800 mb-2"></div>
+                <span className="text-gray-700">Authorized Signatory</span>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="mt-6 text-center text-[10px] pt-3" style={{ borderTop: '2px solid #003366' }}>
+          <div className="text-center text-xs pt-4" style={{ borderTop: '1px solid #e5e7eb' }}>
             <p className="text-gray-500 mb-1">
               This is a computer generated document | For queries contact: 6284942412
             </p>
