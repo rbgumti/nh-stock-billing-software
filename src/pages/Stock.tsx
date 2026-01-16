@@ -40,6 +40,7 @@ import * as XLSX from "xlsx";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { GRNDocument, type GRNItem } from "@/components/forms/GRNDocument";
+import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -793,16 +794,18 @@ export default function Stock() {
       });
 
       root.render(
-        <GRNDocument
-          grnNumber={grnNumber}
-          grnDate={po.grnDate}
-          invoiceNumber={po.invoiceNumber}
-          invoiceDate={po.invoiceDate}
-          purchaseOrder={po}
-          grnItems={grnItems}
-          stockItems={stockItems}
-          notes={po.notes}
-        />
+        <AppSettingsProvider>
+          <GRNDocument
+            grnNumber={grnNumber}
+            grnDate={po.grnDate}
+            invoiceNumber={po.invoiceNumber}
+            invoiceDate={po.invoiceDate}
+            purchaseOrder={po}
+            grnItems={grnItems}
+            stockItems={stockItems}
+            notes={po.notes}
+          />
+        </AppSettingsProvider>
       );
 
       // Let React commit & ensure images are loaded before capture
