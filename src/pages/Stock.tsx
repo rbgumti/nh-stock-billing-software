@@ -754,21 +754,9 @@ export default function Stock() {
     setDownloadingGrnId(po.id);
 
     // Render the same GRN HTML used in the Preview, then capture it with html2canvas.
-    // IMPORTANT: Some browsers block automatic downloads after async work.
-    // We open a new tab immediately (user gesture) and then navigate it to the PDF blob.
+    // Then trigger a direct file download (no new tab).
     const grnNumber = po.grnNumber || `GRN-${po.poNumber}`;
     const safeGrnNumberForFile = grnNumber.replace(/[\\/?:%*|"<>]/g, "-");
-
-    const downloadWindow = window.open("", "_blank");
-    if (downloadWindow) {
-      downloadWindow.document.title = `GRN ${grnNumber}`;
-      downloadWindow.document.body.innerHTML = `
-        <div style="font-family: Segoe UI, Arial, sans-serif; padding: 24px;">
-          <h2 style="margin: 0 0 8px;">Generating GRN PDF…</h2>
-          <p style="margin: 0; color: #555;">Please wait, your download will start automatically.</p>
-        </div>
-      `;
-    }
 
     const mount = document.createElement("div");
     mount.style.position = "fixed";
@@ -861,30 +849,25 @@ export default function Stock() {
 
       pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
 
-      // More reliable than pdf.save() in some browsers (esp. after async work)
       const blob = pdf.output("blob");
       const blobUrl = URL.createObjectURL(blob);
 
-      if (downloadWindow) {
-        downloadWindow.location.href = blobUrl;
-      } else {
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = `GRN-${safeGrnNumberForFile}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      }
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `GRN-${safeGrnNumberForFile}.pdf`;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
       window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
 
       toast({
         title: "Downloaded",
-        description: `GRN ${grnNumber} opened for download (same as Preview).`,
+        description: `GRN ${grnNumber} has been downloaded (same as Preview).`,
       });
     } catch (error) {
       console.error("Error generating GRN PDF:", error);
-      if (downloadWindow) downloadWindow.close();
       toast({
         title: "Error",
         description: "Failed to download GRN PDF",
