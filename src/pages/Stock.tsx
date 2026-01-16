@@ -748,23 +748,21 @@ export default function Stock() {
 
   const downloadGRN = async (po: PurchaseOrder) => {
     // Render the same GRN HTML used in the Preview, then capture it with html2canvas.
+    // IMPORTANT: Some browsers block automatic downloads after async work.
+    // We open a new tab immediately (user gesture) and then navigate it to the PDF blob.
     const grnNumber = po.grnNumber || `GRN-${po.poNumber}`;
     const safeGrnNumberForFile = grnNumber.replace(/[\\/?:%*|"<>]/g, "-");
 
-    const grnItems: GRNItem[] = po.items.map((item) => {
-      const stockItem = stockItems.find((s) => s.id === item.stockItemId);
-      const qty = item.qtyInTabs || item.quantity;
-
-      return {
-        stockItemId: item.stockItemId,
-        orderedQuantity: qty,
-        receivedQuantity: qty,
-        batchNo: stockItem?.batchNo || "",
-        expiryDate: stockItem?.expiryDate || "",
-        mrp: stockItem?.mrp || 0,
-        remarks: "",
-      };
-    });
+    const downloadWindow = window.open("", "_blank");
+    if (downloadWindow) {
+      downloadWindow.document.title = `GRN ${grnNumber}`;
+      downloadWindow.document.body.innerHTML = `
+        <div style="font-family: Segoe UI, Arial, sans-serif; padding: 24px;">
+          <h2 style="margin: 0 0 8px;">Generating GRN PDF…</h2>
+          <p style="margin: 0; color: #555;">Please wait, your download will start automatically.</p>
+        </div>
+      `;
+    }
 
     const mount = document.createElement("div");
     mount.style.position = "fixed";
@@ -777,24 +775,41 @@ export default function Stock() {
     document.body.appendChild(mount);
 
     const root = createRoot(mount);
-    root.render(
-      <GRNDocument
-        grnNumber={grnNumber}
-        grnDate={po.grnDate}
-        invoiceNumber={po.invoiceNumber}
-        invoiceDate={po.invoiceDate}
-        purchaseOrder={po}
-        grnItems={grnItems}
-        stockItems={stockItems}
-        notes={po.notes}
-      />
-    );
 
     try {
+      const grnItems: GRNItem[] = (po.items || []).map((item) => {
+        const stockItem = stockItems.find((s) => s.id === item.stockItemId);
+        const qty = item.qtyInTabs || item.quantity;
+
+        return {
+          stockItemId: item.stockItemId,
+          orderedQuantity: qty,
+          receivedQuantity: qty,
+          batchNo: stockItem?.batchNo || "",
+          expiryDate: stockItem?.expiryDate || "",
+          mrp: stockItem?.mrp || 0,
+          remarks: "",
+        };
+      });
+
+      root.render(
+        <GRNDocument
+          grnNumber={grnNumber}
+          grnDate={po.grnDate}
+          invoiceNumber={po.invoiceNumber}
+          invoiceDate={po.invoiceDate}
+          purchaseOrder={po}
+          grnItems={grnItems}
+          stockItems={stockItems}
+          notes={po.notes}
+        />
+      );
+
       // Let React commit & ensure images are loaded before capture
       await new Promise<void>((resolve) => setTimeout(() => resolve(), 0));
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
       const imgs = Array.from(mount.querySelectorAll("img")) as HTMLImageElement[];
       await Promise.all(
         imgs.map(
@@ -837,14 +852,31 @@ export default function Stock() {
       const imgY = 0;
 
       pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-      pdf.save(`GRN-${safeGrnNumberForFile}.pdf`);
+
+      // More reliable than pdf.save() in some browsers (esp. after async work)
+      const blob = pdf.output("blob");
+      const blobUrl = URL.createObjectURL(blob);
+
+      if (downloadWindow) {
+        downloadWindow.location.href = blobUrl;
+      } else {
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = `GRN-${safeGrnNumberForFile}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
 
       toast({
         title: "Downloaded",
-        description: `GRN ${grnNumber} has been downloaded (same as Preview).`,
+        description: `GRN ${grnNumber} opened for download (same as Preview).`,
       });
     } catch (error) {
       console.error("Error generating GRN PDF:", error);
+      if (downloadWindow) downloadWindow.close();
       toast({
         title: "Error",
         description: "Failed to download GRN PDF",
