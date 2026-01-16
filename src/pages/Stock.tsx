@@ -749,6 +749,7 @@ export default function Stock() {
   const downloadGRN = async (po: PurchaseOrder) => {
     // Render the same GRN HTML used in the Preview, then capture it with html2canvas.
     const grnNumber = po.grnNumber || `GRN-${po.poNumber}`;
+    const safeGrnNumberForFile = grnNumber.replace(/[\\/?:%*|"<>]/g, "-");
 
     const grnItems: GRNItem[] = po.items.map((item) => {
       const stockItem = stockItems.find((s) => s.id === item.stockItemId);
@@ -791,6 +792,8 @@ export default function Stock() {
 
     try {
       // Let React commit & ensure images are loaded before capture
+      await new Promise<void>((resolve) => setTimeout(() => resolve(), 0));
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       const imgs = Array.from(mount.querySelectorAll("img")) as HTMLImageElement[];
       await Promise.all(
@@ -834,7 +837,7 @@ export default function Stock() {
       const imgY = 0;
 
       pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-      pdf.save(`GRN-${grnNumber}.pdf`);
+      pdf.save(`GRN-${safeGrnNumberForFile}.pdf`);
 
       toast({
         title: "Downloaded",
