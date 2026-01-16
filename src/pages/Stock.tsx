@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -70,6 +70,7 @@ export default function Stock() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportStartDate, setExportStartDate] = useState<Date | undefined>(undefined);
   const [exportEndDate, setExportEndDate] = useState<Date | undefined>(undefined);
+  const [downloadingGrnId, setDownloadingGrnId] = useState<number | null>(null);
   const { stockItems, addStockItem, updateStockItem, subscribe } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
@@ -748,6 +749,10 @@ export default function Stock() {
   };
 
   const downloadGRN = async (po: PurchaseOrder) => {
+    // Prevent double-clicks
+    if (downloadingGrnId === po.id) return;
+    setDownloadingGrnId(po.id);
+
     // Render the same GRN HTML used in the Preview, then capture it with html2canvas.
     // IMPORTANT: Some browsers block automatic downloads after async work.
     // We open a new tab immediately (user gesture) and then navigate it to the PDF blob.
@@ -888,6 +893,7 @@ export default function Stock() {
     } finally {
       root.unmount();
       mount.remove();
+      setDownloadingGrnId(null);
     }
   };
 
@@ -1841,9 +1847,14 @@ export default function Stock() {
                         variant="outline" 
                         className="flex-1 glass-subtle border-teal/20 hover:border-teal/40"
                         onClick={() => downloadGRN(po)}
+                        disabled={downloadingGrnId === po.id}
                       >
-                        <Download className="h-4 w-4 mr-2 text-teal" />
-                        Download GRN
+                        {downloadingGrnId === po.id ? (
+                          <Loader2 className="h-4 w-4 mr-2 text-teal animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4 mr-2 text-teal" />
+                        )}
+                        {downloadingGrnId === po.id ? "Generating…" : "Download GRN"}
                       </Button>
                     </div>
                   </div>
