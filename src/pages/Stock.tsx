@@ -34,9 +34,12 @@ import { usePurchaseOrderStore } from "@/hooks/usePurchaseOrderStore";
 import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
 import { useSupplierPaymentStore, SupplierPayment } from "@/hooks/useSupplierPaymentStore";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { createRoot } from "react-dom/client";
 import * as XLSX from "xlsx";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { formatLocalISODate } from "@/lib/dateUtils";
+import { GRNDocument, type GRNItem } from "@/components/forms/GRNDocument";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -743,62 +746,111 @@ export default function Stock() {
     });
   };
 
-  const downloadGRN = (po: any) => {
-    const doc = new jsPDF();
-    
-    // Header
-    doc.setFontSize(20);
-    doc.text("GOODS RECEIPT NOTE", 105, 20, { align: "center" });
-    
-    // GRN Details
-    doc.setFontSize(12);
-    doc.text(`PO Number: ${po.poNumber}`, 20, 40);
-    doc.text(`Order Date: ${po.orderDate}`, 20, 50);
-    doc.text(`GRN Date: ${po.grnDate}`, 20, 60);
-    doc.text(`Supplier: ${po.supplier}`, 20, 70);
-    
-    // Items Table Header
-    doc.setFontSize(10);
-    doc.text("Item Name", 20, 85);
-    doc.text("Quantity", 100, 85);
-    doc.text("Unit Price", 130, 85);
-    doc.text("Total", 165, 85);
-    doc.line(20, 87, 190, 87);
-    
-    // Items
-    let yPos = 95;
-    po.items.forEach((item: any) => {
-      if (yPos > 270) {
-        doc.addPage();
-        yPos = 20;
-      }
-      doc.text(item.stockItemName, 20, yPos);
-      doc.text(item.quantity.toString(), 100, yPos);
-      doc.text(`₹${item.unitPrice.toFixed(2)}`, 130, yPos);
-      doc.text(`₹${item.totalPrice.toFixed(2)}`, 165, yPos);
-      yPos += 10;
+  const downloadGRN = async (po: PurchaseOrder) => {
+    // Render the same GRN HTML used in the Preview, then capture it with html2canvas.
+    const grnNumber = po.grnNumber || `GRN-${po.poNumber}`;
+
+    const grnItems: GRNItem[] = po.items.map((item) => {
+      const stockItem = stockItems.find((s) => s.id === item.stockItemId);
+      const qty = item.qtyInTabs || item.quantity;
+
+      return {
+        stockItemId: item.stockItemId,
+        orderedQuantity: qty,
+        receivedQuantity: qty,
+        batchNo: stockItem?.batchNo || "",
+        expiryDate: stockItem?.expiryDate || "",
+        mrp: stockItem?.mrp || 0,
+        remarks: "",
+      };
     });
-    
-    // Total
-    doc.line(20, yPos, 190, yPos);
-    yPos += 10;
-    doc.setFontSize(12);
-    doc.text(`Total Amount: ₹${po.totalAmount.toFixed(2)}`, 20, yPos);
-    
-    // Notes
-    if (po.notes) {
-      yPos += 15;
-      doc.setFontSize(10);
-      doc.text("Notes:", 20, yPos);
-      yPos += 7;
-      doc.text(po.notes, 20, yPos);
+
+    const mount = document.createElement("div");
+    mount.style.position = "fixed";
+    mount.style.left = "-10000px";
+    mount.style.top = "0";
+    mount.style.width = "794px"; // A4 width-ish in px for consistent layout
+    mount.style.background = "white";
+    mount.style.zIndex = "-1";
+
+    document.body.appendChild(mount);
+
+    const root = createRoot(mount);
+    root.render(
+      <GRNDocument
+        grnNumber={grnNumber}
+        grnDate={po.grnDate}
+        invoiceNumber={po.invoiceNumber}
+        invoiceDate={po.invoiceDate}
+        purchaseOrder={po}
+        grnItems={grnItems}
+        stockItems={stockItems}
+        notes={po.notes}
+      />
+    );
+
+    try {
+      // Let React commit & ensure images are loaded before capture
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      const imgs = Array.from(mount.querySelectorAll("img")) as HTMLImageElement[];
+      await Promise.all(
+        imgs.map(
+          (img) =>
+            img.complete
+              ? Promise.resolve()
+              : new Promise<void>((resolve) => {
+                  img.onload = () => resolve();
+                  img.onerror = () => resolve();
+                })
+        )
+      );
+
+      const target = mount.firstElementChild as HTMLElement | null;
+      if (!target) throw new Error("Failed to render GRN document");
+
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+
+      pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.save(`GRN-${grnNumber}.pdf`);
+
+      toast({
+        title: "Downloaded",
+        description: `GRN ${grnNumber} has been downloaded (same as Preview).`,
+      });
+    } catch (error) {
+      console.error("Error generating GRN PDF:", error);
+      toast({
+        title: "Error",
+        description: "Failed to download GRN PDF",
+        variant: "destructive",
+      });
+    } finally {
+      root.unmount();
+      mount.remove();
     }
-    
-    doc.save(`GRN-${po.poNumber}.pdf`);
-    toast({
-      title: "Downloaded",
-      description: `GRN for PO ${po.poNumber} has been downloaded.`
-    });
   };
 
   // Stock Export Functions
