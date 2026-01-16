@@ -31,7 +31,7 @@ export const GRNDocument = React.forwardRef<HTMLDivElement, GRNDocumentProps>(
     {
       grnNumber,
       grnDate,
-      invoiceNumber, // kept for API parity (not currently displayed)
+      invoiceNumber,
       invoiceDate,
       purchaseOrder,
       grnItems,
@@ -74,7 +74,7 @@ export const GRNDocument = React.forwardRef<HTMLDivElement, GRNDocumentProps>(
     const grandTotal = grnItems.reduce((sum, item) => sum + calculateItemTotal(item), 0);
     const grnDateFormatted = grnDate || new Date().toISOString().split("T")[0];
 
-    void invoiceNumber; // avoid unused var lint if enabled
+    
 
     return (
       <div
@@ -144,8 +144,14 @@ export const GRNDocument = React.forwardRef<HTMLDivElement, GRNDocumentProps>(
               </span>
               <span>{formatDate(purchaseOrder.orderDate)}</span>
             </div>
-            <div className="flex col-span-2">
+            <div className="flex">
               <span className="font-bold min-w-[120px]" style={{ color: "#003366" }}>
+                Invoice No:
+              </span>
+              <span>{invoiceNumber || "-"}</span>
+            </div>
+            <div className="flex">
+              <span className="font-bold min-w-[100px]" style={{ color: "#003366" }}>
                 Invoice Date:
               </span>
               <span>{invoiceDate ? formatDate(invoiceDate) : "-"}</span>
