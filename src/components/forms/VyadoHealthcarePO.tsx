@@ -193,20 +193,35 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           <div className="flex justify-between text-xs mt-4 pt-3" style={{ borderTop: '1px solid #e2e8f0' }}>
             <div>
               <p className="text-gray-700">Thanking You,</p>
-              <p className="text-gray-700">Yours Sincerely,</p>
-              {/* Space for signature and stamp */}
-              <div className="mt-20 pt-2 border-t-2 border-gray-500 min-w-[160px]">
+              <p className="text-gray-700 mb-3">Yours Sincerely,</p>
+              
+              {/* Stamp Box */}
+              <div 
+                className="flex items-center justify-center mb-3"
+                style={{ 
+                  width: '140px', 
+                  height: '70px', 
+                  border: '2px dashed #003366',
+                  borderRadius: '4px',
+                  backgroundColor: '#f8fafc'
+                }}
+              >
+                <span className="text-[8px] text-gray-400 italic">Stamp Here</span>
+              </div>
+              
+              {/* Signature line */}
+              <div className="pt-2 border-t-2 border-gray-500 min-w-[160px]">
                 <span className="font-semibold text-gray-700">{doctorName}</span>
                 <p className="text-gray-600 text-[9px]">Navjeevan Hospital, Sirhind</p>
-                <p className="text-gray-500 text-[8px] italic mt-1">(Signature & Stamp)</p>
+                <p className="text-gray-500 text-[8px] italic mt-1">(Signature)</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-gray-600 text-[10px]">
                 Address: Opp. Bus Stand, Bara Sirhind
               </p>
-              {/* Space for date stamp */}
-              <div className="mt-20 pt-2 border-t-2 border-gray-500 min-w-[120px]">
+              {/* Space for date */}
+              <div className="mt-24 pt-2 border-t-2 border-gray-500 min-w-[120px]">
                 <span className="font-semibold text-gray-700">Date: {formatDate(poDate)}</span>
               </div>
             </div>
