@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ComposedChart, Line } from "recharts";
-import { TrendingUp, TrendingDown, Minus, DollarSign, Wallet, Building, Users, Pill, Brain, Droplets, CreditCard, Download } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, DollarSign, Wallet, Building, Users, Pill, Brain, Droplets, CreditCard, Download, Trophy, AlertTriangle, ArrowUp, ArrowDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 import { Json } from "@/integrations/supabase/types";
@@ -352,6 +352,31 @@ export function MonthlyComparativeAnalysis() {
       wsFinancial['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
       XLSX.utils.book_append_sheet(wb, wsFinancial, 'Financial Summary');
 
+      // Growth Analysis sheet
+      const growthData = metrics.map((m, idx) => {
+        const prev = idx > 0 ? metrics[idx - 1] : null;
+        const revenueGrowth = prev && prev.revenue > 0 ? ((m.revenue - prev.revenue) / prev.revenue) * 100 : 0;
+        const prevPatients = prev ? prev.newPatientsBnx + prev.followUpPatientsBnx + prev.tpnPatients + prev.pshyPatients : 0;
+        const currPatients = m.newPatientsBnx + m.followUpPatientsBnx + m.tpnPatients + m.pshyPatients;
+        const patientsGrowth = prevPatients > 0 ? ((currPatients - prevPatients) / prevPatients) * 100 : 0;
+        const prevQty = prev ? prev.bnxQtySold + prev.tpnQtySold : 0;
+        const currQty = m.bnxQtySold + m.tpnQtySold;
+        const qtyGrowth = prevQty > 0 ? ((currQty - prevQty) / prevQty) * 100 : 0;
+        
+        return {
+          'Month': m.month,
+          'Revenue (₹)': roundTo2(m.revenue),
+          'Revenue Growth (%)': idx === 0 ? 'N/A' : roundTo2(revenueGrowth),
+          'Total Patients': currPatients,
+          'Patients Growth (%)': idx === 0 ? 'N/A' : roundTo2(patientsGrowth),
+          'Total Qty Sold': currQty,
+          'Qty Growth (%)': idx === 0 ? 'N/A' : roundTo2(qtyGrowth),
+        };
+      });
+      const wsGrowth = XLSX.utils.json_to_sheet(growthData);
+      wsGrowth['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 14 }];
+      XLSX.utils.book_append_sheet(wb, wsGrowth, 'Growth Analysis');
+
       // Generate filename with date range
       const startMonth = metrics[0]?.month || 'Start';
       const endMonth = metrics[metrics.length - 1]?.month || 'End';
@@ -391,6 +416,54 @@ export function MonthlyComparativeAnalysis() {
 
   const currentMonth = metrics[metrics.length - 1];
   const previousMonth = metrics[metrics.length - 2];
+
+  // Calculate best and worst performing months
+  const getBestWorstMonths = () => {
+    if (metrics.length < 2) return null;
+
+    const revenueMax = metrics.reduce((max, m) => m.revenue > max.revenue ? m : max, metrics[0]);
+    const revenueMin = metrics.reduce((min, m) => m.revenue < min.revenue ? m : min, metrics[0]);
+    
+    const patientsMax = metrics.reduce((max, m) => {
+      const total = m.newPatientsBnx + m.followUpPatientsBnx + m.tpnPatients + m.pshyPatients;
+      const maxTotal = max.newPatientsBnx + max.followUpPatientsBnx + max.tpnPatients + max.pshyPatients;
+      return total > maxTotal ? m : max;
+    }, metrics[0]);
+
+    const qtyMax = metrics.reduce((max, m) => {
+      const total = m.bnxQtySold + m.tpnQtySold;
+      const maxTotal = max.bnxQtySold + max.tpnQtySold;
+      return total > maxTotal ? m : max;
+    }, metrics[0]);
+
+    return { revenueMax, revenueMin, patientsMax, qtyMax };
+  };
+
+  // Calculate month-over-month growth for each metric
+  const getMonthlyGrowth = () => {
+    return metrics.map((m, idx) => {
+      if (idx === 0) {
+        return { ...m, revenueGrowth: 0, patientsGrowth: 0, qtyGrowth: 0 };
+      }
+      const prev = metrics[idx - 1];
+      const revenueGrowth = prev.revenue > 0 ? ((m.revenue - prev.revenue) / prev.revenue) * 100 : 0;
+      const prevPatients = prev.newPatientsBnx + prev.followUpPatientsBnx + prev.tpnPatients + prev.pshyPatients;
+      const currPatients = m.newPatientsBnx + m.followUpPatientsBnx + m.tpnPatients + m.pshyPatients;
+      const patientsGrowth = prevPatients > 0 ? ((currPatients - prevPatients) / prevPatients) * 100 : 0;
+      const prevQty = prev.bnxQtySold + prev.tpnQtySold;
+      const currQty = m.bnxQtySold + m.tpnQtySold;
+      const qtyGrowth = prevQty > 0 ? ((currQty - prevQty) / prevQty) * 100 : 0;
+      return { ...m, revenueGrowth, patientsGrowth, qtyGrowth };
+    });
+  };
+
+  const bestWorst = getBestWorstMonths();
+  const metricsWithGrowth = getMonthlyGrowth();
+
+  // Average growth calculation
+  const avgRevenueGrowth = metricsWithGrowth.length > 1 
+    ? metricsWithGrowth.slice(1).reduce((sum, m) => sum + m.revenueGrowth, 0) / (metricsWithGrowth.length - 1) 
+    : 0;
 
   return (
     <motion.div
@@ -432,6 +505,120 @@ export function MonthlyComparativeAnalysis() {
             </div>
           </div>
         </CardHeader>
+      </Card>
+
+      {/* Best/Worst Performance Highlights */}
+      {bestWorst && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Best Revenue Month */}
+          <Card className="glass-strong border-0 overflow-hidden relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30">
+            <div className="absolute top-2 right-2">
+              <Trophy className="h-5 w-5 text-amber-500" />
+            </div>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-emerald-500 text-white text-[10px]">BEST</Badge>
+                <span className="text-xs text-muted-foreground">Revenue Month</span>
+              </div>
+              <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400">{bestWorst.revenueMax.month}</p>
+              <p className="text-sm font-semibold">₹{formatNumber(bestWorst.revenueMax.revenue)}</p>
+            </CardContent>
+          </Card>
+
+          {/* Lowest Revenue Month */}
+          <Card className="glass-strong border-0 overflow-hidden relative bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30">
+            <div className="absolute top-2 right-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+            </div>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="destructive" className="text-[10px]">LOW</Badge>
+                <span className="text-xs text-muted-foreground">Revenue Month</span>
+              </div>
+              <p className="text-lg font-bold text-red-700 dark:text-red-400">{bestWorst.revenueMin.month}</p>
+              <p className="text-sm font-semibold">₹{formatNumber(bestWorst.revenueMin.revenue)}</p>
+            </CardContent>
+          </Card>
+
+          {/* Best Patient Month */}
+          <Card className="glass-strong border-0 overflow-hidden relative bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+            <div className="absolute top-2 right-2">
+              <Users className="h-5 w-5 text-blue-500" />
+            </div>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-blue-500 text-white text-[10px]">BEST</Badge>
+                <span className="text-xs text-muted-foreground">Patient Month</span>
+              </div>
+              <p className="text-lg font-bold text-blue-700 dark:text-blue-400">{bestWorst.patientsMax.month}</p>
+              <p className="text-sm font-semibold">
+                {bestWorst.patientsMax.newPatientsBnx + bestWorst.patientsMax.followUpPatientsBnx + 
+                 bestWorst.patientsMax.tpnPatients + bestWorst.patientsMax.pshyPatients} patients
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Best Qty Sold Month */}
+          <Card className="glass-strong border-0 overflow-hidden relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
+            <div className="absolute top-2 right-2">
+              <Pill className="h-5 w-5 text-amber-500" />
+            </div>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-amber-500 text-white text-[10px]">BEST</Badge>
+                <span className="text-xs text-muted-foreground">Sales Month</span>
+              </div>
+              <p className="text-lg font-bold text-amber-700 dark:text-amber-400">{bestWorst.qtyMax.month}</p>
+              <p className="text-sm font-semibold">
+                {formatNumber(bestWorst.qtyMax.bnxQtySold + bestWorst.qtyMax.tpnQtySold)} units sold
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Average Growth Summary */}
+      <Card className="glass-strong border-0 overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-amber/5" />
+        <CardHeader className="relative pb-2">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Growth Trend Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-3 rounded-lg bg-background/50">
+              <p className="text-xs text-muted-foreground mb-1">Avg Monthly Revenue Growth</p>
+              <p className={`text-xl font-bold ${avgRevenueGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                {avgRevenueGrowth >= 0 ? '+' : ''}{avgRevenueGrowth.toFixed(1)}%
+              </p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50">
+              <p className="text-xs text-muted-foreground mb-1">Current Month vs Previous</p>
+              <p className={`text-xl font-bold flex items-center justify-center gap-1 ${
+                getPercentChange(currentMonth?.revenue || 0, previousMonth?.revenue || 0) >= 0 
+                  ? 'text-emerald-600' : 'text-red-600'
+              }`}>
+                {getPercentChange(currentMonth?.revenue || 0, previousMonth?.revenue || 0) >= 0 
+                  ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+                {Math.abs(getPercentChange(currentMonth?.revenue || 0, previousMonth?.revenue || 0)).toFixed(1)}%
+              </p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50">
+              <p className="text-xs text-muted-foreground mb-1">Total Revenue ({selectedMonths}M)</p>
+              <p className="text-xl font-bold text-foreground">
+                ₹{formatNumber(metrics.reduce((sum, m) => sum + m.revenue, 0))}
+              </p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50">
+              <p className="text-xs text-muted-foreground mb-1">Total Patients ({selectedMonths}M)</p>
+              <p className="text-xl font-bold text-foreground">
+                {formatNumber(metrics.reduce((sum, m) => sum + m.newPatientsBnx + m.followUpPatientsBnx + m.tpnPatients + m.pshyPatients, 0))}
+              </p>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Key Metrics Summary Cards */}
@@ -664,14 +851,38 @@ export function MonthlyComparativeAnalysis() {
               <tbody>
                 <tr className="border-b hover:bg-muted/50">
                   <td className="p-2 font-medium">Revenue</td>
-                  {metrics.slice(-4).map(m => (
-                    <td key={m.monthKey} className="text-right p-2">₹{formatNumber(m.revenue)}</td>
-                  ))}
+                  {metrics.slice(-4).map((m, idx, arr) => {
+                    const prevIdx = metrics.indexOf(m) - 1;
+                    const prev = prevIdx >= 0 ? metrics[prevIdx] : null;
+                    const growth = prev && prev.revenue > 0 ? ((m.revenue - prev.revenue) / prev.revenue) * 100 : null;
+                    const isBest = bestWorst?.revenueMax.monthKey === m.monthKey;
+                    const isWorst = bestWorst?.revenueMin.monthKey === m.monthKey;
+                    return (
+                      <td key={m.monthKey} className={`text-right p-2 ${isBest ? 'bg-emerald-100 dark:bg-emerald-900/30' : ''} ${isWorst ? 'bg-red-100 dark:bg-red-900/30' : ''}`}>
+                        <div>₹{formatNumber(m.revenue)}</div>
+                        {growth !== null && (
+                          <span className={`text-[10px] ${growth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {growth >= 0 ? '↑' : '↓'}{Math.abs(growth).toFixed(1)}%
+                          </span>
+                        )}
+                        {isBest && <Badge className="ml-1 text-[8px] py-0 px-1 bg-emerald-500">BEST</Badge>}
+                        {isWorst && <Badge variant="destructive" className="ml-1 text-[8px] py-0 px-1">LOW</Badge>}
+                      </td>
+                    );
+                  })}
                 </tr>
                 <tr className="border-b hover:bg-muted/50">
                   <td className="p-2 font-medium">Expenses</td>
                   {metrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2 text-red-600">₹{formatNumber(m.expenses)}</td>
+                  ))}
+                </tr>
+                <tr className="border-b hover:bg-muted/50 bg-emerald-50/30 dark:bg-emerald-900/10">
+                  <td className="p-2 font-medium text-emerald-700 dark:text-emerald-400">Net Profit</td>
+                  {metrics.slice(-4).map(m => (
+                    <td key={m.monthKey} className={`text-right p-2 font-semibold ${(m.revenue - m.expenses) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      ₹{formatNumber(m.revenue - m.expenses)}
+                    </td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50">
@@ -718,9 +929,15 @@ export function MonthlyComparativeAnalysis() {
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-blue-50/50 dark:bg-blue-900/10">
                   <td className="p-2 font-medium">New Patients (BNX)</td>
-                  {metrics.slice(-4).map(m => (
-                    <td key={m.monthKey} className="text-right p-2">{m.newPatientsBnx}</td>
-                  ))}
+                  {metrics.slice(-4).map(m => {
+                    const isBest = bestWorst?.patientsMax.monthKey === m.monthKey;
+                    return (
+                      <td key={m.monthKey} className={`text-right p-2 ${isBest ? 'bg-blue-100 dark:bg-blue-900/40' : ''}`}>
+                        {m.newPatientsBnx}
+                        {isBest && <Badge className="ml-1 text-[8px] py-0 px-1 bg-blue-500">BEST</Badge>}
+                      </td>
+                    );
+                  })}
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-blue-50/50 dark:bg-blue-900/10">
                   <td className="p-2 font-medium">Follow-up (BNX)</td>
@@ -742,9 +959,15 @@ export function MonthlyComparativeAnalysis() {
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-blue-50/50 dark:bg-blue-900/10">
                   <td className="p-2 font-medium">BNX Qty Sold</td>
-                  {metrics.slice(-4).map(m => (
-                    <td key={m.monthKey} className="text-right p-2">{formatNumber(m.bnxQtySold)}</td>
-                  ))}
+                  {metrics.slice(-4).map(m => {
+                    const isBest = bestWorst?.qtyMax.monthKey === m.monthKey;
+                    return (
+                      <td key={m.monthKey} className={`text-right p-2 ${isBest ? 'bg-amber-100 dark:bg-amber-900/40' : ''}`}>
+                        {formatNumber(m.bnxQtySold)}
+                        {isBest && <Badge className="ml-1 text-[8px] py-0 px-1 bg-amber-500">BEST</Badge>}
+                      </td>
+                    );
+                  })}
                 </tr>
                 <tr className="hover:bg-muted/50 bg-amber-50/50 dark:bg-amber-900/10">
                   <td className="p-2 font-medium">TPN Qty Sold</td>
