@@ -133,7 +133,25 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '13pt', lineHeight: '1.6', fontWeight: '600' }}>
+        <div ref={printRef} className="p-6 bg-white text-black relative overflow-hidden" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '13pt', lineHeight: '1.6', fontWeight: '600' }}>
+          {/* Watermark */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            style={{ zIndex: 0 }}
+          >
+            <div 
+              className="text-gray-200 font-black text-8xl tracking-widest select-none"
+              style={{ 
+                transform: 'rotate(-35deg)', 
+                opacity: 0.15,
+                whiteSpace: 'nowrap',
+                letterSpacing: '0.2em'
+              }}
+            >
+              PURCHASE ORDER
+            </div>
+          </div>
+          
           {/* Header with Logo */}
           <div className="text-center mb-4 pb-3 border-b-4" style={{ borderColor: '#003366' }}>
             <div className="flex justify-center mb-2">
