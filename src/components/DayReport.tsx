@@ -663,7 +663,7 @@ export default function DayReport() {
     const summaryData: any[][] = [
       [`Day's Report Summary - ${format(startDate, 'dd MMM yyyy')} to ${format(endDate, 'dd MMM yyyy')}`],
       [],
-      ['Date', 'New Patients', 'Follow-Up', 'Total Patients', 'Fees', 'Lab Collection', 'Cash Previous', 'Bank Deposit', 'Paytm/GPay', 'Adjustments'],
+      ['Date', 'New Patients', 'Follow-Up', 'Total Patients', 'Fees', 'Lab Collection', 'Cash Previous', 'Bank Deposit', 'Paytm/GPay', 'Adjustments', 'Total Expenses', 'Handover Amarjeet', 'Handover Mandeep', 'Handover Sir', 'Loose Balance'],
     ];
 
     let totalNewPatients = 0;
@@ -672,17 +672,50 @@ export default function DayReport() {
     let totalLab = 0;
     let totalDeposit = 0;
     let totalPaytm = 0;
+    let totalExpenses = 0;
+    let totalHandoverAmarjeet = 0;
+    let totalHandoverMandeep = 0;
+    let totalHandoverSir = 0;
+    let totalLooseBalance = 0;
+
+    // Expense details for separate sheet
+    const expenseDetails: any[][] = [
+      [`Expense Details - ${format(startDate, 'dd MMM yyyy')} to ${format(endDate, 'dd MMM yyyy')}`],
+      [],
+      ['Date', 'Description', 'Amount'],
+    ];
 
     dayReports.forEach(report => {
       const dateStr = new Date(report.report_date).toLocaleDateString('en-IN');
       const newP = report.new_patients || 0;
       const followP = report.follow_up_patients || 0;
+      const handoverAmarjeet = Number(report.cash_handover_amarjeet) || 0;
+      const handoverMandeep = Number(report.cash_handover_mandeep) || 0;
+      const handoverSir = Number(report.cash_handover_sir) || 0;
+      const looseBalance = Number(report.loose_balance) || 0;
+
+      // Calculate total expenses for this day
+      const expenses = (report.expenses as any[]) || [];
+      const dayExpenseTotal = expenses.reduce((sum: number, exp: any) => sum + (Number(exp.amount) || 0), 0);
+
+      // Add individual expenses to expense details sheet
+      expenses.forEach((exp: any) => {
+        if (exp.description && exp.amount) {
+          expenseDetails.push([dateStr, exp.description, fmt(Number(exp.amount) || 0)]);
+        }
+      });
+
       totalNewPatients += newP;
       totalFollowUp += followP;
       totalFees += Number(report.fees) || 0;
       totalLab += Number(report.lab_collection) || 0;
       totalDeposit += Number(report.deposit_in_bank) || 0;
       totalPaytm += Number(report.paytm_gpay) || 0;
+      totalExpenses += dayExpenseTotal;
+      totalHandoverAmarjeet += handoverAmarjeet;
+      totalHandoverMandeep += handoverMandeep;
+      totalHandoverSir += handoverSir;
+      totalLooseBalance += looseBalance;
 
       summaryData.push([
         dateStr,
@@ -695,6 +728,11 @@ export default function DayReport() {
         fmt(Number(report.deposit_in_bank) || 0),
         fmt(Number(report.paytm_gpay) || 0),
         fmt(Number(report.adjustments) || 0),
+        fmt(dayExpenseTotal),
+        fmt(handoverAmarjeet),
+        fmt(handoverMandeep),
+        fmt(handoverSir),
+        fmt(looseBalance),
       ]);
     });
 
@@ -710,6 +748,11 @@ export default function DayReport() {
       fmt(totalDeposit),
       fmt(totalPaytm),
       '',
+      fmt(totalExpenses),
+      fmt(totalHandoverAmarjeet),
+      fmt(totalHandoverMandeep),
+      fmt(totalHandoverSir),
+      fmt(totalLooseBalance),
     ]);
 
     summaryData.push([]);
@@ -722,9 +765,18 @@ export default function DayReport() {
 
     const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
     summarySheet['!cols'] = [
-      { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 12 }
+      { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 18 }, { wch: 18 }, { wch: 14 }, { wch: 14 }
     ];
     XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+
+    // Add expense details sheet if there are expenses
+    if (expenseDetails.length > 3) {
+      expenseDetails.push([]);
+      expenseDetails.push(['TOTAL', '', fmt(totalExpenses)]);
+      const expenseSheet = XLSX.utils.aoa_to_sheet(expenseDetails);
+      expenseSheet['!cols'] = [{ wch: 12 }, { wch: 40 }, { wch: 12 }];
+      XLSX.utils.book_append_sheet(workbook, expenseSheet, 'Expenses');
+    }
 
     XLSX.writeFile(workbook, `Day_Reports_${startDateStr}_to_${endDateStr}.xlsx`);
     toast.success('Day reports exported successfully');
