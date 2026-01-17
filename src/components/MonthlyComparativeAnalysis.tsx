@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ComposedChart, Line } from "recharts";
-import { TrendingUp, TrendingDown, Minus, DollarSign, Wallet, Building, Users, Pill, Brain, Droplets, CreditCard } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, DollarSign, Wallet, Building, Users, Pill, Brain, Droplets, CreditCard, Download } from "lucide-react";
 import { motion } from "framer-motion";
-import { formatNumber } from "@/lib/formatUtils";
+import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 import { Json } from "@/integrations/supabase/types";
+import * as XLSX from "xlsx";
+import { toast } from "sonner";
 
 interface MonthlyMetrics {
   month: string;
@@ -57,6 +60,7 @@ export function MonthlyComparativeAnalysis() {
   const [metrics, setMetrics] = useState<MonthlyMetrics[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonths, setSelectedMonths] = useState<number>(6);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     loadMonthlyData();
@@ -242,6 +246,129 @@ export function MonthlyComparativeAnalysis() {
     );
   };
 
+  const exportToExcel = () => {
+    setExporting(true);
+    try {
+      // Prepare data for Excel
+      const exportData = metrics.map(m => ({
+        'Month': m.month,
+        'Revenue (₹)': roundTo2(m.revenue),
+        'Expenses (₹)': roundTo2(m.expenses),
+        'Net Profit (₹)': roundTo2(m.revenue - m.expenses),
+        'Bank Deposit (₹)': roundTo2(m.bankDeposit),
+        'Paytm/GPay (₹)': roundTo2(m.paytmGpay),
+        'BNX Revenue (₹)': roundTo2(m.bnxRevenue),
+        'TPN Revenue (₹)': roundTo2(m.tpnRevenue),
+        'PSHY Revenue (₹)': roundTo2(m.pshyRevenue),
+        'Fees (₹)': roundTo2(m.fees),
+        'Lab Collection (₹)': roundTo2(m.labCollection),
+        'New Patients (BNX)': m.newPatientsBnx,
+        'Follow-up (BNX)': m.followUpPatientsBnx,
+        'TPN Patients': m.tpnPatients,
+        'PSHY Patients': m.pshyPatients,
+        'BNX Qty Sold': m.bnxQtySold,
+        'TPN Qty Sold': m.tpnQtySold,
+      }));
+
+      // Create workbook with multiple sheets
+      const wb = XLSX.utils.book_new();
+
+      // Main summary sheet
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      
+      // Set column widths
+      ws['!cols'] = [
+        { wch: 12 }, // Month
+        { wch: 14 }, // Revenue
+        { wch: 14 }, // Expenses
+        { wch: 14 }, // Net Profit
+        { wch: 14 }, // Bank Deposit
+        { wch: 14 }, // Paytm/GPay
+        { wch: 14 }, // BNX Revenue
+        { wch: 14 }, // TPN Revenue
+        { wch: 14 }, // PSHY Revenue
+        { wch: 12 }, // Fees
+        { wch: 14 }, // Lab Collection
+        { wch: 16 }, // New Patients
+        { wch: 14 }, // Follow-up
+        { wch: 12 }, // TPN Patients
+        { wch: 12 }, // PSHY Patients
+        { wch: 14 }, // BNX Qty
+        { wch: 14 }, // TPN Qty
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Monthly Summary');
+
+      // Revenue Breakup sheet
+      const revenueData = metrics.map(m => ({
+        'Month': m.month,
+        'BNX Revenue (₹)': roundTo2(m.bnxRevenue),
+        'TPN Revenue (₹)': roundTo2(m.tpnRevenue),
+        'PSHY Revenue (₹)': roundTo2(m.pshyRevenue),
+        'Fees (₹)': roundTo2(m.fees),
+        'Lab Collection (₹)': roundTo2(m.labCollection),
+        'Total Revenue (₹)': roundTo2(m.revenue),
+      }));
+      const wsRevenue = XLSX.utils.json_to_sheet(revenueData);
+      wsRevenue['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 14 }];
+      XLSX.utils.book_append_sheet(wb, wsRevenue, 'Revenue Breakup');
+
+      // Patient Statistics sheet
+      const patientData = metrics.map(m => ({
+        'Month': m.month,
+        'New Patients (BNX)': m.newPatientsBnx,
+        'Follow-up (BNX)': m.followUpPatientsBnx,
+        'Total BNX': m.newPatientsBnx + m.followUpPatientsBnx,
+        'TPN Patients': m.tpnPatients,
+        'PSHY Patients': m.pshyPatients,
+        'Total Patients': m.newPatientsBnx + m.followUpPatientsBnx + m.tpnPatients + m.pshyPatients,
+      }));
+      const wsPatients = XLSX.utils.json_to_sheet(patientData);
+      wsPatients['!cols'] = [{ wch: 12 }, { wch: 18 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 14 }];
+      XLSX.utils.book_append_sheet(wb, wsPatients, 'Patient Statistics');
+
+      // Quantity Sold sheet
+      const qtyData = metrics.map(m => ({
+        'Month': m.month,
+        'BNX Qty Sold': m.bnxQtySold,
+        'TPN Qty Sold': m.tpnQtySold,
+        'Total Qty Sold': m.bnxQtySold + m.tpnQtySold,
+      }));
+      const wsQty = XLSX.utils.json_to_sheet(qtyData);
+      wsQty['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
+      XLSX.utils.book_append_sheet(wb, wsQty, 'Quantity Sold');
+
+      // Financial Summary sheet
+      const financialData = metrics.map(m => ({
+        'Month': m.month,
+        'Revenue (₹)': roundTo2(m.revenue),
+        'Expenses (₹)': roundTo2(m.expenses),
+        'Net Profit (₹)': roundTo2(m.revenue - m.expenses),
+        'Bank Deposit (₹)': roundTo2(m.bankDeposit),
+        'Paytm/GPay (₹)': roundTo2(m.paytmGpay),
+        'Cash Revenue (₹)': roundTo2(m.revenue - m.paytmGpay),
+      }));
+      const wsFinancial = XLSX.utils.json_to_sheet(financialData);
+      wsFinancial['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
+      XLSX.utils.book_append_sheet(wb, wsFinancial, 'Financial Summary');
+
+      // Generate filename with date range
+      const startMonth = metrics[0]?.month || 'Start';
+      const endMonth = metrics[metrics.length - 1]?.month || 'End';
+      const filename = `Monthly_Analysis_${startMonth}_to_${endMonth}.xlsx`.replace(/\s/g, '_');
+
+      XLSX.writeFile(wb, filename);
+      toast.success('Excel exported successfully!', {
+        description: `${metrics.length} months of data exported`
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export Excel');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const chartConfig = {
     revenue: { label: "Revenue", color: "hsl(var(--gold))" },
     expenses: { label: "Expenses", color: "hsl(var(--destructive))" },
@@ -283,16 +410,26 @@ export function MonthlyComparativeAnalysis() {
               </CardTitle>
               <p className="text-sm text-muted-foreground">Comprehensive month-over-month metrics</p>
             </div>
-            <Select value={String(selectedMonths)} onValueChange={(v) => setSelectedMonths(Number(v))}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="3">Last 3 Months</SelectItem>
-                <SelectItem value="6">Last 6 Months</SelectItem>
-                <SelectItem value="12">Last 12 Months</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-3">
+              <Select value={String(selectedMonths)} onValueChange={(v) => setSelectedMonths(Number(v))}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">Last 3 Months</SelectItem>
+                  <SelectItem value="6">Last 6 Months</SelectItem>
+                  <SelectItem value="12">Last 12 Months</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={exportToExcel} 
+                disabled={exporting || metrics.length === 0}
+                className="bg-gradient-to-r from-emerald to-teal text-white hover:opacity-90"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {exporting ? 'Exporting...' : 'Export Excel'}
+              </Button>
+            </div>
           </div>
         </CardHeader>
       </Card>
