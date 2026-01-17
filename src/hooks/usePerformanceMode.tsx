@@ -31,6 +31,37 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     return stored || "Dr. Metali Bhatti";
   });
 
+  // Sync with localStorage changes from other tabs or components
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === DOCTOR_NAME_KEY && e.newValue) {
+        setDoctorNameState(e.newValue);
+      }
+      if (e.key === PERFORMANCE_KEY) {
+        setPerformanceModeState(e.newValue === "true");
+      }
+      if (e.key === COMPACT_KEY) {
+        setCompactModeState(e.newValue === "true");
+      }
+    };
+
+    // Also sync on focus to catch any missed updates
+    const handleFocus = () => {
+      const storedDoctor = localStorage.getItem(DOCTOR_NAME_KEY);
+      if (storedDoctor && storedDoctor !== doctorName) {
+        setDoctorNameState(storedDoctor);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [doctorName]);
+
   const setPerformanceMode = (enabled: boolean) => {
     setPerformanceModeState(enabled);
     localStorage.setItem(PERFORMANCE_KEY, String(enabled));
@@ -44,6 +75,8 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   const setDoctorName = (name: string) => {
     setDoctorNameState(name);
     localStorage.setItem(DOCTOR_NAME_KEY, name);
+    // Dispatch a custom event to notify other components immediately
+    window.dispatchEvent(new CustomEvent('doctorNameChanged', { detail: name }));
   };
 
   // Apply mode classes to document root
