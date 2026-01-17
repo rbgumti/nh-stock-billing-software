@@ -140,7 +140,25 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '13pt', lineHeight: '1.6', fontWeight: '600', minHeight: '1123px', height: '1123px' }}>
+        <div ref={printRef} className="p-6 bg-white text-black flex flex-col relative overflow-hidden" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '13pt', lineHeight: '1.6', fontWeight: '600', minHeight: '1123px', height: '1123px' }}>
+          {/* Watermark */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            style={{ zIndex: 0 }}
+          >
+            <div 
+              className="text-gray-200 font-black text-8xl tracking-widest select-none"
+              style={{ 
+                transform: 'rotate(-35deg)', 
+                opacity: 0.15,
+                whiteSpace: 'nowrap',
+                letterSpacing: '0.2em'
+              }}
+            >
+              PURCHASE ORDER
+            </div>
+          </div>
+          
           {/* Header with Logo */}
           <div className="text-center mb-4 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
             <div className="flex justify-center mb-2">
