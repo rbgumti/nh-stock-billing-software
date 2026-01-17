@@ -31,35 +31,55 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
     return stockItems.find(item => item.id === stockItemId);
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const printContent = printRef.current;
     if (!printContent) return;
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    setIsGeneratingPDF(true);
+    
+    try {
+      const canvas = await html2canvas(printContent, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Purchase Order - ${poNumber}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            @page { size: A4; margin: 10mm; }
-            body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.4; padding: 15px; }
-            @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-          </style>
-        </head>
-        <body>${printContent.innerHTML}</body>
-      </html>
-    `);
+      const imgData = canvas.toDataURL('image/png');
+      
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) return;
 
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Purchase Order - ${poNumber}</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              @page { size: A4; margin: 10mm; }
+              body { display: flex; justify-content: center; align-items: flex-start; }
+              img { max-width: 100%; height: auto; }
+              @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+            </style>
+          </head>
+          <body>
+            <img src="${imgData}" />
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 300);
+    } catch (error) {
+      console.error('Error preparing print:', error);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const handleDownloadPDF = async () => {
