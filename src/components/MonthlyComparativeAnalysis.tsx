@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ComposedChart, Line } from "recharts";
-import { TrendingUp, TrendingDown, Minus, DollarSign, Wallet, Building, Users, Pill, Brain, Droplets, CreditCard, Download, Trophy, AlertTriangle, ArrowUp, ArrowDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, DollarSign, Wallet, Building, Users, Pill, Brain, Droplets, CreditCard, Download, Trophy, AlertTriangle, ArrowUp, ArrowDown, ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 import { Json } from "@/integrations/supabase/types";
@@ -37,6 +37,13 @@ interface MonthlyMetrics {
   tpnQtySold: number;
 }
 
+interface BrandQtySold {
+  brandName: string;
+  category: 'BNX' | 'TPN';
+  monthlyQty: Record<string, number>; // monthKey -> qty
+  totalQty: number;
+}
+
 interface DayReportRow {
   report_date: string;
   fees: number | null;
@@ -58,9 +65,11 @@ interface Expense {
 
 export function MonthlyComparativeAnalysis() {
   const [metrics, setMetrics] = useState<MonthlyMetrics[]>([]);
+  const [brandBreakdown, setBrandBreakdown] = useState<BrandQtySold[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMonths, setSelectedMonths] = useState<number>(6);
   const [exporting, setExporting] = useState(false);
+  const [showBrandBreakdown, setShowBrandBreakdown] = useState(false);
 
   useEffect(() => {
     loadMonthlyData();
@@ -114,6 +123,9 @@ export function MonthlyComparativeAnalysis() {
 
       // Group data by month
       const monthlyMap = new Map<string, MonthlyMetrics>();
+      
+      // Brand-wise quantity tracking: brandName -> { monthKey -> qty }
+      const brandQtyMap = new Map<string, { category: 'BNX' | 'TPN'; monthlyQty: Map<string, number> }>();
 
       // Initialize months
       for (let i = 0; i < selectedMonths; i++) {
@@ -191,12 +203,28 @@ export function MonthlyComparativeAnalysis() {
           const items = invoiceItemsMap.get(invoice.id) || [];
           items.forEach((item: { medicine_name: string; quantity: number; total: number }) => {
             const category = categoryMap.get(item.medicine_name);
-            if (category === 'BNX') {
-              existing.bnxRevenue += Number(item.total) || 0;
-              existing.bnxQtySold += Number(item.quantity) || 0;
-            } else if (category === 'TPN') {
-              existing.tpnRevenue += Number(item.total) || 0;
-              existing.tpnQtySold += Number(item.quantity) || 0;
+            const qty = Number(item.quantity) || 0;
+            
+            if (category === 'BNX' || category === 'TPN') {
+              // Track aggregate
+              if (category === 'BNX') {
+                existing.bnxRevenue += Number(item.total) || 0;
+                existing.bnxQtySold += qty;
+              } else {
+                existing.tpnRevenue += Number(item.total) || 0;
+                existing.tpnQtySold += qty;
+              }
+              
+              // Track brand-wise breakdown
+              if (!brandQtyMap.has(item.medicine_name)) {
+                brandQtyMap.set(item.medicine_name, { 
+                  category: category as 'BNX' | 'TPN', 
+                  monthlyQty: new Map() 
+                });
+              }
+              const brandData = brandQtyMap.get(item.medicine_name)!;
+              const currentQty = brandData.monthlyQty.get(monthKey) || 0;
+              brandData.monthlyQty.set(monthKey, currentQty + qty);
             } else if (category === 'PSHY') {
               // PSHY revenue already tracked via psychiatry_collection in day reports
             }
@@ -208,7 +236,26 @@ export function MonthlyComparativeAnalysis() {
       const sortedMetrics = Array.from(monthlyMap.values())
         .sort((a, b) => a.monthKey.localeCompare(b.monthKey));
 
+      // Convert brand breakdown to array
+      const brandBreakdownArray: BrandQtySold[] = Array.from(brandQtyMap.entries())
+        .map(([brandName, data]) => {
+          const monthlyQtyObj: Record<string, number> = {};
+          let totalQty = 0;
+          data.monthlyQty.forEach((qty, monthKey) => {
+            monthlyQtyObj[monthKey] = qty;
+            totalQty += qty;
+          });
+          return {
+            brandName,
+            category: data.category,
+            monthlyQty: monthlyQtyObj,
+            totalQty,
+          };
+        })
+        .sort((a, b) => b.totalQty - a.totalQty); // Sort by total quantity descending
+
       setMetrics(sortedMetrics);
+      setBrandBreakdown(brandBreakdownArray);
     } catch (error) {
       console.error('Error loading monthly data:', error);
     } finally {
@@ -377,6 +424,40 @@ export function MonthlyComparativeAnalysis() {
       wsGrowth['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 14 }];
       XLSX.utils.book_append_sheet(wb, wsGrowth, 'Growth Analysis');
 
+      // Brand-wise BNX Breakdown sheet
+      const bnxBrands = brandBreakdown.filter(b => b.category === 'BNX');
+      if (bnxBrands.length > 0) {
+        const bnxBrandData = bnxBrands.map(brand => {
+          const row: Record<string, string | number> = { 'Medicine Name': brand.brandName };
+          metrics.forEach(m => {
+            row[m.month] = brand.monthlyQty[m.monthKey] || 0;
+          });
+          row['Total'] = brand.totalQty;
+          return row;
+        });
+        const wsBnxBrands = XLSX.utils.json_to_sheet(bnxBrandData);
+        const colWidths = [{ wch: 30 }, ...metrics.map(() => ({ wch: 12 })), { wch: 12 }];
+        wsBnxBrands['!cols'] = colWidths;
+        XLSX.utils.book_append_sheet(wb, wsBnxBrands, 'BNX Brand Breakdown');
+      }
+
+      // Brand-wise TPN Breakdown sheet
+      const tpnBrands = brandBreakdown.filter(b => b.category === 'TPN');
+      if (tpnBrands.length > 0) {
+        const tpnBrandData = tpnBrands.map(brand => {
+          const row: Record<string, string | number> = { 'Medicine Name': brand.brandName };
+          metrics.forEach(m => {
+            row[m.month] = brand.monthlyQty[m.monthKey] || 0;
+          });
+          row['Total'] = brand.totalQty;
+          return row;
+        });
+        const wsTpnBrands = XLSX.utils.json_to_sheet(tpnBrandData);
+        const colWidths = [{ wch: 30 }, ...metrics.map(() => ({ wch: 12 })), { wch: 12 }];
+        wsTpnBrands['!cols'] = colWidths;
+        XLSX.utils.book_append_sheet(wb, wsTpnBrands, 'TPN Brand Breakdown');
+      }
+
       // Generate filename with date range
       const startMonth = metrics[0]?.month || 'Start';
       const endMonth = metrics[metrics.length - 1]?.month || 'End';
@@ -384,7 +465,7 @@ export function MonthlyComparativeAnalysis() {
 
       XLSX.writeFile(wb, filename);
       toast.success('Excel exported successfully!', {
-        description: `${metrics.length} months of data exported`
+        description: `${metrics.length} months of data exported with brand breakdown`
       });
     } catch (error) {
       console.error('Export error:', error);
@@ -809,10 +890,21 @@ export function MonthlyComparativeAnalysis() {
       <Card className="glass-strong border-0 overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-amber/5 to-orange/5" />
         <CardHeader className="relative">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Pill className="h-5 w-5" />
-            Quantity Sold (BNX & TPN)
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Pill className="h-5 w-5" />
+              Quantity Sold (BNX & TPN)
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowBrandBreakdown(!showBrandBreakdown)}
+              className="text-xs"
+            >
+              {showBrandBreakdown ? <ChevronUp className="h-4 w-4 mr-1" /> : <ChevronDown className="h-4 w-4 mr-1" />}
+              {showBrandBreakdown ? 'Hide' : 'Show'} Brand Breakdown
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px]">
@@ -830,6 +922,127 @@ export function MonthlyComparativeAnalysis() {
           </ChartContainer>
         </CardContent>
       </Card>
+
+      {/* Brand-wise Breakdown Tables */}
+      {showBrandBreakdown && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* BNX Brand Breakdown */}
+          <Card className="glass-strong border-0 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5" />
+            <CardHeader className="relative pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Badge className="bg-blue-500 text-white">BNX</Badge>
+                Brand-wise Quantity Sold
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-background">
+                    <tr className="border-b">
+                      <th className="text-left p-2 font-semibold">Medicine</th>
+                      {metrics.slice(-4).map(m => (
+                        <th key={m.monthKey} className="text-right p-2 font-semibold text-xs">{m.month}</th>
+                      ))}
+                      <th className="text-right p-2 font-semibold bg-blue-50 dark:bg-blue-900/20">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {brandBreakdown
+                      .filter(b => b.category === 'BNX')
+                      .slice(0, 20)
+                      .map((brand, idx) => (
+                        <tr key={brand.brandName} className={`border-b hover:bg-muted/50 ${idx % 2 === 0 ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}>
+                          <td className="p-2 font-medium text-xs truncate max-w-[150px]" title={brand.brandName}>
+                            {brand.brandName}
+                          </td>
+                          {metrics.slice(-4).map(m => (
+                            <td key={m.monthKey} className="text-right p-2 text-xs">
+                              {formatNumber(brand.monthlyQty[m.monthKey] || 0)}
+                            </td>
+                          ))}
+                          <td className="text-right p-2 font-semibold text-xs bg-blue-50 dark:bg-blue-900/20">
+                            {formatNumber(brand.totalQty)}
+                          </td>
+                        </tr>
+                      ))}
+                    {brandBreakdown.filter(b => b.category === 'BNX').length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="p-4 text-center text-muted-foreground">No BNX data available</td>
+                      </tr>
+                    )}
+                    {brandBreakdown.filter(b => b.category === 'BNX').length > 20 && (
+                      <tr className="bg-muted/30">
+                        <td colSpan={6} className="p-2 text-center text-xs text-muted-foreground">
+                          + {brandBreakdown.filter(b => b.category === 'BNX').length - 20} more brands (see Excel export for full list)
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* TPN Brand Breakdown */}
+          <Card className="glass-strong border-0 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5" />
+            <CardHeader className="relative pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Badge className="bg-amber-500 text-white">TPN</Badge>
+                Brand-wise Quantity Sold
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-background">
+                    <tr className="border-b">
+                      <th className="text-left p-2 font-semibold">Medicine</th>
+                      {metrics.slice(-4).map(m => (
+                        <th key={m.monthKey} className="text-right p-2 font-semibold text-xs">{m.month}</th>
+                      ))}
+                      <th className="text-right p-2 font-semibold bg-amber-50 dark:bg-amber-900/20">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {brandBreakdown
+                      .filter(b => b.category === 'TPN')
+                      .slice(0, 20)
+                      .map((brand, idx) => (
+                        <tr key={brand.brandName} className={`border-b hover:bg-muted/50 ${idx % 2 === 0 ? 'bg-amber-50/30 dark:bg-amber-900/10' : ''}`}>
+                          <td className="p-2 font-medium text-xs truncate max-w-[150px]" title={brand.brandName}>
+                            {brand.brandName}
+                          </td>
+                          {metrics.slice(-4).map(m => (
+                            <td key={m.monthKey} className="text-right p-2 text-xs">
+                              {formatNumber(brand.monthlyQty[m.monthKey] || 0)}
+                            </td>
+                          ))}
+                          <td className="text-right p-2 font-semibold text-xs bg-amber-50 dark:bg-amber-900/20">
+                            {formatNumber(brand.totalQty)}
+                          </td>
+                        </tr>
+                      ))}
+                    {brandBreakdown.filter(b => b.category === 'TPN').length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="p-4 text-center text-muted-foreground">No TPN data available</td>
+                      </tr>
+                    )}
+                    {brandBreakdown.filter(b => b.category === 'TPN').length > 20 && (
+                      <tr className="bg-muted/30">
+                        <td colSpan={6} className="p-2 text-center text-xs text-muted-foreground">
+                          + {brandBreakdown.filter(b => b.category === 'TPN').length - 20} more brands (see Excel export for full list)
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Detailed Data Table */}
       <Card className="glass-strong border-0 overflow-hidden relative">
