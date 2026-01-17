@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ComposedChart, Line } from "recharts";
-import { TrendingUp, TrendingDown, Minus, DollarSign, Wallet, Building, Users, Pill, Brain, Droplets, CreditCard, Download, Trophy, AlertTriangle, ArrowUp, ArrowDown, ChevronDown, ChevronUp } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, DollarSign, Wallet, Building, Users, Pill, Brain, Droplets, CreditCard, Download, Trophy, AlertTriangle, ArrowUp, ArrowDown, ChevronDown, ChevronUp, Layers, BarChart3 } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { motion } from "framer-motion";
 import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 import { Json } from "@/integrations/supabase/types";
@@ -70,6 +71,34 @@ export function MonthlyComparativeAnalysis() {
   const [selectedMonths, setSelectedMonths] = useState<number>(6);
   const [exporting, setExporting] = useState(false);
   const [showBrandBreakdown, setShowBrandBreakdown] = useState(false);
+  const [viewMode, setViewMode] = useState<'monthly' | 'cumulative'>('monthly');
+
+  // Compute cumulative metrics from month-by-month data
+  const cumulativeMetrics: MonthlyMetrics[] = metrics.map((m, idx) => {
+    if (idx === 0) return { ...m };
+    const cumulative = { ...m };
+    for (let i = 0; i < idx; i++) {
+      cumulative.revenue += metrics[i].revenue;
+      cumulative.expenses += metrics[i].expenses;
+      cumulative.bankDeposit += metrics[i].bankDeposit;
+      cumulative.paytmGpay += metrics[i].paytmGpay;
+      cumulative.bnxRevenue += metrics[i].bnxRevenue;
+      cumulative.tpnRevenue += metrics[i].tpnRevenue;
+      cumulative.pshyRevenue += metrics[i].pshyRevenue;
+      cumulative.fees += metrics[i].fees;
+      cumulative.labCollection += metrics[i].labCollection;
+      cumulative.newPatientsBnx += metrics[i].newPatientsBnx;
+      cumulative.followUpPatientsBnx += metrics[i].followUpPatientsBnx;
+      cumulative.tpnPatients += metrics[i].tpnPatients;
+      cumulative.pshyPatients += metrics[i].pshyPatients;
+      cumulative.bnxQtySold += metrics[i].bnxQtySold;
+      cumulative.tpnQtySold += metrics[i].tpnQtySold;
+    }
+    return cumulative;
+  });
+
+  // Use appropriate data based on view mode
+  const displayMetrics = viewMode === 'cumulative' ? cumulativeMetrics : metrics;
 
   useEffect(() => {
     loadMonthlyData();
@@ -562,9 +591,30 @@ export function MonthlyComparativeAnalysis() {
               <CardTitle className="text-xl bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">
                 Monthly Comparative Analysis
               </CardTitle>
-              <p className="text-sm text-muted-foreground">Comprehensive month-over-month metrics</p>
+              <p className="text-sm text-muted-foreground">
+                {viewMode === 'cumulative' 
+                  ? 'Cumulative running totals across selected period' 
+                  : 'Individual month-by-month metrics (non-cumulative)'}
+              </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* View Mode Toggle */}
+              <ToggleGroup 
+                type="single" 
+                value={viewMode} 
+                onValueChange={(v) => v && setViewMode(v as 'monthly' | 'cumulative')}
+                className="bg-muted rounded-lg p-1"
+              >
+                <ToggleGroupItem value="monthly" className="text-xs px-3 py-1.5 data-[state=on]:bg-background data-[state=on]:shadow-sm">
+                  <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
+                  Monthly
+                </ToggleGroupItem>
+                <ToggleGroupItem value="cumulative" className="text-xs px-3 py-1.5 data-[state=on]:bg-background data-[state=on]:shadow-sm">
+                  <Layers className="h-3.5 w-3.5 mr-1.5" />
+                  Cumulative
+                </ToggleGroupItem>
+              </ToggleGroup>
+
               <Select value={String(selectedMonths)} onValueChange={(v) => setSelectedMonths(Number(v))}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue />
@@ -788,7 +838,7 @@ export function MonthlyComparativeAnalysis() {
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={metrics}>
+              <ComposedChart data={displayMetrics}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                 <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
@@ -817,7 +867,7 @@ export function MonthlyComparativeAnalysis() {
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={metrics} layout="horizontal">
+                <BarChart data={displayMetrics} layout="horizontal">
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={11} />
                   <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
@@ -846,7 +896,7 @@ export function MonthlyComparativeAnalysis() {
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={metrics}>
+                <BarChart data={displayMetrics}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={11} />
                   <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
@@ -872,7 +922,7 @@ export function MonthlyComparativeAnalysis() {
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={metrics}>
+              <BarChart data={displayMetrics}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                 <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
@@ -911,7 +961,7 @@ export function MonthlyComparativeAnalysis() {
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={metrics}>
+              <BarChart data={displayMetrics}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                 <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
@@ -1050,7 +1100,12 @@ export function MonthlyComparativeAnalysis() {
       <Card className="glass-strong border-0 overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-gray/5 to-slate/5" />
         <CardHeader className="relative">
-          <CardTitle className="text-lg">Detailed Monthly Comparison</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            Detailed {viewMode === 'cumulative' ? 'Cumulative' : 'Monthly'} Comparison
+            {viewMode === 'cumulative' && (
+              <Badge variant="outline" className="text-[10px]">Running Totals</Badge>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -1058,20 +1113,29 @@ export function MonthlyComparativeAnalysis() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left p-2 font-semibold">Metric</th>
-                  {metrics.slice(-4).map(m => (
-                    <th key={m.monthKey} className="text-right p-2 font-semibold">{m.month}</th>
+                  {displayMetrics.slice(-4).map(m => (
+                    <th key={m.monthKey} className="text-right p-2 font-semibold">
+                      {m.month}
+                      {viewMode === 'cumulative' && (
+                        <div className="text-[9px] font-normal text-muted-foreground">cumulative</div>
+                      )}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b hover:bg-muted/50">
                   <td className="p-2 font-medium">Revenue</td>
-                  {metrics.slice(-4).map((m, idx, arr) => {
-                    const prevIdx = metrics.indexOf(m) - 1;
+                  {displayMetrics.slice(-4).map((m, idx) => {
+                    // For growth calculation in cumulative mode, still use original metrics
+                    const originalM = metrics[metrics.findIndex(om => om.monthKey === m.monthKey)];
+                    const prevIdx = metrics.findIndex(om => om.monthKey === m.monthKey) - 1;
                     const prev = prevIdx >= 0 ? metrics[prevIdx] : null;
-                    const growth = prev && prev.revenue > 0 ? ((m.revenue - prev.revenue) / prev.revenue) * 100 : null;
-                    const isBest = bestWorst?.revenueMax.monthKey === m.monthKey;
-                    const isWorst = bestWorst?.revenueMin.monthKey === m.monthKey;
+                    const growth = viewMode === 'monthly' && prev && prev.revenue > 0 
+                      ? ((originalM.revenue - prev.revenue) / prev.revenue) * 100 
+                      : null;
+                    const isBest = viewMode === 'monthly' && bestWorst?.revenueMax.monthKey === m.monthKey;
+                    const isWorst = viewMode === 'monthly' && bestWorst?.revenueMin.monthKey === m.monthKey;
                     return (
                       <td key={m.monthKey} className={`text-right p-2 ${isBest ? 'bg-emerald-100 dark:bg-emerald-900/30' : ''} ${isWorst ? 'bg-red-100 dark:bg-red-900/30' : ''}`}>
                         <div>₹{formatNumber(m.revenue)}</div>
@@ -1088,13 +1152,13 @@ export function MonthlyComparativeAnalysis() {
                 </tr>
                 <tr className="border-b hover:bg-muted/50">
                   <td className="p-2 font-medium">Expenses</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2 text-red-600">₹{formatNumber(m.expenses)}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-emerald-50/30 dark:bg-emerald-900/10">
                   <td className="p-2 font-medium text-emerald-700 dark:text-emerald-400">Net Profit</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className={`text-right p-2 font-semibold ${(m.revenue - m.expenses) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                       ₹{formatNumber(m.revenue - m.expenses)}
                     </td>
@@ -1102,50 +1166,50 @@ export function MonthlyComparativeAnalysis() {
                 </tr>
                 <tr className="border-b hover:bg-muted/50">
                   <td className="p-2 font-medium">Bank Deposit</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2 text-cyan-600">₹{formatNumber(m.bankDeposit)}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50">
                   <td className="p-2 font-medium">Paytm/GPay</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2 text-purple-600">₹{formatNumber(m.paytmGpay)}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-blue-50/50 dark:bg-blue-900/10">
                   <td className="p-2 font-medium text-blue-700 dark:text-blue-400">BNX Revenue</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2">₹{formatNumber(m.bnxRevenue)}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-amber-50/50 dark:bg-amber-900/10">
                   <td className="p-2 font-medium text-amber-700 dark:text-amber-400">TPN Revenue</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2">₹{formatNumber(m.tpnRevenue)}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-purple-50/50 dark:bg-purple-900/10">
                   <td className="p-2 font-medium text-purple-700 dark:text-purple-400">PSHY Revenue</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2">₹{formatNumber(m.pshyRevenue)}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50">
                   <td className="p-2 font-medium">Fees</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2">₹{formatNumber(m.fees)}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50">
                   <td className="p-2 font-medium">Lab Collection</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2">₹{formatNumber(m.labCollection)}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-blue-50/50 dark:bg-blue-900/10">
                   <td className="p-2 font-medium">New Patients (BNX)</td>
-                  {metrics.slice(-4).map(m => {
-                    const isBest = bestWorst?.patientsMax.monthKey === m.monthKey;
+                  {displayMetrics.slice(-4).map(m => {
+                    const isBest = viewMode === 'monthly' && bestWorst?.patientsMax.monthKey === m.monthKey;
                     return (
                       <td key={m.monthKey} className={`text-right p-2 ${isBest ? 'bg-blue-100 dark:bg-blue-900/40' : ''}`}>
                         {m.newPatientsBnx}
@@ -1156,26 +1220,26 @@ export function MonthlyComparativeAnalysis() {
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-blue-50/50 dark:bg-blue-900/10">
                   <td className="p-2 font-medium">Follow-up (BNX)</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2">{m.followUpPatientsBnx}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-amber-50/50 dark:bg-amber-900/10">
                   <td className="p-2 font-medium">TPN Patients</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2">{m.tpnPatients}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-purple-50/50 dark:bg-purple-900/10">
                   <td className="p-2 font-medium">PSHY Patients</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2">{m.pshyPatients}</td>
                   ))}
                 </tr>
                 <tr className="border-b hover:bg-muted/50 bg-blue-50/50 dark:bg-blue-900/10">
                   <td className="p-2 font-medium">BNX Qty Sold</td>
-                  {metrics.slice(-4).map(m => {
-                    const isBest = bestWorst?.qtyMax.monthKey === m.monthKey;
+                  {displayMetrics.slice(-4).map(m => {
+                    const isBest = viewMode === 'monthly' && bestWorst?.qtyMax.monthKey === m.monthKey;
                     return (
                       <td key={m.monthKey} className={`text-right p-2 ${isBest ? 'bg-amber-100 dark:bg-amber-900/40' : ''}`}>
                         {formatNumber(m.bnxQtySold)}
@@ -1186,7 +1250,7 @@ export function MonthlyComparativeAnalysis() {
                 </tr>
                 <tr className="hover:bg-muted/50 bg-amber-50/50 dark:bg-amber-900/10">
                   <td className="p-2 font-medium">TPN Qty Sold</td>
-                  {metrics.slice(-4).map(m => (
+                  {displayMetrics.slice(-4).map(m => (
                     <td key={m.monthKey} className="text-right p-2">{formatNumber(m.tpnQtySold)}</td>
                   ))}
                 </tr>
