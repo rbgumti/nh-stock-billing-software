@@ -74,35 +74,55 @@ export function PrintableGRN({
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const printContent = printRef.current;
     if (!printContent) return;
 
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
+    setIsGenerating(true);
+    try {
+      const canvas = await html2canvas(printContent, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>GRN - ${grnNumber}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            @page { size: A4; margin: 10mm; }
-            body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.4; padding: 15px; }
-            @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-          </style>
-        </head>
-        <body>${printContent.innerHTML}</body>
-      </html>
-    `);
+      const imgData = canvas.toDataURL("image/png");
 
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) return;
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>GRN - ${grnNumber}</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              @page { size: A4; margin: 10mm; }
+              body { display: flex; justify-content: center; align-items: flex-start; }
+              img { max-width: 100%; height: auto; }
+              @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+            </style>
+          </head>
+          <body>
+            <img src="${imgData}" />
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 300);
+    } catch (error) {
+      console.error("Error preparing print:", error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -122,9 +142,9 @@ export function PrintableGRN({
                 {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                 {isGenerating ? "Generating..." : "Download PDF"}
               </Button>
-              <Button onClick={handlePrint} size="sm" className="flex items-center gap-2">
-                <Printer className="h-4 w-4" />
-                Print
+              <Button onClick={handlePrint} size="sm" className="flex items-center gap-2" disabled={isGenerating}>
+                {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
+                {isGenerating ? "Preparing..." : "Print"}
               </Button>
             </div>
           </DialogTitle>
