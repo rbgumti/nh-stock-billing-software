@@ -687,16 +687,18 @@ export function MonthlyComparativeAnalysis() {
               </p>
             </div>
             <div className="text-center p-3 rounded-lg bg-background/50">
-              <p className="text-xs text-muted-foreground mb-1">Total Revenue ({selectedMonths}M)</p>
+              <p className="text-xs text-muted-foreground mb-1">{currentMonth?.month} Revenue</p>
               <p className="text-xl font-bold text-foreground">
-                ₹{formatNumber(metrics.reduce((sum, m) => sum + m.revenue, 0))}
+                ₹{formatNumber(currentMonth?.revenue || 0)}
               </p>
+              <p className="text-[10px] text-muted-foreground">This month only</p>
             </div>
             <div className="text-center p-3 rounded-lg bg-background/50">
-              <p className="text-xs text-muted-foreground mb-1">Total Patients ({selectedMonths}M)</p>
+              <p className="text-xs text-muted-foreground mb-1">{currentMonth?.month} Patients</p>
               <p className="text-xl font-bold text-foreground">
-                {formatNumber(metrics.reduce((sum, m) => sum + m.newPatientsBnx + m.followUpPatientsBnx + m.tpnPatients + m.pshyPatients, 0))}
+                {formatNumber((currentMonth?.newPatientsBnx || 0) + (currentMonth?.followUpPatientsBnx || 0) + (currentMonth?.tpnPatients || 0) + (currentMonth?.pshyPatients || 0))}
               </p>
+              <p className="text-[10px] text-muted-foreground">This month only</p>
             </div>
           </div>
         </CardContent>
