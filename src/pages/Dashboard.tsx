@@ -9,6 +9,7 @@ import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { PaymentReminders } from "@/components/PaymentReminders";
+import { MonthlyComparativeAnalysis } from "@/components/MonthlyComparativeAnalysis";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -719,6 +720,9 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
+
+      {/* Monthly Comparative Analysis */}
+      <MonthlyComparativeAnalysis />
 
       {/* Payment Reminders Widget */}
       <PaymentReminders />
