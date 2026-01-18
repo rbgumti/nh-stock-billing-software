@@ -8,8 +8,75 @@
  */
 
 @layer base {
+  /* Light Mode - Modern, clean with subtle neon accents */
   :root {
-    /* Force dark mode as default for futuristic theme */
+    --background: 220 20% 97%;
+    --foreground: 240 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+
+    --primary: 328 75% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 187 80% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 15% 92%;
+    --muted-foreground: 240 5% 45%;
+
+    --accent: 328 75% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 328 75% 50%;
+
+    --radius: 1rem;
+
+    /* Vibrant neon color palette - Light mode adjusted */
+    --gold: 45 90% 45%;
+    --navy: 230 50% 35%;
+    --purple: 280 70% 50%;
+    --cyan: 187 85% 40%;
+    --pink: 328 75% 50%;
+    --teal: 172 70% 38%;
+    --orange: 24 90% 50%;
+    --emerald: 160 75% 35%;
+    --magenta: 320 70% 50%;
+
+    --sidebar-background: 220 20% 97%;
+    --sidebar-foreground: 240 10% 10%;
+    --sidebar-primary: 328 75% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 94%;
+    --sidebar-accent-foreground: 328 75% 50%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 328 75% 50%;
+
+    /* Glass Design Tokens - Light mode */
+    --glass-background: 0 0% 100% / 0.85;
+    --glass-border: 328 50% 60% / 0.2;
+    --glass-shadow: 240 20% 20% / 0.08;
+    --glass-highlight: 187 80% 50% / 0.1;
+    --glass-blur: 16px;
+    --glass-saturation: 100%;
+
+    /* Gradient tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(328 75% 50%), hsl(187 85% 40%));
+    --gradient-secondary: linear-gradient(135deg, hsl(280 70% 50%), hsl(328 75% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(187 85% 40%), hsl(172 70% 38%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 90% 45%), hsl(24 90% 50%));
+  }
+
+  /* Dark Mode - Futuristic with neon accents */
+  .dark {
     --background: 240 15% 6%;
     --foreground: 0 0% 98%;
 
@@ -38,9 +105,7 @@
     --input: 240 10% 18%;
     --ring: 328 85% 60%;
 
-    --radius: 1rem;
-
-    /* Vibrant neon color palette */
+    /* Vibrant neon color palette - Dark mode */
     --gold: 45 100% 51%;
     --navy: 230 60% 25%;
     --purple: 280 80% 55%;
@@ -60,7 +125,7 @@
     --sidebar-border: 240 10% 16%;
     --sidebar-ring: 328 85% 60%;
 
-    /* Glass Design Tokens - Dark futuristic */
+    /* Dark mode glass tokens */
     --glass-background: 240 15% 10% / 0.8;
     --glass-border: 328 60% 50% / 0.2;
     --glass-shadow: 328 60% 30% / 0.3;
@@ -74,61 +139,6 @@
     --gradient-accent: linear-gradient(135deg, hsl(187 100% 50%), hsl(172 80% 45%));
     --gradient-gold: linear-gradient(135deg, hsl(45 100% 51%), hsl(24 95% 55%));
   }
-
-  .dark {
-    --background: 240 15% 4%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 15% 8%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 15% 8%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 328 85% 62%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 187 100% 52%;
-    --secondary-foreground: 0 0% 0%;
-
-    --muted: 240 10% 14%;
-    --muted-foreground: 240 5% 50%;
-
-    --accent: 328 85% 62%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 240 10% 14%;
-    --input: 240 10% 14%;
-    --ring: 328 85% 62%;
-
-    --gold: 45 100% 55%;
-    --navy: 230 60% 35%;
-    --purple: 280 80% 60%;
-    --cyan: 187 100% 55%;
-    --pink: 328 85% 62%;
-    --teal: 172 80% 50%;
-    --orange: 24 95% 60%;
-    --emerald: 160 84% 45%;
-    --magenta: 320 80% 60%;
-
-    --sidebar-background: 240 15% 4%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 328 85% 62%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 15% 10%;
-    --sidebar-accent-foreground: 328 85% 62%;
-    --sidebar-border: 240 10% 12%;
-    --sidebar-ring: 328 85% 62%;
-
-    /* Dark mode glass tokens */
-    --glass-background: 240 15% 8% / 0.85;
-    --glass-border: 328 60% 50% / 0.15;
-    --glass-shadow: 328 60% 20% / 0.4;
-    --glass-highlight: 187 100% 50% / 0.08;
-  }
 }
 
 @layer base {
@@ -138,11 +148,25 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Dark mode background effects */
+  .dark body {
     background-image: 
       radial-gradient(ellipse at 0% 0%, hsl(328 85% 60% / 0.15) 0px, transparent 50%),
       radial-gradient(ellipse at 100% 0%, hsl(280 80% 55% / 0.12) 0px, transparent 40%),
       radial-gradient(ellipse at 100% 100%, hsl(187 100% 50% / 0.1) 0px, transparent 50%),
       radial-gradient(ellipse at 0% 100%, hsl(172 80% 45% / 0.08) 0px, transparent 40%);
+    background-attachment: fixed;
+  }
+
+  /* Light mode background effects - subtle and clean */
+  :root:not(.dark) body {
+    background-image: 
+      radial-gradient(ellipse at 0% 0%, hsl(328 75% 50% / 0.06) 0px, transparent 50%),
+      radial-gradient(ellipse at 100% 0%, hsl(280 70% 50% / 0.04) 0px, transparent 40%),
+      radial-gradient(ellipse at 100% 100%, hsl(187 85% 40% / 0.05) 0px, transparent 50%),
+      radial-gradient(ellipse at 0% 100%, hsl(172 70% 38% / 0.04) 0px, transparent 40%);
     background-attachment: fixed;
   }
 }
@@ -299,10 +323,10 @@
   background: linear-gradient(135deg, hsl(var(--teal)) 0%, hsl(var(--purple)) 50%, hsl(var(--pink)) 100%);
 }
 
-/* Neon Card - Primary card style */
+/* Neon Card - Primary card style (adapts to light/dark) */
 .neon-card {
   @apply relative overflow-hidden rounded-2xl;
-  background: hsl(240 15% 10% / 0.95);
+  background: hsl(var(--card));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid hsl(var(--pink) / 0.2);
@@ -321,7 +345,7 @@
   transform: translateY(-2px);
 }
 
-/* Glass Card variants */
+/* Glass Card variants - Light mode aware */
 .glass {
   background: hsl(var(--glass-background));
   backdrop-filter: blur(var(--glass-blur));
@@ -331,47 +355,56 @@
 }
 
 .glass-subtle {
-  background: hsl(240 15% 10% / 0.6);
+  background: hsl(var(--card) / 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid hsl(0 0% 100% / 0.05);
+  border: 1px solid hsl(var(--border) / 0.5);
 }
 
 .glass-strong {
-  background: hsl(240 15% 10% / 0.95);
+  background: hsl(var(--card) / 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid hsl(var(--pink) / 0.15);
   box-shadow: 0 8px 24px hsl(var(--glass-shadow));
 }
 
-/* Colorful glass variants */
-.glass-purple {
-  background: linear-gradient(135deg, hsl(var(--purple) / 0.2), hsl(240 15% 10% / 0.8));
+/* Glass card for simple use */
+.glass-card {
+  background: hsl(var(--card) / 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--purple) / 0.3);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: 0 2px 12px hsl(var(--glass-shadow));
+}
+
+/* Colorful glass variants - Light/dark aware */
+.glass-purple {
+  background: linear-gradient(135deg, hsl(var(--purple) / 0.12), hsl(var(--card) / 0.9));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--purple) / 0.25);
 }
 
 .glass-cyan {
-  background: linear-gradient(135deg, hsl(var(--cyan) / 0.15), hsl(240 15% 10% / 0.8));
+  background: linear-gradient(135deg, hsl(var(--cyan) / 0.1), hsl(var(--card) / 0.9));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--cyan) / 0.3);
+  border: 1px solid hsl(var(--cyan) / 0.25);
 }
 
 .glass-pink {
-  background: linear-gradient(135deg, hsl(var(--pink) / 0.2), hsl(240 15% 10% / 0.8));
+  background: linear-gradient(135deg, hsl(var(--pink) / 0.12), hsl(var(--card) / 0.9));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--pink) / 0.3);
+  border: 1px solid hsl(var(--pink) / 0.25);
 }
 
 .glass-gold {
-  background: linear-gradient(135deg, hsl(var(--gold) / 0.15), hsl(240 15% 10% / 0.8));
+  background: linear-gradient(135deg, hsl(var(--gold) / 0.1), hsl(var(--card) / 0.9));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--gold) / 0.3);
+  border: 1px solid hsl(var(--gold) / 0.25);
 }
 
 /* Neon Glow Effects */
@@ -458,17 +491,17 @@
   left: 100%;
 }
 
-/* Glass Input */
+/* Glass Input - Light/dark aware */
 .glass-input {
-  background: hsl(240 15% 12% / 0.8);
+  background: hsl(var(--card) / 0.8);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid hsl(0 0% 100% / 0.1);
+  border: 1px solid hsl(var(--border));
   transition: all 0.25s ease;
 }
 
 .glass-input:focus {
-  background: hsl(240 15% 14% / 0.9);
+  background: hsl(var(--card) / 0.95);
   border-color: hsl(var(--pink));
   box-shadow: 0 0 0 3px hsl(var(--pink) / 0.2), 0 0 20px hsl(var(--pink) / 0.15);
 }
@@ -482,14 +515,14 @@
   transition: stroke-dashoffset 0.5s ease;
 }
 
-/* Stat Card - Dark with neon accent */
+/* Stat Card - Light/dark aware with neon accent */
 .liquid-stat-card {
   @apply relative overflow-hidden rounded-2xl;
-  background: hsl(240 15% 10% / 0.9);
+  background: hsl(var(--card) / 0.9);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid hsl(0 0% 100% / 0.08);
-  box-shadow: 0 4px 16px hsl(0 0% 0% / 0.3);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: 0 4px 16px hsl(var(--glass-shadow));
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -497,29 +530,29 @@
   transform: translateY(-3px);
   border-color: hsl(var(--pink) / 0.3);
   box-shadow: 
-    0 8px 32px hsl(0 0% 0% / 0.4),
+    0 8px 32px hsl(var(--glass-shadow)),
     0 0 20px hsl(var(--pink) / 0.1);
 }
 
-/* Colored glass tints */
+/* Colored glass tints - Light/dark aware */
 .liquid-glass-emerald {
-  background: linear-gradient(135deg, hsl(var(--emerald) / 0.15), hsl(240 15% 10% / 0.9));
+  background: linear-gradient(135deg, hsl(var(--emerald) / 0.12), hsl(var(--card) / 0.9));
 }
 
 .liquid-glass-gold {
-  background: linear-gradient(135deg, hsl(var(--gold) / 0.15), hsl(240 15% 10% / 0.9));
+  background: linear-gradient(135deg, hsl(var(--gold) / 0.12), hsl(var(--card) / 0.9));
 }
 
 .liquid-glass-cyan {
-  background: linear-gradient(135deg, hsl(var(--cyan) / 0.15), hsl(240 15% 10% / 0.9));
+  background: linear-gradient(135deg, hsl(var(--cyan) / 0.12), hsl(var(--card) / 0.9));
 }
 
 .liquid-glass-purple {
-  background: linear-gradient(135deg, hsl(var(--purple) / 0.15), hsl(240 15% 10% / 0.9));
+  background: linear-gradient(135deg, hsl(var(--purple) / 0.12), hsl(var(--card) / 0.9));
 }
 
 .liquid-glass-pink {
-  background: linear-gradient(135deg, hsl(var(--pink) / 0.15), hsl(240 15% 10% / 0.9));
+  background: linear-gradient(135deg, hsl(var(--pink) / 0.12), hsl(var(--card) / 0.9));
 }
 
 /* Hover glow effects */
@@ -884,7 +917,7 @@
     box-shadow: 0 10px 40px hsl(var(--cyan) / 0.3), 0 0 20px hsl(var(--teal) / 0.15);
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar - Light/dark aware */
   .scrollbar-thin {
     scrollbar-width: thin;
   }
@@ -894,7 +927,7 @@
   }
   
   .scrollbar-thin::-webkit-scrollbar-track {
-    background: hsl(240 15% 10%);
+    background: hsl(var(--muted));
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb {
