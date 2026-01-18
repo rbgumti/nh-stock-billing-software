@@ -8,144 +8,146 @@
  */
 
 @layer base {
-  /* Light Mode - Clean, airy with blue accents */
+  /* Light Mode - Vibrant, rich blue palette */
   :root {
-    --background: 210 25% 97%;
-    --foreground: 220 25% 15%;
+    --background: 215 30% 96%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 15%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 15%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 210 100% 50%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 90% 48%;
+    --secondary: 199 89% 48%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 20% 93%;
-    --muted-foreground: 215 15% 45%;
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 210 100% 50%;
+    --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 210 100% 50%;
+    --border: 214 32% 85%;
+    --input: 214 32% 85%;
+    --ring: 217 91% 60%;
 
     --radius: 1rem;
 
-    /* Blue-based color palette - Light mode */
-    --blue-deep: 215 80% 25%;
-    --blue-primary: 210 100% 50%;
-    --blue-light: 200 90% 48%;
-    --blue-pale: 200 100% 95%;
-    --navy: 220 65% 20%;
-    --cyan: 195 100% 45%;
-    --teal: 180 75% 40%;
-    --sky: 200 90% 55%;
-    --indigo: 235 75% 60%;
-    --purple: 270 70% 55%;
-    --green: 145 70% 42%;
-    --emerald: 160 75% 38%;
-    --gold: 45 92% 50%;
+    /* Vibrant color palette - Light mode */
+    --blue-deep: 221 83% 28%;
+    --blue-primary: 217 91% 60%;
+    --blue-light: 199 89% 48%;
+    --blue-pale: 214 95% 93%;
+    --navy: 224 71% 14%;
+    --cyan: 187 100% 42%;
+    --teal: 173 80% 40%;
+    --sky: 199 95% 55%;
+    --indigo: 239 84% 67%;
+    --purple: 270 91% 65%;
+    --green: 142 76% 36%;
+    --emerald: 158 84% 37%;
+    --gold: 43 96% 56%;
     --orange: 25 95% 53%;
-    --pink: 330 80% 55%;
+    --pink: 335 85% 60%;
+    --rose: 349 100% 64%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 25% 15%;
-    --sidebar-primary: 210 100% 50%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 25% 96%;
-    --sidebar-accent-foreground: 210 100% 50%;
-    --sidebar-border: 214 20% 90%;
-    --sidebar-ring: 210 100% 50%;
+    --sidebar-accent: 214 32% 95%;
+    --sidebar-accent-foreground: 217 91% 60%;
+    --sidebar-border: 214 32% 88%;
+    --sidebar-ring: 217 91% 60%;
 
     /* Glass Design Tokens - Light mode */
-    --glass-background: 0 0% 100% / 0.75;
-    --glass-border: 214 50% 70% / 0.3;
-    --glass-shadow: 220 50% 20% / 0.08;
-    --glass-highlight: 200 100% 50% / 0.08;
+    --glass-background: 0 0% 100% / 0.8;
+    --glass-border: 217 70% 60% / 0.25;
+    --glass-shadow: 224 71% 14% / 0.1;
+    --glass-highlight: 199 100% 50% / 0.1;
     --glass-blur: 16px;
     --glass-saturation: 100%;
 
     /* Gradient tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 50%), hsl(200 90% 48%));
-    --gradient-accent: linear-gradient(135deg, hsl(200 90% 48%), hsl(195 100% 45%));
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(199 89% 48%));
+    --gradient-accent: linear-gradient(135deg, hsl(199 89% 48%), hsl(187 100% 42%));
   }
 
-  /* Dark Mode - Deep blue with glass effects */
+  /* Dark Mode - Rich, deep blue with vibrant accents */
   .dark {
-    --background: 220 45% 6%;
-    --foreground: 210 20% 98%;
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
 
-    --card: 220 40% 10%;
-    --card-foreground: 210 20% 98%;
+    --card: 224 55% 8%;
+    --card-foreground: 213 31% 91%;
 
-    --popover: 220 40% 10%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 224 55% 8%;
+    --popover-foreground: 213 31% 91%;
 
-    --primary: 205 100% 55%;
-    --primary-foreground: 220 45% 6%;
+    --primary: 213 94% 68%;
+    --primary-foreground: 224 71% 4%;
 
-    --secondary: 195 100% 50%;
-    --secondary-foreground: 220 45% 6%;
+    --secondary: 192 100% 55%;
+    --secondary-foreground: 224 71% 4%;
 
-    --muted: 220 35% 14%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 218 27% 60%;
 
-    --accent: 205 100% 55%;
-    --accent-foreground: 220 45% 6%;
+    --accent: 213 94% 68%;
+    --accent-foreground: 224 71% 4%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 30% 18%;
-    --input: 220 30% 18%;
-    --ring: 205 100% 55%;
+    --border: 223 47% 16%;
+    --input: 223 47% 16%;
+    --ring: 213 94% 68%;
 
-    /* Blue-based color palette - Dark mode */
-    --blue-deep: 215 80% 25%;
-    --blue-primary: 205 100% 55%;
-    --blue-light: 200 100% 60%;
-    --blue-pale: 200 80% 20%;
-    --navy: 220 60% 18%;
-    --cyan: 195 100% 50%;
-    --teal: 180 80% 45%;
-    --sky: 200 95% 60%;
-    --indigo: 235 80% 65%;
-    --purple: 270 75% 60%;
-    --green: 145 75% 48%;
-    --emerald: 160 80% 42%;
-    --gold: 45 100% 55%;
-    --orange: 25 100% 58%;
-    --pink: 330 85% 60%;
+    /* Vibrant color palette - Dark mode */
+    --blue-deep: 221 83% 35%;
+    --blue-primary: 213 94% 68%;
+    --blue-light: 199 95% 65%;
+    --blue-pale: 217 45% 18%;
+    --navy: 224 71% 14%;
+    --cyan: 187 100% 50%;
+    --teal: 173 85% 48%;
+    --sky: 199 100% 62%;
+    --indigo: 239 90% 72%;
+    --purple: 270 95% 72%;
+    --green: 142 80% 45%;
+    --emerald: 158 90% 45%;
+    --gold: 43 100% 60%;
+    --orange: 25 100% 60%;
+    --pink: 335 90% 65%;
+    --rose: 349 100% 68%;
 
-    --sidebar-background: 220 45% 6%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 205 100% 55%;
-    --sidebar-primary-foreground: 220 45% 6%;
-    --sidebar-accent: 220 40% 12%;
-    --sidebar-accent-foreground: 205 100% 55%;
-    --sidebar-border: 220 30% 16%;
-    --sidebar-ring: 205 100% 55%;
+    --sidebar-background: 224 71% 4%;
+    --sidebar-foreground: 213 31% 91%;
+    --sidebar-primary: 213 94% 68%;
+    --sidebar-primary-foreground: 224 71% 4%;
+    --sidebar-accent: 223 47% 12%;
+    --sidebar-accent-foreground: 213 94% 68%;
+    --sidebar-border: 223 47% 14%;
+    --sidebar-ring: 213 94% 68%;
 
     /* Dark mode glass tokens */
-    --glass-background: 220 40% 10% / 0.7;
-    --glass-border: 205 60% 50% / 0.2;
-    --glass-shadow: 220 80% 5% / 0.4;
-    --glass-highlight: 200 100% 60% / 0.1;
+    --glass-background: 224 55% 8% / 0.75;
+    --glass-border: 213 70% 55% / 0.2;
+    --glass-shadow: 224 90% 3% / 0.5;
+    --glass-highlight: 199 100% 65% / 0.12;
     --glass-blur: 20px;
-    --glass-saturation: 120%;
+    --glass-saturation: 130%;
 
     /* Gradient tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(205 100% 55%), hsl(195 100% 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(195 100% 50%), hsl(180 80% 45%));
+    --gradient-primary: linear-gradient(135deg, hsl(213 94% 68%), hsl(192 100% 55%));
+    --gradient-accent: linear-gradient(135deg, hsl(192 100% 55%), hsl(173 85% 48%));
   }
 }
 
