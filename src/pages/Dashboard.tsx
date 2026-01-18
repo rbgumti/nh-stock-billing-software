@@ -303,11 +303,11 @@ export default function Dashboard() {
 
   const getUpdateIcon = (type: string) => {
     switch (type) {
-      case 'invoice': return <Receipt className="h-4 w-4 text-green-500" />;
-      case 'stock': return <Package className="h-4 w-4 text-amber-500" />;
-      case 'patient': return <Users className="h-4 w-4 text-blue-500" />;
-      case 'prescription': return <Activity className="h-4 w-4 text-purple-500" />;
-      default: return <Bell className="h-4 w-4" />;
+      case 'invoice': return <Receipt className="h-4 w-4 text-emerald" />;
+      case 'stock': return <Package className="h-4 w-4 text-gold" />;
+      case 'patient': return <Users className="h-4 w-4 text-primary" />;
+      case 'prescription': return <Activity className="h-4 w-4 text-purple" />;
+      default: return <Bell className="h-4 w-4 text-cyan" />;
     }
   };
 
