@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2 } from "lucide-react";
+import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -1077,15 +1078,16 @@ export default function Stock() {
   };
 
   return (
-    <div className="p-6 space-y-6 relative">
+    <PageTransition className="p-6 space-y-6 relative">
       <FloatingOrbs />
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
-            Stock Management
-          </h1>
-          <p className="text-muted-foreground mt-2">Monitor and manage your inventory, purchase orders, and goods receipt</p>
-        </div>
+      <FadeIn direction="down">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+              Stock Management
+            </h1>
+            <p className="text-muted-foreground mt-2">Monitor and manage your inventory, purchase orders, and goods receipt</p>
+          </div>
         <div className="flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -1116,6 +1118,7 @@ export default function Stock() {
           </Button>
         </div>
       </div>
+      </FadeIn>
 
       {/* Tabs for different sections */}
       <Tabs defaultValue="item-master" className="w-full">
@@ -2502,6 +2505,6 @@ export default function Stock() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageTransition>
   );
 }

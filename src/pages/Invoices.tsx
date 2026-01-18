@@ -14,6 +14,7 @@ import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
 import { SkeletonInvoiceGrid, SkeletonStats } from "@/components/ui/skeleton";
+import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion";
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -499,85 +500,89 @@ export default function Invoices() {
   }
 
   return (
-    <div className="p-6 space-y-6 relative">
+    <PageTransition className="p-6 space-y-6 relative">
       <FloatingOrbs />
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
-            Invoices
-          </h1>
-          <p className="text-muted-foreground mt-2">Manage billing and payments</p>
+      <FadeIn direction="down">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+              Invoices
+            </h1>
+            <p className="text-muted-foreground mt-2">Manage billing and payments</p>
+          </div>
+          <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
+            <Link to="/invoices/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Invoice
+            </Link>
+          </Button>
         </div>
-        <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
-          <Link to="/invoices/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Invoice
-          </Link>
-        </Button>
-      </div>
+      </FadeIn>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-          <CardContent className="pt-6 relative">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-cyan">
-                <Receipt className="h-5 w-5 text-white" />
+      <FadeIn delay={0.1}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-cyan">
+                  <Receipt className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{filteredInvoices.length}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{filteredInvoices.length}</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-gradient-to-r from-gold to-orange">
+                  <Receipt className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{formatNumber(totalAmount)}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-          <CardContent className="pt-6 relative">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-gold to-orange">
-                <Receipt className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{formatNumber(totalAmount)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 via-transparent to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-          <CardContent className="pt-6 relative">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-emerald to-teal">
-                <CheckCircle className="h-5 w-5 text-white" />
+          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 via-transparent to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-gradient-to-r from-emerald to-teal">
+                  <CheckCircle className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Paid</p>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">₹{formatNumber(paidAmount)}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Paid</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">₹{formatNumber(paidAmount)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-          <CardContent className="pt-6 relative">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-pink">
-                <Receipt className="h-5 w-5 text-white" />
+          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-pink">
+                  <Receipt className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">₹{formatNumber(pendingAmount)}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">₹{formatNumber(pendingAmount)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      </FadeIn>
 
       {/* Search and Filter */}
       <Card className="glass-strong border-0 overflow-hidden relative">
@@ -750,6 +755,6 @@ export default function Invoices() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageTransition>
   );
 }
