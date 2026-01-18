@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion";
 
 export default function Reports() {
   const { stockItems } = useStockStore();
@@ -489,7 +490,7 @@ export default function Reports() {
   };
 
   return (
-    <div className="p-6 space-y-6 relative">
+    <PageTransition className="p-6 space-y-6 relative">
       <FloatingOrbs />
       
       {/* Ambient liquid blobs */}
@@ -499,28 +500,32 @@ export default function Reports() {
         <div className="absolute -bottom-20 left-1/3 w-72 h-72 bg-gradient-radial from-gold/15 via-gold/5 to-transparent rounded-full blur-3xl liquid-blob" style={{ animationDelay: '-10s' }} />
       </div>
 
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent drop-shadow-sm">
-            Reports
-          </h1>
-          <p className="text-muted-foreground mt-1">Comprehensive reports and analytics</p>
+      <FadeIn direction="down">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent drop-shadow-sm">
+              Reports
+            </h1>
+            <p className="text-muted-foreground mt-1">Comprehensive reports and analytics</p>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              type="date"
+              value={dateRange.from}
+              onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+              className="w-auto glass-subtle border-purple/20"
+            />
+            <Input
+              type="date"
+              value={dateRange.to}
+              onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+              className="w-auto glass-subtle border-purple/20"
+            />
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Input
-            type="date"
-            value={dateRange.from}
-            onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-            className="w-auto glass-subtle border-purple/20"
-          />
-          <Input
-            type="date"
-            value={dateRange.to}
-            onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-            className="w-auto glass-subtle border-purple/20"
-          />
-        </div>
-      </div>
+      </FadeIn>
+
+      <FadeIn delay={0.1}>
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="glass-strong border-0 p-1 grid w-full grid-cols-9">
@@ -1263,6 +1268,7 @@ export default function Reports() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </FadeIn>
+    </PageTransition>
   );
 }
