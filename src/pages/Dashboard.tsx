@@ -326,11 +326,12 @@ export default function Dashboard() {
     <div className="p-6 space-y-6 relative">
       <FloatingOrbs />
       
-      {/* Ambient blue glass blobs for dashboard */}
+      {/* Enhanced ambient gradient orbs for dashboard */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-gradient-radial from-primary/20 via-primary/5 to-transparent rounded-full blur-3xl animate-float" />
-        <div className="absolute top-1/3 -right-20 w-80 h-80 bg-gradient-radial from-cyan/20 via-cyan/5 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '-2s' }} />
-        <div className="absolute -bottom-20 left-1/3 w-72 h-72 bg-gradient-radial from-teal/15 via-teal/5 to-transparent rounded-full blur-3xl animate-float" style={{ animationDelay: '-4s' }} />
+        <div className="glow-orb glow-orb-primary w-[500px] h-[500px] top-[-10%] left-[-5%]" />
+        <div className="glow-orb glow-orb-cyan w-[400px] h-[400px] top-[20%] right-[-8%]" style={{ animationDelay: '-3s' }} />
+        <div className="glow-orb glow-orb-purple w-[350px] h-[350px] bottom-[10%] left-[10%]" style={{ animationDelay: '-5s' }} />
+        <div className="glow-orb glow-orb-teal w-[300px] h-[300px] bottom-[-5%] right-[20%]" style={{ animationDelay: '-7s' }} />
       </div>
       
       {/* Header with Real-time indicator */}
@@ -375,8 +376,8 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
       >
-        <div className="glass-card p-1 overflow-hidden border border-primary/20">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-cyan/5 to-teal/5" />
+        <div className="glass-card p-1 overflow-hidden border border-primary/20 mesh-gradient">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-cyan/5 to-teal/8" />
           <div className="absolute top-0 left-0 right-0 h-px highlight-line" />
           <CardHeader className="pb-3 relative">
             <CardTitle className="text-lg flex items-center gap-3">
@@ -574,8 +575,8 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="lg:col-span-1"
         >
-          <div className="glass-card h-full overflow-hidden border border-primary/20">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-cyan/5" />
+          <div className="glass-card h-full overflow-hidden border border-primary/20 mesh-gradient-purple">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-purple/5 to-cyan/8" />
             <div className="highlight-line" />
             
             <CardHeader className="pb-3 relative">
@@ -640,8 +641,8 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.35 }}
           className="lg:col-span-2"
         >
-          <div className="glass-card overflow-hidden border border-cyan/20">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-cyan/5" />
+          <div className="glass-card overflow-hidden border border-cyan/20 mesh-gradient-teal">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan/8 via-transparent to-teal/8" />
             <div className="highlight-line-cyan" />
             
             <CardHeader className="relative">
@@ -734,8 +735,9 @@ export default function Dashboard() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <Card className="glass-card border border-gold/30 overflow-hidden">
-            <div className="highlight-line" />
+          <Card className="glass-card border border-gold/30 overflow-hidden mesh-gradient">
+            <div className="absolute inset-0 bg-gradient-to-r from-gold/8 via-transparent to-orange/6" />
+            <div className="highlight-line-gold" />
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2 text-gold">
                 <AlertCircle className="h-5 w-5" />
@@ -770,8 +772,8 @@ export default function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Trend Chart */}
-        <Card className="glass-card border border-primary/20 overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-cyan/5" />
+        <Card className="glass-card border border-primary/20 overflow-hidden relative mesh-gradient">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-cyan/6" />
           <div className="highlight-line" />
           <CardHeader className="relative">
             <CardTitle className="text-gradient-blue">Revenue Trend</CardTitle>
@@ -809,8 +811,8 @@ export default function Dashboard() {
         </Card>
 
         {/* Stock Category Breakdown */}
-        <Card className="glass-card border border-cyan/20 overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 to-teal/5" />
+        <Card className="glass-card border border-cyan/20 overflow-hidden relative mesh-gradient-teal">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan/8 via-transparent to-teal/8" />
           <div className="highlight-line-cyan" />
           <CardHeader className="relative">
             <CardTitle className="text-gradient-ocean">Stock by Category</CardTitle>
