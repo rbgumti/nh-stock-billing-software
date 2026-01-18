@@ -515,6 +515,27 @@
   background-clip: text;
 }
 
+.text-gradient-emerald {
+  background: linear-gradient(135deg, hsl(var(--emerald)), hsl(var(--teal)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, hsl(var(--purple)), hsl(var(--indigo)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--orange)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* Top highlight line for cards */
 .highlight-line {
   @apply absolute top-0 left-0 right-0 h-px;
@@ -524,6 +545,21 @@
 .highlight-line-cyan {
   @apply absolute top-0 left-0 right-0 h-px;
   background: linear-gradient(90deg, transparent, hsl(var(--cyan) / 0.5), transparent);
+}
+
+.highlight-line-emerald {
+  @apply absolute top-0 left-0 right-0 h-px;
+  background: linear-gradient(90deg, transparent, hsl(var(--emerald) / 0.5), transparent);
+}
+
+.highlight-line-gold {
+  @apply absolute top-0 left-0 right-0 h-px;
+  background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.5), transparent);
+}
+
+.highlight-line-purple {
+  @apply absolute top-0 left-0 right-0 h-px;
+  background: linear-gradient(90deg, transparent, hsl(var(--purple) / 0.5), transparent);
 }
 
 /* ============= BADGE VARIANTS ============= */
