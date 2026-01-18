@@ -12,6 +12,7 @@ import { PaymentReminders } from "@/components/PaymentReminders";
 import { MonthlyComparativeAnalysis } from "@/components/MonthlyComparativeAnalysis";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion";
 
 interface Invoice {
   id: string;
@@ -323,7 +324,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6 relative">
+    <PageTransition className="p-6 space-y-6 relative">
       <FloatingOrbs />
       
       {/* Enhanced ambient gradient orbs for dashboard */}
@@ -938,6 +939,6 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </PageTransition>
   );
 }
