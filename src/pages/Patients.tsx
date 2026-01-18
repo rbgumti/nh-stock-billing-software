@@ -17,6 +17,7 @@ import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPhone } from "@/lib/patientUtils";
 import { SkeletonPatientGrid, SkeletonTable } from "@/components/ui/skeleton";
+import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion";
 
 interface Patient {
   id: number;
@@ -229,32 +230,34 @@ export default function Patients() {
   };
 
   return (
-    <div className="p-6 space-y-6 relative">
+    <PageTransition className="p-6 space-y-6 relative">
       <FloatingOrbs />
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
-            Patients
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {loading ? "Loading patients..." : `${totalCount.toLocaleString()} patients total`}
-            {searchTab === "general" && debouncedSearch && ` matching "${debouncedSearch}"`}
-            {searchTab === "fileno" && debouncedFileNo && ` with file no. "${debouncedFileNo}"`}
-          </p>
+      <FadeIn direction="down">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+              Patients
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              {loading ? "Loading patients..." : `${totalCount.toLocaleString()} patients total`}
+              {searchTab === "general" && debouncedSearch && ` matching "${debouncedSearch}"`}
+              {searchTab === "fileno" && debouncedFileNo && ` with file no. "${debouncedFileNo}"`}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowImport(!showImport)} className="glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5">
+              <Upload className="h-4 w-4 mr-2 text-purple" />
+              Import Excel
+            </Button>
+            <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
+              <Link to="/patients/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Patient
+              </Link>
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowImport(!showImport)} className="glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5">
-            <Upload className="h-4 w-4 mr-2 text-purple" />
-            Import Excel
-          </Button>
-          <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
-            <Link to="/patients/new">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Patient
-            </Link>
-          </Button>
-        </div>
-      </div>
+      </FadeIn>
 
       {/* Import Section */}
       <Collapsible open={showImport} onOpenChange={setShowImport}>
@@ -615,6 +618,6 @@ export default function Patients() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageTransition>
   );
 }
