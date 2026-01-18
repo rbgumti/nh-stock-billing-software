@@ -8,15 +8,28 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-card shadow-sm",
-        glass: "glass border-0",
-        "glass-strong": "glass-strong border-0",
+        default: "border bg-card shadow-sm hover:shadow-md",
+        glass: "glass border-0 hover:border-primary/20 hover:shadow-lg",
+        "glass-strong": "glass-strong border-0 hover:border-primary/25",
         "glass-subtle": "glass-subtle border-0",
-        gradient: "gradient-border"
+        gradient: "gradient-border",
+        interactive: "glass interactive-card",
+        elevated: "glass-strong shadow-elevated hover:shadow-glow"
+      },
+      hover: {
+        none: "",
+        lift: "hover:-translate-y-1 hover:shadow-lg",
+        glow: "hover-glow",
+        scale: "hover:scale-[1.02]",
+        "glow-cyan": "hover-glow-cyan",
+        "glow-emerald": "hover-glow-emerald",
+        "glow-gold": "hover-glow-gold",
+        "glow-purple": "hover-glow-purple"
       }
     },
     defaultVariants: {
-      variant: "glass"
+      variant: "glass",
+      hover: "none"
     }
   }
 )
@@ -26,10 +39,10 @@ export interface CardProps
     VariantProps<typeof cardVariants> {}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, ...props }, ref) => (
+  ({ className, variant, hover, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(cardVariants({ variant, className }))}
+      className={cn(cardVariants({ variant, hover, className }))}
       {...props}
     />
   )
