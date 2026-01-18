@@ -1,6 +1,7 @@
-import { motion, HTMLMotionProps, Variants } from "framer-motion";
+import { motion, HTMLMotionProps, Variants, AnimatePresence } from "framer-motion";
 import { ReactNode, forwardRef } from "react";
 import { cn } from "@/lib/utils";
+import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 // Animation Variants
 export const fadeInUp: Variants = {
@@ -60,11 +61,32 @@ export const staggerContainerFast: Variants = {
   }
 };
 
+// Instant variants for reduced motion
+const instantVariants: Variants = {
+  hidden: { opacity: 1 },
+  visible: { opacity: 1 }
+};
+
 // Default transition
 const defaultTransition = {
   duration: 0.4,
   ease: "easeOut" as const
 };
+
+const instantTransition = {
+  duration: 0
+};
+
+// Hook to check reduced motion preference
+function useReducedMotion() {
+  try {
+    const { reducedMotion } = useAppSettings();
+    return reducedMotion;
+  } catch {
+    // Fallback if used outside provider
+    return false;
+  }
+}
 
 // Page wrapper with fade animation
 interface PageTransitionProps extends HTMLMotionProps<"div"> {
@@ -73,19 +95,31 @@ interface PageTransitionProps extends HTMLMotionProps<"div"> {
 }
 
 export const PageTransition = forwardRef<HTMLDivElement, PageTransitionProps>(
-  ({ children, className, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className={cn("w-full", className)}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  )
+  ({ children, className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={cn("w-full", className)} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
+    return (
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className={cn("w-full", className)}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 );
 PageTransition.displayName = "PageTransition";
 
@@ -100,6 +134,16 @@ interface FadeInProps extends HTMLMotionProps<"div"> {
 
 export const FadeIn = forwardRef<HTMLDivElement, FadeInProps>(
   ({ children, delay = 0, duration = 0.4, direction = "up", className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={className} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
     const variants = {
       up: fadeInUp,
       down: fadeInDown,
@@ -134,19 +178,31 @@ interface ScaleInProps extends HTMLMotionProps<"div"> {
 }
 
 export const ScaleIn = forwardRef<HTMLDivElement, ScaleInProps>(
-  ({ children, delay = 0, duration = 0.4, className, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      initial="hidden"
-      animate="visible"
-      variants={scaleIn}
-      transition={{ ...defaultTransition, delay, duration }}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  )
+  ({ children, delay = 0, duration = 0.4, className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={className} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
+    return (
+      <motion.div
+        ref={ref}
+        initial="hidden"
+        animate="visible"
+        variants={scaleIn}
+        transition={{ ...defaultTransition, delay, duration }}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 );
 ScaleIn.displayName = "ScaleIn";
 
@@ -158,18 +214,30 @@ interface StaggerContainerProps extends HTMLMotionProps<"div"> {
 }
 
 export const StaggerContainer = forwardRef<HTMLDivElement, StaggerContainerProps>(
-  ({ children, className, fast = false, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      initial="hidden"
-      animate="visible"
-      variants={fast ? staggerContainerFast : staggerContainer}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  )
+  ({ children, className, fast = false, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={className} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
+    return (
+      <motion.div
+        ref={ref}
+        initial="hidden"
+        animate="visible"
+        variants={fast ? staggerContainerFast : staggerContainer}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 );
 StaggerContainer.displayName = "StaggerContainer";
 
@@ -180,17 +248,29 @@ interface StaggerItemProps extends HTMLMotionProps<"div"> {
 }
 
 export const StaggerItem = forwardRef<HTMLDivElement, StaggerItemProps>(
-  ({ children, className, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      variants={fadeInUp}
-      transition={defaultTransition}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  )
+  ({ children, className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={className} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
+    return (
+      <motion.div
+        ref={ref}
+        variants={fadeInUp}
+        transition={defaultTransition}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 );
 StaggerItem.displayName = "StaggerItem";
 
@@ -202,18 +282,30 @@ interface HoverScaleProps extends HTMLMotionProps<"div"> {
 }
 
 export const HoverScale = forwardRef<HTMLDivElement, HoverScaleProps>(
-  ({ children, scale = 1.02, className, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      whileHover={{ scale }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2 }}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  )
+  ({ children, scale = 1.02, className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={className} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
+    return (
+      <motion.div
+        ref={ref}
+        whileHover={{ scale }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.2 }}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 );
 HoverScale.displayName = "HoverScale";
 
@@ -226,18 +318,30 @@ interface SlideInProps extends HTMLMotionProps<"div"> {
 }
 
 export const SlideIn = forwardRef<HTMLDivElement, SlideInProps>(
-  ({ children, from = "left", delay = 0, className, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: from === "left" ? -30 : 30 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ ...defaultTransition, delay }}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  )
+  ({ children, from = "left", delay = 0, className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={className} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
+    return (
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, x: from === "left" ? -30 : 30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ ...defaultTransition, delay }}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 );
 SlideIn.displayName = "SlideIn";
 
@@ -249,24 +353,36 @@ interface PopInProps extends HTMLMotionProps<"div"> {
 }
 
 export const PopIn = forwardRef<HTMLDivElement, PopInProps>(
-  ({ children, delay = 0, className, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        delay,
-        duration: 0.4,
-        type: "spring",
-        stiffness: 200,
-        damping: 15
-      }}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  )
+  ({ children, delay = 0, className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={className} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
+    return (
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          delay,
+          duration: 0.4,
+          type: "spring",
+          stiffness: 200,
+          damping: 15
+        }}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 );
 PopIn.displayName = "PopIn";
 
@@ -277,18 +393,30 @@ interface AnimatedListProps extends HTMLMotionProps<"ul"> {
 }
 
 export const AnimatedList = forwardRef<HTMLUListElement, AnimatedListProps>(
-  ({ children, className, ...props }, ref) => (
-    <motion.ul
-      ref={ref}
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.ul>
-  )
+  ({ children, className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <ul ref={ref} className={className} {...props as any}>
+          {children}
+        </ul>
+      );
+    }
+    
+    return (
+      <motion.ul
+        ref={ref}
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.ul>
+    );
+  }
 );
 AnimatedList.displayName = "AnimatedList";
 
@@ -299,17 +427,29 @@ interface AnimatedListItemProps extends HTMLMotionProps<"li"> {
 }
 
 export const AnimatedListItem = forwardRef<HTMLLIElement, AnimatedListItemProps>(
-  ({ children, className, ...props }, ref) => (
-    <motion.li
-      ref={ref}
-      variants={fadeInUp}
-      transition={defaultTransition}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.li>
-  )
+  ({ children, className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <li ref={ref} className={className} {...props as any}>
+          {children}
+        </li>
+      );
+    }
+    
+    return (
+      <motion.li
+        ref={ref}
+        variants={fadeInUp}
+        transition={defaultTransition}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.li>
+    );
+  }
 );
 AnimatedListItem.displayName = "AnimatedListItem";
 
@@ -320,18 +460,30 @@ interface AnimatedGridProps extends HTMLMotionProps<"div"> {
 }
 
 export const AnimatedGrid = forwardRef<HTMLDivElement, AnimatedGridProps>(
-  ({ children, className, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  )
+  ({ children, className, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={className} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
+    return (
+      <motion.div
+        ref={ref}
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 );
 AnimatedGrid.displayName = "AnimatedGrid";
 
@@ -343,18 +495,30 @@ interface AnimatedCardProps extends HTMLMotionProps<"div"> {
 }
 
 export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(
-  ({ children, className, hoverEffect = true, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      variants={fadeInUp}
-      whileHover={hoverEffect ? { y: -4, transition: { duration: 0.2 } } : undefined}
-      transition={defaultTransition}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  )
+  ({ children, className, hoverEffect = true, ...props }, ref) => {
+    const reducedMotion = useReducedMotion();
+    
+    if (reducedMotion) {
+      return (
+        <div ref={ref} className={className} {...props as any}>
+          {children}
+        </div>
+      );
+    }
+    
+    return (
+      <motion.div
+        ref={ref}
+        variants={fadeInUp}
+        whileHover={hoverEffect ? { y: -4, transition: { duration: 0.2 } } : undefined}
+        transition={defaultTransition}
+        className={className}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 );
 AnimatedCard.displayName = "AnimatedCard";
 

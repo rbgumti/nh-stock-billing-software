@@ -5,6 +5,8 @@ interface AppSettingsContextType {
   setPerformanceMode: (enabled: boolean) => void;
   compactMode: boolean;
   setCompactMode: (enabled: boolean) => void;
+  reducedMotion: boolean;
+  setReducedMotion: (enabled: boolean) => void;
   doctorName: string;
   setDoctorName: (name: string) => void;
 }
@@ -13,6 +15,7 @@ const AppSettingsContext = createContext<AppSettingsContextType | undefined>(und
 
 const PERFORMANCE_KEY = "performance_mode";
 const COMPACT_KEY = "compact_mode";
+const REDUCED_MOTION_KEY = "reduced_motion";
 const DOCTOR_NAME_KEY = "doctor_name";
 
 export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
@@ -23,6 +26,15 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
 
   const [compactMode, setCompactModeState] = useState(() => {
     const stored = localStorage.getItem(COMPACT_KEY);
+    return stored === "true";
+  });
+
+  const [reducedMotion, setReducedMotionState] = useState(() => {
+    const stored = localStorage.getItem(REDUCED_MOTION_KEY);
+    // Default to system preference if not set
+    if (stored === null) {
+      return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    }
     return stored === "true";
   });
 
@@ -42,6 +54,9 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
       }
       if (e.key === COMPACT_KEY) {
         setCompactModeState(e.newValue === "true");
+      }
+      if (e.key === REDUCED_MOTION_KEY) {
+        setReducedMotionState(e.newValue === "true");
       }
     };
 
@@ -72,6 +87,11 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     localStorage.setItem(COMPACT_KEY, String(enabled));
   };
 
+  const setReducedMotion = (enabled: boolean) => {
+    setReducedMotionState(enabled);
+    localStorage.setItem(REDUCED_MOTION_KEY, String(enabled));
+  };
+
   const setDoctorName = (name: string) => {
     setDoctorNameState(name);
     localStorage.setItem(DOCTOR_NAME_KEY, name);
@@ -96,12 +116,22 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     }
   }, [compactMode]);
 
+  useEffect(() => {
+    if (reducedMotion) {
+      document.documentElement.classList.add("reduced-motion");
+    } else {
+      document.documentElement.classList.remove("reduced-motion");
+    }
+  }, [reducedMotion]);
+
   return (
     <AppSettingsContext.Provider value={{ 
       performanceMode, 
       setPerformanceMode, 
       compactMode, 
       setCompactMode,
+      reducedMotion,
+      setReducedMotion,
       doctorName,
       setDoctorName
     }}>
