@@ -16,6 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPhone } from "@/lib/patientUtils";
+import { SkeletonPatientGrid, SkeletonTable } from "@/components/ui/skeleton";
 
 interface Patient {
   id: number;
@@ -329,45 +330,14 @@ export default function Patients() {
         </CardContent>
       </Card>
 
-      {/* Loading State */}
+      {/* Loading State - Grid with shimmer */}
       {loading && viewMode === 'grid' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: pageSize }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-6 bg-muted rounded w-3/4"></div>
-                <div className="h-4 bg-muted rounded w-1/2 mt-2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="h-4 bg-muted rounded w-full"></div>
-                  <div className="h-4 bg-muted rounded w-2/3"></div>
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <SkeletonPatientGrid count={pageSize > 12 ? 12 : pageSize} />
       )}
 
-      {/* Loading State - Table */}
+      {/* Loading State - Table with shimmer */}
       {loading && viewMode === 'table' && (
-        <Card>
-          <CardContent className="p-0">
-            <div className="animate-pulse">
-              <div className="h-12 bg-muted border-b"></div>
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="h-14 border-b flex items-center gap-4 px-4">
-                  <div className="h-4 bg-muted rounded w-16"></div>
-                  <div className="h-4 bg-muted rounded w-32"></div>
-                  <div className="h-4 bg-muted rounded w-24"></div>
-                  <div className="h-4 bg-muted rounded w-28"></div>
-                  <div className="h-4 bg-muted rounded flex-1"></div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <SkeletonTable rows={10} columns={7} />
       )}
 
       {/* Patients Grid View */}

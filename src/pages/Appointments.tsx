@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { AppointmentForm } from "@/components/forms/AppointmentForm";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
-
+import { SkeletonAppointmentList, SkeletonStats, SkeletonCard } from "@/components/ui/skeleton";
 interface Appointment {
   id: string;
   patient_id: number;
@@ -237,8 +237,31 @@ export default function Appointments() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="text-center text-muted-foreground">Loading appointments...</div>
+      <div className="p-6 space-y-6 relative">
+        <FloatingOrbs />
+        {/* Header skeleton */}
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <div className="h-10 w-64 bg-gradient-to-r from-gold/20 via-cyan/20 to-purple/20 rounded-lg animate-pulse" />
+            <div className="h-4 w-48 bg-muted/50 rounded animate-pulse" />
+          </div>
+          <div className="h-10 w-40 bg-gradient-to-r from-gold/30 to-orange/30 rounded-lg animate-pulse" />
+        </div>
+        
+        {/* Stats skeletons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <SkeletonStats />
+          <SkeletonStats />
+          <SkeletonStats />
+        </div>
+        
+        {/* Calendar and appointments layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <SkeletonCard className="lg:col-span-1" />
+          <div className="lg:col-span-2 space-y-4">
+            <SkeletonAppointmentList count={4} />
+          </div>
+        </div>
       </div>
     );
   }

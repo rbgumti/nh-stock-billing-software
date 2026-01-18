@@ -11,7 +11,7 @@ import { format } from "date-fns";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { toast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
-
+import { SkeletonCard } from "@/components/ui/skeleton";
 export default function Prescriptions() {
   const navigate = useNavigate();
   const { prescriptions, loading, updatePrescriptionStatus } = usePrescriptionStore();
@@ -167,8 +167,33 @@ export default function Prescriptions() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">Loading prescriptions...</div>
+      <div className="container mx-auto p-6 relative min-h-screen">
+        <FloatingOrbs />
+        
+        {/* Ambient liquid blobs */}
+        <div className="fixed top-20 left-20 w-96 h-96 bg-gradient-to-br from-gold/8 via-purple/5 to-cyan/8 rounded-full blur-3xl pointer-events-none" />
+        <div className="fixed bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-cyan/8 via-pink/5 to-gold/8 rounded-full blur-3xl pointer-events-none" />
+        
+        {/* Header skeleton */}
+        <div className="flex justify-between items-center mb-6 relative z-10">
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-gradient-to-r from-gold/30 via-amber-400/20 to-gold/30 rounded-lg animate-pulse" />
+            <div className="h-4 w-56 bg-muted/50 rounded animate-pulse" />
+          </div>
+          <div className="h-10 w-40 bg-gradient-to-r from-gold/30 to-orange/30 rounded-lg animate-pulse" />
+        </div>
+        
+        {/* Search skeleton */}
+        <div className="mb-6 relative z-10">
+          <div className="h-10 w-full bg-muted/30 rounded-lg animate-pulse glass-strong border-0" />
+        </div>
+        
+        {/* Prescription cards skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 relative z-10">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       </div>
     );
   }

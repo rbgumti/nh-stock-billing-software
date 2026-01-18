@@ -106,7 +106,12 @@ export default {
 				'soft-lg': '0 8px 48px hsl(var(--primary) / 0.25)',
 				'elevated': '0 12px 40px hsl(var(--glass-shadow)), 0 4px 12px hsl(var(--primary) / 0.1)'
 			},
-			keyframes: {
+      keyframes: {
+        shimmer: {
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
 				'accordion-down': {
 					from: { height: '0' },
 					to: { height: 'var(--radix-accordion-content-height)' }
