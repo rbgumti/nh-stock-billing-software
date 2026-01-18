@@ -13,7 +13,7 @@ import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
-
+import { SkeletonInvoiceGrid, SkeletonStats } from "@/components/ui/skeleton";
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -469,13 +469,31 @@ export default function Invoices() {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="p-4 rounded-full bg-gradient-to-r from-purple/10 to-cyan/10 w-fit mx-auto mb-4 animate-pulse">
-            <Receipt className="h-8 w-8 text-purple" />
+      <div className="p-6 space-y-6 relative">
+        <FloatingOrbs />
+        {/* Header skeleton */}
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <div className="h-10 w-48 bg-gradient-to-r from-purple/20 via-cyan/20 to-pink/20 rounded-lg animate-pulse" />
+            <div className="h-4 w-56 bg-muted/50 rounded animate-pulse" />
           </div>
-          <p className="text-lg text-muted-foreground">Loading invoices...</p>
+          <div className="h-10 w-36 bg-gradient-to-r from-gold/30 to-orange/30 rounded-lg animate-pulse" />
         </div>
+        
+        {/* Stats skeletons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <SkeletonStats />
+          <SkeletonStats />
+          <SkeletonStats />
+        </div>
+        
+        {/* Search skeleton */}
+        <div className="glass-strong border-0 rounded-2xl p-6">
+          <div className="h-10 w-full bg-muted/30 rounded-lg animate-pulse" />
+        </div>
+        
+        {/* Invoice grid skeleton */}
+        <SkeletonInvoiceGrid count={6} />
       </div>
     );
   }
