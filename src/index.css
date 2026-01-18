@@ -243,20 +243,71 @@
   }
 }
 
-/* Manual Performance Mode */
-:root.performance-mode *, 
-:root.performance-mode *::before, 
-:root.performance-mode *::after {
+/* Manual Performance Mode - Disables blur effects */
+:root.performance-mode .glass, 
+:root.performance-mode .glass-card, 
+:root.performance-mode .glass-strong,
+:root.performance-mode .glass-subtle,
+:root.performance-mode .glass-blue,
+:root.performance-mode .glass-cyan,
+:root.performance-mode .glass-teal,
+:root.performance-mode .glass-purple,
+:root.performance-mode .glass-emerald,
+:root.performance-mode .glass-gold {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:root.performance-mode body::before,
+:root.performance-mode body::after {
+  display: none !important;
+}
+
+/* Reduced Motion Mode - Disables all animations and transitions */
+:root.reduced-motion *,
+:root.reduced-motion *::before,
+:root.reduced-motion *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
 }
 
-:root.performance-mode .glass, 
-:root.performance-mode .glass-card, 
-:root.performance-mode .glass-strong {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+/* Disable specific animated elements */
+:root.reduced-motion .liquid-blob,
+:root.reduced-motion .glow-orb,
+:root.reduced-motion .animate-pulse,
+:root.reduced-motion .animate-bounce,
+:root.reduced-motion .animate-spin,
+:root.reduced-motion [class*="animate-"] {
+  animation: none !important;
+}
+
+/* Disable hover transforms */
+:root.reduced-motion .glass-card:hover,
+:root.reduced-motion [class*="hover:scale"],
+:root.reduced-motion [class*="hover:-translate"],
+:root.reduced-motion [class*="hover:translate"] {
+  transform: none !important;
+}
+
+/* Disable floating orbs background animation */
+:root.reduced-motion .fixed[class*="blur-3xl"],
+:root.reduced-motion .absolute[class*="blur-3xl"] {
+  animation: none !important;
+  opacity: 0.3 !important;
+}
+
+/* Keep essential visual feedback but make it instant */
+:root.reduced-motion button:active,
+:root.reduced-motion a:active {
+  opacity: 0.8;
+}
+
+/* Disable mesh gradient animations */
+:root.reduced-motion body::after {
+  animation: none !important;
 }
 
 /* Compact Mode */
