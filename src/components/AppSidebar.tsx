@@ -21,20 +21,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { SettingsDialog } from "@/components/SettingsDialog";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-pink to-cyan", glow: "shadow-pink/40" },
-  { title: "Patients", url: "/patients", icon: Users, color: "from-cyan to-pink", glow: "shadow-cyan/40" },
-  { title: "Appointments", url: "/appointments", icon: Calendar, color: "from-pink to-purple", glow: "shadow-pink/40" },
-  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-cyan to-purple", glow: "shadow-cyan/40" },
-  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-pink to-cyan", glow: "shadow-pink/40" },
-  { title: "Stock", url: "/stock", icon: Package, color: "from-cyan to-pink", glow: "shadow-cyan/40" },
-  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-pink to-purple", glow: "shadow-pink/40" },
-  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-cyan to-pink", glow: "shadow-cyan/40" },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-primary to-secondary", glow: "shadow-primary/30" },
+  { title: "Patients", url: "/patients", icon: Users, color: "from-cyan to-teal", glow: "shadow-cyan/30" },
+  { title: "Appointments", url: "/appointments", icon: Calendar, color: "from-primary to-cyan", glow: "shadow-primary/30" },
+  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-secondary to-cyan", glow: "shadow-secondary/30" },
+  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-teal to-emerald", glow: "shadow-teal/30" },
+  { title: "Stock", url: "/stock", icon: Package, color: "from-cyan to-primary", glow: "shadow-cyan/30" },
+  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-primary to-purple", glow: "shadow-primary/30" },
+  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-secondary to-primary", glow: "shadow-secondary/30" },
 ];
 
 const quickActions = [
-  { title: "Add Patient", url: "/patients/new", color: "from-pink to-cyan", iconColor: "text-cyan" },
-  { title: "New Prescription", url: "/prescriptions/new", color: "from-cyan to-pink", iconColor: "text-pink" },
-  { title: "New Invoice", url: "/invoices/new", color: "from-pink to-purple", iconColor: "text-pink" },
+  { title: "Add Patient", url: "/patients/new", color: "from-primary to-cyan", iconColor: "text-primary" },
+  { title: "New Prescription", url: "/prescriptions/new", color: "from-cyan to-teal", iconColor: "text-cyan" },
+  { title: "New Invoice", url: "/invoices/new", color: "from-secondary to-primary", iconColor: "text-secondary" },
 ];
 
 export function AppSidebar() {
@@ -82,35 +82,31 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0 transition-all duration-300`} collapsible="icon">
-      <SidebarContent className="relative overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-pink/20 scrollbar-track-transparent hover:scrollbar-thumb-pink/40">
-        {/* Dark glass background with neon accent */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/98 to-background backdrop-blur-xl" />
+      <SidebarContent className="relative overflow-y-auto overflow-x-hidden scrollbar-thin">
+        {/* Glass background */}
+        <div className="absolute inset-0 sidebar-glass" />
         
-        {/* Neon gradient mesh */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink/5 via-transparent to-cyan/5" />
+        {/* Subtle blue gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-secondary/5" />
         
-        {/* Neon ambient blobs */}
-        <div className="absolute top-16 right-0 w-32 h-32 bg-gradient-radial from-pink/20 to-transparent rounded-full blur-3xl animate-pulse-neon" />
-        <div className="absolute bottom-1/4 right-0 w-28 h-28 bg-gradient-radial from-cyan/15 to-transparent rounded-full blur-3xl animate-pulse-neon" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-16 left-0 w-24 h-24 bg-gradient-radial from-purple/20 to-transparent rounded-full blur-2xl animate-pulse-neon" style={{ animationDelay: '2s' }} />
+        {/* Ambient blue orbs */}
+        <div className="absolute top-16 right-0 w-32 h-32 bg-gradient-radial from-primary/15 to-transparent rounded-full blur-3xl animate-pulse-soft" />
+        <div className="absolute bottom-1/4 right-0 w-28 h-28 bg-gradient-radial from-cyan/10 to-transparent rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
         
-        {/* Top neon accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-pink via-cyan to-pink opacity-60" />
-        
-        {/* Side neon accent */}
-        <div className="absolute top-0 left-0 w-[2px] h-full bg-gradient-to-b from-pink via-cyan to-pink opacity-40" />
+        {/* Top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-primary/50 via-cyan/30 to-primary/50" />
         
         {/* Compact Header */}
-        <div className="relative p-2 border-b border-pink/20">
-          {/* Glass panel behind header with neon glow */}
-          <div className="absolute inset-1 rounded-xl glass-card border border-pink/20" />
+        <div className="relative p-2 border-b border-border/50">
+          {/* Glass panel behind header */}
+          <div className="absolute inset-1 rounded-xl glass-card" />
           
           {!collapsed ? (
             <div className="flex items-center gap-2 relative z-10 px-0.5">
-              {/* Logo with neon glow */}
+              {/* Logo */}
               <div className="relative group flex-shrink-0">
-                <div className="absolute inset-0 w-14 h-14 rounded-full bg-gradient-to-r from-pink to-cyan opacity-0 group-hover:opacity-40 blur-lg transition-all duration-500" />
-                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-card to-background border-2 border-pink/30 group-hover:border-cyan/50 flex items-center justify-center overflow-hidden transition-all duration-300 shadow-lg shadow-pink/20">
+                <div className="absolute inset-0 w-14 h-14 rounded-full bg-gradient-to-r from-primary to-cyan opacity-0 group-hover:opacity-30 blur-lg transition-all duration-500" />
+                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-card to-background border-2 border-primary/20 group-hover:border-primary/40 flex items-center justify-center overflow-hidden transition-all duration-300 shadow-lg shadow-primary/10">
                   <img 
                     src={navjeevanLogo} 
                     alt="Navjeevan Hospital Logo" 
@@ -119,32 +115,32 @@ export function AppSidebar() {
                 </div>
               </div>
               
-              {/* Hospital Name with neon gradient */}
+              {/* Hospital Name with blue gradient */}
               <div className="min-w-0 flex-1 pl-1">
-                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-pink via-cyan to-pink bg-clip-text text-transparent leading-tight animate-shimmer bg-[length:200%_100%]">
+                <h2 className="text-sm font-bold tracking-wide text-gradient-blue leading-tight">
                   NAVJEEVAN
                 </h2>
-                <p className="text-[10px] font-medium tracking-wide text-cyan">
+                <p className="text-[10px] font-medium tracking-wide text-muted-foreground">
                   Hospital Sirhind
                 </p>
               </div>
 
-              {/* Notification Bell with neon glow */}
+              {/* Notification Bell */}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <NavLink to="/reports" className="relative group">
-                      <div className="w-9 h-9 rounded-xl glass-card hover:bg-pink/10 border border-pink/20 hover:border-cyan/40 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:shadow-pink/20">
-                        <Bell className="h-4 w-4 text-muted-foreground group-hover:text-cyan transition-colors" />
+                      <div className="w-9 h-9 rounded-xl glass-card hover:bg-primary/10 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
+                        <Bell className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         {pendingFollowUps > 0 && (
-                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-r from-pink to-rose-500 text-[10px] font-bold text-white flex items-center justify-center shadow-lg shadow-pink/40 animate-pulse-neon">
+                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-r from-primary to-secondary text-[10px] font-bold text-white flex items-center justify-center shadow-lg shadow-primary/30">
                             {pendingFollowUps > 9 ? '9+' : pendingFollowUps}
                           </span>
                         )}
                       </div>
                     </NavLink>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="glass-card border-pink/20">
+                  <TooltipContent side="bottom" className="glass-card">
                     <p className="text-xs">{pendingFollowUps} pending follow-ups</p>
                   </TooltipContent>
                 </Tooltip>
@@ -153,8 +149,8 @@ export function AppSidebar() {
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
-                <div className="absolute inset-0 w-11 h-11 rounded-full bg-gradient-to-r from-pink to-cyan opacity-0 group-hover:opacity-50 blur-md transition-all duration-300" />
-                <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-card to-background border-2 border-pink/30 flex items-center justify-center overflow-hidden shadow-lg shadow-pink/20">
+                <div className="absolute inset-0 w-11 h-11 rounded-full bg-gradient-to-r from-primary to-cyan opacity-0 group-hover:opacity-40 blur-md transition-all duration-300" />
+                <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-card to-background border-2 border-primary/20 flex items-center justify-center overflow-hidden shadow-lg shadow-primary/10">
                   <img 
                     src={navjeevanLogo}
                     alt="NH Logo" 
@@ -169,19 +165,19 @@ export function AppSidebar() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-9 h-9 p-0 rounded-xl glass-card hover:bg-pink/10 border border-pink/20 hover:border-cyan/40 transition-all duration-300 hover:shadow-lg hover:shadow-pink/20"
+                    className="w-9 h-9 p-0 rounded-xl glass-card hover:bg-primary/10 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
                   >
                     <Menu className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-72 bg-background/98 border-pink/20 p-0 backdrop-blur-xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink/5 to-cyan/5" />
-                  <SheetHeader className="relative p-4 border-b border-pink/20">
+                <SheetContent side="left" className="w-72 glass-strong border-border/50 p-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
+                  <SheetHeader className="relative p-4 border-b border-border/50">
                     <div className="flex items-center gap-3">
                       <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
                       <div>
-                        <SheetTitle className="bg-gradient-to-r from-pink to-cyan bg-clip-text text-transparent text-base">NAVJEEVAN</SheetTitle>
-                        <p className="text-xs text-cyan">Hospital Sirhind</p>
+                        <SheetTitle className="text-gradient-blue text-base">NAVJEEVAN</SheetTitle>
+                        <p className="text-xs text-muted-foreground">Hospital Sirhind</p>
                       </div>
                     </div>
                   </SheetHeader>
@@ -189,7 +185,7 @@ export function AppSidebar() {
                   <div className="relative p-3 space-y-4 overflow-y-auto max-h-[calc(100vh-100px)]">
                     {/* Navigation */}
                     <div>
-                      <p className="text-[10px] text-pink uppercase tracking-widest mb-2 px-2">Navigate</p>
+                      <p className="text-[10px] text-primary uppercase tracking-widest mb-2 px-2">Navigate</p>
                       <div className="space-y-1">
                         {navigationItems.map((item) => (
                           <NavLink
@@ -198,12 +194,12 @@ export function AppSidebar() {
                             onClick={() => setSheetOpen(false)}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
                               isActive(item.url)
-                                ? "glass-card border border-pink/30 shadow-lg shadow-pink/20"
-                                : "hover:bg-pink/5 hover:border-pink/20"
+                                ? "glass-card border border-primary/30 shadow-lg shadow-primary/10"
+                                : "hover:bg-primary/5"
                             }`}
                           >
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-lg ${
-                              isActive(item.url) ? `bg-gradient-to-br ${item.color} ${item.glow}` : "glass-card"
+                              isActive(item.url) ? `bg-gradient-to-br ${item.color} ${item.glow}` : "glass-subtle"
                             }`}>
                               <item.icon className={`h-4 w-4 ${isActive(item.url) ? "text-white" : "text-muted-foreground"}`} />
                             </div>
@@ -217,16 +213,16 @@ export function AppSidebar() {
                     
                     {/* Quick Actions */}
                     <div>
-                      <p className="text-[10px] text-cyan uppercase tracking-widest mb-2 px-2">Quick Add</p>
+                      <p className="text-[10px] text-secondary uppercase tracking-widest mb-2 px-2">Quick Add</p>
                       <div className="space-y-1">
                         {quickActions.map((action) => (
                           <NavLink
                             key={action.title}
                             to={action.url}
                             onClick={() => setSheetOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-pink/5 transition-all duration-300 group"
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/5 transition-all duration-300 group"
                           >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${action.color} shadow-lg group-hover:shadow-pink/30`}>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${action.color} shadow-lg group-hover:shadow-primary/20`}>
                               <Plus className="h-4 w-4 text-white" />
                             </div>
                             <span className="text-muted-foreground group-hover:text-foreground transition-colors">{action.title}</span>
@@ -241,9 +237,9 @@ export function AppSidebar() {
           )}
         </div>
         
-        {/* Navigation with neon active states */}
+        {/* Navigation */}
         <SidebarGroup className="relative z-10 px-2 pt-4">
-          <SidebarGroupLabel className="text-pink uppercase text-[10px] tracking-[0.2em] font-semibold mb-3 px-3">
+          <SidebarGroupLabel className="text-primary uppercase text-[10px] tracking-[0.2em] font-semibold mb-3 px-3">
             Navigate
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -255,36 +251,36 @@ export function AppSidebar() {
                       to={item.url} 
                       className={`group relative rounded-xl transition-all duration-300 flex items-center ${
                         isActive(item.url) 
-                          ? "glass-card border border-pink/40 shadow-lg shadow-pink/20" 
-                          : "hover:bg-pink/5 hover:border-pink/20"
+                          ? "glass-card border border-primary/30 shadow-lg shadow-primary/10" 
+                          : "hover:bg-primary/5"
                       }`}
                     >
-                      {/* Neon active indicator */}
+                      {/* Active indicator */}
                       {isActive(item.url) && (
                         <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b ${item.color} rounded-full shadow-lg ${item.glow}`} />
                       )}
                       
-                      {/* Icon container with neon glow */}
+                      {/* Icon container */}
                       <div className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${
                         isActive(item.url) 
                           ? `bg-gradient-to-br ${item.color} shadow-lg ${item.glow}` 
-                          : "glass-card group-hover:bg-pink/10"
+                          : "glass-subtle group-hover:bg-primary/10"
                       }`}>
                         <item.icon className={`h-5 w-5 transition-colors ${
-                          isActive(item.url) ? 'text-white' : 'text-muted-foreground group-hover:text-cyan'
+                          isActive(item.url) ? 'text-white' : 'text-muted-foreground group-hover:text-primary'
                         }`} />
                       </div>
                       
                       {!collapsed && (
                         <>
                           <span className={`ml-3 font-medium transition-colors ${
-                            isActive(item.url) ? 'bg-gradient-to-r from-pink to-cyan bg-clip-text text-transparent' : 'text-muted-foreground group-hover:text-foreground'
+                            isActive(item.url) ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'
                           }`}>
                             {item.title}
                           </span>
                           
                           {isActive(item.url) && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-cyan" />
+                            <ChevronRight className="ml-auto h-4 w-4 text-primary" />
                           )}
                         </>
                       )}
@@ -296,12 +292,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Quick Actions with neon glass cards */}
+        {/* Quick Actions */}
         <SidebarGroup className="relative z-10 mt-4 px-2">
           <SidebarGroupLabel className="uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
-            <div className="w-6 h-[1px] bg-gradient-to-r from-cyan to-transparent" />
-            <span className="text-cyan">Quick Add</span>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-pink/30 to-transparent" />
+            <div className="w-6 h-[1px] bg-gradient-to-r from-secondary to-transparent" />
+            <span className="text-secondary">Quick Add</span>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1.5">
@@ -310,20 +306,20 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={action.url} 
-                      className="relative rounded-xl glass-card border border-pink/20 hover:border-cyan/40 transition-all duration-500 group overflow-hidden hover:shadow-lg hover:shadow-pink/20"
+                      className="relative rounded-xl glass-card hover:border-primary/30 transition-all duration-300 group overflow-hidden hover:shadow-lg hover:shadow-primary/10"
                     >
-                      {/* Neon shimmer effect */}
+                      {/* Shimmer effect */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
-                        <div className="absolute inset-0 bg-gradient-to-r from-pink/20 via-cyan/20 to-pink/20 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
                       </div>
                       
-                      {/* Icon with neon glow and rotation */}
-                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-lg shadow-pink/30 transition-all duration-500 group-hover:scale-110 group-hover:rotate-90 group-hover:shadow-xl group-hover:shadow-cyan/40`}>
+                      {/* Icon */}
+                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-lg transition-all duration-300 group-hover:scale-110`}>
                         <Plus className="h-4 w-4 text-white relative z-10" />
                       </div>
                       
                       {!collapsed && (
-                        <span className={`ml-3 font-medium bg-gradient-to-r ${action.color} bg-clip-text text-transparent group-hover:opacity-100 opacity-75 transition-all duration-500 group-hover:translate-x-0.5`}>
+                        <span className={`ml-3 font-medium text-muted-foreground group-hover:text-foreground transition-all duration-300`}>
                           {action.title}
                         </span>
                       )}
@@ -346,46 +342,46 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* Toggle Button with neon glass effect */}
+        {/* Toggle Button */}
         <div className="mt-auto relative z-10">
           <div className={`px-3 py-3 ${collapsed ? 'flex justify-center' : ''}`}>
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className={`group relative overflow-hidden rounded-xl glass-card border border-pink/20 hover:border-cyan/40 transition-all duration-500 backdrop-blur-md hover:shadow-lg hover:shadow-pink/20 ${
+              className={`group relative overflow-hidden rounded-xl glass-card hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 ${
                 collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
               }`}
             >
-              {/* Neon shimmer effect */}
+              {/* Shimmer effect */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-pink/20 via-cyan/20 to-pink/20 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
               </div>
               
               {!collapsed && (
-                <span className="text-muted-foreground text-xs font-medium group-hover:text-cyan transition-all duration-500 relative z-10">
+                <span className="text-muted-foreground text-xs font-medium group-hover:text-foreground transition-all duration-300 relative z-10">
                   Collapse
                 </span>
               )}
               
-              <div className={`relative flex items-center justify-center transition-all duration-500 ${
-                collapsed ? '' : 'bg-gradient-to-br from-pink/20 to-cyan/20 rounded-lg p-1.5 border border-pink/20'
+              <div className={`relative flex items-center justify-center transition-all duration-300 ${
+                collapsed ? '' : 'bg-primary/10 rounded-lg p-1.5'
               }`}>
                 {collapsed ? (
-                  <PanelLeft className="h-5 w-5 text-muted-foreground group-hover:text-cyan transition-all duration-500 group-hover:scale-110" />
+                  <PanelLeft className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all duration-300" />
                 ) : (
-                  <PanelLeftClose className="h-4 w-4 text-muted-foreground group-hover:text-pink transition-all duration-500 group-hover:scale-110" />
+                  <PanelLeftClose className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all duration-300" />
                 )}
               </div>
             </Button>
           </div>
 
-          {/* Footer with neon separator */}
+          {/* Footer */}
           {!collapsed && (
             <div className="text-center px-4 pb-4">
-              <div className="h-px bg-gradient-to-r from-transparent via-pink/40 to-transparent mb-3" />
+              <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent mb-3" />
               <p className="text-[10px] text-muted-foreground tracking-wider font-medium">
-                Powered by <span className="bg-gradient-to-r from-pink via-cyan to-pink bg-clip-text text-transparent font-semibold animate-shimmer bg-[length:200%_100%]">Lovable</span>
+                Powered by <span className="text-gradient-blue font-semibold">Lovable</span>
               </p>
             </div>
           )}
