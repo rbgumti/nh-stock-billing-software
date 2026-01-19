@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { PerformanceModeProvider } from "@/hooks/usePerformanceMode";
 import { ThemeProvider } from "next-themes";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -45,6 +46,7 @@ const App = () => (
                   <header className="h-12 flex items-center justify-between border-b border-border bg-background/80 backdrop-blur-sm px-4 sticky top-0 z-40">
                     <SidebarTrigger />
                     <div className="flex items-center gap-2">
+                      <ThemeSwitcher />
                       <ThemeToggle />
                     </div>
                   </header>
