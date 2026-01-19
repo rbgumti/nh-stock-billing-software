@@ -86,15 +86,15 @@ export function AppSidebar() {
         {/* Glass background */}
         <div className="absolute inset-0 sidebar-glass" />
         
-        {/* Subtle blue gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-secondary/5" />
+        {/* Subtle mint gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 via-transparent to-teal-500/5" />
         
-        {/* Ambient blue orbs */}
-        <div className="absolute top-16 right-0 w-32 h-32 bg-gradient-radial from-primary/15 to-transparent rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute bottom-1/4 right-0 w-28 h-28 bg-gradient-radial from-cyan/10 to-transparent rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
+        {/* Ambient mint orbs */}
+        <div className="absolute top-16 right-0 w-32 h-32 bg-gradient-radial from-emerald-500/15 to-transparent rounded-full blur-3xl animate-pulse-soft" />
+        <div className="absolute bottom-1/4 right-0 w-28 h-28 bg-gradient-radial from-teal-500/10 to-transparent rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
         
         {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-primary/50 via-cyan/30 to-primary/50" />
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-emerald-500/50 via-teal-500/30 to-emerald-500/50" />
         
         {/* Compact Header */}
         <div className="relative p-2 border-b border-border/50">
@@ -105,8 +105,8 @@ export function AppSidebar() {
             <div className="flex items-center gap-2 relative z-10 px-0.5">
               {/* Logo */}
               <div className="relative group flex-shrink-0">
-                <div className="absolute inset-0 w-14 h-14 rounded-full bg-gradient-to-r from-primary to-cyan opacity-0 group-hover:opacity-30 blur-lg transition-all duration-500" />
-                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-card to-background border-2 border-primary/20 group-hover:border-primary/40 flex items-center justify-center overflow-hidden transition-all duration-300 shadow-lg shadow-primary/10">
+                <div className="absolute inset-0 w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-30 blur-lg transition-all duration-500" />
+                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-2 border-emerald-500/30 group-hover:border-emerald-500/50 flex items-center justify-center overflow-hidden transition-all duration-300 shadow-lg shadow-emerald-500/20">
                   <img 
                     src={navjeevanLogo} 
                     alt="Navjeevan Hospital Logo" 
@@ -115,12 +115,12 @@ export function AppSidebar() {
                 </div>
               </div>
               
-              {/* Hospital Name with blue gradient */}
+              {/* Hospital Name with mint gradient */}
               <div className="min-w-0 flex-1 pl-1">
-                <h2 className="text-sm font-bold tracking-wide text-gradient-blue leading-tight">
+                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent leading-tight">
                   NAVJEEVAN
                 </h2>
-                <p className="text-[10px] font-medium tracking-wide text-muted-foreground">
+                <p className="text-[10px] font-medium tracking-wide text-emerald-600/70 dark:text-emerald-400/70">
                   Hospital Sirhind
                 </p>
               </div>
@@ -130,10 +130,10 @@ export function AppSidebar() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <NavLink to="/reports" className="relative group">
-                      <div className="w-9 h-9 rounded-xl glass-card hover:bg-primary/10 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
-                        <Bell className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <div className="w-9 h-9 rounded-xl glass-card hover:bg-emerald-500/10 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20">
+                        <Bell className="h-4 w-4 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
                         {pendingFollowUps > 0 && (
-                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-r from-primary to-secondary text-[10px] font-bold text-white flex items-center justify-center shadow-lg shadow-primary/30">
+                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-[10px] font-bold text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
                             {pendingFollowUps > 9 ? '9+' : pendingFollowUps}
                           </span>
                         )}
@@ -149,8 +149,8 @@ export function AppSidebar() {
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
               <div className="relative group">
-                <div className="absolute inset-0 w-11 h-11 rounded-full bg-gradient-to-r from-primary to-cyan opacity-0 group-hover:opacity-40 blur-md transition-all duration-300" />
-                <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-card to-background border-2 border-primary/20 flex items-center justify-center overflow-hidden shadow-lg shadow-primary/10">
+                <div className="absolute inset-0 w-11 h-11 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-40 blur-md transition-all duration-300" />
+                <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-2 border-emerald-500/30 flex items-center justify-center overflow-hidden shadow-lg shadow-emerald-500/20">
                   <img 
                     src={navjeevanLogo}
                     alt="NH Logo" 
@@ -165,19 +165,21 @@ export function AppSidebar() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-9 h-9 p-0 rounded-xl glass-card hover:bg-primary/10 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
+                    className="w-9 h-9 p-0 rounded-xl glass-card hover:bg-emerald-500/10 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10"
                   >
                     <Menu className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-72 glass-strong border-border/50 p-0">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5" />
                   <SheetHeader className="relative p-4 border-b border-border/50">
                     <div className="flex items-center gap-3">
-                      <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-2 border-emerald-500/30 flex items-center justify-center overflow-hidden">
+                        <img src={navjeevanLogo} alt="Logo" className="w-8 h-8 object-contain" />
+                      </div>
                       <div>
-                        <SheetTitle className="text-gradient-blue text-base">NAVJEEVAN</SheetTitle>
-                        <p className="text-xs text-muted-foreground">Hospital Sirhind</p>
+                        <SheetTitle className="bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent text-base">NAVJEEVAN</SheetTitle>
+                        <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70">Hospital Sirhind</p>
                       </div>
                     </div>
                   </SheetHeader>
@@ -185,7 +187,7 @@ export function AppSidebar() {
                   <div className="relative p-3 space-y-4 overflow-y-auto max-h-[calc(100vh-100px)]">
                     {/* Navigation */}
                     <div>
-                      <p className="text-[10px] text-primary uppercase tracking-widest mb-2 px-2">Navigate</p>
+                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2 px-2">Navigate</p>
                       <div className="space-y-1">
                         {navigationItems.map((item) => (
                           <NavLink
@@ -213,7 +215,7 @@ export function AppSidebar() {
                     
                     {/* Quick Actions */}
                     <div>
-                      <p className="text-[10px] text-secondary uppercase tracking-widest mb-2 px-2">Quick Add</p>
+                      <p className="text-[10px] text-teal-600 dark:text-teal-400 uppercase tracking-widest mb-2 px-2">Quick Add</p>
                       <div className="space-y-1">
                         {quickActions.map((action) => (
                           <NavLink
@@ -239,7 +241,7 @@ export function AppSidebar() {
         
         {/* Navigation */}
         <SidebarGroup className="relative z-10 px-2 pt-4">
-          <SidebarGroupLabel className="text-primary uppercase text-[10px] tracking-[0.2em] font-semibold mb-3 px-3">
+          <SidebarGroupLabel className="text-emerald-600 dark:text-emerald-400 uppercase text-[10px] tracking-[0.2em] font-semibold mb-3 px-3">
             Navigate
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -295,9 +297,9 @@ export function AppSidebar() {
         {/* Quick Actions */}
         <SidebarGroup className="relative z-10 mt-4 px-2">
           <SidebarGroupLabel className="uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
-            <div className="w-6 h-[1px] bg-gradient-to-r from-secondary to-transparent" />
-            <span className="text-secondary">Quick Add</span>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+            <div className="w-6 h-[1px] bg-gradient-to-r from-teal-500 to-transparent" />
+            <span className="text-teal-600 dark:text-teal-400">Quick Add</span>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1.5">
