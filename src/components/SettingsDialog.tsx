@@ -1,4 +1,4 @@
-import { Settings, Zap, Minimize2, User, Sun, Moon, Monitor, Sparkles } from "lucide-react";
+import { Settings, Zap, Minimize2, User, Sun, Moon, Monitor } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,20 +14,9 @@ import { Input } from "@/components/ui/input";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { useTheme } from "next-themes";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { toast } from "@/hooks/use-toast";
 
 export function SettingsDialog() {
-  const { performanceMode, setPerformanceMode, compactMode, setCompactMode, reducedMotion, setReducedMotion, doctorName, setDoctorName } = useAppSettings();
-
-  const handleReducedMotionChange = (checked: boolean) => {
-    setReducedMotion(checked);
-    toast({
-      title: checked ? "Animations disabled" : "Animations enabled",
-      description: checked 
-        ? "Page transitions and animations have been turned off" 
-        : "Page transitions and animations have been restored",
-    });
-  };
+  const { performanceMode, setPerformanceMode, compactMode, setCompactMode, doctorName, setDoctorName } = useAppSettings();
   const { theme, setTheme } = useTheme();
 
   return (
@@ -118,30 +107,6 @@ export function SettingsDialog() {
 
           <Separator />
 
-          {/* Reduced Motion */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-pink-500/10">
-                <Sparkles className="w-5 h-5 text-pink-500" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="reduced-motion" className="text-sm font-medium">
-                  Reduce Motion
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  Disable page transitions and entrance animations
-                </p>
-              </div>
-            </div>
-            <Switch
-              id="reduced-motion"
-              checked={reducedMotion}
-              onCheckedChange={handleReducedMotionChange}
-            />
-          </div>
-
-          <Separator />
-
           {/* Performance Mode */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-start gap-3">
@@ -153,7 +118,7 @@ export function SettingsDialog() {
                   Performance Mode
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Disable blur effects and visual enhancements
+                  Disable animations and effects for better performance
                 </p>
               </div>
             </div>

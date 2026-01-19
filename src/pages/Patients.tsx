@@ -16,8 +16,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPhone } from "@/lib/patientUtils";
-import { SkeletonPatientGrid, SkeletonTable } from "@/components/ui/skeleton";
-import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion";
 
 interface Patient {
   id: number;
@@ -230,34 +228,32 @@ export default function Patients() {
   };
 
   return (
-    <PageTransition className="p-6 space-y-6 relative">
+    <div className="p-6 space-y-6 relative">
       <FloatingOrbs />
-      <FadeIn direction="down">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
-              Patients
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              {loading ? "Loading patients..." : `${totalCount.toLocaleString()} patients total`}
-              {searchTab === "general" && debouncedSearch && ` matching "${debouncedSearch}"`}
-              {searchTab === "fileno" && debouncedFileNo && ` with file no. "${debouncedFileNo}"`}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setShowImport(!showImport)} className="glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5">
-              <Upload className="h-4 w-4 mr-2 text-purple" />
-              Import Excel
-            </Button>
-            <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
-              <Link to="/patients/new">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Patient
-              </Link>
-            </Button>
-          </div>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+            Patients
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            {loading ? "Loading patients..." : `${totalCount.toLocaleString()} patients total`}
+            {searchTab === "general" && debouncedSearch && ` matching "${debouncedSearch}"`}
+            {searchTab === "fileno" && debouncedFileNo && ` with file no. "${debouncedFileNo}"`}
+          </p>
         </div>
-      </FadeIn>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowImport(!showImport)} className="glass-subtle border-purple/20 hover:border-purple/40 hover:bg-purple/5">
+            <Upload className="h-4 w-4 mr-2 text-purple" />
+            Import Excel
+          </Button>
+          <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
+            <Link to="/patients/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Patient
+            </Link>
+          </Button>
+        </div>
+      </div>
 
       {/* Import Section */}
       <Collapsible open={showImport} onOpenChange={setShowImport}>
@@ -333,14 +329,45 @@ export default function Patients() {
         </CardContent>
       </Card>
 
-      {/* Loading State - Grid with shimmer */}
+      {/* Loading State */}
       {loading && viewMode === 'grid' && (
-        <SkeletonPatientGrid count={pageSize > 12 ? 12 : pageSize} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: pageSize }).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-6 bg-muted rounded w-3/4"></div>
+                <div className="h-4 bg-muted rounded w-1/2 mt-2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                  <div className="h-4 bg-muted rounded w-2/3"></div>
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
-      {/* Loading State - Table with shimmer */}
+      {/* Loading State - Table */}
       {loading && viewMode === 'table' && (
-        <SkeletonTable rows={10} columns={7} />
+        <Card>
+          <CardContent className="p-0">
+            <div className="animate-pulse">
+              <div className="h-12 bg-muted border-b"></div>
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="h-14 border-b flex items-center gap-4 px-4">
+                  <div className="h-4 bg-muted rounded w-16"></div>
+                  <div className="h-4 bg-muted rounded w-32"></div>
+                  <div className="h-4 bg-muted rounded w-24"></div>
+                  <div className="h-4 bg-muted rounded w-28"></div>
+                  <div className="h-4 bg-muted rounded flex-1"></div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Patients Grid View */}
@@ -618,6 +645,6 @@ export default function Patients() {
           </CardContent>
         </Card>
       )}
-    </PageTransition>
+    </div>
   );
 }

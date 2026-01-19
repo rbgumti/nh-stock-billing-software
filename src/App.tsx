@@ -2,8 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { PerformanceModeProvider } from "@/hooks/usePerformanceMode";
@@ -31,36 +30,6 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Animated Routes component that uses location for AnimatePresence
-const AnimatedRoutes = () => {
-  const location = useLocation();
-  
-  return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
-        <Route path="/patients/new" element={<ProtectedRoute><NewPatient /></ProtectedRoute>} />
-        <Route path="/patients/view/:id" element={<ProtectedRoute><ViewPatient /></ProtectedRoute>} />
-        <Route path="/patients/edit/:id" element={<ProtectedRoute><EditPatient /></ProtectedRoute>} />
-        <Route path="/stock" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
-        <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
-        <Route path="/invoices/new" element={<ProtectedRoute><NewInvoice /></ProtectedRoute>} />
-        <Route path="/invoices/edit/:id" element={<ProtectedRoute><EditInvoice /></ProtectedRoute>} />
-        <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-        <Route path="/analytics/patients" element={<ProtectedRoute><PatientAnalytics /></ProtectedRoute>} />
-        <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
-        <Route path="/prescriptions" element={<ProtectedRoute><Prescriptions /></ProtectedRoute>} />
-        <Route path="/prescriptions/new" element={<ProtectedRoute><NewPrescription /></ProtectedRoute>} />
-        <Route path="/prescriptions/view/:id" element={<ProtectedRoute><ViewPrescription /></ProtectedRoute>} />
-        <Route path="/prescriptions/edit/:id" element={<ProtectedRoute><EditPrescription /></ProtectedRoute>} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AnimatePresence>
-  );
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -80,7 +49,26 @@ const App = () => (
                     </div>
                   </header>
                   <main className="flex-1 overflow-auto">
-                    <AnimatedRoutes />
+                    <Routes>
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                      <Route path="/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+                      <Route path="/patients/new" element={<ProtectedRoute><NewPatient /></ProtectedRoute>} />
+                      <Route path="/patients/view/:id" element={<ProtectedRoute><ViewPatient /></ProtectedRoute>} />
+                      <Route path="/patients/edit/:id" element={<ProtectedRoute><EditPatient /></ProtectedRoute>} />
+                      <Route path="/stock" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
+                      <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
+                      <Route path="/invoices/new" element={<ProtectedRoute><NewInvoice /></ProtectedRoute>} />
+                      <Route path="/invoices/edit/:id" element={<ProtectedRoute><EditInvoice /></ProtectedRoute>} />
+                      <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+                      <Route path="/analytics/patients" element={<ProtectedRoute><PatientAnalytics /></ProtectedRoute>} />
+                      <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
+                      <Route path="/prescriptions" element={<ProtectedRoute><Prescriptions /></ProtectedRoute>} />
+                      <Route path="/prescriptions/new" element={<ProtectedRoute><NewPrescription /></ProtectedRoute>} />
+                      <Route path="/prescriptions/view/:id" element={<ProtectedRoute><ViewPrescription /></ProtectedRoute>} />
+                      <Route path="/prescriptions/edit/:id" element={<ProtectedRoute><EditPrescription /></ProtectedRoute>} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
                   </main>
                 </div>
               </div>

@@ -13,8 +13,7 @@ import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
-import { SkeletonInvoiceGrid, SkeletonStats } from "@/components/ui/skeleton";
-import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion";
+
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -470,119 +469,97 @@ export default function Invoices() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6 relative">
-        <FloatingOrbs />
-        {/* Header skeleton */}
-        <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <div className="h-10 w-48 bg-gradient-to-r from-purple/20 via-cyan/20 to-pink/20 rounded-lg animate-pulse" />
-            <div className="h-4 w-56 bg-muted/50 rounded animate-pulse" />
+      <div className="p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="p-4 rounded-full bg-gradient-to-r from-purple/10 to-cyan/10 w-fit mx-auto mb-4 animate-pulse">
+            <Receipt className="h-8 w-8 text-purple" />
           </div>
-          <div className="h-10 w-36 bg-gradient-to-r from-gold/30 to-orange/30 rounded-lg animate-pulse" />
+          <p className="text-lg text-muted-foreground">Loading invoices...</p>
         </div>
-        
-        {/* Stats skeletons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SkeletonStats />
-          <SkeletonStats />
-          <SkeletonStats />
-        </div>
-        
-        {/* Search skeleton */}
-        <div className="glass-strong border-0 rounded-2xl p-6">
-          <div className="h-10 w-full bg-muted/30 rounded-lg animate-pulse" />
-        </div>
-        
-        {/* Invoice grid skeleton */}
-        <SkeletonInvoiceGrid count={6} />
       </div>
     );
   }
 
   return (
-    <PageTransition className="p-6 space-y-6 relative">
+    <div className="p-6 space-y-6 relative">
       <FloatingOrbs />
-      <FadeIn direction="down">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
-              Invoices
-            </h1>
-            <p className="text-muted-foreground mt-2">Manage billing and payments</p>
-          </div>
-          <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
-            <Link to="/invoices/new">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Invoice
-            </Link>
-          </Button>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
+            Invoices
+          </h1>
+          <p className="text-muted-foreground mt-2">Manage billing and payments</p>
         </div>
-      </FadeIn>
+        <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
+          <Link to="/invoices/new">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Invoice
+          </Link>
+        </Button>
+      </div>
 
       {/* Summary Cards */}
-      <FadeIn delay={0.1}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-            <CardContent className="pt-6 relative">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-cyan">
-                  <Receipt className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{filteredInvoices.length}</p>
-                </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-purple to-cyan">
+                <Receipt className="h-5 w-5 text-white" />
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-            <CardContent className="pt-6 relative">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-r from-gold to-orange">
-                  <Receipt className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{formatNumber(totalAmount)}</p>
-                </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{filteredInvoices.length}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-gold to-orange">
+                <Receipt className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{formatNumber(totalAmount)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 via-transparent to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-            <CardContent className="pt-6 relative">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-r from-emerald to-teal">
-                  <CheckCircle className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Paid</p>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">₹{formatNumber(paidAmount)}</p>
-                </div>
+        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 via-transparent to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-emerald to-teal">
+                <CheckCircle className="h-5 w-5 text-white" />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Paid</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent">₹{formatNumber(paidAmount)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-            <CardContent className="pt-6 relative">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-pink">
-                  <Receipt className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">₹{formatNumber(pendingAmount)}</p>
-                </div>
+        <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <CardContent className="pt-6 relative">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-orange to-pink">
+                <Receipt className="h-5 w-5 text-white" />
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </FadeIn>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-orange to-pink bg-clip-text text-transparent">₹{formatNumber(pendingAmount)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Search and Filter */}
       <Card className="glass-strong border-0 overflow-hidden relative">
@@ -755,6 +732,6 @@ export default function Invoices() {
           </CardContent>
         </Card>
       )}
-    </PageTransition>
+    </div>
   );
 }

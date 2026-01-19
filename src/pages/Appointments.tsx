@@ -13,8 +13,7 @@ import { cn } from "@/lib/utils";
 import { AppointmentForm } from "@/components/forms/AppointmentForm";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
-import { SkeletonAppointmentList, SkeletonStats, SkeletonCard } from "@/components/ui/skeleton";
-import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/motion";
+
 interface Appointment {
   id: string;
   patient_id: number;
@@ -238,31 +237,8 @@ export default function Appointments() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6 relative">
-        <FloatingOrbs />
-        {/* Header skeleton */}
-        <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <div className="h-10 w-64 bg-gradient-to-r from-gold/20 via-cyan/20 to-purple/20 rounded-lg animate-pulse" />
-            <div className="h-4 w-48 bg-muted/50 rounded animate-pulse" />
-          </div>
-          <div className="h-10 w-40 bg-gradient-to-r from-gold/30 to-orange/30 rounded-lg animate-pulse" />
-        </div>
-        
-        {/* Stats skeletons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SkeletonStats />
-          <SkeletonStats />
-          <SkeletonStats />
-        </div>
-        
-        {/* Calendar and appointments layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <SkeletonCard className="lg:col-span-1" />
-          <div className="lg:col-span-2 space-y-4">
-            <SkeletonAppointmentList count={4} />
-          </div>
-        </div>
+      <div className="p-6">
+        <div className="text-center text-muted-foreground">Loading appointments...</div>
       </div>
     );
   }
@@ -546,41 +522,39 @@ export default function Appointments() {
   };
 
   return (
-    <PageTransition className="p-6 space-y-6 relative min-h-screen">
+    <div className="p-6 space-y-6 relative min-h-screen">
       <FloatingOrbs />
       
       {/* Ambient liquid blobs */}
       <div className="fixed top-20 left-20 w-96 h-96 bg-gradient-to-br from-gold/8 via-purple/5 to-cyan/8 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-cyan/8 via-pink/5 to-gold/8 rounded-full blur-3xl pointer-events-none" />
       
-      <FadeIn direction="down">
-        <div className="flex items-center justify-between relative z-10">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gold via-amber-400 to-gold bg-clip-text text-transparent">Appointments</h1>
-            <p className="text-muted-foreground mt-2">Manage patient appointments and schedules</p>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) setEditingAppointment(null);
-          }}>
-            <DialogTrigger asChild>
-              <Button className="bg-gold hover:bg-gold/90 text-navy">
-                <Plus className="mr-2 h-4 w-4" />
-                New Appointment
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingAppointment ? 'Edit Appointment' : 'Schedule New Appointment'}</DialogTitle>
-              </DialogHeader>
-              <AppointmentForm 
-                appointment={editingAppointment} 
-                onSuccess={handleFormSuccess}
-              />
-            </DialogContent>
-          </Dialog>
+      <div className="flex items-center justify-between relative z-10">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gold via-amber-400 to-gold bg-clip-text text-transparent">Appointments</h1>
+          <p className="text-muted-foreground mt-2">Manage patient appointments and schedules</p>
         </div>
-      </FadeIn>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setEditingAppointment(null);
+        }}>
+          <DialogTrigger asChild>
+            <Button className="bg-gold hover:bg-gold/90 text-navy">
+              <Plus className="mr-2 h-4 w-4" />
+              New Appointment
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingAppointment ? 'Edit Appointment' : 'Schedule New Appointment'}</DialogTitle>
+            </DialogHeader>
+            <AppointmentForm 
+              appointment={editingAppointment} 
+              onSuccess={handleFormSuccess}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* View Mode Tabs */}
       <div className="flex items-center justify-between relative z-10">
@@ -603,71 +577,59 @@ export default function Appointments() {
       </div>
 
       {/* Stats */}
-      <FadeIn delay={0.1}>
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
-          <StaggerItem>
-            <Card className="glass-strong border border-white/10 hover:border-gold/30 transition-all duration-300 group overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium">Total Appointments</CardTitle>
-                <CalendarIcon className="h-4 w-4 text-gold" />
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl font-bold bg-gradient-to-r from-gold to-amber-400 bg-clip-text text-transparent">{appointments.length}</div>
-              </CardContent>
-            </Card>
-          </StaggerItem>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
+        <Card className="glass-strong border border-white/10 hover:border-gold/30 transition-all duration-300 group overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium">Total Appointments</CardTitle>
+            <CalendarIcon className="h-4 w-4 text-gold" />
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <div className="text-2xl font-bold bg-gradient-to-r from-gold to-amber-400 bg-clip-text text-transparent">{appointments.length}</div>
+          </CardContent>
+        </Card>
 
-          <StaggerItem>
-            <Card className="glass-strong border border-white/10 hover:border-cyan/30 transition-all duration-300 group overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium">Upcoming</CardTitle>
-                <Clock className="h-4 w-4 text-cyan-400" />
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">{upcomingAppointments.length}</div>
-              </CardContent>
-            </Card>
-          </StaggerItem>
+        <Card className="glass-strong border border-white/10 hover:border-cyan/30 transition-all duration-300 group overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium">Upcoming</CardTitle>
+            <Clock className="h-4 w-4 text-cyan-400" />
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <div className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">{upcomingAppointments.length}</div>
+          </CardContent>
+        </Card>
 
-          <StaggerItem>
-            <Card className="glass-strong border border-white/10 hover:border-purple/30 transition-all duration-300 group overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium">Today</CardTitle>
-                <CalendarIcon className="h-4 w-4 text-purple-400" />
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{getAppointmentsForDate(new Date()).length}</div>
-              </CardContent>
-            </Card>
-          </StaggerItem>
+        <Card className="glass-strong border border-white/10 hover:border-purple/30 transition-all duration-300 group overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium">Today</CardTitle>
+            <CalendarIcon className="h-4 w-4 text-purple-400" />
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{getAppointmentsForDate(new Date()).length}</div>
+          </CardContent>
+        </Card>
 
-          <StaggerItem>
-            <Card className="glass-strong border border-white/10 hover:border-emerald-500/30 transition-all duration-300 group overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium">Completed</CardTitle>
-                <FileText className="h-4 w-4 text-emerald-400" />
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                  {appointments.filter(a => a.status === 'Completed').length}
-                </div>
-              </CardContent>
-            </Card>
-          </StaggerItem>
-        </StaggerContainer>
-      </FadeIn>
+        <Card className="glass-strong border border-white/10 hover:border-emerald-500/30 transition-all duration-300 group overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <FileText className="h-4 w-4 text-emerald-400" />
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <div className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+              {appointments.filter(a => a.status === 'Completed').length}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Calendar Views */}
-      <FadeIn delay={0.2}>
-        <div className="relative z-10">
-          {viewMode === "week" && renderWeekView()}
-          {viewMode === "month" && renderMonthView()}
-        </div>
-      </FadeIn>
+      <div className="relative z-10">
+        {viewMode === "week" && renderWeekView()}
+        {viewMode === "month" && renderMonthView()}
+      </div>
 
       {viewMode === "day" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
@@ -716,44 +678,42 @@ export default function Appointments() {
       )}
 
       {/* Upcoming Appointments */}
-      <FadeIn delay={0.3}>
-        <Card className="glass-strong border border-white/10 relative z-10">
-          <CardHeader>
-            <CardTitle className="bg-gradient-to-r from-gold to-amber-400 bg-clip-text text-transparent">Upcoming Appointments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {upcomingAppointments.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No upcoming appointments</p>
-              ) : (
-                upcomingAppointments.map((appointment) => (
-                  <div
-                    key={appointment.id}
-                    className="flex items-center justify-between p-3 glass-strong border border-white/10 rounded-lg hover:border-gold/30 transition-all duration-300"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{appointment.patient_name}</span>
-                        <Badge className={getStatusColor(appointment.status)}>
-                          {appointment.status}
-                        </Badge>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {format(new Date(appointment.appointment_date), 'MMM d, yyyy • h:mm a')} • {appointment.reason}
-                      </div>
+      <Card className="glass-strong border border-white/10 relative z-10">
+        <CardHeader>
+          <CardTitle className="bg-gradient-to-r from-gold to-amber-400 bg-clip-text text-transparent">Upcoming Appointments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {upcomingAppointments.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No upcoming appointments</p>
+            ) : (
+              upcomingAppointments.map((appointment) => (
+                <div
+                  key={appointment.id}
+                  className="flex items-center justify-between p-3 glass-strong border border-white/10 rounded-lg hover:border-gold/30 transition-all duration-300"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{appointment.patient_name}</span>
+                      <Badge className={getStatusColor(appointment.status)}>
+                        {appointment.status}
+                      </Badge>
                     </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(appointment)}>
-                        Edit
-                      </Button>
+                    <div className="text-sm text-muted-foreground">
+                      {format(new Date(appointment.appointment_date), 'MMM d, yyyy • h:mm a')} • {appointment.reason}
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </FadeIn>
-    </PageTransition>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(appointment)}>
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

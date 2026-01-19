@@ -21,20 +21,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { SettingsDialog } from "@/components/SettingsDialog";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-primary to-secondary", glow: "shadow-primary/30" },
-  { title: "Patients", url: "/patients", icon: Users, color: "from-cyan to-teal", glow: "shadow-cyan/30" },
-  { title: "Appointments", url: "/appointments", icon: Calendar, color: "from-primary to-cyan", glow: "shadow-primary/30" },
-  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-secondary to-cyan", glow: "shadow-secondary/30" },
-  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-teal to-emerald", glow: "shadow-teal/30" },
-  { title: "Stock", url: "/stock", icon: Package, color: "from-cyan to-primary", glow: "shadow-cyan/30" },
-  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-primary to-purple", glow: "shadow-primary/30" },
-  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-secondary to-primary", glow: "shadow-secondary/30" },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
+  { title: "Patients", url: "/patients", icon: Users, color: "from-blue-500 to-cyan-500", glow: "group-hover:shadow-blue-500/30" },
+  { title: "Appointments", url: "/appointments", icon: Calendar, color: "from-emerald-500 to-teal-500", glow: "group-hover:shadow-emerald-500/30" },
+  { title: "Prescriptions", url: "/prescriptions", icon: FileText, color: "from-amber-500 to-orange-500", glow: "group-hover:shadow-amber-500/30" },
+  { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-pink-500 to-rose-500", glow: "group-hover:shadow-pink-500/30" },
+  { title: "Stock", url: "/stock", icon: Package, color: "from-indigo-500 to-blue-500", glow: "group-hover:shadow-indigo-500/30" },
+  { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-green-500 to-emerald-500", glow: "group-hover:shadow-green-500/30" },
+  { title: "Reports", url: "/reports", icon: BarChart3, color: "from-purple-500 to-violet-500", glow: "group-hover:shadow-purple-500/30" },
 ];
 
 const quickActions = [
-  { title: "Add Patient", url: "/patients/new", color: "from-primary to-cyan", iconColor: "text-primary" },
-  { title: "New Prescription", url: "/prescriptions/new", color: "from-cyan to-teal", iconColor: "text-cyan" },
-  { title: "New Invoice", url: "/invoices/new", color: "from-secondary to-primary", iconColor: "text-secondary" },
+  { title: "Add Patient", url: "/patients/new", color: "from-blue-500 to-cyan-500", iconColor: "text-cyan-400" },
+  { title: "New Prescription", url: "/prescriptions/new", color: "from-amber-500 to-orange-500", iconColor: "text-amber-400" },
+  { title: "New Invoice", url: "/invoices/new", color: "from-green-500 to-emerald-500", iconColor: "text-emerald-400" },
 ];
 
 export function AppSidebar() {
@@ -82,31 +82,34 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={`${collapsed ? "w-14" : "w-64"} border-r-0 transition-all duration-300`} collapsible="icon">
-      <SidebarContent className="relative overflow-y-auto overflow-x-hidden scrollbar-thin">
-        {/* Glass background */}
+      <SidebarContent className="relative overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20">
+        {/* Optimized Glass Background */}
         <div className="absolute inset-0 sidebar-glass" />
         
-        {/* Subtle ocean blue gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 via-transparent to-cyan-500/5" />
+        {/* Simplified Gradient Mesh - static for performance */}
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/8 via-transparent to-cyan-600/6" />
         
-        {/* Ambient ocean orbs */}
-        <div className="absolute top-16 right-0 w-32 h-32 bg-gradient-radial from-blue-500/15 to-transparent rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute bottom-1/4 right-0 w-28 h-28 bg-gradient-radial from-cyan-500/10 to-transparent rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
+        {/* Reduced Ambient Blobs - fewer elements, less blur */}
+        <div className="absolute top-16 right-0 w-32 h-32 bg-gradient-radial from-violet-500/20 to-transparent rounded-full blur-2xl" />
+        <div className="absolute bottom-1/4 right-0 w-28 h-28 bg-gradient-radial from-pink-500/15 to-transparent rounded-full blur-2xl" />
+        <div className="absolute bottom-16 left-0 w-24 h-24 bg-gradient-radial from-amber-400/20 to-transparent rounded-full blur-xl" />
         
-        {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-blue-500/50 via-cyan-500/30 to-blue-500/50" />
+        {/* Top Accent Line */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        
+        {/* Side Accent */}
+        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-violet-500/30 via-transparent to-cyan-500/30" />
         
         {/* Compact Header */}
-        <div className="relative p-2 border-b border-border/50">
+        <div className="relative p-2 border-b border-white/5">
           {/* Glass panel behind header */}
-          <div className="absolute inset-1 rounded-xl glass-card" />
+          <div className="absolute inset-1 rounded-xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/10" />
           
           {!collapsed ? (
             <div className="flex items-center gap-2 relative z-10 px-0.5">
               {/* Logo */}
               <div className="relative group flex-shrink-0">
-                <div className="absolute inset-0 w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-30 blur-lg transition-all duration-500" />
-                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 border-2 border-blue-500/30 group-hover:border-blue-500/50 flex items-center justify-center overflow-hidden transition-all duration-300 shadow-lg shadow-blue-500/20">
+                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-white/15 group-hover:border-white/30 flex items-center justify-center overflow-hidden transition-colors duration-200">
                   <img 
                     src={navjeevanLogo} 
                     alt="Navjeevan Hospital Logo" 
@@ -115,12 +118,12 @@ export function AppSidebar() {
                 </div>
               </div>
               
-              {/* Hospital Name with ocean blue gradient */}
+              {/* Hospital Name */}
               <div className="min-w-0 flex-1 pl-1">
-                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent leading-tight">
+                <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-white to-violet-200 bg-clip-text text-transparent leading-tight">
                   NAVJEEVAN
                 </h2>
-                <p className="text-[10px] font-medium tracking-wide text-blue-600/70 dark:text-blue-400/70">
+                <p className="text-[10px] font-medium tracking-wide text-amber-400">
                   Hospital Sirhind
                 </p>
               </div>
@@ -129,18 +132,18 @@ export function AppSidebar() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <NavLink to="/reports" className="relative group">
-                      <div className="w-9 h-9 rounded-xl glass-card hover:bg-blue-500/10 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20">
-                        <Bell className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                    <NavLink to="/reports" className="relative">
+                      <div className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors duration-200">
+                        <Bell className="h-4 w-4 text-slate-400 hover:text-white" />
                         {pendingFollowUps > 0 && (
-                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-[10px] font-bold text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
+                          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center">
                             {pendingFollowUps > 9 ? '9+' : pendingFollowUps}
                           </span>
                         )}
                       </div>
                     </NavLink>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="glass-card">
+                  <TooltipContent side="bottom" className="bg-slate-800/95 border-white/10">
                     <p className="text-xs">{pendingFollowUps} pending follow-ups</p>
                   </TooltipContent>
                 </Tooltip>
@@ -148,9 +151,8 @@ export function AppSidebar() {
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 relative z-10">
-              <div className="relative group">
-                <div className="absolute inset-0 w-11 h-11 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-40 blur-md transition-all duration-300" />
-                <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 border-2 border-blue-500/30 flex items-center justify-center overflow-hidden shadow-lg shadow-blue-500/20">
+              <div className="relative">
+                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-white/15 flex items-center justify-center overflow-hidden">
                   <img 
                     src={navjeevanLogo}
                     alt="NH Logo" 
@@ -165,21 +167,19 @@ export function AppSidebar() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-9 h-9 p-0 rounded-xl glass-card hover:bg-blue-500/10 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10"
+                    className="w-9 h-9 p-0 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors duration-200"
                   >
-                    <Menu className="h-4 w-4 text-muted-foreground" />
+                    <Menu className="h-4 w-4 text-slate-400" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-72 glass-strong border-border/50 p-0">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5" />
-                  <SheetHeader className="relative p-4 border-b border-border/50">
+                <SheetContent side="left" className="w-72 bg-slate-900/98 border-white/10 p-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-violet-600/3 to-cyan-600/3" />
+                  <SheetHeader className="relative p-4 border-b border-white/10">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 border-2 border-blue-500/30 flex items-center justify-center overflow-hidden">
-                        <img src={navjeevanLogo} alt="Logo" className="w-8 h-8 object-contain" />
-                      </div>
+                      <img src={navjeevanLogo} alt="Logo" className="w-10 h-10 object-contain" />
                       <div>
-                        <SheetTitle className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent text-base">NAVJEEVAN</SheetTitle>
-                        <p className="text-xs text-blue-600/70 dark:text-blue-400/70">Hospital Sirhind</p>
+                        <SheetTitle className="text-white text-base">NAVJEEVAN</SheetTitle>
+                        <p className="text-xs text-amber-400">Hospital Sirhind</p>
                       </div>
                     </div>
                   </SheetHeader>
@@ -187,25 +187,25 @@ export function AppSidebar() {
                   <div className="relative p-3 space-y-4 overflow-y-auto max-h-[calc(100vh-100px)]">
                     {/* Navigation */}
                     <div>
-                      <p className="text-[10px] text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 px-2">Navigate</p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2 px-2">Navigate</p>
                       <div className="space-y-1">
                         {navigationItems.map((item) => (
                           <NavLink
                             key={item.title}
                             to={item.url}
                             onClick={() => setSheetOpen(false)}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150 ${
                               isActive(item.url)
-                                ? "glass-card border border-primary/30 shadow-lg shadow-primary/10"
-                                : "hover:bg-primary/5"
+                                ? "bg-white/10 border border-white/10"
+                                : "hover:bg-white/5"
                             }`}
                           >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-lg ${
-                              isActive(item.url) ? `bg-gradient-to-br ${item.color} ${item.glow}` : "glass-subtle"
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              isActive(item.url) ? `bg-gradient-to-br ${item.color}` : "bg-white/5"
                             }`}>
-                              <item.icon className={`h-4 w-4 ${isActive(item.url) ? "text-white" : "text-muted-foreground"}`} />
+                              <item.icon className={`h-4 w-4 ${isActive(item.url) ? "text-white" : "text-slate-400"}`} />
                             </div>
-                            <span className={isActive(item.url) ? "text-foreground font-medium" : "text-muted-foreground"}>
+                            <span className={isActive(item.url) ? "text-white font-medium" : "text-slate-300"}>
                               {item.title}
                             </span>
                           </NavLink>
@@ -215,19 +215,19 @@ export function AppSidebar() {
                     
                     {/* Quick Actions */}
                     <div>
-                      <p className="text-[10px] text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mb-2 px-2">Quick Add</p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2 px-2">Quick Add</p>
                       <div className="space-y-1">
                         {quickActions.map((action) => (
                           <NavLink
                             key={action.title}
                             to={action.url}
                             onClick={() => setSheetOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/5 transition-all duration-300 group"
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors duration-150"
                           >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${action.color} shadow-lg group-hover:shadow-primary/20`}>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${action.color}`}>
                               <Plus className="h-4 w-4 text-white" />
                             </div>
-                            <span className="text-muted-foreground group-hover:text-foreground transition-colors">{action.title}</span>
+                            <span className="text-slate-300">{action.title}</span>
                           </NavLink>
                         ))}
                       </div>
@@ -239,9 +239,9 @@ export function AppSidebar() {
           )}
         </div>
         
-        {/* Navigation */}
+        {/* Navigation - Optimized for performance */}
         <SidebarGroup className="relative z-10 px-2 pt-4">
-          <SidebarGroupLabel className="text-blue-600 dark:text-blue-400 uppercase text-[10px] tracking-[0.2em] font-semibold mb-3 px-3">
+          <SidebarGroupLabel className="text-slate-500/90 uppercase text-[10px] tracking-[0.2em] font-semibold mb-3 px-3">
             Navigate
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -251,38 +251,38 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
-                      className={`group relative rounded-xl transition-all duration-300 flex items-center ${
+                      className={`relative rounded-xl transition-colors duration-150 flex items-center ${
                         isActive(item.url) 
-                          ? "glass-card border border-primary/30 shadow-lg shadow-primary/10" 
-                          : "hover:bg-primary/5"
+                          ? "bg-white/10 border border-white/15" 
+                          : "hover:bg-white/5"
                       }`}
                     >
                       {/* Active indicator */}
                       {isActive(item.url) && (
-                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b ${item.color} rounded-full shadow-lg ${item.glow}`} />
+                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b ${item.color} rounded-full`} />
                       )}
                       
                       {/* Icon container */}
-                      <div className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${
+                      <div className={`flex items-center justify-center w-9 h-9 rounded-xl ${
                         isActive(item.url) 
-                          ? `bg-gradient-to-br ${item.color} shadow-lg ${item.glow}` 
-                          : "glass-subtle group-hover:bg-primary/10"
+                          ? `bg-gradient-to-br ${item.color}` 
+                          : "bg-white/5"
                       }`}>
-                        <item.icon className={`h-5 w-5 transition-colors ${
-                          isActive(item.url) ? 'text-white' : 'text-muted-foreground group-hover:text-primary'
+                        <item.icon className={`h-5 w-5 ${
+                          isActive(item.url) ? 'text-white' : 'text-slate-400'
                         }`} />
                       </div>
                       
                       {!collapsed && (
                         <>
-                          <span className={`ml-3 font-medium transition-colors ${
-                            isActive(item.url) ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'
+                          <span className={`ml-3 font-medium ${
+                            isActive(item.url) ? 'text-white' : 'text-slate-400'
                           }`}>
                             {item.title}
                           </span>
                           
                           {isActive(item.url) && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-primary" />
+                            <ChevronRight className="ml-auto h-4 w-4 text-white/60" />
                           )}
                         </>
                       )}
@@ -294,12 +294,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Quick Actions */}
+        {/* Quick Actions with Enhanced Glass Cards */}
         <SidebarGroup className="relative z-10 mt-4 px-2">
-          <SidebarGroupLabel className="uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
-            <div className="w-6 h-[1px] bg-gradient-to-r from-cyan-500 to-transparent" />
-            <span className="text-cyan-600 dark:text-cyan-400">Quick Add</span>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
+          <SidebarGroupLabel className="text-slate-500/90 uppercase text-[10px] tracking-[0.25em] font-semibold mb-3 px-3 flex items-center gap-2">
+            <div className="w-6 h-[1px] bg-gradient-to-r from-amber-500/60 to-transparent" />
+            <span className="bg-gradient-to-r from-slate-400 to-slate-500 bg-clip-text text-transparent">Quick Add</span>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1.5">
@@ -308,20 +308,20 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={action.url} 
-                      className="relative rounded-xl glass-card hover:border-primary/30 transition-all duration-300 group overflow-hidden hover:shadow-lg hover:shadow-primary/10"
+                      className="relative rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.04] to-transparent backdrop-blur-sm hover:from-white/[0.1] hover:to-white/[0.02] hover:border-white/20 transition-all duration-500 group overflow-hidden hover:shadow-lg"
                     >
-                      {/* Shimmer effect */}
+                      {/* Enhanced shimmer effect */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
-                        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/12 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
                       </div>
                       
-                      {/* Icon */}
-                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-lg transition-all duration-300 group-hover:scale-110`}>
+                      {/* Icon with enhanced glass container and rotation */}
+                      <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-90 group-hover:shadow-xl group-hover:shadow-current/30`}>
                         <Plus className="h-4 w-4 text-white relative z-10" />
                       </div>
                       
                       {!collapsed && (
-                        <span className={`ml-3 font-medium text-muted-foreground group-hover:text-foreground transition-all duration-300`}>
+                        <span className={`ml-3 font-medium bg-gradient-to-r ${action.color} bg-clip-text text-transparent group-hover:opacity-100 opacity-75 transition-all duration-500 group-hover:translate-x-0.5`}>
                           {action.title}
                         </span>
                       )}
@@ -344,46 +344,46 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* Toggle Button */}
+        {/* Toggle Button with Enhanced Glass Effect */}
         <div className="mt-auto relative z-10">
           <div className={`px-3 py-3 ${collapsed ? 'flex justify-center' : ''}`}>
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className={`group relative overflow-hidden rounded-xl glass-card hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 ${
+              className={`group relative overflow-hidden rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.05] to-transparent hover:from-white/[0.12] hover:to-white/[0.04] hover:border-white/20 transition-all duration-500 backdrop-blur-md hover:shadow-lg hover:shadow-purple-500/10 ${
                 collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
               }`}
             >
-              {/* Shimmer effect */}
+              {/* Enhanced glass shimmer effect */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/15 via-cyan-500/15 to-violet-500/15 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
               </div>
               
               {!collapsed && (
-                <span className="text-muted-foreground text-xs font-medium group-hover:text-foreground transition-all duration-300 relative z-10">
+                <span className="text-slate-500 text-xs font-medium group-hover:text-slate-300 transition-all duration-500 relative z-10">
                   Collapse
                 </span>
               )}
               
-              <div className={`relative flex items-center justify-center transition-all duration-300 ${
-                collapsed ? '' : 'bg-primary/10 rounded-lg p-1.5'
+              <div className={`relative flex items-center justify-center transition-all duration-500 ${
+                collapsed ? '' : 'bg-gradient-to-br from-violet-500/20 to-cyan-500/20 rounded-lg p-1.5 border border-white/10'
               }`}>
                 {collapsed ? (
-                  <PanelLeft className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all duration-300" />
+                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 transition-all duration-500 group-hover:scale-110" />
                 ) : (
-                  <PanelLeftClose className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all duration-300" />
+                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-violet-400 transition-all duration-500 group-hover:scale-110" />
                 )}
               </div>
             </Button>
           </div>
 
-          {/* Footer */}
+          {/* Footer with Enhanced Glass Separator */}
           {!collapsed && (
             <div className="text-center px-4 pb-4">
-              <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent mb-3" />
-              <p className="text-[10px] text-muted-foreground tracking-wider font-medium">
-                Powered by <span className="text-gradient-blue font-semibold">Lovable</span>
+              <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-3" />
+              <p className="text-[10px] text-slate-600/80 tracking-wider font-medium">
+                Powered by <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-semibold">Lovable</span>
               </p>
             </div>
           )}
