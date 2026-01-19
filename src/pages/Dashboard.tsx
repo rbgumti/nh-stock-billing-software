@@ -327,12 +327,12 @@ export default function Dashboard() {
     <PageTransition className="p-6 space-y-6 relative">
       <FloatingOrbs />
       
-      {/* Enhanced ambient gradient orbs for dashboard */}
+      {/* Enhanced ambient gradient orbs for dashboard - mint green theme */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <div className="glow-orb glow-orb-primary w-[500px] h-[500px] top-[-10%] left-[-5%]" />
-        <div className="glow-orb glow-orb-cyan w-[400px] h-[400px] top-[20%] right-[-8%]" style={{ animationDelay: '-3s' }} />
-        <div className="glow-orb glow-orb-purple w-[350px] h-[350px] bottom-[10%] left-[10%]" style={{ animationDelay: '-5s' }} />
-        <div className="glow-orb glow-orb-teal w-[300px] h-[300px] bottom-[-5%] right-[20%]" style={{ animationDelay: '-7s' }} />
+        <div className="glow-orb glow-orb-teal w-[400px] h-[400px] top-[20%] right-[-8%]" style={{ animationDelay: '-3s' }} />
+        <div className="glow-orb glow-orb-emerald w-[350px] h-[350px] bottom-[10%] left-[10%]" style={{ animationDelay: '-5s' }} />
+        <div className="glow-orb glow-orb-cyan w-[300px] h-[300px] bottom-[-5%] right-[20%]" style={{ animationDelay: '-7s' }} />
       </div>
       
       {/* Header with Real-time indicator */}
@@ -343,27 +343,27 @@ export default function Dashboard() {
         className="flex flex-col md:flex-row md:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-4xl font-bold text-gradient-blue drop-shadow-sm">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent drop-shadow-sm">
             Dashboard
           </h1>
           <p className="text-muted-foreground mt-1">Real-time business insights and analytics</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground glass-card px-4 py-2 rounded-full border border-primary/20">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground glass-card px-4 py-2 rounded-full border border-emerald-500/20">
             <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-primary shadow-glow-primary"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-lg shadow-emerald-500/50"></span>
             </span>
             Live updates
           </div>
-          <div className="text-sm text-muted-foreground glass-card px-4 py-2 rounded-full border border-cyan/20">
-            <Clock className="h-3.5 w-3.5 inline-block mr-1.5 text-primary" />
+          <div className="text-sm text-muted-foreground glass-card px-4 py-2 rounded-full border border-teal-500/20">
+            <Clock className="h-3.5 w-3.5 inline-block mr-1.5 text-emerald-600 dark:text-emerald-400" />
             {lastUpdated.toLocaleTimeString()}
           </div>
           <button
             onClick={handleManualRefresh}
             disabled={isRefreshing}
-            className="btn-primary group flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium disabled:opacity-50"
+            className="group flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-105 transition-all duration-300 disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180'}`} />
             Refresh
@@ -377,61 +377,61 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
       >
-        <div className="glass-card p-1 overflow-hidden border border-primary/20 mesh-gradient">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-cyan/5 to-teal/8" />
-          <div className="absolute top-0 left-0 right-0 h-px highlight-line" />
+        <div className="glass-card p-1 overflow-hidden border border-emerald-500/20 mesh-gradient">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/8 via-teal-500/5 to-emerald-500/8" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
           <CardHeader className="pb-3 relative">
             <CardTitle className="text-lg flex items-center gap-3">
-              <div className="icon-container">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30">
                 <Plus className="h-5 w-5 text-white" />
               </div>
-              <span className="text-gradient-blue">Quick Actions</span>
+              <span className="bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">Quick Actions</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="relative">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <button
-                className="group relative h-auto py-6 flex flex-col items-center gap-4 rounded-2xl glass-card border border-primary/20 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
+                className="group relative h-auto py-6 flex flex-col items-center gap-4 rounded-2xl glass-card border border-emerald-500/20 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300"
                 onClick={() => navigate('/invoices/new')}
               >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/10 to-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative p-4 rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/30 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 transition-all duration-300">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-emerald-500/40 transition-all duration-300">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
-                <span className="relative font-semibold text-sm group-hover:text-primary transition-colors">New Invoice</span>
+                <span className="relative font-semibold text-sm group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">New Invoice</span>
               </button>
 
               <button
-                className="group relative h-auto py-6 flex flex-col items-center gap-4 rounded-2xl glass-card border border-cyan/20 hover:border-cyan/50 hover:shadow-lg hover:shadow-cyan/20 transition-all duration-300"
+                className="group relative h-auto py-6 flex flex-col items-center gap-4 rounded-2xl glass-card border border-teal-500/20 hover:border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all duration-300"
                 onClick={() => navigate('/patients/new')}
               >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-cyan/10 to-teal/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative p-4 rounded-2xl bg-gradient-to-br from-cyan to-teal shadow-lg shadow-cyan/30 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-cyan/40 transition-all duration-300">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-teal-500/10 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative p-4 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/30 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-teal-500/40 transition-all duration-300">
                   <UserPlus className="h-6 w-6 text-white" />
                 </div>
-                <span className="relative font-semibold text-sm group-hover:text-cyan transition-colors">New Patient</span>
+                <span className="relative font-semibold text-sm group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">New Patient</span>
               </button>
 
               <button
-                className="group relative h-auto py-6 flex flex-col items-center gap-4 rounded-2xl glass-card border border-teal/20 hover:border-teal/50 hover:shadow-lg hover:shadow-teal/20 transition-all duration-300"
+                className="group relative h-auto py-6 flex flex-col items-center gap-4 rounded-2xl glass-card border border-cyan-500/20 hover:border-cyan-500/50 hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300"
                 onClick={() => navigate('/prescriptions/new')}
               >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-teal/10 to-emerald/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative p-4 rounded-2xl bg-gradient-to-br from-teal to-emerald shadow-lg shadow-teal/30 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-teal/40 transition-all duration-300">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative p-4 rounded-2xl bg-gradient-to-br from-cyan-500 to-emerald-500 shadow-lg shadow-cyan-500/30 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-cyan-500/40 transition-all duration-300">
                   <Stethoscope className="h-6 w-6 text-white" />
                 </div>
-                <span className="relative font-semibold text-sm group-hover:text-teal transition-colors">New Prescription</span>
+                <span className="relative font-semibold text-sm group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">New Prescription</span>
               </button>
 
               <button
-                className="group relative h-auto py-6 flex flex-col items-center gap-4 rounded-2xl glass-card border border-purple/20 hover:border-purple/50 hover:shadow-lg hover:shadow-purple/20 transition-all duration-300"
+                className="group relative h-auto py-6 flex flex-col items-center gap-4 rounded-2xl glass-card border border-emerald-500/20 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300"
                 onClick={() => navigate('/stock')}
               >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple/10 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative p-4 rounded-2xl bg-gradient-to-br from-purple to-primary shadow-lg shadow-purple/30 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-purple/40 transition-all duration-300">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative p-4 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-600 shadow-lg shadow-emerald-500/30 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-emerald-500/40 transition-all duration-300">
                   <Package className="h-6 w-6 text-white" />
                 </div>
-                <span className="relative font-semibold text-sm group-hover:text-purple transition-colors">Manage Stock</span>
+                <span className="relative font-semibold text-sm group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Manage Stock</span>
               </button>
             </div>
           </CardContent>
@@ -445,23 +445,23 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
         >
-          <div className="stat-card stat-card-blue group">
+          <div className="stat-card stat-card-emerald group">
             {/* Decorative corner blob */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial from-primary/30 to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity" />
-            <div className="highlight-line" />
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial from-emerald-500/30 to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
             
             <div className="flex items-center justify-between mb-3 relative">
               <span className="text-sm font-medium text-foreground/80">Today's Revenue</span>
-              <div className="icon-container group-hover:scale-110 transition-all duration-300">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-all duration-300">
                 <ArrowUpRight className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="relative">
-              <div className="text-3xl font-bold text-gradient-blue">
+              <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
                 Rs.{todayRevenue.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-primary" />
+                <TrendingUp className="h-3 w-3 text-emerald-500" />
                 {todayInvoices.length} invoices today
               </p>
             </div>
@@ -473,18 +473,18 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <div className="stat-card stat-card-cyan group">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial from-cyan/30 to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity" />
-            <div className="highlight-line-cyan" />
+          <div className="stat-card stat-card-teal group">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial from-teal-500/30 to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-500/50 to-transparent" />
             
             <div className="flex items-center justify-between mb-3 relative">
               <span className="text-sm font-medium text-foreground/80">Total Revenue</span>
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan to-teal shadow-lg shadow-cyan/30 group-hover:scale-110 transition-all duration-300">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/30 group-hover:scale-110 transition-all duration-300">
                 <DollarSign className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="relative">
-              <div className="text-3xl font-bold text-gradient-ocean">
+              <div className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">
                 Rs.{totalRevenue.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground mt-2">All time earnings</p>
@@ -497,18 +497,18 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.25 }}
         >
-          <div className="stat-card stat-card-purple group">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial from-purple/30 to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity" />
-            <div className="highlight-line" />
+          <div className="stat-card stat-card-cyan group">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial from-cyan-500/30 to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
             
             <div className="flex items-center justify-between mb-3 relative">
               <span className="text-sm font-medium text-foreground/80">Total Patients</span>
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple to-primary shadow-lg shadow-purple/30 group-hover:scale-110 transition-all duration-300">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 shadow-lg shadow-cyan-500/30 group-hover:scale-110 transition-all duration-300">
                 <Users className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="relative">
-              <div className="text-3xl font-bold text-gradient-blue">
+              <div className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-emerald-600 dark:from-cyan-400 dark:to-emerald-400 bg-clip-text text-transparent">
                 {patients.length}
               </div>
               <p className="text-xs text-muted-foreground mt-2">Registered patients</p>
@@ -522,17 +522,17 @@ export default function Dashboard() {
           transition={{ duration: 0.4, delay: 0.3 }}
         >
           <div className="stat-card stat-card-emerald group">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial from-emerald/30 to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity" />
-            <div className="highlight-line-cyan" />
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial from-emerald-500/30 to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
             
             <div className="flex items-center justify-between mb-3 relative">
               <span className="text-sm font-medium text-foreground/80">Stock Items</span>
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald to-teal shadow-lg shadow-emerald/30 group-hover:scale-110 transition-all duration-300">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-all duration-300">
                 <Package className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="relative">
-              <div className="text-3xl font-bold text-gradient-ocean">
+              <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
                 {stockItems.length}
               </div>
               <p className="text-xs text-muted-foreground mt-2">In inventory</p>
@@ -545,18 +545,18 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.35 }}
         >
-          <div className={`stat-card group ${lowStockItems.length > 0 ? 'stat-card-gold' : 'stat-card-cyan'}`}>
-            <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial ${lowStockItems.length > 0 ? 'from-gold/30' : 'from-cyan/30'} to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity`} />
-            <div className="highlight-line" />
+          <div className={`stat-card group ${lowStockItems.length > 0 ? 'stat-card-gold' : 'stat-card-teal'}`}>
+            <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial ${lowStockItems.length > 0 ? 'from-gold/30' : 'from-teal-500/30'} to-transparent rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity`} />
+            <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent ${lowStockItems.length > 0 ? 'via-gold/50' : 'via-teal-500/50'} to-transparent`} />
             
             <div className="flex items-center justify-between mb-3 relative">
               <span className="text-sm font-medium text-foreground/80">Low Stock Alerts</span>
-              <div className={`p-2.5 rounded-xl shadow-lg group-hover:scale-110 transition-all duration-300 ${lowStockItems.length > 0 ? 'bg-gradient-to-br from-gold to-orange shadow-gold/30' : 'bg-gradient-to-br from-cyan to-teal shadow-cyan/30'}`}>
+              <div className={`p-2.5 rounded-xl shadow-lg group-hover:scale-110 transition-all duration-300 ${lowStockItems.length > 0 ? 'bg-gradient-to-br from-gold to-orange shadow-gold/30' : 'bg-gradient-to-br from-teal-500 to-cyan-500 shadow-teal-500/30'}`}>
                 <AlertCircle className="h-4 w-4 text-white" />
               </div>
             </div>
             <div className="relative">
-              <div className={`text-3xl font-bold ${lowStockItems.length > 0 ? 'text-gold' : 'text-gradient-ocean'}`}>
+              <div className={`text-3xl font-bold ${lowStockItems.length > 0 ? 'text-gold' : 'bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent'}`}>
                 {lowStockItems.length}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -576,19 +576,19 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="lg:col-span-1"
         >
-          <div className="glass-card h-full overflow-hidden border border-primary/20 mesh-gradient-purple">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-purple/5 to-cyan/8" />
-            <div className="highlight-line" />
+          <div className="glass-card h-full overflow-hidden border border-emerald-500/20 mesh-gradient">
+            <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/8 via-teal-500/5 to-cyan-500/8" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
             
             <CardHeader className="pb-3 relative">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg flex items-center gap-3">
-                  <div className="icon-container">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30">
                     <Activity className="h-4 w-4 text-white" />
                   </div>
-                  <span className="text-gradient-blue">Live Activity</span>
+                  <span className="bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">Live Activity</span>
                 </CardTitle>
-                <Badge className="badge-blue px-3 py-1 text-xs">
+                <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 px-3 py-1 text-xs">
                   {realtimeUpdates.length} updates
                 </Badge>
               </div>
@@ -613,8 +613,8 @@ export default function Dashboard() {
                         transition={{ duration: 0.25 }}
                         className={`flex items-start gap-3 p-3 rounded-xl transition-all duration-300 ${
                           index === 0 
-                            ? 'bg-gradient-to-r from-primary/10 to-cyan/5 border border-primary/30 shadow-sm' 
-                            : 'glass-card border-transparent hover:border-primary/20'
+                            ? 'bg-gradient-to-r from-emerald-500/10 to-teal-500/5 border border-emerald-500/30 shadow-sm' 
+                            : 'glass-card border-transparent hover:border-emerald-500/20'
                         }`}
                       >
                         <div className={`p-2 rounded-lg ${index === 0 ? 'bg-background shadow-sm' : 'bg-background/50'}`}>
@@ -642,26 +642,26 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.35 }}
           className="lg:col-span-2"
         >
-          <div className="glass-card overflow-hidden border border-cyan/20 mesh-gradient-teal">
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan/8 via-transparent to-teal/8" />
-            <div className="highlight-line-cyan" />
+          <div className="glass-card overflow-hidden border border-teal-500/20 mesh-gradient">
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/8 via-transparent to-emerald-500/8" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-500/50 to-transparent" />
             
             <CardHeader className="relative">
-              <CardTitle className="text-xl text-gradient-blue">Payment Overview</CardTitle>
+              <CardTitle className="text-xl bg-gradient-to-r from-teal-600 to-emerald-600 dark:from-teal-400 dark:to-emerald-400 bg-clip-text text-transparent">Payment Overview</CardTitle>
               <p className="text-sm text-muted-foreground">Revenue breakdown and pending amounts</p>
             </CardHeader>
             <CardContent className="relative">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="glass-card border border-emerald/20 hover:border-emerald/50 hover:shadow-lg hover:shadow-emerald/20 p-4 group transition-all duration-300">
-                  <div className="highlight-line" />
+                <div className="glass-card border border-emerald-500/20 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20 p-4 group transition-all duration-300">
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 rounded-xl bg-gradient-to-br from-emerald to-teal shadow-md shadow-emerald/20 group-hover:scale-110 transition-transform">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform">
                         <TrendingUp className="h-4 w-4 text-white" />
                       </div>
-                      <span className="font-semibold text-emerald">Paid</span>
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">Paid</span>
                     </div>
-                    <p className="text-2xl font-bold text-gradient-ocean">Rs.{paidAmount.toLocaleString()}</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">Rs.{paidAmount.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground mt-1">{paidInvoices.length} invoices</p>
                   </div>
                 </div>
@@ -678,21 +678,21 @@ export default function Dashboard() {
                     <p className="text-sm text-muted-foreground mt-1">{pendingInvoices.length} invoices</p>
                   </div>
                 </div>
-                <div className="glass-card border border-primary/20 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 p-4 group transition-all duration-300">
-                  <div className="highlight-line" />
+                <div className="glass-card border border-teal-500/20 hover:border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 p-4 group transition-all duration-300">
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-500/30 to-transparent" />
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="icon-container group-hover:scale-110 transition-transform">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 shadow-md shadow-teal-500/20 group-hover:scale-110 transition-transform">
                         <Receipt className="h-4 w-4 text-white" />
                       </div>
-                      <span className="font-semibold text-primary">Total</span>
+                      <span className="font-semibold text-teal-600 dark:text-teal-400">Total</span>
                     </div>
-                    <p className="text-2xl font-bold text-gradient-blue">Rs.{totalRevenue.toLocaleString()}</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 dark:from-teal-400 dark:to-emerald-400 bg-clip-text text-transparent">Rs.{totalRevenue.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground mt-1">{invoices.length} invoices</p>
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl glass-card border border-primary/10 p-4">
+              <div className="rounded-xl glass-card border border-emerald-500/10 p-4">
                 <ChartContainer config={chartConfig} className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={monthlyData}>

@@ -9,12 +9,15 @@ const cardVariants = cva(
     variants: {
       variant: {
         default: "border bg-card shadow-sm hover:shadow-md",
-        glass: "glass border-0 hover:border-primary/20 hover:shadow-lg",
-        "glass-strong": "glass-strong border-0 hover:border-primary/25",
+        glass: "glass border-0 hover:border-emerald-500/20 hover:shadow-lg",
+        "glass-strong": "glass-strong border-0 hover:border-emerald-500/25",
         "glass-subtle": "glass-subtle border-0",
         gradient: "gradient-border",
         interactive: "glass interactive-card",
-        elevated: "glass-strong shadow-elevated hover:shadow-glow"
+        elevated: "glass-strong shadow-elevated hover:shadow-glow-green",
+        mint: "glass-emerald border border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/20",
+        teal: "glass-teal border border-teal-500/20 hover:border-teal-500/40 hover:shadow-lg hover:shadow-teal-500/20",
+        cyan: "glass-cyan border border-cyan-500/20 hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/20"
       },
       hover: {
         none: "",
@@ -24,7 +27,9 @@ const cardVariants = cva(
         "glow-cyan": "hover-glow-cyan",
         "glow-emerald": "hover-glow-emerald",
         "glow-gold": "hover-glow-gold",
-        "glow-purple": "hover-glow-purple"
+        "glow-purple": "hover-glow-purple",
+        "glow-mint": "hover:shadow-lg hover:shadow-emerald-500/25",
+        "glow-teal": "hover:shadow-lg hover:shadow-teal-500/25"
       }
     },
     defaultVariants: {
