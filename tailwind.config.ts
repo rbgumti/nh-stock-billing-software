@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Segoe UI', 'SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Roboto', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -100,8 +103,8 @@ export default {
 				'glow-cyan': '0 0 35px hsl(var(--cyan) / 0.4)',
 				'glow-emerald': '0 0 35px hsl(var(--emerald) / 0.4)',
 				'glow-gold': '0 0 35px hsl(var(--gold) / 0.4)',
-				'glow-purple': '0 0 35px hsl(var(--purple) / 0.4)',
-				'glow-pink': '0 0 35px hsl(var(--pink) / 0.4)',
+				'glow-teal': '0 0 35px hsl(var(--teal) / 0.4)',
+				'glow-green': '0 0 35px hsl(var(--green) / 0.4)',
 				'soft': '0 4px 24px hsl(var(--primary) / 0.18)',
 				'soft-lg': '0 8px 48px hsl(var(--primary) / 0.25)',
 				'elevated': '0 12px 40px hsl(var(--glass-shadow)), 0 4px 12px hsl(var(--primary) / 0.1)'
