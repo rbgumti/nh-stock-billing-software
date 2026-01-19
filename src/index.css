@@ -562,7 +562,11 @@
 }
 
 .glow-orb-teal {
-  background: hsl(var(--teal) / 0.3);
+  background: hsl(var(--teal) / 0.35);
+}
+
+.glow-orb-emerald {
+  background: hsl(var(--emerald) / 0.35);
 }
 
 @keyframes orbPulse {
@@ -673,6 +677,11 @@
 .stat-card-purple {
   background: linear-gradient(135deg, hsl(var(--purple) / 0.08), hsl(var(--glass-background)));
   border-color: hsl(var(--purple) / 0.2);
+}
+
+.stat-card-teal {
+  background: linear-gradient(135deg, hsl(var(--teal) / 0.08), hsl(var(--glass-background)));
+  border-color: hsl(var(--teal) / 0.2);
 }
 
 /* Icon containers */
