@@ -86,19 +86,19 @@ export function AppSidebar() {
         {/* Optimized Glass Background */}
         <div className="absolute inset-0 sidebar-glass" />
         
-        {/* Simplified Gradient Mesh - static for performance */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/8 via-transparent to-cyan-600/6" />
+        {/* Simplified Gradient Mesh - uses theme primary color */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-secondary/6" />
         
-        {/* Reduced Ambient Blobs - fewer elements, less blur */}
-        <div className="absolute top-16 right-0 w-32 h-32 bg-gradient-radial from-violet-500/20 to-transparent rounded-full blur-2xl" />
-        <div className="absolute bottom-1/4 right-0 w-28 h-28 bg-gradient-radial from-pink-500/15 to-transparent rounded-full blur-2xl" />
-        <div className="absolute bottom-16 left-0 w-24 h-24 bg-gradient-radial from-amber-400/20 to-transparent rounded-full blur-xl" />
+        {/* Reduced Ambient Blobs - uses theme colors */}
+        <div className="absolute top-16 right-0 w-32 h-32 bg-gradient-radial from-primary/20 to-transparent rounded-full blur-2xl" />
+        <div className="absolute bottom-1/4 right-0 w-28 h-28 bg-gradient-radial from-accent/15 to-transparent rounded-full blur-2xl" />
+        <div className="absolute bottom-16 left-0 w-24 h-24 bg-gradient-radial from-sidebar-primary/20 to-transparent rounded-full blur-xl" />
         
         {/* Top Accent Line */}
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         
-        {/* Side Accent */}
-        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-violet-500/30 via-transparent to-cyan-500/30" />
+        {/* Side Accent - uses theme primary */}
+        <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-primary/30 via-transparent to-secondary/30" />
         
         {/* Compact Header */}
         <div className="relative p-2 border-b border-white/5">
@@ -351,13 +351,13 @@ export function AppSidebar() {
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className={`group relative overflow-hidden rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.05] to-transparent hover:from-white/[0.12] hover:to-white/[0.04] hover:border-white/20 transition-all duration-500 backdrop-blur-md hover:shadow-lg hover:shadow-purple-500/10 ${
+              className={`group relative overflow-hidden rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.05] to-transparent hover:from-white/[0.12] hover:to-white/[0.04] hover:border-white/20 transition-all duration-500 backdrop-blur-md hover:shadow-lg hover:shadow-primary/10 ${
                 collapsed ? 'w-10 h-10 p-0' : 'w-full justify-between'
               }`}
             >
-              {/* Enhanced glass shimmer effect */}
+              {/* Enhanced glass shimmer effect - uses theme colors */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 overflow-hidden rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/15 via-cyan-500/15 to-violet-500/15 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/15 via-secondary/15 to-primary/15 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
               </div>
               
               {!collapsed && (
@@ -367,12 +367,12 @@ export function AppSidebar() {
               )}
               
               <div className={`relative flex items-center justify-center transition-all duration-500 ${
-                collapsed ? '' : 'bg-gradient-to-br from-violet-500/20 to-cyan-500/20 rounded-lg p-1.5 border border-white/10'
+                collapsed ? '' : 'bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg p-1.5 border border-white/10'
               }`}>
                 {collapsed ? (
-                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 transition-all duration-500 group-hover:scale-110" />
+                  <PanelLeft className="h-5 w-5 text-slate-400 group-hover:text-primary transition-all duration-500 group-hover:scale-110" />
                 ) : (
-                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-violet-400 transition-all duration-500 group-hover:scale-110" />
+                  <PanelLeftClose className="h-4 w-4 text-slate-400 group-hover:text-primary transition-all duration-500 group-hover:scale-110" />
                 )}
               </div>
             </Button>
@@ -383,7 +383,7 @@ export function AppSidebar() {
             <div className="text-center px-4 pb-4">
               <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-3" />
               <p className="text-[10px] text-slate-600/80 tracking-wider font-medium">
-                Powered by <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-semibold">Lovable</span>
+                Powered by <span className="bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent font-semibold">Lovable</span>
               </p>
             </div>
           )}
