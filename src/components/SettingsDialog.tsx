@@ -14,9 +14,20 @@ import { Input } from "@/components/ui/input";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { useTheme } from "next-themes";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { toast } from "@/hooks/use-toast";
 
 export function SettingsDialog() {
   const { performanceMode, setPerformanceMode, compactMode, setCompactMode, reducedMotion, setReducedMotion, doctorName, setDoctorName } = useAppSettings();
+
+  const handleReducedMotionChange = (checked: boolean) => {
+    setReducedMotion(checked);
+    toast({
+      title: checked ? "Animations disabled" : "Animations enabled",
+      description: checked 
+        ? "Page transitions and animations have been turned off" 
+        : "Page transitions and animations have been restored",
+    });
+  };
   const { theme, setTheme } = useTheme();
 
   return (
@@ -125,7 +136,7 @@ export function SettingsDialog() {
             <Switch
               id="reduced-motion"
               checked={reducedMotion}
-              onCheckedChange={setReducedMotion}
+              onCheckedChange={handleReducedMotionChange}
             />
           </div>
 
