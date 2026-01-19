@@ -8,146 +8,146 @@
  */
 
 @layer base {
-  /* Light Mode - Fresh mint green palette */
+  /* Light Mode - Soft mint green palette (lighter) */
   :root {
-    --background: 130 25% 92%;
-    --foreground: 140 30% 15%;
+    --background: 130 30% 96%;
+    --foreground: 140 25% 20%;
 
-    --card: 120 20% 98%;
-    --card-foreground: 140 30% 15%;
+    --card: 120 25% 99%;
+    --card-foreground: 140 25% 20%;
 
-    --popover: 120 20% 98%;
-    --popover-foreground: 140 30% 15%;
+    --popover: 120 25% 99%;
+    --popover-foreground: 140 25% 20%;
 
-    --primary: 142 50% 45%;
+    --primary: 152 55% 52%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 152 45% 50%;
+    --secondary: 162 50% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 130 20% 88%;
-    --muted-foreground: 140 15% 40%;
+    --muted: 130 25% 92%;
+    --muted-foreground: 140 15% 45%;
 
-    --accent: 142 50% 45%;
+    --accent: 152 55% 52%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 130 20% 82%;
-    --input: 130 20% 82%;
-    --ring: 142 50% 45%;
+    --border: 130 25% 88%;
+    --input: 130 25% 88%;
+    --ring: 152 55% 52%;
 
     --radius: 1rem;
 
-    /* Vibrant color palette - Light mode */
-    --blue-deep: 142 45% 28%;
-    --blue-primary: 142 50% 45%;
-    --blue-light: 152 45% 50%;
-    --blue-pale: 130 40% 92%;
-    --navy: 145 50% 12%;
-    --cyan: 160 60% 42%;
-    --teal: 168 55% 40%;
-    --sky: 155 50% 52%;
-    --indigo: 165 50% 40%;
-    --purple: 270 50% 55%;
-    --green: 142 76% 36%;
-    --emerald: 158 84% 37%;
-    --gold: 43 96% 56%;
-    --orange: 25 95% 53%;
-    --pink: 335 60% 55%;
-    --rose: 349 70% 58%;
+    /* Vibrant color palette - Light mode (lighter) */
+    --blue-deep: 152 50% 38%;
+    --blue-primary: 152 55% 52%;
+    --blue-light: 162 50% 58%;
+    --blue-pale: 130 45% 95%;
+    --navy: 155 45% 18%;
+    --cyan: 170 60% 50%;
+    --teal: 175 55% 48%;
+    --sky: 165 55% 58%;
+    --indigo: 175 50% 48%;
+    --purple: 270 50% 60%;
+    --green: 152 70% 45%;
+    --emerald: 165 80% 45%;
+    --gold: 43 96% 58%;
+    --orange: 25 95% 55%;
+    --pink: 335 60% 58%;
+    --rose: 349 70% 62%;
 
-    --sidebar-background: 120 20% 98%;
-    --sidebar-foreground: 140 30% 15%;
-    --sidebar-primary: 142 50% 45%;
+    --sidebar-background: 120 25% 99%;
+    --sidebar-foreground: 140 25% 20%;
+    --sidebar-primary: 152 55% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 130 25% 93%;
-    --sidebar-accent-foreground: 142 50% 45%;
-    --sidebar-border: 130 20% 85%;
-    --sidebar-ring: 142 50% 45%;
+    --sidebar-accent: 130 30% 95%;
+    --sidebar-accent-foreground: 152 55% 52%;
+    --sidebar-border: 130 25% 90%;
+    --sidebar-ring: 152 55% 52%;
 
     /* Glass Design Tokens - Light mode */
-    --glass-background: 120 20% 98% / 0.85;
-    --glass-border: 142 40% 50% / 0.25;
-    --glass-shadow: 145 50% 12% / 0.08;
-    --glass-highlight: 152 50% 55% / 0.12;
+    --glass-background: 120 25% 99% / 0.88;
+    --glass-border: 152 45% 55% / 0.22;
+    --glass-shadow: 155 40% 20% / 0.06;
+    --glass-highlight: 162 55% 60% / 0.1;
     --glass-blur: 16px;
     --glass-saturation: 100%;
 
     /* Gradient tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(142 50% 45%), hsl(152 45% 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(152 45% 50%), hsl(160 60% 42%));
+    --gradient-primary: linear-gradient(135deg, hsl(152 55% 52%), hsl(162 50% 55%));
+    --gradient-accent: linear-gradient(135deg, hsl(162 50% 55%), hsl(170 60% 50%));
   }
 
-  /* Dark Mode - Deep forest green with vibrant accents */
+  /* Dark Mode - Softer forest green with vibrant accents (lighter) */
   .dark {
-    --background: 145 30% 6%;
-    --foreground: 130 25% 90%;
+    --background: 155 25% 10%;
+    --foreground: 130 30% 92%;
 
-    --card: 145 25% 10%;
-    --card-foreground: 130 25% 90%;
+    --card: 155 22% 14%;
+    --card-foreground: 130 30% 92%;
 
-    --popover: 145 25% 10%;
-    --popover-foreground: 130 25% 90%;
+    --popover: 155 22% 14%;
+    --popover-foreground: 130 30% 92%;
 
-    --primary: 142 55% 55%;
-    --primary-foreground: 145 30% 6%;
+    --primary: 152 60% 58%;
+    --primary-foreground: 155 25% 8%;
 
-    --secondary: 160 50% 50%;
-    --secondary-foreground: 145 30% 6%;
+    --secondary: 170 55% 55%;
+    --secondary-foreground: 155 25% 8%;
 
-    --muted: 145 25% 14%;
-    --muted-foreground: 140 20% 55%;
+    --muted: 155 22% 18%;
+    --muted-foreground: 150 25% 60%;
 
-    --accent: 142 55% 55%;
-    --accent-foreground: 145 30% 6%;
+    --accent: 152 60% 58%;
+    --accent-foreground: 155 25% 8%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 145 25% 18%;
-    --input: 145 25% 18%;
-    --ring: 142 55% 55%;
+    --border: 155 22% 22%;
+    --input: 155 22% 22%;
+    --ring: 152 60% 58%;
 
-    /* Vibrant color palette - Dark mode */
-    --blue-deep: 142 50% 32%;
-    --blue-primary: 142 55% 55%;
-    --blue-light: 152 50% 58%;
-    --blue-pale: 145 30% 16%;
-    --navy: 145 50% 12%;
-    --cyan: 160 65% 48%;
-    --teal: 168 60% 45%;
-    --sky: 155 55% 55%;
-    --indigo: 165 55% 45%;
-    --purple: 270 55% 60%;
-    --green: 142 80% 45%;
-    --emerald: 158 90% 45%;
-    --gold: 43 100% 60%;
-    --orange: 25 100% 60%;
-    --pink: 335 65% 60%;
-    --rose: 349 75% 62%;
+    /* Vibrant color palette - Dark mode (lighter) */
+    --blue-deep: 152 50% 40%;
+    --blue-primary: 152 60% 58%;
+    --blue-light: 162 55% 62%;
+    --blue-pale: 155 25% 20%;
+    --navy: 155 40% 16%;
+    --cyan: 170 65% 55%;
+    --teal: 175 60% 52%;
+    --sky: 165 60% 60%;
+    --indigo: 175 55% 52%;
+    --purple: 270 55% 65%;
+    --green: 152 80% 50%;
+    --emerald: 165 85% 50%;
+    --gold: 43 100% 62%;
+    --orange: 25 100% 62%;
+    --pink: 335 65% 62%;
+    --rose: 349 75% 65%;
 
-    --sidebar-background: 145 30% 6%;
-    --sidebar-foreground: 130 25% 90%;
-    --sidebar-primary: 142 55% 55%;
-    --sidebar-primary-foreground: 145 30% 6%;
-    --sidebar-accent: 145 25% 12%;
-    --sidebar-accent-foreground: 142 55% 55%;
-    --sidebar-border: 145 25% 16%;
-    --sidebar-ring: 142 55% 55%;
+    --sidebar-background: 155 25% 10%;
+    --sidebar-foreground: 130 30% 92%;
+    --sidebar-primary: 152 60% 58%;
+    --sidebar-primary-foreground: 155 25% 8%;
+    --sidebar-accent: 155 22% 16%;
+    --sidebar-accent-foreground: 152 60% 58%;
+    --sidebar-border: 155 22% 20%;
+    --sidebar-ring: 152 60% 58%;
 
-    /* Dark mode glass tokens */
-    --glass-background: 145 25% 10% / 0.8;
-    --glass-border: 142 50% 45% / 0.22;
-    --glass-shadow: 145 40% 4% / 0.5;
-    --glass-highlight: 152 55% 55% / 0.15;
+    /* Dark mode glass tokens (lighter) */
+    --glass-background: 155 22% 14% / 0.85;
+    --glass-border: 152 55% 52% / 0.25;
+    --glass-shadow: 155 35% 6% / 0.4;
+    --glass-highlight: 162 60% 60% / 0.12;
     --glass-blur: 20px;
     --glass-saturation: 130%;
 
     /* Gradient tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(142 55% 55%), hsl(160 50% 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(160 50% 50%), hsl(168 60% 45%));
+    --gradient-primary: linear-gradient(135deg, hsl(152 60% 58%), hsl(170 55% 55%));
+    --gradient-accent: linear-gradient(135deg, hsl(170 55% 55%), hsl(175 60% 52%));
   }
 }
 
@@ -161,10 +161,10 @@
     font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
   }
 
-  /* Dark mode background - Rich forest green mesh gradient */
+  /* Dark mode background - Softer forest green mesh gradient */
   .dark body {
     background: 
-      linear-gradient(135deg, hsl(145 30% 6%) 0%, hsl(145 25% 10%) 40%, hsl(140 28% 7%) 100%);
+      linear-gradient(135deg, hsl(155 25% 10%) 0%, hsl(155 22% 14%) 40%, hsl(150 24% 11%) 100%);
     background-attachment: fixed;
   }
 
@@ -173,11 +173,11 @@
     position: fixed;
     inset: 0;
     background: 
-      radial-gradient(ellipse 80% 50% at 20% 10%, hsl(142 55% 55% / 0.12) 0px, transparent 50%),
-      radial-gradient(ellipse 60% 40% at 85% 20%, hsl(160 50% 50% / 0.10) 0px, transparent 45%),
-      radial-gradient(ellipse 70% 60% at 90% 85%, hsl(168 60% 45% / 0.08) 0px, transparent 50%),
-      radial-gradient(ellipse 50% 50% at 10% 80%, hsl(152 50% 55% / 0.06) 0px, transparent 45%),
-      radial-gradient(ellipse 40% 30% at 50% 50%, hsl(142 55% 55% / 0.04) 0px, transparent 60%);
+      radial-gradient(ellipse 80% 50% at 20% 10%, hsl(152 60% 58% / 0.10) 0px, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 85% 20%, hsl(170 55% 55% / 0.08) 0px, transparent 45%),
+      radial-gradient(ellipse 70% 60% at 90% 85%, hsl(175 60% 52% / 0.06) 0px, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 10% 80%, hsl(162 55% 60% / 0.05) 0px, transparent 45%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, hsl(152 60% 58% / 0.03) 0px, transparent 60%);
     pointer-events: none;
     z-index: -1;
   }
@@ -187,8 +187,8 @@
     position: fixed;
     inset: 0;
     background: 
-      radial-gradient(circle at 30% 70%, hsl(160 60% 48% / 0.05) 0px, transparent 30%),
-      radial-gradient(circle at 70% 30%, hsl(155 55% 50% / 0.04) 0px, transparent 25%);
+      radial-gradient(circle at 30% 70%, hsl(170 60% 55% / 0.04) 0px, transparent 30%),
+      radial-gradient(circle at 70% 30%, hsl(165 55% 55% / 0.03) 0px, transparent 25%);
     pointer-events: none;
     z-index: -1;
     animation: meshShift 30s ease-in-out infinite alternate;
@@ -202,7 +202,7 @@
 
   /* Light mode background - Soft mint green mesh gradient */
   :root:not(.dark) body {
-    background: linear-gradient(180deg, hsl(130 25% 94%) 0%, hsl(130 22% 90%) 100%);
+    background: linear-gradient(180deg, hsl(130 30% 97%) 0%, hsl(130 28% 94%) 100%);
     background-attachment: fixed;
   }
 
@@ -211,10 +211,10 @@
     position: fixed;
     inset: 0;
     background: 
-      radial-gradient(ellipse 80% 60% at 10% 0%, hsl(142 50% 45% / 0.06) 0px, transparent 50%),
-      radial-gradient(ellipse 60% 50% at 95% 20%, hsl(152 45% 50% / 0.05) 0px, transparent 45%),
-      radial-gradient(ellipse 70% 50% at 80% 90%, hsl(168 55% 40% / 0.04) 0px, transparent 50%),
-      radial-gradient(ellipse 50% 40% at 5% 85%, hsl(160 60% 42% / 0.03) 0px, transparent 40%);
+      radial-gradient(ellipse 80% 60% at 10% 0%, hsl(152 55% 52% / 0.05) 0px, transparent 50%),
+      radial-gradient(ellipse 60% 50% at 95% 20%, hsl(162 50% 55% / 0.04) 0px, transparent 45%),
+      radial-gradient(ellipse 70% 50% at 80% 90%, hsl(175 55% 48% / 0.03) 0px, transparent 50%),
+      radial-gradient(ellipse 50% 40% at 5% 85%, hsl(170 60% 50% / 0.02) 0px, transparent 40%);
     pointer-events: none;
     z-index: -1;
   }
@@ -224,7 +224,7 @@
     position: fixed;
     inset: 0;
     background: 
-      radial-gradient(circle at 50% 0%, hsl(152 50% 55% / 0.03) 0px, transparent 35%);
+      radial-gradient(circle at 50% 0%, hsl(162 55% 58% / 0.02) 0px, transparent 35%);
     pointer-events: none;
     z-index: -1;
   }
