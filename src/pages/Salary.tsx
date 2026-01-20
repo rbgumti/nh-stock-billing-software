@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, Plus, Pencil, Trash2, Download, Calculator, 
-  Calendar, DollarSign, UserPlus, FileSpreadsheet, FileDown, Loader2 
+  Calendar, DollarSign, UserPlus, FileSpreadsheet, FileDown, Loader2,
+  TrendingUp, BarChart3
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -23,6 +24,10 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { createRoot } from "react-dom/client";
 import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
+import { 
+  BarChart, Bar, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
+} from "recharts";
 
 const Salary = () => {
   const { 
@@ -113,6 +118,112 @@ const Salary = () => {
       { salaryFixed: 0, advanceAdjusted: 0, advancePending: 0, salaryPayable: 0 }
     );
   }, [monthlySalaryData]);
+
+  // Calculate history data for charts (last 12 months)
+  const historyData = useMemo(() => {
+    const months: { month: string; label: string; shortLabel: string }[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const date = subMonths(new Date(), i);
+      months.push({
+        month: format(date, "yyyy-MM"),
+        label: format(date, "MMMM yyyy"),
+        shortLabel: format(date, "MMM yy"),
+      });
+    }
+
+    return months.map(monthData => {
+      const monthRecords = salaryRecords.filter(r => r.month === monthData.month);
+      
+      let totalPayable = 0;
+      let totalAdvanceAdjusted = 0;
+      let totalAdvancePending = 0;
+      let employeeCount = 0;
+
+      employees.forEach(employee => {
+        const record = monthRecords.find(r => r.employeeId === employee.id);
+        const workingDays = record?.workingDays ?? 31;
+        const advanceAdjusted = record?.advanceAdjusted ?? 0;
+        const advancePending = record?.advancePending ?? 0;
+        
+        const perDayRate = employee.salaryFixed / 31;
+        const salaryPayable = Math.round((perDayRate * workingDays) - advanceAdjusted);
+        
+        if (record) {
+          totalPayable += salaryPayable;
+          totalAdvanceAdjusted += advanceAdjusted;
+          totalAdvancePending += advancePending;
+          employeeCount++;
+        }
+      });
+
+      return {
+        month: monthData.shortLabel,
+        fullMonth: monthData.label,
+        totalPayable,
+        totalAdvanceAdjusted,
+        totalAdvancePending,
+        employeeCount,
+        avgSalary: employeeCount > 0 ? Math.round(totalPayable / employeeCount) : 0,
+      };
+    });
+  }, [employees, salaryRecords]);
+
+  // Employee-wise salary comparison for current vs previous month
+  const employeeComparison = useMemo(() => {
+    const currentMonth = selectedMonth;
+    const previousMonth = format(subMonths(new Date(selectedMonth + "-01"), 1), "yyyy-MM");
+
+    return employees.map(employee => {
+      const currentRecord = salaryRecords.find(r => r.employeeId === employee.id && r.month === currentMonth);
+      const previousRecord = salaryRecords.find(r => r.employeeId === employee.id && r.month === previousMonth);
+
+      const perDayRate = employee.salaryFixed / 31;
+      
+      const currentWorkingDays = currentRecord?.workingDays ?? 31;
+      const currentAdvance = currentRecord?.advanceAdjusted ?? 0;
+      const currentPayable = Math.round((perDayRate * currentWorkingDays) - currentAdvance);
+
+      const previousWorkingDays = previousRecord?.workingDays ?? 31;
+      const previousAdvance = previousRecord?.advanceAdjusted ?? 0;
+      const previousPayable = Math.round((perDayRate * previousWorkingDays) - previousAdvance);
+
+      const change = currentPayable - previousPayable;
+      const changePercent = previousPayable !== 0 ? ((change / previousPayable) * 100).toFixed(1) : 0;
+
+      return {
+        name: employee.name.split(' ')[0], // First name only for chart
+        fullName: employee.name,
+        designation: employee.designation,
+        currentMonth: currentPayable,
+        previousMonth: previousPayable,
+        change,
+        changePercent,
+      };
+    });
+  }, [employees, salaryRecords, selectedMonth]);
+
+  // Designation-wise breakdown
+  const designationBreakdown = useMemo(() => {
+    const breakdown: { [key: string]: { count: number; totalSalary: number } } = {};
+    
+    monthlySalaryData.forEach(item => {
+      const designation = item.employee.designation;
+      if (!breakdown[designation]) {
+        breakdown[designation] = { count: 0, totalSalary: 0 };
+      }
+      breakdown[designation].count++;
+      breakdown[designation].totalSalary += item.salaryPayable;
+    });
+
+    return Object.entries(breakdown).map(([name, data]) => ({
+      name,
+      count: data.count,
+      totalSalary: data.totalSalary,
+      avgSalary: Math.round(data.totalSalary / data.count),
+    }));
+  }, [monthlySalaryData]);
+
+  const CHART_COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00C49F', '#FFBB28', '#FF8042', '#0088FE'];
 
   // Handle employee form submission
   const handleEmployeeSubmit = () => {
@@ -408,6 +519,10 @@ const Salary = () => {
               <Users className="w-4 h-4" />
               Employees
             </TabsTrigger>
+            <TabsTrigger value="history" className="gap-2">
+              <TrendingUp className="w-4 h-4" />
+              History & Analytics
+            </TabsTrigger>
           </TabsList>
 
           {/* Salary Calculation Tab */}
@@ -609,6 +724,272 @@ const Salary = () => {
                           </TableRow>
                         ))
                       )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* History & Analytics Tab */}
+          <TabsContent value="history" className="mt-4 space-y-6">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="glass-card">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">12-Month Total Payout</p>
+                      <p className="text-2xl font-bold text-primary">
+                        ₹{historyData.reduce((sum, m) => sum + m.totalPayable, 0).toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <TrendingUp className="w-8 h-8 text-primary/60" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="glass-card">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">12-Month Avg. Payout</p>
+                      <p className="text-2xl font-bold">
+                        ₹{Math.round(historyData.reduce((sum, m) => sum + m.totalPayable, 0) / 12).toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <BarChart3 className="w-8 h-8 text-blue-500/60" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="glass-card">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Advances (12M)</p>
+                      <p className="text-2xl font-bold text-amber-600">
+                        ₹{historyData.reduce((sum, m) => sum + m.totalAdvanceAdjusted, 0).toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <DollarSign className="w-8 h-8 text-amber-500/60" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Monthly Trend Chart */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Monthly Salary Trend (Last 12 Months)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={historyData}>
+                      <defs>
+                        <linearGradient id="colorPayable" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorAdvance" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#ffc658" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#ffc658" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`} />
+                      <RechartsTooltip 
+                        formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, '']}
+                        labelFormatter={(label) => historyData.find(d => d.month === label)?.fullMonth || label}
+                      />
+                      <Legend />
+                      <Area 
+                        type="monotone" 
+                        dataKey="totalPayable" 
+                        name="Total Payable" 
+                        stroke="#8884d8" 
+                        fillOpacity={1} 
+                        fill="url(#colorPayable)" 
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="totalAdvanceAdjusted" 
+                        name="Advances Adjusted" 
+                        stroke="#ffc658" 
+                        fillOpacity={1} 
+                        fill="url(#colorAdvance)" 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Employee Comparison Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Employee Comparison (Current vs Previous Month)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={employeeComparison} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`} />
+                        <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={60} />
+                        <RechartsTooltip 
+                          formatter={(value: number, name: string) => [
+                            `₹${value.toLocaleString('en-IN')}`, 
+                            name === 'currentMonth' ? 'Current Month' : 'Previous Month'
+                          ]}
+                          labelFormatter={(label) => employeeComparison.find(e => e.name === label)?.fullName || label}
+                        />
+                        <Legend />
+                        <Bar dataKey="currentMonth" name="Current Month" fill="#8884d8" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="previousMonth" name="Previous Month" fill="#82ca9d" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Designation Breakdown Pie Chart */}
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Salary by Designation
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={designationBreakdown}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="totalSalary"
+                          nameKey="name"
+                          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                        >
+                          {designationBreakdown.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip 
+                          formatter={(value: number, name: string, props: any) => [
+                            `₹${value.toLocaleString('en-IN')} (${props.payload.count} employees)`,
+                            props.payload.name
+                          ]}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Monthly History Table */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Monthly History Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Month</TableHead>
+                        <TableHead className="text-right">Total Payable</TableHead>
+                        <TableHead className="text-right">Advances Adjusted</TableHead>
+                        <TableHead className="text-right">Advances Pending</TableHead>
+                        <TableHead className="text-center">Employees</TableHead>
+                        <TableHead className="text-right">Avg. Salary</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {historyData.map((month, index) => (
+                        <TableRow key={month.month} className={index === historyData.length - 1 ? "bg-primary/5" : ""}>
+                          <TableCell className="font-medium">{month.fullMonth}</TableCell>
+                          <TableCell className="text-right font-bold text-primary">
+                            ₹{month.totalPayable.toLocaleString('en-IN')}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ₹{month.totalAdvanceAdjusted.toLocaleString('en-IN')}
+                          </TableCell>
+                          <TableCell className="text-right text-amber-600">
+                            ₹{month.totalAdvancePending.toLocaleString('en-IN')}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline">{month.employeeCount}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right text-muted-foreground">
+                            ₹{month.avgSalary.toLocaleString('en-IN')}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Employee Change Summary */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Month-over-Month Change
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Designation</TableHead>
+                        <TableHead className="text-right">Previous Month</TableHead>
+                        <TableHead className="text-right">Current Month</TableHead>
+                        <TableHead className="text-right">Change</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {employeeComparison.map((emp) => (
+                        <TableRow key={emp.fullName}>
+                          <TableCell className="font-medium">{emp.fullName}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{emp.designation}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right text-muted-foreground">
+                            ₹{emp.previousMonth.toLocaleString('en-IN')}
+                          </TableCell>
+                          <TableCell className="text-right font-bold">
+                            ₹{emp.currentMonth.toLocaleString('en-IN')}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <span className={emp.change > 0 ? "text-green-600" : emp.change < 0 ? "text-red-600" : ""}>
+                              {emp.change > 0 ? "+" : ""}₹{emp.change.toLocaleString('en-IN')}
+                              {emp.changePercent !== 0 && ` (${emp.changePercent}%)`}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
