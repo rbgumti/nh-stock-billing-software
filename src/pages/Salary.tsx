@@ -361,6 +361,47 @@ const Salary = () => {
     toast.success(`Marked all employees as ${status} for ${format(parseISO(date), "dd MMM yyyy")}`);
   };
 
+  // Copy attendance from last month to current month
+  const copyFromLastMonth = () => {
+    const currentMonthStr = format(attendanceMonth, "yyyy-MM");
+    const lastMonth = subMonths(attendanceMonth, 1);
+    const lastMonthStr = format(lastMonth, "yyyy-MM");
+    const daysInCurrentMonth = getDaysInMonth(attendanceMonth);
+    const daysInLastMonth = getDaysInMonth(lastMonth);
+    
+    let copiedCount = 0;
+    
+    employees.forEach((employee) => {
+      // Get all attendance records from last month for this employee
+      const lastMonthRecords = attendanceRecords.filter(
+        (r) => r.employeeId === employee.id && r.date.startsWith(lastMonthStr)
+      );
+      
+      // For each day in current month, check if there's a corresponding day in last month
+      for (let day = 1; day <= daysInCurrentMonth; day++) {
+        // Only copy if the day existed in last month
+        if (day <= daysInLastMonth) {
+          const lastMonthDate = format(new Date(lastMonth.getFullYear(), lastMonth.getMonth(), day), "yyyy-MM-dd");
+          const currentMonthDate = format(new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth(), day), "yyyy-MM-dd");
+          
+          // Find the record from last month for this day
+          const lastMonthRecord = lastMonthRecords.find((r) => r.date === lastMonthDate);
+          
+          if (lastMonthRecord) {
+            markAttendance(employee.id, currentMonthDate, lastMonthRecord.status);
+            copiedCount++;
+          }
+        }
+      }
+    });
+    
+    if (copiedCount > 0) {
+      toast.success(`Copied ${copiedCount} attendance records from ${format(lastMonth, "MMMM yyyy")}`);
+    } else {
+      toast.info(`No attendance records found in ${format(lastMonth, "MMMM yyyy")} to copy`);
+    }
+  };
+
   // Attendance status config
   const attendanceStatusConfig: Record<AttendanceStatus, { icon: React.ElementType; color: string; bgColor: string; label: string }> = {
     present: { icon: CheckCircle, color: "text-green-600", bgColor: "bg-green-100 dark:bg-green-900/30", label: "P" },
@@ -874,6 +915,17 @@ const Salary = () => {
                 </Button>
               </div>
               <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={copyFromLastMonth} variant="outline" className="gap-2">
+                      <CalendarDays className="w-4 h-4" />
+                      Copy from Last Month
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Copy attendance pattern from {format(subMonths(attendanceMonth, 1), "MMMM yyyy")}
+                  </TooltipContent>
+                </Tooltip>
                 <Button onClick={exportAttendanceToExcel} variant="outline" className="gap-2">
                   <Download className="w-4 h-4" />
                   Export
