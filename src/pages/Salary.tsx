@@ -790,7 +790,10 @@ const Salary = () => {
             {/* Calendar Grid */}
             <Card className="glass-card">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Daily Attendance</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="text-base">Daily Attendance</span>
+                  <p className="text-xs text-muted-foreground font-normal">Click column headers for bulk marking</p>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -798,17 +801,55 @@ const Salary = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead className="sticky left-0 bg-background z-10 min-w-[140px]">Employee</TableHead>
-                        {calendarDays.filter(day => isSameMonth(day, attendanceMonth)).map((day) => (
-                          <TableHead 
-                            key={day.toISOString()} 
-                            className={`text-center p-1 min-w-[40px] ${isToday(day) ? "bg-primary/20" : ""}`}
-                          >
-                            <div className="flex flex-col items-center">
-                              <span className="text-[10px] text-muted-foreground">{format(day, "EEE")}</span>
-                              <span className="text-xs font-bold">{format(day, "d")}</span>
-                            </div>
-                          </TableHead>
-                        ))}
+                        {calendarDays.filter(day => isSameMonth(day, attendanceMonth)).map((day) => {
+                          const dateStr = format(day, "yyyy-MM-dd");
+                          return (
+                            <TableHead 
+                              key={day.toISOString()} 
+                              className={`text-center p-1 min-w-[40px] ${isToday(day) ? "bg-primary/20" : ""} cursor-pointer hover:bg-muted/50 group`}
+                            >
+                              <div className="flex flex-col items-center">
+                                <span className="text-[10px] text-muted-foreground">{format(day, "EEE")}</span>
+                                <span className="text-xs font-bold">{format(day, "d")}</span>
+                                {/* Bulk action dropdown on hover */}
+                                <div className="flex gap-0.5 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-4 w-4 p-0 text-green-600 hover:bg-green-100"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleBulkMark(dateStr, "present");
+                                        }}
+                                      >
+                                        <CheckCircle className="w-3 h-3" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">Mark all Present</TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-4 w-4 p-0 text-purple-600 hover:bg-purple-100"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleBulkMark(dateStr, "holiday");
+                                        }}
+                                      >
+                                        <Sun className="w-3 h-3" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">Mark all Holiday</TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                            </TableHead>
+                          );
+                        })}
                         <TableHead className="text-center bg-green-100 dark:bg-green-900/30">Total</TableHead>
                       </TableRow>
                     </TableHeader>
