@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,18 +7,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, Plus, Pencil, Trash2, Download, Calculator, 
   Calendar, DollarSign, UserPlus, FileSpreadsheet, FileDown, Loader2,
-  TrendingUp, BarChart3
+  TrendingUp, BarChart3, CheckCircle, XCircle, Clock, Sun, CalendarDays, RefreshCcw, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSalaryStore, Employee, SalaryRecord } from "@/hooks/useSalaryStore";
+import { useSalaryStore, Employee, SalaryRecord, AttendanceStatus } from "@/hooks/useSalaryStore";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { SalarySlipDocument } from "@/components/forms/SalarySlipDocument";
 import { toast } from "sonner";
-import { format, startOfMonth, subMonths, addMonths } from "date-fns";
+import { format, startOfMonth, subMonths, addMonths, getDaysInMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay } from "date-fns";
 import * as XLSX from "xlsx";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -32,23 +32,28 @@ import {
 const Salary = () => {
   const { 
     employees, 
-    salaryRecords, 
+    salaryRecords,
+    attendanceRecords,
     addEmployee, 
     updateEmployee, 
     deleteEmployee,
     addSalaryRecord,
     updateSalaryRecord,
     deleteSalaryRecord,
-    calculateSalary 
+    calculateSalary,
+    markAttendance,
+    getAttendanceByMonth,
+    getEmployeeAttendanceByMonth,
+    calculateWorkingDaysFromAttendance,
+    bulkMarkAttendance
   } = useSalaryStore();
 
   const [activeTab, setActiveTab] = useState("salary");
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), "yyyy-MM"));
+  const [attendanceMonth, setAttendanceMonth] = useState(new Date());
   const [isEmployeeDialogOpen, setIsEmployeeDialogOpen] = useState(false);
-  const [isSalaryDialogOpen, setIsSalaryDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [generatingSlipId, setGeneratingSlipId] = useState<string | null>(null);
-  const [editingSalaryRecord, setEditingSalaryRecord] = useState<SalaryRecord | null>(null);
 
   // Employee form state
   const [employeeForm, setEmployeeForm] = useState({
@@ -106,7 +111,7 @@ const Salary = () => {
     });
   }, [employees, salaryRecords, selectedMonth]);
 
-  // Calculate totals
+  // Calculate totals - use attendance-based working days if available
   const totals = useMemo(() => {
     return monthlySalaryData.reduce(
       (acc, item) => ({
@@ -118,6 +123,39 @@ const Salary = () => {
       { salaryFixed: 0, advanceAdjusted: 0, advancePending: 0, salaryPayable: 0 }
     );
   }, [monthlySalaryData]);
+
+  // Calculate monthly attendance summary
+  const monthlyAttendanceSummary = useMemo(() => {
+    const monthRecords = getAttendanceByMonth(format(attendanceMonth, "yyyy-MM"));
+    
+    return employees.map((employee) => {
+      const empRecords = monthRecords.filter((r) => r.employeeId === employee.id);
+      const present = empRecords.filter((r) => r.status === "present").length;
+      const halfDay = empRecords.filter((r) => r.status === "half-day").length;
+      const absent = empRecords.filter((r) => r.status === "absent").length;
+      const leave = empRecords.filter((r) => r.status === "leave").length;
+      const holiday = empRecords.filter((r) => r.status === "holiday").length;
+      const workingDays = present + halfDay * 0.5;
+
+      return {
+        employee,
+        present,
+        halfDay,
+        absent,
+        leave,
+        holiday,
+        workingDays,
+        totalMarked: empRecords.length,
+      };
+    });
+  }, [employees, attendanceRecords, attendanceMonth]);
+
+  // Generate calendar days for attendance view
+  const calendarDays = useMemo(() => {
+    const start = startOfWeek(startOfMonth(attendanceMonth), { weekStartsOn: 0 });
+    const end = endOfWeek(new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth() + 1, 0), { weekStartsOn: 0 });
+    return eachDayOfInterval({ start, end });
+  }, [attendanceMonth]);
 
   // Calculate history data for charts (last 12 months)
   const historyData = useMemo(() => {
@@ -286,10 +324,50 @@ const Salary = () => {
 
   // Delete employee
   const handleDeleteEmployee = (id: string) => {
-    if (confirm("Are you sure you want to delete this employee? All salary records will also be deleted.")) {
+    if (confirm("Are you sure you want to delete this employee? All salary and attendance records will also be deleted.")) {
       deleteEmployee(id);
       toast.success("Employee deleted successfully");
     }
+  };
+
+  // Handle attendance marking
+  const handleMarkAttendance = (employeeId: string, date: string, status: AttendanceStatus) => {
+    markAttendance(employeeId, date, status);
+  };
+
+  // Get attendance status for employee on a date
+  const getAttendanceStatus = (employeeId: string, date: string): AttendanceStatus | null => {
+    const record = attendanceRecords.find(
+      (r) => r.employeeId === employeeId && r.date === date
+    );
+    return record?.status || null;
+  };
+
+  // Sync attendance to salary
+  const syncAttendanceToSalary = () => {
+    const month = format(attendanceMonth, "yyyy-MM");
+    employees.forEach((employee) => {
+      const workingDays = calculateWorkingDaysFromAttendance(employee.id, month);
+      handleSalaryUpdate(employee.id, "workingDays", workingDays);
+    });
+    toast.success("Working days synced from attendance records");
+  };
+
+  // Bulk mark attendance for a date
+  const handleBulkMark = (date: string, status: AttendanceStatus) => {
+    employees.forEach((employee) => {
+      markAttendance(employee.id, date, status);
+    });
+    toast.success(`Marked all employees as ${status} for ${format(parseISO(date), "dd MMM yyyy")}`);
+  };
+
+  // Attendance status config
+  const attendanceStatusConfig: Record<AttendanceStatus, { icon: React.ElementType; color: string; bgColor: string; label: string }> = {
+    present: { icon: CheckCircle, color: "text-green-600", bgColor: "bg-green-100 dark:bg-green-900/30", label: "P" },
+    absent: { icon: XCircle, color: "text-red-600", bgColor: "bg-red-100 dark:bg-red-900/30", label: "A" },
+    "half-day": { icon: Clock, color: "text-amber-600", bgColor: "bg-amber-100 dark:bg-amber-900/30", label: "H" },
+    leave: { icon: Calendar, color: "text-blue-600", bgColor: "bg-blue-100 dark:bg-blue-900/30", label: "L" },
+    holiday: { icon: Sun, color: "text-purple-600", bgColor: "bg-purple-100 dark:bg-purple-900/30", label: "Ho" },
   };
 
   // Export to Excel
@@ -510,10 +588,14 @@ const Salary = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-card/50 backdrop-blur-sm">
+          <TabsList className="bg-card/50 backdrop-blur-sm flex-wrap">
             <TabsTrigger value="salary" className="gap-2">
               <Calculator className="w-4 h-4" />
               Salary Calculation
+            </TabsTrigger>
+            <TabsTrigger value="attendance" className="gap-2">
+              <CalendarDays className="w-4 h-4" />
+              Attendance
             </TabsTrigger>
             <TabsTrigger value="employees" className="gap-2">
               <Users className="w-4 h-4" />
@@ -642,6 +724,226 @@ const Salary = () => {
                           </TableRow>
                         </>
                       )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Attendance Tab */}
+          <TabsContent value="attendance" className="mt-4 space-y-4">
+            {/* Attendance Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setAttendanceMonth(subMonths(attendanceMonth, 1))}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <h3 className="text-lg font-semibold min-w-[160px] text-center">
+                  {format(attendanceMonth, "MMMM yyyy")}
+                </h3>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setAttendanceMonth(addMonths(attendanceMonth, 1))}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+              <Button onClick={syncAttendanceToSalary} className="gap-2">
+                <RefreshCcw className="w-4 h-4" />
+                Sync to Salary
+              </Button>
+            </div>
+
+            {/* Attendance Legend */}
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(attendanceStatusConfig).map(([status, config]) => (
+                <Badge key={status} variant="outline" className={`${config.bgColor} ${config.color} gap-1`}>
+                  <config.icon className="w-3 h-3" />
+                  {status.charAt(0).toUpperCase() + status.slice(1).replace("-", " ")}
+                </Badge>
+              ))}
+            </div>
+
+            {/* Attendance Summary Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {monthlyAttendanceSummary.slice(0, 6).map((item) => (
+                <Card key={item.employee.id} className="glass-card">
+                  <CardContent className="p-3">
+                    <p className="text-sm font-medium truncate">{item.employee.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-green-600">P: {item.present}</span>
+                      <span className="text-xs text-amber-600">H: {item.halfDay}</span>
+                      <span className="text-xs text-red-600">A: {item.absent}</span>
+                    </div>
+                    <p className="text-sm font-bold text-primary mt-1">{item.workingDays} days</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Calendar Grid */}
+            <Card className="glass-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Daily Attendance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="sticky left-0 bg-background z-10 min-w-[140px]">Employee</TableHead>
+                        {calendarDays.filter(day => isSameMonth(day, attendanceMonth)).map((day) => (
+                          <TableHead 
+                            key={day.toISOString()} 
+                            className={`text-center p-1 min-w-[40px] ${isToday(day) ? "bg-primary/20" : ""}`}
+                          >
+                            <div className="flex flex-col items-center">
+                              <span className="text-[10px] text-muted-foreground">{format(day, "EEE")}</span>
+                              <span className="text-xs font-bold">{format(day, "d")}</span>
+                            </div>
+                          </TableHead>
+                        ))}
+                        <TableHead className="text-center bg-green-100 dark:bg-green-900/30">Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {employees.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={getDaysInMonth(attendanceMonth) + 2} className="text-center py-8 text-muted-foreground">
+                            No employees found. Add employees first.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        employees.map((employee) => {
+                          const summary = monthlyAttendanceSummary.find(s => s.employee.id === employee.id);
+                          return (
+                            <TableRow key={employee.id}>
+                              <TableCell className="sticky left-0 bg-background z-10 font-medium text-sm">
+                                {employee.name}
+                              </TableCell>
+                              {calendarDays.filter(day => isSameMonth(day, attendanceMonth)).map((day) => {
+                                const dateStr = format(day, "yyyy-MM-dd");
+                                const status = getAttendanceStatus(employee.id, dateStr);
+                                const config = status ? attendanceStatusConfig[status] : null;
+
+                                return (
+                                  <TableCell 
+                                    key={day.toISOString()} 
+                                    className={`p-0.5 text-center ${isToday(day) ? "bg-primary/10" : ""}`}
+                                  >
+                                    <Select
+                                      value={status || ""}
+                                      onValueChange={(value) => handleMarkAttendance(employee.id, dateStr, value as AttendanceStatus)}
+                                    >
+                                      <SelectTrigger 
+                                        className={`w-9 h-8 p-0 text-xs font-bold border-0 ${config ? config.bgColor : "bg-muted/50"} ${config ? config.color : "text-muted-foreground"}`}
+                                      >
+                                        <SelectValue placeholder="-">
+                                          {config?.label || "-"}
+                                        </SelectValue>
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="present">
+                                          <div className="flex items-center gap-2">
+                                            <CheckCircle className="w-3 h-3 text-green-600" />
+                                            Present
+                                          </div>
+                                        </SelectItem>
+                                        <SelectItem value="absent">
+                                          <div className="flex items-center gap-2">
+                                            <XCircle className="w-3 h-3 text-red-600" />
+                                            Absent
+                                          </div>
+                                        </SelectItem>
+                                        <SelectItem value="half-day">
+                                          <div className="flex items-center gap-2">
+                                            <Clock className="w-3 h-3 text-amber-600" />
+                                            Half Day
+                                          </div>
+                                        </SelectItem>
+                                        <SelectItem value="leave">
+                                          <div className="flex items-center gap-2">
+                                            <Calendar className="w-3 h-3 text-blue-600" />
+                                            Leave
+                                          </div>
+                                        </SelectItem>
+                                        <SelectItem value="holiday">
+                                          <div className="flex items-center gap-2">
+                                            <Sun className="w-3 h-3 text-purple-600" />
+                                            Holiday
+                                          </div>
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </TableCell>
+                                );
+                              })}
+                              <TableCell className="text-center font-bold text-primary bg-green-50 dark:bg-green-900/10">
+                                {summary?.workingDays || 0}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Monthly Attendance Summary Table */}
+            <Card className="glass-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Monthly Summary - {format(attendanceMonth, "MMMM yyyy")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Designation</TableHead>
+                        <TableHead className="text-center text-green-600">Present</TableHead>
+                        <TableHead className="text-center text-amber-600">Half Day</TableHead>
+                        <TableHead className="text-center text-red-600">Absent</TableHead>
+                        <TableHead className="text-center text-blue-600">Leave</TableHead>
+                        <TableHead className="text-center text-purple-600">Holiday</TableHead>
+                        <TableHead className="text-center font-bold">Working Days</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {monthlyAttendanceSummary.map((item) => (
+                        <TableRow key={item.employee.id}>
+                          <TableCell className="font-medium">{item.employee.name}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{item.employee.designation}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30">{item.present}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30">{item.halfDay}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30">{item.absent}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30">{item.leave}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30">{item.holiday}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-bold text-primary text-lg">
+                            {item.workingDays}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
