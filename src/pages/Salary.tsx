@@ -404,7 +404,126 @@ const Salary = () => {
     toast.success("Salary report exported successfully");
   };
 
-  // Generate salary slip PDF for individual employee
+  // Export attendance to Excel
+  const exportAttendanceToExcel = () => {
+    const monthStr = format(attendanceMonth, "yyyy-MM");
+    const monthLabel = format(attendanceMonth, "MMMM yyyy");
+    const daysInMonth = getDaysInMonth(attendanceMonth);
+    
+    const workbook = XLSX.utils.book_new();
+    
+    // Sheet 1: Monthly Summary
+    const summaryData = monthlyAttendanceSummary.map((item, index) => ({
+      "S.No": index + 1,
+      "Employee Name": item.employee.name,
+      "Designation": item.employee.designation,
+      "Present Days": item.present,
+      "Absent Days": item.absent,
+      "Half Days": item.halfDay,
+      "Leaves": item.leave,
+      "Holidays": item.holiday,
+      "Total Working Days": item.workingDays,
+      "Attendance %": daysInMonth > 0 ? `${((item.workingDays / daysInMonth) * 100).toFixed(1)}%` : "0%",
+    }));
+    
+    // Add totals row
+    const totalPresent = monthlyAttendanceSummary.reduce((sum, i) => sum + i.present, 0);
+    const totalAbsent = monthlyAttendanceSummary.reduce((sum, i) => sum + i.absent, 0);
+    const totalHalfDay = monthlyAttendanceSummary.reduce((sum, i) => sum + i.halfDay, 0);
+    const totalLeave = monthlyAttendanceSummary.reduce((sum, i) => sum + i.leave, 0);
+    const totalHoliday = monthlyAttendanceSummary.reduce((sum, i) => sum + i.holiday, 0);
+    const totalWorkingDays = monthlyAttendanceSummary.reduce((sum, i) => sum + i.workingDays, 0);
+    
+    summaryData.push({
+      "S.No": "" as any,
+      "Employee Name": "TOTAL",
+      "Designation": "",
+      "Present Days": totalPresent,
+      "Absent Days": totalAbsent,
+      "Half Days": totalHalfDay,
+      "Leaves": totalLeave,
+      "Holidays": totalHoliday,
+      "Total Working Days": totalWorkingDays,
+      "Attendance %": "",
+    });
+    
+    const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+    summarySheet['!cols'] = [
+      { wch: 6 },  // S.No
+      { wch: 25 }, // Employee Name
+      { wch: 20 }, // Designation
+      { wch: 12 }, // Present
+      { wch: 12 }, // Absent
+      { wch: 10 }, // Half Days
+      { wch: 10 }, // Leaves
+      { wch: 10 }, // Holidays
+      { wch: 18 }, // Total Working Days
+      { wch: 14 }, // Attendance %
+    ];
+    XLSX.utils.book_append_sheet(workbook, summarySheet, "Monthly Summary");
+    
+    // Sheet 2: Daily Records
+    const dailyData: any[][] = [
+      [`Attendance Report - ${monthLabel}`],
+      [],
+    ];
+    
+    // Header row with dates
+    const headerRow = ["S.No", "Employee Name", "Designation"];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth(), day);
+      headerRow.push(format(date, "d"));
+    }
+    headerRow.push("Working Days");
+    dailyData.push(headerRow);
+    
+    // Day names row
+    const dayNamesRow = ["", "", ""];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth(), day);
+      dayNamesRow.push(format(date, "EEE").charAt(0));
+    }
+    dayNamesRow.push("");
+    dailyData.push(dayNamesRow);
+    
+    // Employee rows
+    employees.forEach((employee, index) => {
+      const row: any[] = [index + 1, employee.name, employee.designation];
+      let workingDays = 0;
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = format(new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth(), day), "yyyy-MM-dd");
+        const record = attendanceRecords.find(r => r.employeeId === employee.id && r.date === dateStr);
+        
+        if (record) {
+          const statusLabel = attendanceStatusConfig[record.status].label;
+          row.push(statusLabel);
+          if (record.status === "present") workingDays += 1;
+          else if (record.status === "half-day") workingDays += 0.5;
+        } else {
+          row.push("-");
+        }
+      }
+      row.push(workingDays);
+      dailyData.push(row);
+    });
+    
+    const dailySheet = XLSX.utils.aoa_to_sheet(dailyData);
+    
+    // Set column widths
+    const colWidths = [{ wch: 6 }, { wch: 25 }, { wch: 20 }];
+    for (let i = 0; i < daysInMonth; i++) {
+      colWidths.push({ wch: 4 });
+    }
+    colWidths.push({ wch: 14 });
+    dailySheet['!cols'] = colWidths;
+    
+    XLSX.utils.book_append_sheet(workbook, dailySheet, "Daily Records");
+    
+    XLSX.writeFile(workbook, `Attendance-Report-${format(attendanceMonth, "MMMM-yyyy")}.xlsx`);
+    toast.success("Attendance report exported successfully");
+  };
+
   const generateSalarySlip = async (employeeId: string) => {
     const salaryData = monthlySalaryData.find(item => item.employee.id === employeeId);
     if (!salaryData) {
@@ -754,10 +873,16 @@ const Salary = () => {
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
-              <Button onClick={syncAttendanceToSalary} className="gap-2">
-                <RefreshCcw className="w-4 h-4" />
-                Sync to Salary
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button onClick={exportAttendanceToExcel} variant="outline" className="gap-2">
+                  <Download className="w-4 h-4" />
+                  Export
+                </Button>
+                <Button onClick={syncAttendanceToSalary} className="gap-2">
+                  <RefreshCcw className="w-4 h-4" />
+                  Sync to Salary
+                </Button>
+              </div>
             </div>
 
             {/* Attendance Legend */}
