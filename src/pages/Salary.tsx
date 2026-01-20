@@ -812,7 +812,7 @@ const Salary = () => {
                                 <span className="text-[10px] text-muted-foreground">{format(day, "EEE")}</span>
                                 <span className="text-xs font-bold">{format(day, "d")}</span>
                                 {/* Bulk action dropdown on hover */}
-                                <div className="flex gap-0.5 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex flex-wrap gap-0.5 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity justify-center">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <Button
@@ -828,6 +828,38 @@ const Salary = () => {
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="bottom">Mark all Present</TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-4 w-4 p-0 text-red-600 hover:bg-red-100"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleBulkMark(dateStr, "absent");
+                                        }}
+                                      >
+                                        <XCircle className="w-3 h-3" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">Mark all Absent</TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-4 w-4 p-0 text-blue-600 hover:bg-blue-100"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleBulkMark(dateStr, "leave");
+                                        }}
+                                      >
+                                        <Calendar className="w-3 h-3" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">Mark all Leave</TooltipContent>
                                   </Tooltip>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
