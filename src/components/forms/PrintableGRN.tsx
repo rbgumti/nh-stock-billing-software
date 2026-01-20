@@ -40,15 +40,20 @@ export function PrintableGRN({
 
     setIsGenerating(true);
     try {
-      const canvas = await html2canvas(printRef.current, {
-        scale: 2,
+      // Clone the element to avoid modifying the original
+      const element = printRef.current;
+      
+      const canvas = await html2canvas(element, {
+        scale: 3, // Higher scale for better quality
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
       });
 
-      const imgData = canvas.toDataURL("image/png");
+      const imgData = canvas.toDataURL("image/png", 1.0);
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -58,14 +63,23 @@ export function PrintableGRN({
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
+      // Calculate dimensions to fit A4 properly
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      
+      // Scale to fit width, maintaining aspect ratio
+      const scaledWidth = pdfWidth;
+      const scaledHeight = (imgHeight * pdfWidth) / imgWidth;
+      
+      // If height exceeds page, scale to fit height instead
+      const finalWidth = scaledHeight > pdfHeight ? (imgWidth * pdfHeight) / imgHeight : scaledWidth;
+      const finalHeight = scaledHeight > pdfHeight ? pdfHeight : scaledHeight;
+      
+      // Center horizontally
+      const imgX = (pdfWidth - finalWidth) / 2;
       const imgY = 0;
 
-      pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.addImage(imgData, "PNG", imgX, imgY, finalWidth, finalHeight);
       pdf.save(`GRN-${grnNumber}.pdf`);
     } catch (error) {
       console.error("Error generating PDF:", error);
