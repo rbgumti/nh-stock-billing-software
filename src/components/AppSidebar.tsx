@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Bell } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Bell, Wallet } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +28,7 @@ const navigationItems = [
   { title: "Patient Analytics", url: "/analytics/patients", icon: Activity, color: "from-pink-500 to-rose-500", glow: "group-hover:shadow-pink-500/30" },
   { title: "Stock", url: "/stock", icon: Package, color: "from-indigo-500 to-blue-500", glow: "group-hover:shadow-indigo-500/30" },
   { title: "Invoices", url: "/invoices", icon: Receipt, color: "from-green-500 to-emerald-500", glow: "group-hover:shadow-green-500/30" },
+  { title: "Salary", url: "/salary", icon: Wallet, color: "from-teal-500 to-cyan-500", glow: "group-hover:shadow-teal-500/30" },
   { title: "Reports", url: "/reports", icon: BarChart3, color: "from-purple-500 to-violet-500", glow: "group-hover:shadow-purple-500/30" },
 ];
 
