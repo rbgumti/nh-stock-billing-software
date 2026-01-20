@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,17 +6,23 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, Plus, Pencil, Trash2, Download, Calculator, 
-  Calendar, DollarSign, UserPlus, FileSpreadsheet 
+  Calendar, DollarSign, UserPlus, FileSpreadsheet, FileDown, Loader2 
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSalaryStore, Employee, SalaryRecord } from "@/hooks/useSalaryStore";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
+import { SalarySlipDocument } from "@/components/forms/SalarySlipDocument";
 import { toast } from "sonner";
 import { format, startOfMonth, subMonths, addMonths } from "date-fns";
 import * as XLSX from "xlsx";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { createRoot } from "react-dom/client";
+import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
 
 const Salary = () => {
   const { 
@@ -36,6 +42,7 @@ const Salary = () => {
   const [isEmployeeDialogOpen, setIsEmployeeDialogOpen] = useState(false);
   const [isSalaryDialogOpen, setIsSalaryDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [generatingSlipId, setGeneratingSlipId] = useState<string | null>(null);
   const [editingSalaryRecord, setEditingSalaryRecord] = useState<SalaryRecord | null>(null);
 
   // Employee form state
@@ -208,6 +215,101 @@ const Salary = () => {
     toast.success("Salary report exported successfully");
   };
 
+  // Generate salary slip PDF for individual employee
+  const generateSalarySlip = async (employeeId: string) => {
+    const salaryData = monthlySalaryData.find(item => item.employee.id === employeeId);
+    if (!salaryData) {
+      toast.error("Employee data not found");
+      return;
+    }
+
+    setGeneratingSlipId(employeeId);
+
+    try {
+      const monthLabel = format(new Date(selectedMonth + "-01"), "MMMM yyyy");
+      
+      // Create a temporary container
+      const container = document.createElement("div");
+      container.style.position = "absolute";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      document.body.appendChild(container);
+
+      // Render the salary slip component
+      const root = createRoot(container);
+      
+      await new Promise<void>((resolve) => {
+        root.render(
+          <AppSettingsProvider>
+            <SalarySlipDocument
+              employee={salaryData.employee}
+              month={selectedMonth}
+              monthLabel={monthLabel}
+              workingDays={salaryData.workingDays}
+              advanceAdjusted={salaryData.advanceAdjusted}
+              advancePending={salaryData.advancePending}
+              salaryPayable={salaryData.salaryPayable}
+            />
+          </AppSettingsProvider>
+        );
+        setTimeout(resolve, 100);
+      });
+
+      // Generate canvas from the rendered component
+      const canvas = await html2canvas(container.firstChild as HTMLElement, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      // Create PDF
+      const imgData = canvas.toDataURL("image/png", 1.0);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      // Scale to fit width, maintaining aspect ratio
+      const scaledWidth = pdfWidth;
+      const scaledHeight = (imgHeight * pdfWidth) / imgWidth;
+
+      // If height exceeds page, scale to fit height instead
+      const finalWidth = scaledHeight > pdfHeight ? (imgWidth * pdfHeight) / imgHeight : scaledWidth;
+      const finalHeight = scaledHeight > pdfHeight ? pdfHeight : scaledHeight;
+
+      // Center horizontally
+      const imgX = (pdfWidth - finalWidth) / 2;
+      const imgY = 0;
+
+      pdf.addImage(imgData, "PNG", imgX, imgY, finalWidth, finalHeight);
+
+      // Generate filename
+      const sanitizedName = salaryData.employee.name.replace(/[^a-zA-Z0-9]/g, '-');
+      const monthFile = format(new Date(selectedMonth + "-01"), "MMM-yyyy");
+      pdf.save(`Salary-Slip-${sanitizedName}-${monthFile}.pdf`);
+
+      // Cleanup
+      root.unmount();
+      document.body.removeChild(container);
+
+      toast.success(`Salary slip generated for ${salaryData.employee.name}`);
+    } catch (error) {
+      console.error("Error generating salary slip:", error);
+      toast.error("Failed to generate salary slip");
+    } finally {
+      setGeneratingSlipId(null);
+    }
+  };
+
   return (
     <div className="relative p-4 sm:p-6 min-h-screen">
       <FloatingOrbs />
@@ -335,12 +437,13 @@ const Salary = () => {
                         <TableHead className="font-bold text-foreground text-right">Advance (Adjusted)</TableHead>
                         <TableHead className="font-bold text-foreground text-right">Advance Pending</TableHead>
                         <TableHead className="font-bold text-foreground text-right bg-green-200 dark:bg-green-800/50">Salary Payable</TableHead>
+                        <TableHead className="font-bold text-foreground text-center w-20">Slip</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {monthlySalaryData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                          <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                             No employees found. Add employees first to calculate salaries.
                           </TableCell>
                         </TableRow>
@@ -386,6 +489,26 @@ const Salary = () => {
                               <TableCell className="text-right font-bold bg-green-50 dark:bg-green-900/10 text-primary">
                                 ₹{item.salaryPayable.toLocaleString('en-IN')}
                               </TableCell>
+                              <TableCell className="text-center">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-8 w-8"
+                                      onClick={() => generateSalarySlip(item.employee.id)}
+                                      disabled={generatingSlipId === item.employee.id}
+                                    >
+                                      {generatingSlipId === item.employee.id ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                      ) : (
+                                        <FileDown className="w-4 h-4" />
+                                      )}
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Download Salary Slip</TooltipContent>
+                                </Tooltip>
+                              </TableCell>
                             </TableRow>
                           ))}
                           {/* Totals Row */}
@@ -400,6 +523,7 @@ const Salary = () => {
                             <TableCell className="text-right text-primary bg-green-200 dark:bg-green-800/50">
                               ₹{totals.salaryPayable.toLocaleString('en-IN')}
                             </TableCell>
+                            <TableCell></TableCell>
                           </TableRow>
                         </>
                       )}
