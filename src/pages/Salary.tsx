@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, Plus, Pencil, Trash2, Download, Calculator, 
   Calendar, DollarSign, UserPlus, FileSpreadsheet, FileDown, Loader2,
-  TrendingUp, BarChart3, CheckCircle, XCircle, Clock, Sun, CalendarDays, RefreshCcw, ChevronLeft, ChevronRight, Wallet
+  TrendingUp, BarChart3, CheckCircle, XCircle, Clock, Sun, CalendarDays, RefreshCcw, ChevronLeft, ChevronRight, Wallet, LockKeyhole
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,7 @@ import { useAdvancesFromDayReports } from "@/hooks/useAdvancesFromDayReports";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { SalarySlipDocument } from "@/components/forms/SalarySlipDocument";
 import { SalaryPasswordGate } from "@/components/SalaryPasswordGate";
+import { useSalaryAccess } from "@/hooks/useSalaryAccess";
 import { toast } from "sonner";
 import { format, startOfMonth, subMonths, addMonths, getDaysInMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay } from "date-fns";
 import * as XLSX from "xlsx";
@@ -49,6 +50,8 @@ const SalaryContent = () => {
     calculateWorkingDaysFromAttendance,
     bulkMarkAttendance
   } = useSalaryStore();
+
+  const { revokeAccess } = useSalaryAccess();
 
   const { 
     monthlySummary: advancesSummary, 
@@ -706,6 +709,15 @@ const SalaryContent = () => {
             <Button onClick={exportToExcel} variant="outline" className="gap-2">
               <Download className="w-4 h-4" />
               Export
+            </Button>
+            
+            <Button 
+              onClick={revokeAccess} 
+              variant="outline" 
+              className="gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <LockKeyhole className="w-4 h-4" />
+              Lock
             </Button>
           </div>
         </div>
