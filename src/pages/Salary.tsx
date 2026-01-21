@@ -18,6 +18,7 @@ import { useSalaryStore, Employee, SalaryRecord, AttendanceStatus } from "@/hook
 import { useAdvancesFromDayReports } from "@/hooks/useAdvancesFromDayReports";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { SalarySlipDocument } from "@/components/forms/SalarySlipDocument";
+import { SalaryPasswordGate } from "@/components/SalaryPasswordGate";
 import { toast } from "sonner";
 import { format, startOfMonth, subMonths, addMonths, getDaysInMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay } from "date-fns";
 import * as XLSX from "xlsx";
@@ -30,7 +31,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from "recharts";
 
-const Salary = () => {
+const SalaryContent = () => {
   const { 
     employees, 
     salaryRecords,
@@ -1647,6 +1648,15 @@ const Salary = () => {
         </DialogContent>
       </Dialog>
     </div>
+  );
+};
+
+// Wrapper component with password protection
+const Salary = () => {
+  return (
+    <SalaryPasswordGate>
+      <SalaryContent />
+    </SalaryPasswordGate>
   );
 };
 
