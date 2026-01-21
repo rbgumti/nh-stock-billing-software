@@ -53,6 +53,13 @@ const SalaryContent = () => {
 
   const { revokeAccess } = useSalaryAccess();
 
+  // Auto-lock when navigating away from the Salary page
+  useEffect(() => {
+    return () => {
+      revokeAccess();
+    };
+  }, [revokeAccess]);
+
   const { 
     monthlySummary: advancesSummary, 
     fetchAdvancesForMonth, 
