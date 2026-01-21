@@ -11,31 +11,32 @@ interface SalaryPasswordGateProps {
 }
 
 export function SalaryPasswordGate({ children }: SalaryPasswordGateProps) {
-  const { isAuthenticated, verifyPassword } = useSalaryAccess();
+  const { isAuthenticated, isVerifying, verifyPassword } = useSalaryAccess();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
   if (isAuthenticated) {
     return <>{children}</>;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    
+    if (!password || password.length === 0) {
+      toast.error("Please enter a password");
+      return;
+    }
 
-    // Small delay for UX
-    setTimeout(() => {
-      if (verifyPassword(password)) {
-        toast.success("Access granted");
-      } else {
-        setAttempts((prev) => prev + 1);
-        toast.error("Incorrect password");
-        setPassword("");
-      }
-      setIsLoading(false);
-    }, 300);
+    const success = await verifyPassword(password);
+    
+    if (success) {
+      toast.success("Access granted");
+    } else {
+      setAttempts((prev) => prev + 1);
+      toast.error("Incorrect password");
+      setPassword("");
+    }
   };
 
   return (
@@ -62,6 +63,7 @@ export function SalaryPasswordGate({ children }: SalaryPasswordGateProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 className="pr-10"
                 autoFocus
+                maxLength={100}
               />
               <button
                 type="button"
@@ -82,9 +84,9 @@ export function SalaryPasswordGate({ children }: SalaryPasswordGateProps) {
             <Button
               type="submit"
               className="w-full"
-              disabled={!password || isLoading}
+              disabled={!password || isVerifying}
             >
-              {isLoading ? "Verifying..." : "Unlock"}
+              {isVerifying ? "Verifying..." : "Unlock"}
             </Button>
           </form>
         </CardContent>
