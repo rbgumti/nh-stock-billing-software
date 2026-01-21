@@ -59,7 +59,19 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
     
     setUploading(true);
     try {
-      const fileExt = receiptFile.name.split('.').pop();
+      const fileExt = receiptFile.name.split('.').pop()?.toLowerCase();
+      
+      // Validate file type
+      const allowedTypes = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+      if (!fileExt || !allowedTypes.includes(fileExt)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a PDF or image file (JPG, PNG, WebP)",
+          variant: "destructive"
+        });
+        return null;
+      }
+
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `receipts/${fileName}`;
 
@@ -69,11 +81,8 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('payment-receipts')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
+      // Store just the file path - we'll generate signed URLs when viewing
+      return filePath;
     } catch (error) {
       console.error('Error uploading receipt:', error);
       toast({
@@ -84,6 +93,26 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
       return null;
     } finally {
       setUploading(false);
+    }
+  };
+
+  // Helper function to get signed URL for viewing receipts
+  const getSignedReceiptUrl = async (filePath: string): Promise<string | null> => {
+    try {
+      // If it's already a full URL (legacy), return as-is
+      if (filePath.startsWith('http')) {
+        return filePath;
+      }
+      
+      const { data, error } = await supabase.storage
+        .from('payment-receipts')
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+      
+      if (error) throw error;
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Error getting signed URL:', error);
+      return null;
     }
   };
 
@@ -295,14 +324,26 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
                   {receiptFile ? receiptFile.name : 'Receipt uploaded'}
                 </span>
                 {formData.receipt_url && !receiptFile && (
-                  <a 
-                    href={formData.receipt_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline"
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    className="text-sm text-primary hover:underline p-0 h-auto"
+                    onClick={async () => {
+                      const url = await getSignedReceiptUrl(formData.receipt_url);
+                      if (url) {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: "Could not access receipt. Please try again.",
+                          variant: "destructive"
+                        });
+                      }
+                    }}
                   >
                     View
-                  </a>
+                  </Button>
                 )}
                 <Button
                   type="button"
