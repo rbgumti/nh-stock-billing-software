@@ -140,6 +140,7 @@ export type Database = {
       day_reports: {
         Row: {
           adjustments: number | null
+          advances: Json | null
           cash_denominations: Json | null
           cash_handover_amarjeet: number | null
           cash_handover_mandeep: number | null
@@ -165,6 +166,7 @@ export type Database = {
         }
         Insert: {
           adjustments?: number | null
+          advances?: Json | null
           cash_denominations?: Json | null
           cash_handover_amarjeet?: number | null
           cash_handover_mandeep?: number | null
@@ -190,6 +192,7 @@ export type Database = {
         }
         Update: {
           adjustments?: number | null
+          advances?: Json | null
           cash_denominations?: Json | null
           cash_handover_amarjeet?: number | null
           cash_handover_mandeep?: number | null

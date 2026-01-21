@@ -10,11 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Calendar, Loader2, Check, RefreshCw, ToggleLeft, ToggleRight, Save, FileSpreadsheet, FileText, ChevronDown, CalendarRange } from "lucide-react";
+import { Download, Calendar, Loader2, Check, RefreshCw, ToggleLeft, ToggleRight, Save, FileSpreadsheet, FileText, ChevronDown, CalendarRange, Trash2, Plus, Wallet } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DateRangeExportDialog } from "./DateRangeExportDialog";
-import { format } from "date-fns";
+import { format as formatDateFns } from "date-fns";
 import { useStockStore } from "@/hooks/useStockStore";
+import { useSalaryStore } from "@/hooks/useSalaryStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -46,8 +48,15 @@ interface ExpenseItem {
   amount: number;
 }
 
+interface AdvanceItem {
+  employeeId: string;
+  employeeName: string;
+  amount: number;
+}
+
 export default function DayReport() {
   const { stockItems } = useStockStore();
+  const { employees } = useSalaryStore();
   const [reportDate, setReportDate] = useState(() => formatLocalISODate());
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -91,6 +100,9 @@ export default function DayReport() {
   const [expenses, setExpenses] = useState<ExpenseItem[]>([
     { description: "", amount: 0 }
   ]);
+  
+  // Employee Advances
+  const [advances, setAdvances] = useState<AdvanceItem[]>([]);
   
   // Cash denominations
   const [cashDetails, setCashDetails] = useState<CashDenomination[]>([
@@ -233,6 +245,12 @@ export default function DayReport() {
         } else {
           setExpenses([{ description: "", amount: 0 }]);
         }
+        // Load advances from the report
+        if ((data as any).advances && Array.isArray((data as any).advances)) {
+          setAdvances((data as any).advances as AdvanceItem[]);
+        } else {
+          setAdvances([]);
+        }
       } else {
         // Reset to defaults for new date
         setReportId(null);
@@ -267,6 +285,7 @@ export default function DayReport() {
           { denomination: 1, count: 0, amount: 0 },
         ]);
         setExpenses([{ description: "", amount: 0 }]);
+        setAdvances([]);
       }
     } catch (error) {
       console.error('Error loading report:', error);
@@ -299,6 +318,7 @@ export default function DayReport() {
         psychiatry_collection: psychiatryCollection,
         cash_denominations: JSON.parse(JSON.stringify(cashDetails)),
         expenses: JSON.parse(JSON.stringify(expenses.filter(e => e.description || e.amount > 0))),
+        advances: JSON.parse(JSON.stringify(advances.filter(a => a.employeeId && a.amount > 0))),
         created_by: user?.id,
       };
 
@@ -335,7 +355,7 @@ export default function DayReport() {
   }, [newPatients, followUpPatients, cashPreviousDay, depositInBank,
       paytmGpay, cashHandoverAmarjeet, cashHandoverMandeep, cashHandoverSir, adjustments,
       tapentadolPatients, psychiatryPatients, fees, labCollection, psychiatryCollection,
-      cashDetails, expenses]);
+      cashDetails, expenses, advances]);
 
   useEffect(() => {
     loadSavedReport().then(() => {
@@ -488,12 +508,37 @@ export default function DayReport() {
     setExpenses(updated);
   };
 
+  // Advance helpers
+  const addAdvance = () => {
+    setAdvances([...advances, { employeeId: "", employeeName: "", amount: 0 }]);
+  };
+
+  const updateAdvance = (index: number, field: 'employeeId' | 'amount', value: string | number) => {
+    const updated = [...advances];
+    if (field === 'employeeId') {
+      const selectedEmployee = employees.find(e => e.id === value);
+      updated[index] = { 
+        ...updated[index], 
+        employeeId: value as string,
+        employeeName: selectedEmployee?.name || ""
+      };
+    } else {
+      updated[index] = { ...updated[index], amount: value as number };
+    }
+    setAdvances(updated);
+  };
+
+  const removeAdvance = (index: number) => {
+    setAdvances(advances.filter((_, i) => i !== index));
+  };
+
   // Calculations
   const bnxTotal = bnxMedicines.reduce((sum, item) => sum + item.amount, 0);
   const tpnTotal = tpnMedicines.reduce((sum, item) => sum + item.amount, 0);
   const pshyTotal = pshyMedicines.reduce((sum, item) => sum + item.amount, 0);
   
   const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
+  const totalAdvances = advances.reduce((sum, item) => sum + item.amount, 0);
   const totalCash = cashDetails.reduce((sum, item) => sum + item.amount, 0);
   
   const totalSale = bnxTotal + tpnTotal + pshyTotal + fees + labCollection;
@@ -601,8 +646,8 @@ export default function DayReport() {
   };
 
   const exportDateRangeToExcel = async (startDate: Date, endDate: Date) => {
-    const startDateStr = format(startDate, 'yyyy-MM-dd');
-    const endDateStr = format(endDate, 'yyyy-MM-dd');
+    const startDateStr = formatDateFns(startDate, 'yyyy-MM-dd');
+    const endDateStr = formatDateFns(endDate, 'yyyy-MM-dd');
     const fmt = (n: number) => Number(n.toFixed(2));
 
     // Fetch day reports in date range
@@ -661,7 +706,7 @@ export default function DayReport() {
 
     // Summary sheet with all day reports
     const summaryData: any[][] = [
-      [`Day's Report Summary - ${format(startDate, 'dd MMM yyyy')} to ${format(endDate, 'dd MMM yyyy')}`],
+      [`Day's Report Summary - ${formatDateFns(startDate, 'dd MMM yyyy')} to ${formatDateFns(endDate, 'dd MMM yyyy')}`],
       [],
       ['Date', 'New Patients', 'Follow-Up', 'Total Patients', 'Fees', 'Lab Collection', 'Cash Previous', 'Bank Deposit', 'Paytm/GPay', 'Adjustments', 'Total Expenses', 'Handover Amarjeet', 'Handover Mandeep', 'Handover Sir', 'Loose Balance'],
     ];
@@ -680,7 +725,7 @@ export default function DayReport() {
 
     // Expense details for separate sheet
     const expenseDetails: any[][] = [
-      [`Expense Details - ${format(startDate, 'dd MMM yyyy')} to ${format(endDate, 'dd MMM yyyy')}`],
+      [`Expense Details - ${formatDateFns(startDate, 'dd MMM yyyy')} to ${formatDateFns(endDate, 'dd MMM yyyy')}`],
       [],
       ['Date', 'Description', 'Amount'],
     ];
@@ -1737,6 +1782,70 @@ export default function DayReport() {
                 <span>Total</span>
                 <span className="text-red-600">₹{formatNumber(totalExpenses)}</span>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Employee Advances */}
+          <Card>
+            <CardHeader className="bg-amber-600 text-white py-2 rounded-t-lg">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Wallet className="w-4 h-4" />
+                Employee Advances
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 space-y-2">
+              {employees.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-2">
+                  No employees found. Add employees in Salary Management first.
+                </p>
+              ) : (
+                <>
+                  {advances.map((adv, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <Select
+                        value={adv.employeeId}
+                        onValueChange={(value) => updateAdvance(index, 'employeeId', value)}
+                      >
+                        <SelectTrigger className="flex-1 h-7 text-xs">
+                          <SelectValue placeholder="Select Employee" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {employees.map((emp) => (
+                            <SelectItem key={emp.id} value={emp.id} className="text-xs">
+                              {emp.name} ({emp.designation})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        type="number"
+                        placeholder="Amount"
+                        value={adv.amount || ''}
+                        onChange={(e) => updateAdvance(index, 'amount', parseFloat(e.target.value) || 0)}
+                        className="w-24 h-7 text-right"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => removeAdvance(index)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button onClick={addAdvance} variant="outline" size="sm" className="w-full h-7 text-xs gap-1">
+                    <Plus className="w-3 h-3" />
+                    Add Advance
+                  </Button>
+                  {advances.length > 0 && (
+                    <div className="flex justify-between font-bold border-t pt-2">
+                      <span>Total Advances</span>
+                      <span className="text-amber-600">₹{formatNumber(totalAdvances)}</span>
+                    </div>
+                  )}
+                </>
+              )}
             </CardContent>
           </Card>
 
