@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const SALARY_PASSWORD = "Roop@58925658";
 const SALARY_ACCESS_KEY = "salary_access_granted";
 
 export function useSalaryAccess() {
@@ -8,14 +8,39 @@ export function useSalaryAccess() {
     // Check session storage for existing access
     return sessionStorage.getItem(SALARY_ACCESS_KEY) === "true";
   });
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  const verifyPassword = useCallback((password: string): boolean => {
-    if (password === SALARY_PASSWORD) {
-      sessionStorage.setItem(SALARY_ACCESS_KEY, "true");
-      setIsAuthenticated(true);
-      return true;
+  const verifyPassword = useCallback(async (password: string): Promise<boolean> => {
+    setIsVerifying(true);
+    
+    try {
+      // Validate input before sending
+      if (!password || password.length === 0 || password.length > 100) {
+        return false;
+      }
+
+      const { data, error } = await supabase.functions.invoke('verify-salary-access', {
+        body: { password }
+      });
+
+      if (error) {
+        console.error('Salary verification error:', error);
+        return false;
+      }
+
+      if (data?.success) {
+        sessionStorage.setItem(SALARY_ACCESS_KEY, "true");
+        setIsAuthenticated(true);
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Salary verification error:', error);
+      return false;
+    } finally {
+      setIsVerifying(false);
     }
-    return false;
   }, []);
 
   const revokeAccess = useCallback(() => {
@@ -25,6 +50,7 @@ export function useSalaryAccess() {
 
   return {
     isAuthenticated,
+    isVerifying,
     verifyPassword,
     revokeAccess,
   };
