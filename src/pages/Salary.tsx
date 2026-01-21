@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, Plus, Pencil, Trash2, Download, Calculator, 
   Calendar, DollarSign, UserPlus, FileSpreadsheet, FileDown, Loader2,
-  TrendingUp, BarChart3, CheckCircle, XCircle, Clock, Sun, CalendarDays, RefreshCcw, ChevronLeft, ChevronRight
+  TrendingUp, BarChart3, CheckCircle, XCircle, Clock, Sun, CalendarDays, RefreshCcw, ChevronLeft, ChevronRight, Wallet
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSalaryStore, Employee, SalaryRecord, AttendanceStatus } from "@/hooks/useSalaryStore";
+import { useAdvancesFromDayReports } from "@/hooks/useAdvancesFromDayReports";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { SalarySlipDocument } from "@/components/forms/SalarySlipDocument";
 import { toast } from "sonner";
@@ -48,12 +49,25 @@ const Salary = () => {
     bulkMarkAttendance
   } = useSalaryStore();
 
+  const { 
+    monthlySummary: advancesSummary, 
+    fetchAdvancesForMonth, 
+    getEmployeeTotalAdvances,
+    loading: advancesLoading 
+  } = useAdvancesFromDayReports();
+
   const [activeTab, setActiveTab] = useState("salary");
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), "yyyy-MM"));
   const [attendanceMonth, setAttendanceMonth] = useState(new Date());
   const [isEmployeeDialogOpen, setIsEmployeeDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [generatingSlipId, setGeneratingSlipId] = useState<string | null>(null);
+
+  // Fetch advances when month changes
+  useEffect(() => {
+    const monthDate = new Date(selectedMonth + "-01");
+    fetchAdvancesForMonth(monthDate);
+  }, [selectedMonth, fetchAdvancesForMonth]);
 
   // Employee form state
   const [employeeForm, setEmployeeForm] = useState({
@@ -771,14 +785,43 @@ const Salary = () => {
           <TabsContent value="salary" className="mt-4">
             <Card className="glass-card">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between flex-wrap gap-2">
                   <span>Monthly Salary Sheet - {format(new Date(selectedMonth + "-01"), "MMMM yyyy")}</span>
-                  {employees.length === 0 && (
-                    <Button size="sm" onClick={() => setActiveTab("employees")} className="gap-2">
-                      <UserPlus className="w-4 h-4" />
-                      Add Employees First
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {advancesSummary.length > 0 && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="gap-2"
+                            disabled={advancesLoading}
+                            onClick={() => {
+                              let synced = 0;
+                              advancesSummary.forEach((summary) => {
+                                const currentRecord = salaryRecords.find(
+                                  r => r.employeeId === summary.employeeId && r.month === selectedMonth
+                                );
+                                handleSalaryUpdate(summary.employeeId, 'advanceAdjusted', summary.totalAdvances);
+                                synced++;
+                              });
+                              toast.success(`Synced advances for ${synced} employee(s) from Day Reports`);
+                            }}
+                          >
+                            <Wallet className="w-4 h-4" />
+                            Sync Advances (₹{advancesSummary.reduce((s, a) => s + a.totalAdvances, 0).toLocaleString('en-IN')})
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Sync advances recorded in Day Reports to salary sheet</TooltipContent>
+                      </Tooltip>
+                    )}
+                    {employees.length === 0 && (
+                      <Button size="sm" onClick={() => setActiveTab("employees")} className="gap-2">
+                        <UserPlus className="w-4 h-4" />
+                        Add Employees First
+                      </Button>
+                    )}
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
