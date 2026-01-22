@@ -1883,7 +1883,7 @@ export default function Stock() {
                       <p className="text-muted-foreground">Items Received</p>
                       <p className="font-medium">{po.items.length} item(s)</p>
                     </div>
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex gap-2 mt-4 flex-wrap">
                       <Button 
                         variant="outline" 
                         size="sm"
@@ -1891,8 +1891,29 @@ export default function Stock() {
                         onClick={() => setEditingGRN(po)}
                       >
                         <Pencil className="h-4 w-4 mr-1 text-purple" />
-                        Edit
+                        Edit GRN
                       </Button>
+                      {po.poType === 'Service' ? (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="glass-subtle border-orange/20 hover:border-orange/40"
+                          onClick={() => setEditingServicePO(po)}
+                        >
+                          <Pencil className="h-4 w-4 mr-1 text-orange" />
+                          Edit PO
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="glass-subtle border-orange/20 hover:border-orange/40"
+                          onClick={() => setEditingPO(po)}
+                        >
+                          <Pencil className="h-4 w-4 mr-1 text-orange" />
+                          Edit PO
+                        </Button>
+                      )}
                       <Button 
                         variant="outline" 
                         className="flex-1 glass-subtle border-teal/20 hover:border-teal/40"
