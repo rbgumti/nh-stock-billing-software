@@ -14,6 +14,8 @@ export interface GRNItem {
   costPrice?: number;
   mrp?: number;
   remarks?: string;
+  isAdditionalBatch?: boolean;
+  parentIndex?: number;
 }
 
 export interface GRNDocumentProps {
