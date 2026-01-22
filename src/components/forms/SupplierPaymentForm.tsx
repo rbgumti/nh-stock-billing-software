@@ -1,20 +1,27 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { SupplierPayment } from "@/hooks/useSupplierPaymentStore";
 import { Supplier } from "@/hooks/useSupplierStore";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, X, FileText } from "lucide-react";
+import { Upload, X, FileText, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface SupplierPaymentFormProps {
   onClose: () => void;
-  onSubmit: (payment: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>) => void;
+  onSubmit: (
+    payment: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>,
+    linkedPOIds: number[]
+  ) => void;
   suppliers: Supplier[];
   purchaseOrders: PurchaseOrder[];
   initialData?: SupplierPayment;
@@ -23,7 +30,6 @@ interface SupplierPaymentFormProps {
 export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrders, initialData }: SupplierPaymentFormProps) {
   const [formData, setFormData] = useState({
     supplier_id: initialData?.supplier_id?.toString() || "",
-    purchase_order_id: initialData?.purchase_order_id?.toString() || "",
     amount: initialData?.amount?.toString() || "",
     payment_date: initialData?.payment_date || new Date().toISOString().split('T')[0],
     due_date: initialData?.due_date || "",
@@ -32,12 +38,53 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
     utr_number: initialData?.utr_number || "",
     bank_reference: initialData?.bank_reference || "",
     receipt_url: initialData?.receipt_url || "",
-    status: initialData?.status || "Pending",
+    status: initialData?.status || "Completed",
     notes: initialData?.notes || ""
   });
   
+  // Multi-select PO IDs
+  const [selectedPOIds, setSelectedPOIds] = useState<number[]>(
+    initialData?.purchase_order_id ? [initialData.purchase_order_id] : []
+  );
+  
   const [uploading, setUploading] = useState(false);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
+
+  // Filter POs for selected supplier - only show unpaid/partial ones
+  const filteredPOs = useMemo(() => {
+    if (!formData.supplier_id) return [];
+    const supplier = suppliers.find(s => s.id.toString() === formData.supplier_id);
+    if (!supplier) return [];
+    
+    return purchaseOrders.filter(po => 
+      po.supplier === supplier.name && 
+      po.status === 'Received' &&
+      po.paymentStatus !== 'Paid'
+    );
+  }, [formData.supplier_id, suppliers, purchaseOrders]);
+
+  // Calculate total outstanding for selected POs
+  const selectedPOsTotal = useMemo(() => {
+    return filteredPOs
+      .filter(po => selectedPOIds.includes(po.id))
+      .reduce((sum, po) => sum + po.totalAmount, 0);
+  }, [filteredPOs, selectedPOIds]);
+
+  const handlePOToggle = (poId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedPOIds(prev => [...prev, poId]);
+    } else {
+      setSelectedPOIds(prev => prev.filter(id => id !== poId));
+    }
+  };
+
+  const selectAllPOs = () => {
+    setSelectedPOIds(filteredPOs.map(po => po.id));
+  };
+
+  const clearAllPOs = () => {
+    setSelectedPOIds([]);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,7 +108,6 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
     try {
       const fileExt = receiptFile.name.split('.').pop()?.toLowerCase();
       
-      // Validate file type
       const allowedTypes = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
       if (!fileExt || !allowedTypes.includes(fileExt)) {
         toast({
@@ -81,7 +127,6 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
 
       if (uploadError) throw uploadError;
 
-      // Store just the file path - we'll generate signed URLs when viewing
       return filePath;
     } catch (error) {
       console.error('Error uploading receipt:', error);
@@ -96,17 +141,15 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
     }
   };
 
-  // Helper function to get signed URL for viewing receipts
   const getSignedReceiptUrl = async (filePath: string): Promise<string | null> => {
     try {
-      // If it's already a full URL (legacy), return as-is
       if (filePath.startsWith('http')) {
         return filePath;
       }
       
       const { data, error } = await supabase.storage
         .from('payment-receipts')
-        .createSignedUrl(filePath, 3600); // 1 hour expiry
+        .createSignedUrl(filePath, 3600);
       
       if (error) throw error;
       return data.signedUrl;
@@ -131,9 +174,13 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
       }
     }
 
+    // For the payment record, link to the first PO if multiple selected
+    // The linked_po_ids will be used to update all PO statuses
+    const primaryPOId = selectedPOIds.length > 0 ? selectedPOIds[0] : undefined;
+
     onSubmit({
       supplier_id: parseInt(formData.supplier_id),
-      purchase_order_id: formData.purchase_order_id ? parseInt(formData.purchase_order_id) : undefined,
+      purchase_order_id: primaryPOId,
       amount: parseFloat(formData.amount),
       payment_date: formData.payment_date,
       due_date: formData.due_date || undefined,
@@ -143,26 +190,44 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
       bank_reference: formData.bank_reference || undefined,
       receipt_url: receiptUrl || undefined,
       status: formData.status,
-      notes: formData.notes || undefined
-    });
+      notes: formData.notes || (selectedPOIds.length > 1 ? `Payment for POs: ${selectedPOIds.map(id => {
+        const po = purchaseOrders.find(p => p.id === id);
+        return po ? `#${po.poNumber}` : `#${id}`;
+      }).join(', ')}` : undefined)
+    }, selectedPOIds);
+    
     onClose();
   };
-
-  const filteredPOs = formData.supplier_id 
-    ? purchaseOrders.filter(po => {
-        const supplier = suppliers.find(s => s.id.toString() === formData.supplier_id);
-        return supplier && po.supplier === supplier.name;
-      })
-    : [];
 
   const removeReceipt = () => {
     setReceiptFile(null);
     setFormData({ ...formData, receipt_url: "" });
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
+
+  const getPaymentStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Paid':
+        return <Badge className="bg-emerald/20 text-emerald border-emerald/30 text-xs">Paid</Badge>;
+      case 'Partial':
+        return <Badge className="bg-cyan/20 text-cyan border-cyan/30 text-xs">Partial</Badge>;
+      case 'Overdue':
+        return <Badge className="bg-destructive/20 text-destructive border-destructive/30 text-xs">Overdue</Badge>;
+      default:
+        return <Badge className="bg-gold/20 text-gold border-gold/30 text-xs">Pending</Badge>;
+    }
+  };
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{initialData ? 'Edit Payment' : 'Record Payment'}</DialogTitle>
         </DialogHeader>
@@ -172,7 +237,10 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
             <Label htmlFor="supplier">Supplier *</Label>
             <Select
               value={formData.supplier_id}
-              onValueChange={(value) => setFormData({ ...formData, supplier_id: value, purchase_order_id: "" })}
+              onValueChange={(value) => {
+                setFormData({ ...formData, supplier_id: value });
+                setSelectedPOIds([]); // Clear selected POs when supplier changes
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select supplier" />
@@ -187,25 +255,92 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="purchase_order">Link to Purchase Order (Optional)</Label>
-            <Select
-              value={formData.purchase_order_id}
-              onValueChange={(value) => setFormData({ ...formData, purchase_order_id: value === "none" ? "" : value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select PO (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                {filteredPOs.map((po) => (
-                  <SelectItem key={po.id} value={po.id.toString()}>
-                    PO #{po.poNumber} - ₹{po.totalAmount.toFixed(2)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Multi-select POs */}
+          {formData.supplier_id && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label>Link to Purchase Orders</Label>
+                {filteredPOs.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button type="button" variant="ghost" size="sm" onClick={selectAllPOs} className="text-xs h-7">
+                      Select All
+                    </Button>
+                    <Button type="button" variant="ghost" size="sm" onClick={clearAllPOs} className="text-xs h-7">
+                      Clear
+                    </Button>
+                  </div>
+                )}
+              </div>
+              
+              {filteredPOs.length > 0 ? (
+                <Card className="border">
+                  <ScrollArea className="h-[180px]">
+                    <CardContent className="p-2 space-y-1">
+                      {filteredPOs.map((po) => {
+                        const isSelected = selectedPOIds.includes(po.id);
+                        const isOverdue = po.paymentDueDate && new Date(po.paymentDueDate) < new Date();
+                        
+                        return (
+                          <div
+                            key={po.id}
+                            className={`flex items-center gap-3 p-2 rounded-md transition-colors cursor-pointer ${
+                              isSelected ? 'bg-primary/10 border border-primary/30' : 'hover:bg-muted/50'
+                            }`}
+                            onClick={() => handlePOToggle(po.id, !isSelected)}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={(checked) => handlePOToggle(po.id, checked as boolean)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm">PO #{po.poNumber}</span>
+                                {getPaymentStatusBadge(po.paymentStatus || 'Pending')}
+                                {isOverdue && (
+                                  <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground flex gap-2">
+                                <span>{po.grnDate || po.orderDate}</span>
+                                {po.grnNumber && <span>• GRN: {po.grnNumber}</span>}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <span className="font-semibold text-sm">{formatCurrency(po.totalAmount)}</span>
+                              {po.paymentDueDate && (
+                                <div className={`text-xs ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`}>
+                                  Due: {po.paymentDueDate}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </CardContent>
+                  </ScrollArea>
+                </Card>
+              ) : (
+                <Card className="border">
+                  <CardContent className="py-6 text-center text-muted-foreground">
+                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-emerald/50" />
+                    <p className="text-sm">No unpaid POs for this supplier</p>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {selectedPOIds.length > 0 && (
+                <div className="mt-2 p-2 bg-muted/50 rounded-md flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    {selectedPOIds.length} PO{selectedPOIds.length > 1 ? 's' : ''} selected
+                  </span>
+                  <span className="font-semibold text-sm">
+                    Total: {formatCurrency(selectedPOsTotal)}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -216,8 +351,20 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
                 step="0.01"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                placeholder={selectedPOsTotal > 0 ? `Suggested: ${selectedPOsTotal.toFixed(2)}` : ''}
                 required
               />
+              {selectedPOsTotal > 0 && !formData.amount && (
+                <Button 
+                  type="button" 
+                  variant="link" 
+                  size="sm" 
+                  className="text-xs p-0 h-auto mt-1"
+                  onClick={() => setFormData({ ...formData, amount: selectedPOsTotal.toFixed(2) })}
+                >
+                  Use total: {formatCurrency(selectedPOsTotal)}
+                </Button>
+              )}
             </div>
             <div>
               <Label htmlFor="status">Status</Label>
@@ -229,10 +376,9 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Pending">Pending</SelectItem>
                   <SelectItem value="Completed">Completed</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
                   <SelectItem value="Partial">Partial</SelectItem>
-                  <SelectItem value="Overdue">Overdue</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -386,6 +532,7 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
             </Button>
             <Button type="submit" disabled={uploading}>
               {uploading ? 'Uploading...' : (initialData ? 'Update' : 'Record')} Payment
+              {selectedPOIds.length > 0 && ` (${selectedPOIds.length} PO${selectedPOIds.length > 1 ? 's' : ''})`}
             </Button>
           </div>
         </form>

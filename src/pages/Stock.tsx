@@ -377,13 +377,48 @@ export default function Stock() {
     }
   };
 
-  const handleAddPayment = async (paymentData: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>) => {
+  const handleAddPayment = async (
+    paymentData: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>,
+    linkedPOIds: number[] = []
+  ) => {
     try {
       await addPayment(paymentData);
-      toast({
-        title: "Success",
-        description: "Payment has been recorded successfully!"
-      });
+      
+      // Auto-update payment status for linked POs
+      if (linkedPOIds.length > 0 && paymentData.status === 'Completed') {
+        const paymentAmount = paymentData.amount;
+        const totalPOAmount = linkedPOIds.reduce((sum, poId) => {
+          const po = purchaseOrders.find(p => p.id === poId);
+          return sum + (po?.totalAmount || 0);
+        }, 0);
+        
+        // Determine if this is a full or partial payment
+        const isFullPayment = paymentAmount >= totalPOAmount;
+        const newStatus = isFullPayment ? 'Paid' : 'Partial';
+        
+        // Update each linked PO's payment status
+        for (const poId of linkedPOIds) {
+          const po = purchaseOrders.find(p => p.id === poId);
+          if (po) {
+            await updatePurchaseOrder(poId, {
+              ...po,
+              paymentStatus: newStatus as 'Pending' | 'Partial' | 'Paid' | 'Overdue',
+              paymentDate: paymentData.payment_date,
+              paymentAmount: (po.paymentAmount || 0) + (paymentAmount / linkedPOIds.length)
+            });
+          }
+        }
+        
+        toast({
+          title: "Success",
+          description: `Payment recorded and ${linkedPOIds.length} PO${linkedPOIds.length > 1 ? 's' : ''} marked as ${newStatus}!`
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Payment has been recorded successfully!"
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -394,10 +429,37 @@ export default function Stock() {
     }
   };
 
-  const handleEditPayment = async (paymentData: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>) => {
+  const handleEditPayment = async (
+    paymentData: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>,
+    linkedPOIds: number[] = []
+  ) => {
     if (!editingPayment) return;
     try {
       await updatePayment(editingPayment.id, paymentData);
+      
+      // Update linked POs if any
+      if (linkedPOIds.length > 0 && paymentData.status === 'Completed') {
+        const paymentAmount = paymentData.amount;
+        const totalPOAmount = linkedPOIds.reduce((sum, poId) => {
+          const po = purchaseOrders.find(p => p.id === poId);
+          return sum + (po?.totalAmount || 0);
+        }, 0);
+        
+        const isFullPayment = paymentAmount >= totalPOAmount;
+        const newStatus = isFullPayment ? 'Paid' : 'Partial';
+        
+        for (const poId of linkedPOIds) {
+          const po = purchaseOrders.find(p => p.id === poId);
+          if (po) {
+            await updatePurchaseOrder(poId, {
+              ...po,
+              paymentStatus: newStatus as 'Pending' | 'Partial' | 'Paid' | 'Overdue',
+              paymentDate: paymentData.payment_date
+            });
+          }
+        }
+      }
+      
       setEditingPayment(null);
       toast({
         title: "Success",
