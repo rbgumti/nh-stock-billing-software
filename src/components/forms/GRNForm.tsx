@@ -19,6 +19,7 @@ interface GRNItem {
   receivedQuantity: number;
   batchNo?: string;
   expiryDate?: string;
+  costPrice?: number;
   mrp?: number;
   remarks?: string;
 }
@@ -45,15 +46,20 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   
   const [grnItems, setGRNItems] = useState<GRNItem[]>(
-    purchaseOrder.items.map(item => ({
-      stockItemId: item.stockItemId,
-      orderedQuantity: item.qtyInTabs || item.quantity, // Use tabs as primary quantity
-      receivedQuantity: item.qtyInTabs || item.quantity,
-      batchNo: "",
-      expiryDate: "",
-      mrp: 0,
-      remarks: ""
-    }))
+    purchaseOrder.items.map(item => {
+      // Get stock item to auto-populate batch, expiry, and cost price from Item Master
+      const stockItem = stockItems.find(s => s.id === item.stockItemId);
+      return {
+        stockItemId: item.stockItemId,
+        orderedQuantity: item.qtyInTabs || item.quantity, // Use tabs as primary quantity
+        receivedQuantity: item.qtyInTabs || item.quantity,
+        batchNo: stockItem?.batchNo || "",
+        expiryDate: stockItem?.expiryDate || "",
+        costPrice: stockItem?.unitPrice || item.unitPrice || 0, // Cost price from Item Master
+        mrp: stockItem?.mrp || 0,
+        remarks: ""
+      };
+    })
   );
 
   const [notes, setNotes] = useState("");
@@ -104,6 +110,12 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
   const updateExpiryDate = (index: number, expiryDate: string) => {
     const newItems = [...grnItems];
     newItems[index].expiryDate = expiryDate;
+    setGRNItems(newItems);
+  };
+
+  const updateCostPrice = (index: number, costPrice: string) => {
+    const newItems = [...grnItems];
+    newItems[index].costPrice = parseFloat(costPrice) || 0;
     setGRNItems(newItems);
   };
 
@@ -231,12 +243,13 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-8 gap-4 p-3 bg-gray-50 font-medium text-sm rounded-lg">
+                <div className="grid grid-cols-9 gap-4 p-3 bg-gray-50 font-medium text-sm rounded-lg">
                   <div>Item</div>
                   <div>Ordered Qty</div>
                   <div>Received Qty</div>
                   <div>Batch No</div>
                   <div>Expiry Date</div>
+                  <div>Cost/Tab (₹)</div>
                   <div>MRP/Tab (₹)</div>
                   <div>Status</div>
                   <div>Remarks</div>
@@ -247,7 +260,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                   const StatusIcon = status.icon;
                   
                   return (
-                    <div key={index} className="grid grid-cols-8 gap-4 p-3 border rounded-lg">
+                    <div key={index} className="grid grid-cols-9 gap-4 p-3 border rounded-lg">
                       <div className="font-medium">
                         {getStockItemName(grnItem.stockItemId)}
                       </div>
@@ -280,6 +293,18 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                           type="date"
                           value={grnItem.expiryDate || ""}
                           onChange={(e) => updateExpiryDate(index, e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Input
+                          type="number"
+                          step="0.00001"
+                          value={grnItem.costPrice || ""}
+                          onChange={(e) => updateCostPrice(index, e.target.value)}
+                          placeholder="0.00"
+                          min="0"
                           className="w-full"
                         />
                       </div>

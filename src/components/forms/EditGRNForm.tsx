@@ -17,6 +17,7 @@ interface GRNItem {
   receivedQuantity: number;
   batchNo?: string;
   expiryDate?: string;
+  costPrice?: number;
   mrp?: number;
   remarks?: string;
 }
@@ -47,6 +48,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
         receivedQuantity: item.qtyInTabs || item.quantity, // Assume all received
         batchNo: stockItem?.batchNo || "",
         expiryDate: stockItem?.expiryDate || "",
+        costPrice: stockItem?.unitPrice || item.unitPrice || 0, // Cost price from Item Master
         mrp: stockItem?.mrp || 0,
         remarks: ""
       };
@@ -68,6 +70,12 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
   const updateExpiryDate = (index: number, expiryDate: string) => {
     const newItems = [...grnItems];
     newItems[index].expiryDate = expiryDate;
+    setGRNItems(newItems);
+  };
+
+  const updateCostPrice = (index: number, costPrice: string) => {
+    const newItems = [...grnItems];
+    newItems[index].costPrice = parseFloat(costPrice) || 0;
     setGRNItems(newItems);
   };
 
@@ -205,12 +213,13 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-7 gap-4 p-3 bg-gray-50 font-medium text-sm rounded-lg">
+                <div className="grid grid-cols-8 gap-4 p-3 bg-gray-50 font-medium text-sm rounded-lg">
                   <div>Item</div>
                   <div>Ordered</div>
                   <div>Received</div>
                   <div>Batch No</div>
                   <div>Expiry</div>
+                  <div>Cost/Tab</div>
                   <div>MRP/Tab</div>
                   <div>Status</div>
                 </div>
@@ -220,7 +229,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                   const StatusIcon = status.icon;
                   
                   return (
-                    <div key={index} className="grid grid-cols-7 gap-4 p-3 border rounded-lg items-center">
+                    <div key={index} className="grid grid-cols-8 gap-4 p-3 border rounded-lg items-center">
                       <div className="font-medium text-sm">
                         {getStockItemName(grnItem.stockItemId)}
                       </div>
@@ -253,6 +262,18 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                           type="date"
                           value={grnItem.expiryDate || ""}
                           onChange={(e) => updateExpiryDate(index, e.target.value)}
+                          className="w-full text-sm"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Input
+                          type="number"
+                          step="0.00001"
+                          value={grnItem.costPrice || ""}
+                          onChange={(e) => updateCostPrice(index, e.target.value)}
+                          placeholder="0"
+                          min="0"
                           className="w-full text-sm"
                         />
                       </div>
