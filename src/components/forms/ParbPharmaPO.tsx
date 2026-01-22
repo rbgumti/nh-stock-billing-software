@@ -100,12 +100,25 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      
+
+      // Fit the entire captured page onto a single A4 page (avoid cropping the footer).
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
-      
+
+      let renderWidth = imgWidth;
+      let renderHeight = imgHeight;
+      let x = 0;
+      const y = 0;
+
+      if (renderHeight > pageHeight) {
+        const scaleFactor = pageHeight / renderHeight;
+        renderHeight = pageHeight;
+        renderWidth = renderWidth * scaleFactor;
+        x = (pageWidth - renderWidth) / 2;
+      }
+
+      pdf.addImage(imgData, 'PNG', x, y, renderWidth, renderHeight);
+
       pdf.save(`PO-${poNumber}-Parb-Pharma.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
