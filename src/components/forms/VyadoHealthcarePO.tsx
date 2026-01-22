@@ -220,22 +220,19 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
             </tbody>
           </table>
 
-          {/* Flex spacer to push content to fill page */}
-          <div className="flex-grow"></div>
-
           {/* Signature Section */}
-          <div className="mt-auto">
-            <div className="pt-4" style={{ borderTop: '2px solid #003366' }}>
+          <div className="mt-6">
+            <div className="pt-3" style={{ borderTop: '2px solid #003366' }}>
               <p className="text-gray-800 font-bold">Thanking You,</p>
               <p className="text-gray-800 font-bold">Yours Sincerely,</p>
             </div>
             
             {/* Signature Section - Two columns */}
-            <div className="flex justify-between text-base mt-4">
+            <div className="flex justify-between text-base mt-3">
               {/* Left Column - Doctor Details */}
               <div className="text-left">
-                {/* Space for signature */}
-                <div className="min-h-[60px]"></div>
+                {/* Space for signature & stamp */}
+                <div className="min-h-[90px]"></div>
                 <div className="pt-2 border-t-2 border-gray-600 min-w-[220px]">
                   <span className="font-black text-base" style={{ color: '#003366' }}>{doctorName}</span>
                   <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
@@ -245,13 +242,16 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
               {/* Right Column - Date with signature line */}
               <div className="text-right flex flex-col justify-end">
                 {/* Space for signature */}
-                <div className="min-h-[60px]"></div>
+                <div className="min-h-[90px]"></div>
                 <div className="pt-2 border-t-2 border-gray-600 min-w-[160px]">
                   <span className="font-black text-base" style={{ color: '#003366' }}>Date: {formatDate(poDate)}</span>
                 </div>
               </div>
             </div>
           </div>
+          
+          {/* Flex spacer to push footer to bottom */}
+          <div className="flex-grow"></div>
 
           {/* Footer - Blue background bar */}
           <div className="mt-4 text-center text-sm font-black py-2 px-4 rounded" style={{ backgroundColor: '#003366' }}>
