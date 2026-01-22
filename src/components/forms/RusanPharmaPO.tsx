@@ -63,8 +63,8 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             <style>
               * { margin: 0; padding: 0; box-sizing: border-box; }
               @page { size: A4; margin: 10mm; }
-              body { display: flex; justify-content: center; align-items: flex-start; }
-              img { max-width: 100%; height: auto; }
+              body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+              img { max-width: 190mm; max-height: 277mm; width: auto; height: auto; object-fit: contain; }
               @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
             </style>
           </head>
