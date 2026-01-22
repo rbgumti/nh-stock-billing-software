@@ -94,8 +94,9 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
     setIsGeneratingPDF(true);
     
     try {
+      // Use scale 3 for high-fidelity rendering (matching professional document standards)
       const canvas = await html2canvas(printContent, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff'
@@ -106,12 +107,22 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       
+      // Calculate dimensions to fit exactly on one A4 page
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+      // Scale down if content exceeds page height to ensure single-page fit
+      if (imgHeight > pageHeight) {
+        const scaleFactor = pageHeight / imgHeight;
+        const scaledWidth = imgWidth * scaleFactor;
+        const xOffset = (pageWidth - scaledWidth) / 2; // Center horizontally
+        pdf.addImage(imgData, 'PNG', xOffset, 0, scaledWidth, pageHeight);
+      } else {
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      }
       
-      pdf.save(`PO-${poNumber}-Rusan-Pharma.pdf`);
+      const sanitizedPONumber = poNumber.replace(/[^a-zA-Z0-9-_]/g, '-');
+      pdf.save(`PO-${sanitizedPONumber}-Rusan-Pharma.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
