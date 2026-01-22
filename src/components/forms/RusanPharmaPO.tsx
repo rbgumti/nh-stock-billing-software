@@ -149,65 +149,65 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-5 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '12pt', lineHeight: '1.4', fontWeight: '600', height: '1123px' }}>
+        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '14pt', lineHeight: '1.5', fontWeight: '600', height: '1123px' }}>
           {/* Header with Logo */}
-          <div className="text-center mb-2 pb-2 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
-            <div className="flex justify-center mb-1">
-              <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
+          <div className="text-center mb-3 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
+            <div className="flex justify-center mb-2">
+              <img src={navjeevanLogo} alt="Logo" className="w-16 h-16 object-contain" />
             </div>
-            <h1 className="text-2xl font-black tracking-wide" style={{ color: '#003366', letterSpacing: '1px' }}>
+            <h1 className="text-3xl font-black tracking-wide" style={{ color: '#003366', letterSpacing: '1px' }}>
               NAVJEEVAN HOSPITAL
             </h1>
-            <p className="text-xs font-bold italic text-gray-700">Healthcare with Compassion</p>
-            <p className="text-xs font-bold text-gray-800">
+            <p className="text-sm font-bold italic text-gray-700">Healthcare with Compassion</p>
+            <p className="text-sm font-bold text-gray-800">
               Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
-            <p className="text-xs font-bold text-gray-700">Phone: 6284942412 | {doctorName} | Licence No: PSMHC/Pb./2024/863</p>
+            <p className="text-sm font-bold text-gray-700">Phone: 6284942412 | {doctorName} | Licence No: PSMHC/Pb./2024/863</p>
           </div>
 
           {/* PO Title Badge */}
-          <div className="flex justify-center mb-2">
-            <div className="px-6 py-1.5 rounded-lg text-white font-black text-base tracking-widest shadow-md" style={{ backgroundColor: '#003366' }}>
+          <div className="flex justify-center mb-3">
+            <div className="px-8 py-2 rounded-lg text-white font-black text-lg tracking-widest shadow-md" style={{ backgroundColor: '#003366' }}>
               PURCHASE ORDER
             </div>
           </div>
 
           {/* PO Info Grid */}
-          <div className="grid grid-cols-2 gap-2 mb-2 p-3 rounded-lg text-sm font-bold" style={{ backgroundColor: '#f0f7ff', border: '2px solid #003366' }}>
+          <div className="grid grid-cols-2 gap-3 mb-3 p-3 rounded-lg text-base font-bold" style={{ backgroundColor: '#f0f7ff', border: '2px solid #003366' }}>
             <div className="flex">
-              <span className="font-black min-w-[100px]" style={{ color: '#003366' }}>PO Number:</span>
+              <span className="font-black min-w-[110px]" style={{ color: '#003366' }}>PO Number:</span>
               <span className="font-black text-gray-900">NH-25-26-{getPONumberSuffix()}</span>
             </div>
             <div className="flex">
-              <span className="font-black min-w-[100px]" style={{ color: '#003366' }}>PO Date:</span>
+              <span className="font-black min-w-[110px]" style={{ color: '#003366' }}>PO Date:</span>
               <span className="font-bold text-gray-900">{formatDate(poDate)}</span>
             </div>
           </div>
 
           {/* Supplier Box */}
-          <div className="p-3 mb-2 rounded-lg text-sm" style={{ backgroundColor: '#e8f4fd', border: '2px solid #0066cc' }}>
+          <div className="p-3 mb-3 rounded-lg text-base" style={{ backgroundColor: '#e8f4fd', border: '2px solid #0066cc' }}>
             <span className="font-black" style={{ color: '#003366' }}>TO: </span>
             <span className="font-black text-gray-900">RUSAN PHARMA LTD.</span>
             <span className="text-gray-800 font-bold ml-2">Khasra No. 122MI, Central Hope Town, Selaqui, Dehradun, Uttarakhand - 248197</span>
           </div>
 
           {/* Subject & Salutation */}
-          <p className="text-sm font-bold mb-1"><span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span className="text-gray-900">Purchase Order</span></p>
-          <p className="text-sm font-bold mb-1 text-gray-900">Dear Sir/Madam,</p>
-          <p className="text-sm font-semibold text-justify mb-2 text-gray-800">
+          <p className="text-base font-bold mb-1"><span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span className="text-gray-900">Purchase Order</span></p>
+          <p className="text-base font-bold mb-2 text-gray-900">Dear Sir/Madam,</p>
+          <p className="text-base font-semibold text-justify mb-3 text-gray-800">
             We place a purchase order with authorized doctor's stamp and signature. Terms per telephone discussion. Payment by cheque to your bank account.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-2 text-sm" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <table className="w-full border-collapse mb-3 text-base" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
             <thead>
               <tr style={{ backgroundColor: '#003366' }}>
-                <th className="p-2 text-center text-white font-black border border-gray-400 w-[6%]">Sr.</th>
-                <th className="p-2 text-left text-white font-black border border-gray-400 w-[18%]">Product</th>
-                <th className="p-2 text-left text-white font-black border border-gray-400 w-[36%]">Compositions</th>
-                <th className="p-2 text-center text-white font-black border border-gray-400 w-[12%]">Pack</th>
-                <th className="p-2 text-center text-white font-black border border-gray-400 w-[14%]">Strips</th>
-                <th className="p-2 text-center text-white font-black border border-gray-400 w-[14%]">Tablets</th>
+                <th className="p-2.5 text-center text-white font-black border border-gray-400 w-[6%]">Sr.</th>
+                <th className="p-2.5 text-left text-white font-black border border-gray-400 w-[18%]">Product</th>
+                <th className="p-2.5 text-left text-white font-black border border-gray-400 w-[36%]">Compositions</th>
+                <th className="p-2.5 text-center text-white font-black border border-gray-400 w-[12%]">Pack</th>
+                <th className="p-2.5 text-center text-white font-black border border-gray-400 w-[14%]">Strips</th>
+                <th className="p-2.5 text-center text-white font-black border border-gray-400 w-[14%]">Tablets</th>
               </tr>
             </thead>
             <tbody>
@@ -223,12 +223,12 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
                 
                 return (
                   <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f0f7ff' }}>
-                    <td className="border border-gray-400 p-2 text-center font-bold text-gray-900">{index + 1}</td>
-                    <td className="border border-gray-400 p-2 font-black text-gray-900">{item.stockItemName}</td>
-                    <td className="border border-gray-400 p-2 font-bold text-gray-800">{stockItem?.composition || '-'}</td>
-                    <td className="border border-gray-400 p-2 text-center font-bold text-gray-800">{packing.replace('*', '×')}</td>
-                    <td className="border border-gray-400 p-2 text-center font-black text-gray-900">{qtyInStrips.toLocaleString()}</td>
-                    <td className="border border-gray-400 p-2 text-center font-black text-gray-900">{qtyInTabs.toLocaleString()}</td>
+                    <td className="border border-gray-400 p-2.5 text-center font-bold text-gray-900">{index + 1}</td>
+                    <td className="border border-gray-400 p-2.5 font-black text-gray-900">{item.stockItemName}</td>
+                    <td className="border border-gray-400 p-2.5 font-bold text-gray-800">{stockItem?.composition || '-'}</td>
+                    <td className="border border-gray-400 p-2.5 text-center font-bold text-gray-800">{packing.replace('*', '×')}</td>
+                    <td className="border border-gray-400 p-2.5 text-center font-black text-gray-900">{qtyInStrips.toLocaleString()}</td>
+                    <td className="border border-gray-400 p-2.5 text-center font-black text-gray-900">{qtyInTabs.toLocaleString()}</td>
                   </tr>
                 );
               })}
@@ -236,29 +236,29 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </table>
 
           {/* Undertaking */}
-          <div className="mt-1">
-            <p className="font-black text-sm mb-0.5" style={{ color: '#003366' }}>UNDERTAKING:</p>
-            <p className="text-xs font-semibold text-justify leading-tight text-gray-800">
+          <div className="mt-2">
+            <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
+            <p className="text-sm font-semibold text-justify leading-snug text-gray-800">
               We confirm purchase from Rusan Pharma Ltd. under P.O. No. {getPONumberSuffix()}/A ({formatDate(poDate)}). These controlled substances per NDPS Act, 1985, shall be maintained with full records. Form-6 will be submitted upon receipt. Products exclusively for our De-addiction Centre and qualified doctors only, licensed under PSMHC/Punjab/2024/863, sales within India only, no retail or export. Rusan Pharma Ltd. not liable for non-compliance by us.
             </p>
           </div>
 
-          {/* Signature Section - shifted upwards */}
-          <div className="mt-2 flex justify-between text-sm px-1">
+          {/* Signature Section */}
+          <div className="mt-3 flex justify-between text-base px-2">
             <div className="text-left">
-              <p className="font-black text-sm" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
-              <p className="text-gray-800 font-bold text-xs">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-              <div className="min-h-[80px]"></div>
-              <div className="pt-1 border-t-2 border-gray-600 min-w-[200px]">
-                <span className="font-black text-gray-900 text-base">{doctorName}</span>
-                <p className="text-gray-700 text-xs font-bold">Navjeevan Hospital, Sirhind</p>
+              <p className="font-black text-base" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
+              <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
+              <div className="min-h-[70px]"></div>
+              <div className="pt-1 border-t-2 border-gray-600 min-w-[220px]">
+                <span className="font-black text-gray-900 text-lg">{doctorName}</span>
+                <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
                 <p className="text-gray-600 text-xs font-semibold italic">(Signature & Stamp)</p>
               </div>
             </div>
-            <div className="text-center min-w-[140px]">
-              <div className="min-h-[80px]"></div>
+            <div className="text-center min-w-[150px]">
+              <div className="min-h-[70px]"></div>
               <div className="pt-1 border-t-2 border-gray-600 mt-auto">
-                <span className="font-black text-gray-900 text-base">Date: {formatDate(poDate)}</span>
+                <span className="font-black text-gray-900 text-lg">Date: {formatDate(poDate)}</span>
               </div>
             </div>
           </div>
@@ -267,7 +267,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           <div className="flex-grow"></div>
 
           {/* Footer */}
-          <div className="mt-2 text-center text-xs font-black pt-2" style={{ borderTop: '3px solid #003366' }}>
+          <div className="mt-3 text-center text-sm font-black pt-2" style={{ borderTop: '3px solid #003366' }}>
             <p style={{ color: '#003366' }}>
               NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
