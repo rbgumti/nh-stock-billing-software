@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle, AlertCircle, Loader2, Plus, Trash2 } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { formatPrecision } from "@/lib/formatUtils";
@@ -20,6 +20,8 @@ interface GRNItem {
   costPrice?: number;
   mrp?: number;
   remarks?: string;
+  isAdditionalBatch?: boolean;
+  parentIndex?: number;
 }
 
 interface EditGRNFormProps {
@@ -91,7 +93,54 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
     setGRNItems(newItems);
   };
 
-  const getItemStatus = (ordered: number, received: number) => {
+  // Add a new batch row for an item
+  const addBatchRow = (stockItemId: number, parentIndex: number) => {
+    const stockItem = stockItems.find(s => s.id === stockItemId);
+    const newBatchItem: GRNItem = {
+      stockItemId,
+      orderedQuantity: 0,
+      receivedQuantity: 0,
+      batchNo: "",
+      expiryDate: "",
+      costPrice: stockItem?.unitPrice || 0,
+      mrp: stockItem?.mrp || 0,
+      remarks: "",
+      isAdditionalBatch: true,
+      parentIndex
+    };
+    
+    let insertIndex = parentIndex + 1;
+    while (insertIndex < grnItems.length && 
+           grnItems[insertIndex].isAdditionalBatch && 
+           grnItems[insertIndex].stockItemId === stockItemId) {
+      insertIndex++;
+    }
+    
+    const newItems = [...grnItems];
+    newItems.splice(insertIndex, 0, newBatchItem);
+    setGRNItems(newItems);
+  };
+
+  const removeBatchRow = (index: number) => {
+    const newItems = [...grnItems];
+    newItems.splice(index, 1);
+    setGRNItems(newItems);
+  };
+
+  const getTotalReceivedForItem = (stockItemId: number) => {
+    return grnItems
+      .filter(item => item.stockItemId === stockItemId)
+      .reduce((sum, item) => sum + item.receivedQuantity, 0);
+  };
+
+  const getOrderedQuantityForItem = (stockItemId: number) => {
+    const originalItem = grnItems.find(item => item.stockItemId === stockItemId && !item.isAdditionalBatch);
+    return originalItem?.orderedQuantity || 0;
+  };
+
+  const getItemStatus = (stockItemId: number) => {
+    const ordered = getOrderedQuantityForItem(stockItemId);
+    const received = getTotalReceivedForItem(stockItemId);
     if (received === 0) return { label: "Not Received", variant: "destructive" as const, icon: AlertCircle };
     if (received < ordered) return { label: "Partial", variant: "secondary" as const, icon: AlertCircle };
     if (received === ordered) return { label: "Complete", variant: "default" as const, icon: CheckCircle };
@@ -213,19 +262,20 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-8 gap-4 p-3 bg-gray-50 font-medium text-sm rounded-lg">
+                <div className="grid grid-cols-9 gap-3 p-3 bg-gray-50 dark:bg-gray-800 font-medium text-sm rounded-lg">
                   <div>Item</div>
-                  <div>Ordered</div>
-                  <div>Received</div>
+                  <div className="text-center">Ordered</div>
+                  <div className="text-center">Received</div>
                   <div>Batch No</div>
                   <div>Expiry</div>
                   <div>Cost/Tab</div>
                   <div>MRP/Tab</div>
-                  <div>Status</div>
+                  <div className="text-center">Status</div>
+                  <div className="text-center">Batch</div>
                 </div>
 
                 {grnItems.map((grnItem, index) => {
-                  const status = getItemStatus(grnItem.orderedQuantity, grnItem.receivedQuantity);
+                  const status = getItemStatus(grnItem.stockItemId);
                   const StatusIcon = status.icon;
                   const stockItem = stockItems.find(s => s.id === grnItem.stockItemId);
                   const masterCostPrice = stockItem?.unitPrice || 0;
@@ -233,15 +283,37 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                     grnItem.costPrice > 0 && 
                     masterCostPrice > 0 && 
                     Math.abs(grnItem.costPrice - masterCostPrice) > 0.00001;
+                  const isAdditional = grnItem.isAdditionalBatch;
+                  const totalReceived = getTotalReceivedForItem(grnItem.stockItemId);
                   
                   return (
-                    <div key={index} className="grid grid-cols-8 gap-4 p-3 border rounded-lg items-center">
+                    <div 
+                      key={index} 
+                      className={`grid grid-cols-9 gap-3 p-3 border rounded-lg items-center ${isAdditional ? 'ml-4 border-dashed bg-muted/30' : ''}`}
+                    >
                       <div className="font-medium text-sm">
-                        {getStockItemName(grnItem.stockItemId)}
+                        {isAdditional ? (
+                          <span className="text-muted-foreground italic">↳ Batch #{
+                            grnItems.slice(0, index).filter(i => i.stockItemId === grnItem.stockItemId).length + 1
+                          }</span>
+                        ) : (
+                          getStockItemName(grnItem.stockItemId)
+                        )}
                       </div>
                       
                       <div className="text-center">
-                        {grnItem.orderedQuantity}
+                        {isAdditional ? (
+                          <span className="text-muted-foreground">-</span>
+                        ) : (
+                          <div>
+                            <span>{grnItem.orderedQuantity}</span>
+                            {totalReceived !== grnItem.orderedQuantity && (
+                              <p className="text-[10px] text-muted-foreground">
+                                Total: {totalReceived}
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
                       
                       <div>
@@ -301,11 +373,39 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                         />
                       </div>
                       
-                      <div>
-                        <Badge variant={status.variant} className="flex items-center gap-1 text-xs">
-                          <StatusIcon className="h-3 w-3" />
-                          {status.label}
-                        </Badge>
+                      <div className="flex items-center justify-center">
+                        {!isAdditional && (
+                          <Badge variant={status.variant} className="flex items-center gap-1 text-xs">
+                            <StatusIcon className="h-3 w-3" />
+                            {status.label}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center justify-center">
+                        {!isAdditional ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => addBatchRow(grnItem.stockItemId, index)}
+                            className="h-8 px-2"
+                            title="Add another batch"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeBatchRow(index)}
+                            className="h-8 px-2 text-destructive hover:text-destructive"
+                            title="Remove batch"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );
