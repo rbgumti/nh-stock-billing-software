@@ -10,6 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { PaymentReminders } from "@/components/PaymentReminders";
 import { MonthlyComparativeAnalysis } from "@/components/MonthlyComparativeAnalysis";
+import { AgingSummaryWidget } from "@/components/AgingSummaryWidget";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -724,8 +725,11 @@ export default function Dashboard() {
       {/* Monthly Comparative Analysis */}
       <MonthlyComparativeAnalysis />
 
-      {/* Payment Reminders Widget */}
-      <PaymentReminders />
+      {/* Payment Reminders & Aging Summary Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PaymentReminders />
+        <AgingSummaryWidget />
+      </div>
 
       {/* Low Stock Alerts */}
       {lowStockItems.length > 0 && (
