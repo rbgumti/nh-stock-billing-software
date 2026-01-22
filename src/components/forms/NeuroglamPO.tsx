@@ -245,29 +245,33 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
             </p>
 
             {/* Signature Section - Two columns */}
-            <div className="flex justify-between text-base mt-6">
+            <div className="flex justify-between text-base mt-4">
               {/* Left Column - For Hospital & Doctor Details */}
               <div className="text-left">
                 <p className="font-black" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
                 <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-                <div className="mt-16 pt-2 border-t-2 border-gray-600 min-w-[220px]">
+                {/* Space for signature */}
+                <div className="min-h-[60px]"></div>
+                <div className="pt-2 border-t-2 border-gray-600 min-w-[220px]">
                   <span className="font-black text-gray-900 text-base">{doctorName}</span>
                   <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
                   <p className="text-gray-600 text-xs font-semibold italic">(Signature & Stamp)</p>
                 </div>
               </div>
               {/* Right Column - Date with signature line */}
-              <div className="text-right">
-                <div className="mt-16 pt-2 border-t-2 border-gray-600 min-w-[160px]">
+              <div className="text-right flex flex-col justify-end">
+                {/* Space for signature */}
+                <div className="min-h-[60px]"></div>
+                <div className="pt-2 border-t-2 border-gray-600 min-w-[160px]">
                   <span className="font-black text-gray-900 text-base">Date: {formatDate(poDate)}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="mt-6 text-center text-sm font-black pt-3" style={{ borderTop: '3px solid #003366' }}>
-            <p style={{ color: '#003366' }}>
+          {/* Footer - Blue background bar */}
+          <div className="mt-4 text-center text-sm font-black py-2 px-4 rounded" style={{ backgroundColor: '#003366' }}>
+            <p className="text-white">
               NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
           </div>
