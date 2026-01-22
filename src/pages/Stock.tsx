@@ -44,6 +44,7 @@ import { formatLocalISODate } from "@/lib/dateUtils";
 import { GRNDocument, type GRNItem } from "@/components/forms/GRNDocument";
 import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
 import { BatchGroupedTable } from "@/components/BatchGroupedTable";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -249,6 +250,9 @@ export default function Stock() {
         if (!stockItem) continue;
 
         const batchNo = grnItem.batchNo || stockItem.batchNo;
+        const newExpiryDate = grnItem.expiryDate || stockItem.expiryDate;
+        const newCostPrice = grnItem.costPrice || stockItem.unitPrice;
+        const newMrp = grnItem.mrp || stockItem.mrp;
 
         try {
           // Find existing batch or create new one
@@ -256,36 +260,58 @@ export default function Stock() {
             stockItem.name,
             batchNo,
             {
-              expiryDate: grnItem.expiryDate || stockItem.expiryDate,
-              costPrice: grnItem.costPrice || stockItem.unitPrice,
-              mrp: grnItem.mrp || stockItem.mrp,
+              expiryDate: newExpiryDate,
+              costPrice: newCostPrice,
+              mrp: newMrp,
               receivedQuantity: grnItem.receivedQuantity,
             }
           );
 
-          // Get the target stock item (could be original or newly created)
-          const targetItem = stockItems.find(s => s.id === stockItemId) || stockItem;
+          // Fetch current stock from database to avoid stale data
+          const { data: currentData } = await supabase
+            .from('stock_items')
+            .select('current_stock')
+            .eq('item_id', stockItemId)
+            .single();
+
+          const currentStock = currentData?.current_stock || 0;
           
-          // Update stock for the matched/created batch
-          await updateStockItem(stockItemId, {
-            ...targetItem,
-            currentStock: targetItem.currentStock + grnItem.receivedQuantity,
-            batchNo: batchNo,
-            expiryDate: grnItem.expiryDate || targetItem.expiryDate,
-            unitPrice: grnItem.costPrice || targetItem.unitPrice,
-            mrp: grnItem.mrp || targetItem.mrp,
-          });
+          // Update stock with new batch/expiry data and increased quantity
+          const { error: updateError } = await supabase
+            .from('stock_items')
+            .update({
+              current_stock: currentStock + grnItem.receivedQuantity,
+              batch_no: batchNo,
+              expiry_date: newExpiryDate,
+              unit_price: newCostPrice,
+              mrp: newMrp || null,
+            })
+            .eq('item_id', stockItemId);
+
+          if (updateError) throw updateError;
 
           if (isNew) {
             console.log(`Created new batch for ${stockItem.name}: ${batchNo}`);
+          } else {
+            console.log(`Updated batch ${batchNo} for ${stockItem.name}: +${grnItem.receivedQuantity}, Expiry: ${newExpiryDate}`);
           }
         } catch (error) {
           console.error('Error processing GRN item:', error);
-          // Fallback: update original stock item
-          await updateStockItem(stockItem.id, {
-            ...stockItem,
-            currentStock: stockItem.currentStock + grnItem.receivedQuantity
-          });
+          // Fallback: update original stock item with basic stock increase
+          const { error: fallbackError } = await supabase
+            .from('stock_items')
+            .update({
+              current_stock: stockItem.currentStock + grnItem.receivedQuantity,
+              batch_no: batchNo,
+              expiry_date: newExpiryDate,
+              unit_price: newCostPrice,
+              mrp: newMrp || null,
+            })
+            .eq('item_id', stockItem.id);
+
+          if (fallbackError) {
+            console.error('Fallback update also failed:', fallbackError);
+          }
         }
       }
 
