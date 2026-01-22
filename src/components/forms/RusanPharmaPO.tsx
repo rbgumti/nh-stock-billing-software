@@ -236,45 +236,40 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </tbody>
           </table>
 
-
-          {/* Undertaking - Directly after table, minimal gap */}
-          <div className="mt-1">
-            <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
-            <p className="text-sm font-semibold text-justify text-gray-800" style={{ lineHeight: '1.3' }}>
-              We confirm purchase from Rusan Pharma Ltd. under P.O. No. {getPONumberSuffix()}/A ({formatDate(poDate)}). These controlled substances per Narcotic Drugs and Psychotropic Substances Act, 1985, shall be maintained with full records. Form-6 (Consignment Note) will be submitted upon receipt. Products are exclusively for our De-addiction Centre and qualified doctors only, licensed under PSMHC/Punjab/2024/863, sales within India only, no retail or export. Rusan Pharma Ltd. not liable for non-compliance by us.
-            </p>
-          </div>
-
-          {/* Signature Section - Two columns with space for stamp */}
-          <div className="mt-3 flex justify-between text-base">
-            {/* Left Column - For Hospital & Doctor Details */}
-            <div className="text-left">
-              <p className="font-black text-base" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
-              <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-              {/* Space for signature & stamp */}
-              <div className="min-h-[100px]"></div>
-              <div className="pt-1 border-t-2 border-gray-600 min-w-[220px]">
-                <span className="font-black text-gray-900 text-base">{doctorName}</span>
-                <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
-                <p className="text-gray-600 text-xs font-semibold italic">(Signature & Stamp)</p>
-              </div>
-            </div>
-            {/* Right Column - Date with signature line */}
-            <div className="text-right flex flex-col justify-end">
-              {/* Space for signature */}
-              <div className="min-h-[100px]"></div>
-              <div className="pt-1 border-t-2 border-gray-600 min-w-[160px]">
-                <span className="font-black text-gray-900 text-base">Date: {formatDate(poDate)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Flex spacer to push footer to bottom */}
+          {/* Flex spacer to push content to fill page */}
           <div className="flex-grow"></div>
 
-          {/* Footer - Blue background bar */}
-          <div className="mt-3 text-center text-sm font-black py-2 px-4 rounded" style={{ backgroundColor: '#003366' }}>
-            <p className="text-white">
+          {/* Undertaking */}
+          <div className="mt-auto">
+            <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
+            <p className="text-sm font-semibold text-justify leading-relaxed text-gray-800">
+              We confirm purchase from Rusan Pharma Ltd. under P.O. No. {getPONumberSuffix()}/A ({formatDate(poDate)}). These controlled substances per Narcotic Drugs and Psychotropic Substances Act, 1985, shall be maintained with full records. Form-6 (Consignment Note) will be submitted upon receipt. Products are exclusively for our De-addiction Centre and qualified doctors only, licensed under PSMHC/Punjab/2024/863, sales within India only, no retail or export. Rusan Pharma Ltd. not liable for non-compliance by us.
+            </p>
+
+            <div className="flex-grow min-h-16"></div>
+
+            {/* Signature Section */}
+            <div className="flex justify-between text-base px-2">
+              <div className="text-left">
+                <p className="font-black" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
+                <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
+                <div className="mt-24 pt-3 border-t-2 border-gray-600 min-w-[220px]">
+                  <span className="font-black text-gray-900 text-lg">{doctorName}</span>
+                  <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
+                  <p className="text-gray-600 text-xs font-semibold italic mt-1">(Signature & Stamp)</p>
+                </div>
+              </div>
+              <div className="text-center min-w-[160px]">
+                <div className="mt-24 pt-3 border-t-2 border-gray-600">
+                  <span className="font-black text-gray-900 text-lg">Date: {formatDate(poDate)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-6 text-center text-sm font-black pt-3" style={{ borderTop: '3px solid #003366' }}>
+            <p style={{ color: '#003366' }}>
               NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
           </div>
