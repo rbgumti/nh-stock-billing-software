@@ -89,8 +89,9 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
     setIsGeneratingPDF(true);
     
     try {
+      // Use scale 3 for high-fidelity rendering (matching professional document standards)
       const canvas = await html2canvas(printContent, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff'
@@ -101,12 +102,22 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       
+      // Calculate dimensions to fit exactly on one A4 page
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+      // Scale down if content exceeds page height to ensure single-page fit
+      if (imgHeight > pageHeight) {
+        const scaleFactor = pageHeight / imgHeight;
+        const scaledWidth = imgWidth * scaleFactor;
+        const xOffset = (pageWidth - scaledWidth) / 2; // Center horizontally
+        pdf.addImage(imgData, 'PNG', xOffset, 0, scaledWidth, pageHeight);
+      } else {
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      }
       
-      pdf.save(`PO-${poNumber}-VYADO-Healthcare.pdf`);
+      const sanitizedPONumber = poNumber.replace(/[^a-zA-Z0-9-_]/g, '-');
+      pdf.save(`PO-${sanitizedPONumber}-VYADO-Healthcare.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
@@ -133,7 +144,7 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '13pt', lineHeight: '1.6', fontWeight: '600' }}>
+        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '13pt', lineHeight: '1.6', fontWeight: '600', minHeight: '1123px', height: '1123px' }}>
           {/* Header with Logo */}
           <div className="text-center mb-4 pb-3 border-b-4" style={{ borderColor: '#003366' }}>
             <div className="flex justify-center mb-2">
@@ -183,7 +194,7 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-6 text-base">
+          <table className="w-full border-collapse mb-4 text-base">
             <thead>
               <tr style={{ backgroundColor: '#003366' }}>
                 <th className="p-3 text-center text-white font-black border-2 border-gray-400 w-[8%]">Sr.</th>
@@ -209,28 +220,44 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
             </tbody>
           </table>
 
-          {/* Signature Section with ample space for sign & stamp */}
-          <div className="flex justify-between text-base mt-6 pt-4" style={{ borderTop: '2px solid #003366' }}>
-            <div>
+          {/* Flex spacer to push content to fill page */}
+          <div className="flex-grow"></div>
+
+          {/* Signature Section */}
+          <div className="mt-auto">
+            <div className="pt-4" style={{ borderTop: '2px solid #003366' }}>
               <p className="text-gray-800 font-bold">Thanking You,</p>
               <p className="text-gray-800 font-bold">Yours Sincerely,</p>
-              
-              {/* Large signature area */}
-              <div className="mt-28 pt-3 border-t-2 border-gray-600 min-w-[220px]">
-                <span className="font-black text-gray-900 text-lg">{doctorName}</span>
-                <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
-                <p className="text-gray-600 text-xs font-semibold italic mt-1">(Signature & Stamp)</p>
+            </div>
+            
+            {/* Signature Section - Two columns */}
+            <div className="flex justify-between text-base mt-4">
+              {/* Left Column - Doctor Details */}
+              <div className="text-left">
+                {/* Space for signature */}
+                <div className="min-h-[60px]"></div>
+                <div className="pt-2 border-t-2 border-gray-600 min-w-[220px]">
+                  <span className="font-black text-base" style={{ color: '#003366' }}>{doctorName}</span>
+                  <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
+                  <p className="text-gray-600 text-xs font-semibold italic">(Signature & Stamp)</p>
+                </div>
+              </div>
+              {/* Right Column - Date with signature line */}
+              <div className="text-right flex flex-col justify-end">
+                {/* Space for signature */}
+                <div className="min-h-[60px]"></div>
+                <div className="pt-2 border-t-2 border-gray-600 min-w-[160px]">
+                  <span className="font-black text-base" style={{ color: '#003366' }}>Date: {formatDate(poDate)}</span>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-gray-800 text-sm font-bold">
-                Address: Opp. Bus Stand, Bara Sirhind
-              </p>
-              {/* Space for date aligned with signature */}
-              <div className="mt-28 pt-3 border-t-2 border-gray-600 min-w-[160px]">
-                <span className="font-black text-gray-900 text-lg">Date: {formatDate(poDate)}</span>
-              </div>
-            </div>
+          </div>
+
+          {/* Footer - Blue background bar */}
+          <div className="mt-4 text-center text-sm font-black py-2 px-4 rounded" style={{ backgroundColor: '#003366' }}>
+            <p className="text-white">
+              NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
+            </p>
           </div>
         </div>
       </DialogContent>
