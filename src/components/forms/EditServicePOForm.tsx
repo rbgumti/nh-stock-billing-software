@@ -95,7 +95,10 @@ export function EditServicePOForm({ purchaseOrder, onClose, onSubmit }: EditServ
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="poDate">PO Date *</Label>
+              <Label htmlFor="poDate" className="flex items-center gap-2">
+                PO Date *
+                <span className="text-xs text-muted-foreground font-normal">(can be backdated)</span>
+              </Label>
               <Input
                 id="poDate"
                 type="date"
