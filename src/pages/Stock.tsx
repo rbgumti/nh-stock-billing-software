@@ -848,6 +848,7 @@ export default function Stock() {
           receivedQuantity: qty,
           batchNo: stockItem?.batchNo || "",
           expiryDate: stockItem?.expiryDate || "",
+          costPrice: item.unitPrice || stockItem?.unitPrice || 0,
           mrp: stockItem?.mrp || 0,
           remarks: "",
         };
@@ -890,11 +891,13 @@ export default function Stock() {
       if (!target) throw new Error("Failed to render GRN document");
 
       const canvas = await html2canvas(target, {
-        scale: 2,
+        scale: 3, // Higher scale for better quality - matches PrintableGRN
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
+        windowWidth: target.scrollWidth,
+        windowHeight: target.scrollHeight,
       });
 
       const imgData = canvas.toDataURL("image/png");
