@@ -237,7 +237,7 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           {/* Undertaking - Directly after table, minimal gap */}
           <div className="mt-1">
             <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
-            <p className="text-xs font-semibold text-justify text-gray-800" style={{ lineHeight: '1.3' }}>
+            <p className="text-sm font-semibold text-justify text-gray-800" style={{ lineHeight: '1.3' }}>
               We confirm purchase of Buprenorphine products from Neuroglam, Village Ajnoud, Tehsil Payal, Ludhiana – 141421 (Punjab), under P.O. No. {poNumber.replace('NH/PO-', '')} dated {formatDate(poDate)} ({getMonthYear(poDate)}). Products will be supplied exclusively to De-Addiction Centres and qualified doctors under License No. PSMHC/Punjab/2024/863. We are aware these are controlled substances per NDPS Act, 1985, and shall maintain all statutory records. Form 6 (Consignment Note) will be issued upon delivery. Products are for formulations/sales within India only, not for retail counter sale or export. Neuroglam shall not be liable for any non-compliance by us.
             </p>
           </div>
