@@ -28,8 +28,6 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
     unitPrice: "",
     mrp: "",
     supplier: "",
-    expiryDate: "",
-    batchNo: "",
     description: "",
     composition: "",
     packing: ""
@@ -46,8 +44,6 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
         unitPrice: initialData.unitPrice?.toString() || "",
         mrp: initialData.mrp?.toString() || "",
         supplier: initialData.supplier || "",
-        expiryDate: initialData.expiryDate === "N/A" ? "" : initialData.expiryDate || "",
-        batchNo: initialData.batchNo || "",
         description: initialData.description || "",
         composition: initialData.composition || "",
         packing: initialData.packing || ""
@@ -76,8 +72,9 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
       unitPrice: parseFloat(formData.unitPrice) || 0,
       mrp: parseFloat(formData.mrp) || undefined,
       supplier: formData.supplier,
-      expiryDate: formData.expiryDate || "N/A",
-      batchNo: formData.batchNo || `BATCH${Date.now()}`,
+      // Keep existing batch/expiry when editing, set defaults for new items
+      expiryDate: isEditing ? initialData.expiryDate : "N/A",
+      batchNo: isEditing ? initialData.batchNo : `BATCH${Date.now()}`,
       status: "In Stock",
       composition: formData.composition || undefined,
       packing: formData.packing || undefined
@@ -229,15 +226,6 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
                     </>
                   )}
                 </div>
-                <div>
-                  <Label htmlFor="batchNo">Batch Number</Label>
-                  <Input
-                    id="batchNo"
-                    value={formData.batchNo}
-                    onChange={(e) => handleInputChange("batchNo", e.target.value)}
-                    placeholder="e.g., BATCH001"
-                  />
-                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -269,12 +257,12 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
               </div>
             </div>
 
-            {/* Stock & Expiry Section */}
+            {/* Stock Settings Section */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider border-b pb-2">
-                Stock & Expiry
+                Stock Settings
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="currentStock">Current Stock *</Label>
                   <Input
@@ -299,16 +287,10 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="expiryDate">Expiry Date</Label>
-                  <Input
-                    id="expiryDate"
-                    type="date"
-                    value={formData.expiryDate}
-                    onChange={(e) => handleInputChange("expiryDate", e.target.value)}
-                  />
-                </div>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Note: Batch number and expiry date are managed through GRN (Goods Receipt Note) when receiving stock.
+              </p>
             </div>
 
             {/* Description Section */}
