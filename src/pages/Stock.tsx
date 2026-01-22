@@ -43,6 +43,7 @@ import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { GRNDocument, type GRNItem } from "@/components/forms/GRNDocument";
 import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
+import { BatchGroupedTable } from "@/components/BatchGroupedTable";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -76,7 +77,7 @@ export default function Stock() {
   const [exportStartDate, setExportStartDate] = useState<Date | undefined>(undefined);
   const [exportEndDate, setExportEndDate] = useState<Date | undefined>(undefined);
   const [downloadingGrnId, setDownloadingGrnId] = useState<number | null>(null);
-  const { stockItems, addStockItem, updateStockItem, subscribe } = useStockStore();
+  const { stockItems, addStockItem, updateStockItem, subscribe, findOrCreateBatch, getBatchesForMedicine } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
   const { payments, addPayment, updatePayment, deletePayment, getOutstandingPayments, getUpcomingPayments } = useSupplierPaymentStore();
@@ -237,19 +238,56 @@ export default function Stock() {
     });
   };
 
-  const handleGRN = (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string }) => {
+  const handleGRN = async (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (po) {
-      // Update stock levels based on GRN
-      grnData.items.forEach((grnItem: any) => {
+      // Update stock levels based on GRN - with batch-wise tracking
+      for (const grnItem of grnData.items) {
+        if (grnItem.receivedQuantity <= 0) continue;
+
         const stockItem = stockItems.find(s => s.id === grnItem.stockItemId);
-        if (stockItem) {
-          updateStockItem(stockItem.id, {
+        if (!stockItem) continue;
+
+        const batchNo = grnItem.batchNo || stockItem.batchNo;
+
+        try {
+          // Find existing batch or create new one
+          const { stockItemId, isNew } = await findOrCreateBatch(
+            stockItem.name,
+            batchNo,
+            {
+              expiryDate: grnItem.expiryDate || stockItem.expiryDate,
+              costPrice: grnItem.costPrice || stockItem.unitPrice,
+              mrp: grnItem.mrp || stockItem.mrp,
+              receivedQuantity: grnItem.receivedQuantity,
+            }
+          );
+
+          // Get the target stock item (could be original or newly created)
+          const targetItem = stockItems.find(s => s.id === stockItemId) || stockItem;
+          
+          // Update stock for the matched/created batch
+          await updateStockItem(stockItemId, {
+            ...targetItem,
+            currentStock: targetItem.currentStock + grnItem.receivedQuantity,
+            batchNo: batchNo,
+            expiryDate: grnItem.expiryDate || targetItem.expiryDate,
+            unitPrice: grnItem.costPrice || targetItem.unitPrice,
+            mrp: grnItem.mrp || targetItem.mrp,
+          });
+
+          if (isNew) {
+            console.log(`Created new batch for ${stockItem.name}: ${batchNo}`);
+          }
+        } catch (error) {
+          console.error('Error processing GRN item:', error);
+          // Fallback: update original stock item
+          await updateStockItem(stockItem.id, {
             ...stockItem,
             currentStock: stockItem.currentStock + grnItem.receivedQuantity
           });
         }
-      });
+      }
 
       // Update PO status with GRN number, invoice number and date
       updatePurchaseOrder(po.id, {
@@ -1303,83 +1341,26 @@ export default function Stock() {
             </CardContent>
           </Card>
 
-          {/* Item Master Table */}
+          {/* Item Master Table - Batch Grouped */}
           <Card className="glass-strong border-0 overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-purple/10 to-cyan/10 border-b">
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
                 Item Master List
+                <Badge variant="outline" className="ml-2 text-xs">
+                  Batch-wise tracking enabled
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="px-4 py-3 text-left font-semibold">Item Name</th>
-                      <th className="px-4 py-3 text-left font-semibold">Vendor</th>
-                      <th className="px-4 py-3 text-left font-semibold">Category</th>
-                      <th className="px-4 py-3 text-right font-semibold">Cost/Tab (₹)</th>
-                      <th className="px-4 py-3 text-right font-semibold">MRP/Tab (₹)</th>
-                      <th className="px-4 py-3 text-left font-semibold">Composition</th>
-                      <th className="px-4 py-3 text-left font-semibold">Packing</th>
-                      <th className="px-4 py-3 text-center font-semibold">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredItems.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-                          No items found. Add your first item using the "Add Item Master" button.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredItems.map((item, idx) => {
-                        const style = getCategoryStyle(item.category);
-                        const IconComponent = style.Icon;
-                        return (
-                          <tr key={item.id} className={idx % 2 === 0 ? 'bg-muted/20' : ''}>
-                            <td className="px-4 py-3 font-medium">{item.name}</td>
-                            <td className="px-4 py-3">{item.supplier || '-'}</td>
-                            <td className="px-4 py-3">
-                              <Badge className={`${style.badge} flex items-center gap-1 w-fit`}>
-                                <IconComponent className="h-3 w-3" />
-                                {item.category}
-                              </Badge>
-                            </td>
-                            <td className="px-4 py-3 text-right">₹{item.unitPrice.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-right">{item.mrp ? `₹${item.mrp.toFixed(2)}` : '-'}</td>
-                            <td className="px-4 py-3 text-xs max-w-[200px] truncate" title={item.composition}>
-                              {item.composition || '-'}
-                            </td>
-                            <td className="px-4 py-3">{item.packing || '-'}</td>
-                            <td className="px-4 py-3 text-center">
-                              <div className="flex justify-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setEditingItem(item)}
-                                  className="h-8 w-8 p-0 hover:bg-purple/10"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setShowLedgerItem(item)}
-                                  className="h-8 w-8 p-0 hover:bg-cyan/10"
-                                >
-                                  <BookOpen className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              <BatchGroupedTable
+                stockItems={stockItems}
+                filteredItems={filteredItems}
+                getBatchesForMedicine={getBatchesForMedicine}
+                getCategoryStyle={getCategoryStyle}
+                onEditItem={(item) => setEditingItem(item)}
+                onViewLedger={(item) => setShowLedgerItem(item)}
+              />
             </CardContent>
           </Card>
         </TabsContent>
