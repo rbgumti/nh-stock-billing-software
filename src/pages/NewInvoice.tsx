@@ -17,6 +17,7 @@ import { usePrescriptionStore } from "@/hooks/usePrescriptionStore";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientSearchSelect } from "@/components/PatientSearchSelect";
 import { loadAllPatients, Patient } from "@/lib/patientUtils";
+import ExpiryWarningBadge, { getExpiryWarningLevel } from "@/components/ExpiryWarningBadge";
 
 const FREQUENCY_OPTIONS = [
   { value: "OD", label: "OD (Once Daily)", multiplier: 1 },
@@ -543,12 +544,18 @@ export default function NewInvoice() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor={`expiryDate-${item.id}`}>Expiry Date</Label>
+                          <Label htmlFor={`expiryDate-${item.id}`} className="flex items-center gap-2">
+                            Expiry Date
+                            <ExpiryWarningBadge expiryDate={item.expiryDate} />
+                          </Label>
                           <Input
                             id={`expiryDate-${item.id}`}
                             type="date"
                             value={item.expiryDate}
                             onChange={(e) => updateItem(item.id, "expiryDate", e.target.value)}
+                            className={getExpiryWarningLevel(item.expiryDate) === 'critical' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 
+                                       getExpiryWarningLevel(item.expiryDate) === 'warning' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' : 
+                                       getExpiryWarningLevel(item.expiryDate) === 'caution' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : ''}
                           />
                         </div>
                       <div>
