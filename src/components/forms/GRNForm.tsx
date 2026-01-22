@@ -258,6 +258,12 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                 {grnItems.map((grnItem, index) => {
                   const status = getItemStatus(grnItem.orderedQuantity, grnItem.receivedQuantity);
                   const StatusIcon = status.icon;
+                  const stockItem = stockItems.find(s => s.id === grnItem.stockItemId);
+                  const masterCostPrice = stockItem?.unitPrice || 0;
+                  const hasCostVariance = grnItem.costPrice !== undefined && 
+                    grnItem.costPrice > 0 && 
+                    masterCostPrice > 0 && 
+                    Math.abs(grnItem.costPrice - masterCostPrice) > 0.00001;
                   
                   return (
                     <div key={index} className="grid grid-cols-9 gap-4 p-3 border rounded-lg">
@@ -297,7 +303,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                         />
                       </div>
                       
-                      <div>
+                      <div className="space-y-1">
                         <Input
                           type="number"
                           step="0.00001"
@@ -305,8 +311,13 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                           onChange={(e) => updateCostPrice(index, e.target.value)}
                           placeholder="0.00"
                           min="0"
-                          className="w-full"
+                          className={`w-full ${hasCostVariance ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30' : ''}`}
                         />
+                        {hasCostVariance && (
+                          <p className="text-[10px] text-orange-600 dark:text-orange-400">
+                            Master: ₹{formatPrecision(masterCostPrice)}
+                          </p>
+                        )}
                       </div>
                       
                       <div>
