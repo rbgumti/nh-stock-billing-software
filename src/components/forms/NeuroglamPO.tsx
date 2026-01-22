@@ -151,17 +151,17 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '14pt', lineHeight: '1.5', fontWeight: '600', minHeight: '1123px', height: '1123px' }}>
+        <div ref={printRef} className="p-5 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '13pt', lineHeight: '1.5', fontWeight: '600', minHeight: '1123px', height: '1123px' }}>
           {/* Header with Logo */}
-          <div className="text-center mb-4 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
-            <div className="flex justify-center mb-2">
-              <img src={navjeevanLogo} alt="Logo" className="w-16 h-16 object-contain" />
+          <div className="text-center mb-3 pb-2 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
+            <div className="flex justify-center mb-1">
+              <img src={navjeevanLogo} alt="Logo" className="w-14 h-14 object-contain" />
             </div>
             <h1 className="text-3xl font-black tracking-wide" style={{ color: '#003366', letterSpacing: '1px' }}>
               NAVJEEVAN HOSPITAL
             </h1>
-            <p className="text-base font-bold italic text-gray-700">Healthcare with Compassion</p>
-            <p className="text-base font-bold text-gray-800">
+            <p className="text-sm font-bold italic text-gray-700">Healthcare with Compassion</p>
+            <p className="text-sm font-bold text-gray-800">
               Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
             <p className="text-sm font-bold text-gray-700">Phone: 6284942412 | {doctorName}</p>
@@ -169,48 +169,48 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           </div>
 
           {/* PO Title Badge */}
-          <div className="flex justify-center mb-4">
-            <div className="px-10 py-2.5 rounded-lg text-white font-black text-xl tracking-widest shadow-md" style={{ backgroundColor: '#003366' }}>
+          <div className="flex justify-center mb-3">
+            <div className="px-8 py-2 rounded-lg text-white font-black text-lg tracking-widest shadow-md" style={{ backgroundColor: '#003366' }}>
               PURCHASE ORDER
             </div>
           </div>
 
           {/* PO Info Grid */}
-          <div className="grid grid-cols-2 gap-3 mb-4 p-4 rounded-lg text-lg font-bold" style={{ backgroundColor: '#f0f7ff', border: '2px solid #003366' }}>
+          <div className="grid grid-cols-2 gap-2 mb-3 p-3 rounded-lg text-base font-bold" style={{ backgroundColor: '#f0f7ff', border: '2px solid #003366' }}>
             <div className="flex">
-              <span className="font-black min-w-[110px]" style={{ color: '#003366' }}>PO Number:</span>
+              <span className="font-black min-w-[100px]" style={{ color: '#003366' }}>PO Number:</span>
               <span className="font-black text-gray-900">{poNumber}</span>
             </div>
             <div className="flex">
-              <span className="font-black min-w-[110px]" style={{ color: '#003366' }}>PO Date:</span>
+              <span className="font-black min-w-[100px]" style={{ color: '#003366' }}>PO Date:</span>
               <span className="font-bold text-gray-900">{formatDate(poDate)}</span>
             </div>
           </div>
 
           {/* Supplier Box */}
-          <div className="p-4 mb-4 rounded-lg text-lg" style={{ backgroundColor: '#e8f4fd', border: '2px solid #0066cc' }}>
+          <div className="p-3 mb-3 rounded-lg text-base" style={{ backgroundColor: '#e8f4fd', border: '2px solid #0066cc' }}>
             <span className="font-black" style={{ color: '#003366' }}>TO: </span>
             <span className="font-black text-gray-900">NEUROGLAM</span>
-            <p className="text-gray-800 font-bold mt-1">Village – Ajnoud, Tehsil – Payal, Ludhiana – 141421 (Punjab)</p>
+            <span className="text-gray-800 font-bold ml-2">Village – Ajnoud, Tehsil – Payal, Ludhiana – 141421 (Punjab)</span>
           </div>
 
           {/* Subject & Salutation */}
-          <p className="text-lg font-bold mb-2"><span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span className="text-gray-900">Purchase Order</span></p>
-          <p className="text-lg font-bold mb-2 text-gray-900">Dear Sir/Madam,</p>
-          <p className="text-base font-semibold text-justify mb-4 text-gray-800" style={{ lineHeight: '1.5' }}>
+          <p className="text-base font-bold mb-1"><span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span className="text-gray-900">Purchase Order</span></p>
+          <p className="text-base font-bold mb-2 text-gray-900">Dear Sir/Madam,</p>
+          <p className="text-sm font-semibold text-justify mb-3 text-gray-800" style={{ lineHeight: '1.4' }}>
             We hereby placing a purchase order with Stamp and Sign of our current working doctor's. Terms and Conditions will remain same as our discussion telephonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse text-base" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <table className="w-full border-collapse text-sm" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
             <thead>
               <tr style={{ backgroundColor: '#003366' }}>
-                <th className="p-3 text-center text-white font-black border border-gray-400 w-[5%]">Sr.</th>
-                <th className="p-3 text-left text-white font-black border border-gray-400 w-[18%]">Product</th>
-                <th className="p-3 text-left text-white font-black border border-gray-400 w-[37%]">Compositions</th>
-                <th className="p-3 text-center text-white font-black border border-gray-400 w-[12%]">Pack</th>
-                <th className="p-3 text-center text-white font-black border border-gray-400 w-[14%]">Strips</th>
-                <th className="p-3 text-center text-white font-black border border-gray-400 w-[14%]">Tablets</th>
+                <th className="p-2 text-center text-white font-black border border-gray-400 w-[5%]">Sr.</th>
+                <th className="p-2 text-left text-white font-black border border-gray-400 w-[18%]">Product</th>
+                <th className="p-2 text-left text-white font-black border border-gray-400 w-[37%]">Compositions</th>
+                <th className="p-2 text-center text-white font-black border border-gray-400 w-[12%]">Pack</th>
+                <th className="p-2 text-center text-white font-black border border-gray-400 w-[14%]">Strips</th>
+                <th className="p-2 text-center text-white font-black border border-gray-400 w-[14%]">Tablets</th>
               </tr>
             </thead>
             <tbody>
@@ -222,22 +222,22 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
                 
                 return (
                   <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f0f7ff' }}>
-                    <td className="border border-gray-400 p-3 text-center font-bold text-gray-900">{index + 1}</td>
-                    <td className="border border-gray-400 p-3 font-black text-gray-900">{item.stockItemName}</td>
-                    <td className="border border-gray-400 p-3 font-bold text-gray-800">{stockItem?.composition || '-'}</td>
-                    <td className="border border-gray-400 p-3 text-center font-bold text-gray-800">{packing}</td>
-                    <td className="border border-gray-400 p-3 text-center font-black text-gray-900">{qtyInStrips.toLocaleString()}</td>
-                    <td className="border border-gray-400 p-3 text-center font-black text-gray-900">{qtyInTabs.toLocaleString()}</td>
+                    <td className="border border-gray-400 p-2 text-center font-bold text-gray-900">{index + 1}</td>
+                    <td className="border border-gray-400 p-2 font-black text-gray-900">{item.stockItemName}</td>
+                    <td className="border border-gray-400 p-2 font-bold text-gray-800">{stockItem?.composition || '-'}</td>
+                    <td className="border border-gray-400 p-2 text-center font-bold text-gray-800">{packing}</td>
+                    <td className="border border-gray-400 p-2 text-center font-black text-gray-900">{qtyInStrips.toLocaleString()}</td>
+                    <td className="border border-gray-400 p-2 text-center font-black text-gray-900">{qtyInTabs.toLocaleString()}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
 
-          {/* Undertaking - Directly after table */}
-          <div className="mt-3">
-            <p className="font-black text-lg mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
-            <p className="text-sm font-semibold text-justify text-gray-800" style={{ lineHeight: '1.4' }}>
+          {/* Undertaking - Directly after table, minimal gap */}
+          <div className="mt-1">
+            <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
+            <p className="text-xs font-semibold text-justify text-gray-800" style={{ lineHeight: '1.3' }}>
               We confirm purchase of Buprenorphine products from Neuroglam, Village Ajnoud, Tehsil Payal, Ludhiana – 141421 (Punjab), under P.O. No. {poNumber.replace('NH/PO-', '')} dated {formatDate(poDate)} ({getMonthYear(poDate)}). Products will be supplied exclusively to De-Addiction Centres and qualified doctors under License No. PSMHC/Punjab/2024/863. We are aware these are controlled substances per NDPS Act, 1985, and shall maintain all statutory records. Form 6 (Consignment Note) will be issued upon delivery. Products are for formulations/sales within India only, not for retail counter sale or export. Neuroglam shall not be liable for any non-compliance by us.
             </p>
           </div>
@@ -245,32 +245,32 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           {/* Flex spacer to push signature to bottom */}
           <div className="flex-grow"></div>
 
-          {/* Signature Section - Two columns with space for stamp */}
-          <div className="flex justify-between text-lg">
+          {/* Signature Section - Two columns with increased space for stamp */}
+          <div className="flex justify-between text-base">
             {/* Left Column - For Hospital & Doctor Details */}
             <div className="text-left">
-              <p className="font-black text-lg" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
-              <p className="text-gray-800 font-bold text-base">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-              {/* Space for signature & stamp */}
-              <div className="min-h-[75px]"></div>
-              <div className="pt-2 border-t-2 border-gray-600 min-w-[240px]">
-                <span className="font-black text-gray-900 text-lg">{doctorName}</span>
-                <p className="text-gray-700 text-base font-bold">Navjeevan Hospital, Sirhind</p>
-                <p className="text-gray-600 text-sm font-semibold italic">(Signature & Stamp)</p>
+              <p className="font-black text-base" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
+              <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
+              {/* Increased space for signature & stamp */}
+              <div className="min-h-[80px]"></div>
+              <div className="pt-1 border-t-2 border-gray-600 min-w-[220px]">
+                <span className="font-black text-gray-900 text-base">{doctorName}</span>
+                <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
+                <p className="text-gray-600 text-xs font-semibold italic">(Signature & Stamp)</p>
               </div>
             </div>
             {/* Right Column - Date with signature line */}
             <div className="text-right flex flex-col justify-end">
-              {/* Space for signature */}
-              <div className="min-h-[75px]"></div>
-              <div className="pt-2 border-t-2 border-gray-600 min-w-[180px]">
-                <span className="font-black text-gray-900 text-lg">Date: {formatDate(poDate)}</span>
+              {/* Increased space for signature */}
+              <div className="min-h-[80px]"></div>
+              <div className="pt-1 border-t-2 border-gray-600 min-w-[160px]">
+                <span className="font-black text-gray-900 text-base">Date: {formatDate(poDate)}</span>
               </div>
             </div>
           </div>
 
           {/* Footer - Blue background bar */}
-          <div className="mt-4 text-center text-base font-black py-2.5 px-4 rounded" style={{ backgroundColor: '#003366' }}>
+          <div className="mt-3 text-center text-sm font-black py-2 px-4 rounded" style={{ backgroundColor: '#003366' }}>
             <p className="text-white">
               NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
