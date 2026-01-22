@@ -240,39 +240,25 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
           {/* Undertaking */}
           <div className="mt-auto">
             <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
-            <p className="text-sm font-semibold text-justify leading-relaxed text-gray-800 mb-1">
-              We hereby confirm that the product containing the psychotropic substance Buprenorphine, which we intend to procure from Neuroglam, Village Ajnoud, Tehsil Payal, Ludhiana – 141421 (Punjab), is covered under our Purchase Order No. {poNumber.replace('NH/PO-', '')} dated {formatDate(poDate)} ({getMonthYear(poDate)}).
-            </p>
-            <p className="text-sm font-semibold text-justify leading-relaxed text-gray-800 mb-1">
-              The products purchased by us will be exclusively supplied to De-Addiction Centres and qualified Doctors under our valid License No. PSMHC/Punjab/2024/863. We are fully aware that this product contains controlled substances regulated under the Narcotic Drugs and Psychotropic Substances Act, 1985, and we shall maintain all statutory records pertaining to its sale and purchase.
-            </p>
-            <p className="text-sm font-semibold text-justify leading-relaxed text-gray-800 mb-1">
-              We further assure that an Acknowledgement (Form-6 Consignment Note) for the receipt of the above substance will be issued to the supplier immediately upon delivery.
-            </p>
-            <p className="text-sm font-semibold text-justify leading-relaxed text-gray-800 mb-2">
-              Additionally, we undertake that the procured product will be used only for the formulations and sales mentioned below and will be marketed within India only. These products are not intended for retail counter sale or export.
-            </p>
-            
-            <p className="font-black text-sm mb-1" style={{ color: '#003366' }}>Neuroglam Liability Acknowledgment:</p>
             <p className="text-sm font-semibold text-justify leading-relaxed text-gray-800">
-              We acknowledge that Neuroglam shall not be held liable for any non-compliance with statutory provisions committed by us, whether intentionally or unintentionally.
+              We confirm purchase of Buprenorphine products from Neuroglam, Village Ajnoud, Tehsil Payal, Ludhiana – 141421 (Punjab), under P.O. No. {poNumber.replace('NH/PO-', '')} dated {formatDate(poDate)} ({getMonthYear(poDate)}). Products will be supplied exclusively to De-Addiction Centres and qualified doctors under License No. PSMHC/Punjab/2024/863. We are aware these are controlled substances per NDPS Act, 1985, and shall maintain all statutory records. Form-6 (Consignment Note) will be issued upon delivery. Products are for formulations/sales within India only, not for retail counter sale or export. Neuroglam shall not be liable for any non-compliance by us.
             </p>
 
-            <div className="flex-grow min-h-12"></div>
+            <div className="flex-grow min-h-16"></div>
 
             {/* Signature Section */}
             <div className="flex justify-between text-base px-2">
               <div className="text-left">
                 <p className="font-black" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
                 <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-                <div className="mt-20 pt-3 border-t-2 border-gray-600 min-w-[220px]">
+                <div className="mt-24 pt-3 border-t-2 border-gray-600 min-w-[220px]">
                   <span className="font-black text-gray-900 text-lg">{doctorName}</span>
                   <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
                   <p className="text-gray-600 text-xs font-semibold italic mt-1">(Signature & Stamp)</p>
                 </div>
               </div>
               <div className="text-center min-w-[160px]">
-                <div className="mt-20 pt-3 border-t-2 border-gray-600">
+                <div className="mt-24 pt-3 border-t-2 border-gray-600">
                   <span className="font-black text-gray-900 text-lg">Date: {formatDate(poDate)}</span>
                 </div>
               </div>
