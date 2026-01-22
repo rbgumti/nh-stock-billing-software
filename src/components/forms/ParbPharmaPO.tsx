@@ -89,8 +89,9 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
     setIsGeneratingPDF(true);
     
     try {
+      // Use scale 3 for high-fidelity rendering (matching professional document standards)
       const canvas = await html2canvas(printContent, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff'
@@ -101,12 +102,22 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       
+      // Calculate dimensions to fit exactly on one A4 page
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+      // Scale down if content exceeds page height to ensure single-page fit
+      if (imgHeight > pageHeight) {
+        const scaleFactor = pageHeight / imgHeight;
+        const scaledWidth = imgWidth * scaleFactor;
+        const xOffset = (pageWidth - scaledWidth) / 2; // Center horizontally
+        pdf.addImage(imgData, 'PNG', xOffset, 0, scaledWidth, pageHeight);
+      } else {
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      }
       
-      pdf.save(`PO-${poNumber}-Parb-Pharma.pdf`);
+      const sanitizedPONumber = poNumber.replace(/[^a-zA-Z0-9-_]/g, '-');
+      pdf.save(`PO-${sanitizedPONumber}-Parb-Pharma.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
@@ -216,40 +227,44 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             </tbody>
           </table>
 
-          {/* Flex spacer to push content to fill page */}
-          <div className="flex-grow"></div>
-
-          {/* Undertaking */}
-          <div className="mt-auto">
+          {/* Undertaking - Directly after table, minimal gap */}
+          <div className="mt-1">
             <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
-            <p className="text-sm font-semibold text-justify leading-relaxed text-gray-800">
-              We hereby confirm that the products which we intend to buy from PARA PHARMACEUTICALS PVT. LTD. E-9, INDUSTRIAL AREA SIIDCUL, SILAQUI DEHRADUN UTTARAKHAND INDIA Our P.O.NO {poNumber}. .dt- {formatDate(poDate)}. These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License no PSMHC/Pb./2024/863. We are full aware these products containing controlled substance as per Narcotic drugs & psychotropic substance Act 1985, and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation & for its sale within india only & not meant for export.
+            <p className="text-sm font-semibold text-justify text-gray-800" style={{ lineHeight: '1.3' }}>
+              We hereby confirm that the products which we intend to buy from PARB PHARMACEUTICALS PVT. LTD. E-9, INDUSTRIAL AREA SIIDCUL, SILAQUI DEHRADUN UTTARAKHAND INDIA Our P.O.NO {poNumber}. dt- {formatDate(poDate)}. These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License no PSMHC/Pb./2024/863. We are fully aware these products contain controlled substances as per Narcotic Drugs & Psychotropic Substances Act 1985, and we will keep the relevant records of sale and purchase. Also we assure our acknowledgement in Form-6 (Consignment Note) for receipt of above purchase items to supplier immediately on receipt of above controlled substances. We undertake that we are taking the products for sale of below mentioned formulation & for its sale within India only & not meant for export.
             </p>
+          </div>
 
-            <div className="flex-grow min-h-16"></div>
-
-            {/* Signature Section */}
-            <div className="flex justify-between text-base px-2">
-              <div className="text-left">
-                <p className="font-black" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
-                <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-                <div className="mt-24 pt-3 border-t-2 border-gray-600 min-w-[220px]">
-                  <span className="font-black text-gray-900 text-lg">{doctorName}</span>
-                  <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
-                  <p className="text-gray-600 text-xs font-semibold italic mt-1">(Signature & Stamp)</p>
-                </div>
+          {/* Signature Section - Two columns with space for stamp */}
+          <div className="mt-3 flex justify-between text-base">
+            {/* Left Column - For Hospital & Doctor Details */}
+            <div className="text-left">
+              <p className="font-black text-base" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
+              <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
+              {/* Space for signature & stamp */}
+              <div className="min-h-[100px]"></div>
+              <div className="pt-1 border-t-2 border-gray-600 min-w-[220px]">
+                <span className="font-black text-gray-900 text-base">{doctorName}</span>
+                <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
+                <p className="text-gray-600 text-xs font-semibold italic">(Signature & Stamp)</p>
               </div>
-              <div className="text-center min-w-[160px]">
-                <div className="mt-24 pt-3 border-t-2 border-gray-600">
-                  <span className="font-black text-gray-900 text-lg">Date: {formatDate(poDate)}</span>
-                </div>
+            </div>
+            {/* Right Column - Date with signature line */}
+            <div className="text-right flex flex-col justify-end">
+              {/* Space for signature */}
+              <div className="min-h-[100px]"></div>
+              <div className="pt-1 border-t-2 border-gray-600 min-w-[160px]">
+                <span className="font-black text-gray-900 text-base">Date: {formatDate(poDate)}</span>
               </div>
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="mt-6 text-center text-sm font-black pt-3" style={{ borderTop: '3px solid #003366' }}>
-            <p style={{ color: '#003366' }}>
+          {/* Flex spacer to push footer to bottom */}
+          <div className="flex-grow"></div>
+
+          {/* Footer - Blue background bar */}
+          <div className="mt-3 text-center text-sm font-black py-2 px-4 rounded" style={{ backgroundColor: '#003366' }}>
+            <p className="text-white">
               NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
           </div>
