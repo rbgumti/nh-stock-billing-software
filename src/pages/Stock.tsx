@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck, Clock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -23,6 +23,7 @@ import { SupplierForm } from "@/components/forms/SupplierForm";
 import { SupplierPaymentForm } from "@/components/forms/SupplierPaymentForm";
 import { StockLedger } from "@/components/StockLedger";
 import { SupplierLedger } from "@/components/SupplierLedger";
+import { SupplierAgingReport } from "@/components/SupplierAgingReport";
 import { ParbPharmaPO } from "@/components/forms/ParbPharmaPO";
 import { RusanPharmaPO } from "@/components/forms/RusanPharmaPO";
 import { NeuroglamPO } from "@/components/forms/NeuroglamPO";
@@ -65,6 +66,7 @@ export default function Stock() {
   const [showLedgerItem, setShowLedgerItem] = useState<any>(null);
   const [showSupplierLedger, setShowSupplierLedger] = useState(false);
   const [supplierLedgerId, setSupplierLedgerId] = useState<number | undefined>(undefined);
+  const [showAgingReport, setShowAgingReport] = useState(false);
   const [showParbPharmaPO, setShowParbPharmaPO] = useState<PurchaseOrder | null>(null);
   const [showNeuroglamPO, setShowNeuroglamPO] = useState<PurchaseOrder | null>(null);
   const [showVyadoHealthcarePO, setShowVyadoHealthcarePO] = useState<PurchaseOrder | null>(null);
@@ -1930,6 +1932,14 @@ export default function Stock() {
             <h2 className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">Supplier Payments</h2>
             <div className="flex gap-2">
               <Button 
+                onClick={() => setShowAgingReport(true)} 
+                variant="outline"
+                className="glass-subtle border-orange/30 hover:border-orange/50"
+              >
+                <Clock className="h-4 w-4 mr-2 text-orange" />
+                Aging Report
+              </Button>
+              <Button 
                 onClick={() => { setSupplierLedgerId(undefined); setShowSupplierLedger(true); }} 
                 variant="outline"
                 className="glass-subtle border-cyan/30 hover:border-cyan/50"
@@ -2595,6 +2605,16 @@ export default function Stock() {
           purchaseOrders={purchaseOrders}
           onClose={() => setShowSupplierLedger(false)}
           initialSupplierId={supplierLedgerId}
+        />
+      )}
+
+      {/* Supplier Aging Report */}
+      {showAgingReport && (
+        <SupplierAgingReport
+          suppliers={suppliers}
+          payments={payments}
+          purchaseOrders={purchaseOrders}
+          onClose={() => setShowAgingReport(false)}
         />
       )}
     </div>
