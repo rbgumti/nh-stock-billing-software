@@ -242,17 +242,14 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
             </p>
           </div>
 
-          {/* Flex spacer to push signature to bottom */}
-          <div className="flex-grow"></div>
-
-          {/* Signature Section - Two columns with increased space for stamp */}
-          <div className="flex justify-between text-base">
+          {/* Signature Section - Two columns with space for stamp */}
+          <div className="mt-3 flex justify-between text-base">
             {/* Left Column - For Hospital & Doctor Details */}
             <div className="text-left">
               <p className="font-black text-base" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
               <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-              {/* Increased space for signature & stamp */}
-              <div className="min-h-[80px]"></div>
+              {/* Space for signature & stamp */}
+              <div className="min-h-[100px]"></div>
               <div className="pt-1 border-t-2 border-gray-600 min-w-[220px]">
                 <span className="font-black text-gray-900 text-base">{doctorName}</span>
                 <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
@@ -261,13 +258,16 @@ export function NeuroglamPO({ poNumber, poDate, items, stockItems, onClose }: Ne
             </div>
             {/* Right Column - Date with signature line */}
             <div className="text-right flex flex-col justify-end">
-              {/* Increased space for signature */}
-              <div className="min-h-[80px]"></div>
+              {/* Space for signature */}
+              <div className="min-h-[100px]"></div>
               <div className="pt-1 border-t-2 border-gray-600 min-w-[160px]">
                 <span className="font-black text-gray-900 text-base">Date: {formatDate(poDate)}</span>
               </div>
             </div>
           </div>
+
+          {/* Flex spacer to push footer to bottom */}
+          <div className="flex-grow"></div>
 
           {/* Footer - Blue background bar */}
           <div className="mt-3 text-center text-sm font-black py-2 px-4 rounded" style={{ backgroundColor: '#003366' }}>
