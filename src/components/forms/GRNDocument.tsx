@@ -11,6 +11,7 @@ export interface GRNItem {
   receivedQuantity: number;
   batchNo?: string;
   expiryDate?: string;
+  costPrice?: number;
   mrp?: number;
   remarks?: string;
 }
@@ -42,8 +43,11 @@ export const GRNDocument = React.forwardRef<HTMLDivElement, GRNDocumentProps>(
   ) => {
     const { doctorName } = useAppSettings();
 
-    const formatDate = (dateStr: string) => {
+    const formatDate = (dateStr: string | undefined) => {
+      if (!dateStr || dateStr.trim() === "") return "-";
       const date = new Date(dateStr);
+      // Check if date is valid
+      if (isNaN(date.getTime())) return "-";
       return date
         .toLocaleDateString("en-IN", {
           day: "2-digit",
@@ -57,17 +61,20 @@ export const GRNDocument = React.forwardRef<HTMLDivElement, GRNDocumentProps>(
       return stockItems.find((item) => item.id === stockItemId);
     };
 
-    // Get cost price from PO items
-    const getCostPrice = (stockItemId: number) => {
-      const poItem = purchaseOrder.items.find((item) => item.stockItemId === stockItemId);
-      return poItem?.unitPrice || 0;
+    // Get cost price from GRN item first, then fallback to PO items, then stock item
+    const getCostPrice = (item: GRNItem) => {
+      if (item.costPrice && item.costPrice > 0) return item.costPrice;
+      const poItem = purchaseOrder.items.find((poi) => poi.stockItemId === item.stockItemId);
+      if (poItem?.unitPrice) return poItem.unitPrice;
+      const stockItem = stockItems.find((s) => s.id === item.stockItemId);
+      return stockItem?.unitPrice || 0;
     };
 
     const totalReceivedQty = grnItems.reduce((sum, item) => sum + item.receivedQuantity, 0);
 
     // Calculate total amount based on received quantity and cost price
     const calculateItemTotal = (item: GRNItem) => {
-      const costPrice = getCostPrice(item.stockItemId);
+      const costPrice = getCostPrice(item);
       return item.receivedQuantity * costPrice;
     };
 
@@ -187,15 +194,15 @@ export const GRNDocument = React.forwardRef<HTMLDivElement, GRNDocumentProps>(
           <tbody>
             {grnItems.map((item, index) => {
               const stockItem = getStockItemDetails(item.stockItemId);
-              const costPrice = getCostPrice(item.stockItemId);
+              const costPrice = getCostPrice(item);
               const itemTotal = calculateItemTotal(item);
               return (
                 <tr key={index} style={{ backgroundColor: "#ffffff" }}>
                   <td className="border border-gray-300 p-3 text-center">{index + 1}</td>
                   <td className="border border-gray-300 p-3 font-medium">{stockItem?.name || "Unknown"}</td>
-                  <td className="border border-gray-300 p-3 text-center">{item.batchNo || "-"}</td>
+                  <td className="border border-gray-300 p-3 text-center">{item.batchNo || stockItem?.batchNo || "-"}</td>
                   <td className="border border-gray-300 p-3 text-center">
-                    {item.expiryDate ? formatDate(item.expiryDate) : "-"}
+                    {formatDate(item.expiryDate || stockItem?.expiryDate)}
                   </td>
                   <td className="border border-gray-300 p-3 text-right">₹{formatPrecision(costPrice)}</td>
                   <td className="border border-gray-300 p-3 text-right">
