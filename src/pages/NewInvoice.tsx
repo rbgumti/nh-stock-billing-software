@@ -82,7 +82,14 @@ export default function NewInvoice() {
 
   const medicines = getMedicines();
 
-  // FIFO helper: Find the batch with earliest expiry date for a medicine name
+  // Helper to check if expiry date is valid
+  const isValidExpiryDate = (date?: string): boolean => {
+    if (!date || date === 'N/A' || date.trim() === '') return false;
+    const parsed = new Date(date);
+    return !isNaN(parsed.getTime());
+  };
+
+  // FIFO helper: Find the batch with earliest valid expiry date for a medicine name
   const findFIFOBatch = (medicineName: string) => {
     const matchingMedicines = medicines.filter(med => 
       med.name.toLowerCase().includes(medicineName.toLowerCase()) ||
@@ -91,12 +98,14 @@ export default function NewInvoice() {
     
     if (matchingMedicines.length === 0) return null;
     
-    // Sort by expiry date (earliest first)
+    // Sort by expiry date (earliest valid expiry first, N/A at end)
     const sorted = [...matchingMedicines].sort((a, b) => {
-      if (!a.expiryDate && !b.expiryDate) return 0;
-      if (!a.expiryDate) return 1;
-      if (!b.expiryDate) return -1;
-      return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+      const aValid = isValidExpiryDate(a.expiryDate);
+      const bValid = isValidExpiryDate(b.expiryDate);
+      if (!aValid && !bValid) return 0;
+      if (!aValid) return 1; // N/A goes to end
+      if (!bValid) return -1;
+      return new Date(a.expiryDate!).getTime() - new Date(b.expiryDate!).getTime();
     });
     
     return sorted[0];
