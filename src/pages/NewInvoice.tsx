@@ -81,6 +81,26 @@ export default function NewInvoice() {
 
   const medicines = getMedicines();
 
+  // FIFO helper: Find the batch with earliest expiry date for a medicine name
+  const findFIFOBatch = (medicineName: string) => {
+    const matchingMedicines = medicines.filter(med => 
+      med.name.toLowerCase().includes(medicineName.toLowerCase()) ||
+      medicineName.toLowerCase().includes(med.name.toLowerCase())
+    ).filter(med => med.currentStock > 0); // Only consider items with stock
+    
+    if (matchingMedicines.length === 0) return null;
+    
+    // Sort by expiry date (earliest first)
+    const sorted = [...matchingMedicines].sort((a, b) => {
+      if (!a.expiryDate && !b.expiryDate) return 0;
+      if (!a.expiryDate) return 1;
+      if (!b.expiryDate) return -1;
+      return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+    });
+    
+    return sorted[0];
+  };
+
   // Load patients on mount
   useEffect(() => {
     loadPatients();
@@ -123,13 +143,10 @@ export default function NewInvoice() {
         }
         setNotes(prescription.notes || '');
         
-        // Convert prescription items to invoice items and auto-match medicines from stock
+        // Convert prescription items to invoice items and auto-match medicines using FIFO
         const invoiceItems: InvoiceItem[] = prescription.items.map((item, index) => {
-          // Try to find matching medicine in stock (case-insensitive partial match)
-          const matchedMedicine = medicines.find(med => 
-            med.name.toLowerCase().includes(item.medicine_name.toLowerCase()) ||
-            item.medicine_name.toLowerCase().includes(med.name.toLowerCase())
-          );
+          // Use FIFO logic to find the batch with earliest expiry date
+          const matchedMedicine = findFIFOBatch(item.medicine_name);
           
           if (matchedMedicine) {
             return {

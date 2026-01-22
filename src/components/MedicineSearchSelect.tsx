@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,6 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -21,6 +20,7 @@ interface Medicine {
   name: string;
   batchNo: string;
   currentStock: number;
+  expiryDate?: string;
 }
 
 interface MedicineSearchSelectProps {
@@ -42,10 +42,49 @@ export function MedicineSearchSelect({
 
   const selectedMedicine = medicines.find((m) => m.id === value);
 
-  const filteredMedicines = medicines.filter((medicine) =>
-    medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    medicine.batchNo.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter and sort by expiry date (FIFO - earliest expiry first)
+  const filteredMedicines = medicines
+    .filter((medicine) =>
+      medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      medicine.batchNo.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      // First sort by name
+      const nameCompare = a.name.localeCompare(b.name);
+      if (nameCompare !== 0) return nameCompare;
+      // Then by expiry date (earliest first - FIFO)
+      if (!a.expiryDate && !b.expiryDate) return 0;
+      if (!a.expiryDate) return 1;
+      if (!b.expiryDate) return -1;
+      return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+    });
+
+  // Helper to format expiry date
+  const formatExpiry = (dateStr?: string) => {
+    if (!dateStr) return "-";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return "-";
+      return date.toLocaleDateString("en-IN", { month: "short", year: "2-digit" });
+    } catch {
+      return "-";
+    }
+  };
+
+  // Check if this batch is the earliest expiry for its medicine name
+  const isEarliestExpiry = (medicine: Medicine) => {
+    const sameMedicines = medicines.filter(m => 
+      m.name.toLowerCase() === medicine.name.toLowerCase() && m.currentStock > 0
+    );
+    if (sameMedicines.length <= 1) return false;
+    const sorted = [...sameMedicines].sort((a, b) => {
+      if (!a.expiryDate && !b.expiryDate) return 0;
+      if (!a.expiryDate) return 1;
+      if (!b.expiryDate) return -1;
+      return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+    });
+    return sorted[0]?.id === medicine.id;
+  };
 
   const handleRef = (el: HTMLButtonElement | null) => {
     buttonRef.current = el;
@@ -105,10 +144,17 @@ export function MedicineSearchSelect({
                       value === medicine.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex flex-col">
-                    <span>{medicine.name}</span>
+                  <div className="flex flex-col flex-1">
+                    <div className="flex items-center gap-2">
+                      <span>{medicine.name}</span>
+                      {isEarliestExpiry(medicine) && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 font-medium">
+                          FIFO
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs text-muted-foreground">
-                      Batch: {medicine.batchNo} | Stock: {medicine.currentStock}
+                      Batch: {medicine.batchNo} | Exp: {formatExpiry(medicine.expiryDate)} | Stock: {medicine.currentStock}
                     </span>
                   </div>
                 </CommandItem>
