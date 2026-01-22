@@ -144,30 +144,30 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="p-4 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '11pt', lineHeight: '1.4', fontWeight: '600', minHeight: '842px', height: '842px' }}>
+        <div ref={printRef} className="p-6 bg-white text-black flex flex-col" style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '13pt', lineHeight: '1.6', fontWeight: '600', minHeight: '1123px', height: '1123px' }}>
           {/* Header with Logo */}
-          <div className="text-center mb-2 pb-2 border-b-2" style={{ borderColor: '#003366' }}>
-            <div className="flex justify-center mb-1">
-              <img src={navjeevanLogo} alt="Logo" className="w-12 h-12 object-contain" />
+          <div className="text-center mb-4 pb-3 border-b-4" style={{ borderColor: '#003366' }}>
+            <div className="flex justify-center mb-2">
+              <img src={navjeevanLogo} alt="Logo" className="w-16 h-16 object-contain" />
             </div>
-            <h1 className="text-2xl font-black tracking-wide" style={{ color: '#003366', letterSpacing: '1px' }}>
+            <h1 className="text-3xl font-black tracking-wide" style={{ color: '#003366', letterSpacing: '1px' }}>
               NAVJEEVAN HOSPITAL
             </h1>
-            <p className="text-xs font-bold text-gray-800 mt-0.5">
+            <p className="text-sm font-bold text-gray-800 mt-1">
               Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab) | Ph: 6284942412
             </p>
-            <p className="text-xs font-bold text-gray-700">Licence No: PSMHC/Pb./2024/863 | {doctorName}</p>
+            <p className="text-xs font-bold text-gray-700 mt-0.5">Licence No: PSMHC/Pb./2024/863 | {doctorName}</p>
           </div>
 
           {/* PO Title Badge */}
-          <div className="flex justify-center mb-2">
-            <div className="px-6 py-1.5 rounded text-white font-black text-sm tracking-widest shadow-md" style={{ backgroundColor: '#003366' }}>
+          <div className="flex justify-center mb-4">
+            <div className="px-8 py-2.5 rounded text-white font-black text-lg tracking-widest shadow-md" style={{ backgroundColor: '#003366' }}>
               PURCHASE ORDER
             </div>
           </div>
 
           {/* PO Info Grid */}
-          <div className="flex justify-between mb-2 p-2 rounded text-sm font-bold" style={{ backgroundColor: '#f0f7ff', border: '1px solid #003366' }}>
+          <div className="flex justify-between mb-4 p-4 rounded text-base font-bold" style={{ backgroundColor: '#f0f7ff', border: '2px solid #003366' }}>
             <div>
               <span className="font-black" style={{ color: '#003366' }}>PO No: </span>
               <span className="font-black text-gray-900">{poNumber}</span>
@@ -179,28 +179,28 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
           </div>
 
           {/* Supplier Box */}
-          <div className="p-2 mb-2 rounded text-sm" style={{ backgroundColor: '#e8f4fd', border: '1px solid #0066cc' }}>
+          <div className="p-4 mb-4 rounded text-base" style={{ backgroundColor: '#e8f4fd', border: '2px solid #0066cc' }}>
             <span className="font-black" style={{ color: '#003366' }}>TO: </span>
             <span className="font-black text-gray-900">VYADO HEALTHCARE PVT LTD</span>
             <span className="text-gray-800 font-bold ml-2">| Gali No.4, Vinod Nagar, Hisar - 125001</span>
           </div>
 
           {/* Subject */}
-          <p className="text-sm mb-1 font-bold">
+          <p className="text-base mb-2 font-bold">
             <span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span className="text-gray-900">Medicine Order</span>
           </p>
-          <p className="text-sm text-gray-800 mb-2 font-semibold">
+          <p className="text-base text-gray-800 mb-4 font-semibold">
             Kindly supply the following medicines to Navjeevan Hospital, Bara Sirhind at the earliest.
           </p>
 
           {/* Items Table */}
-          <table className="w-full border-collapse mb-2 text-sm">
+          <table className="w-full border-collapse mb-4 text-base">
             <thead>
               <tr style={{ backgroundColor: '#003366' }}>
-                <th className="p-2 text-center text-white font-black border border-gray-400 w-[8%]">Sr.</th>
-                <th className="p-2 text-left text-white font-black border border-gray-400 w-[50%]">Product Name</th>
-                <th className="p-2 text-center text-white font-black border border-gray-400 w-[20%]">Packing</th>
-                <th className="p-2 text-center text-white font-black border border-gray-400 w-[22%]">Qty.</th>
+                <th className="p-3 text-center text-white font-black border-2 border-gray-400 w-[8%]">Sr.</th>
+                <th className="p-3 text-left text-white font-black border-2 border-gray-400 w-[50%]">Product Name</th>
+                <th className="p-3 text-center text-white font-black border-2 border-gray-400 w-[20%]">Packing</th>
+                <th className="p-3 text-center text-white font-black border-2 border-gray-400 w-[22%]">Qty.</th>
               </tr>
             </thead>
             <tbody>
@@ -210,10 +210,10 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
                 
                 return (
                   <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f0f7ff' }}>
-                    <td className="border border-gray-400 p-2 text-center font-bold text-gray-900">{index + 1}</td>
-                    <td className="border border-gray-400 p-2 font-black text-gray-900">{item.stockItemName}</td>
-                    <td className="border border-gray-400 p-2 text-center font-bold text-gray-800">{packing}</td>
-                    <td className="border border-gray-400 p-2 text-center font-black text-gray-900">{item.quantity} TAB</td>
+                    <td className="border-2 border-gray-400 p-3 text-center font-bold text-gray-900">{index + 1}</td>
+                    <td className="border-2 border-gray-400 p-3 font-black text-gray-900">{item.stockItemName}</td>
+                    <td className="border-2 border-gray-400 p-3 text-center font-bold text-gray-800">{packing}</td>
+                    <td className="border-2 border-gray-400 p-3 text-center font-black text-gray-900">{item.quantity} TAB</td>
                   </tr>
                 );
               })}
@@ -225,36 +225,36 @@ export function VyadoHealthcarePO({ poNumber, poDate, items, stockItems, onClose
 
           {/* Signature Section */}
           <div className="mt-auto">
-            <div className="pt-2" style={{ borderTop: '1px solid #003366' }}>
-              <p className="text-gray-800 font-bold text-sm">Thanking You,</p>
-              <p className="text-gray-800 font-bold text-sm">Yours Sincerely,</p>
+            <div className="pt-4" style={{ borderTop: '2px solid #003366' }}>
+              <p className="text-gray-800 font-bold">Thanking You,</p>
+              <p className="text-gray-800 font-bold">Yours Sincerely,</p>
             </div>
             
             {/* Signature Section - Two columns */}
-            <div className="flex justify-between text-sm mt-2">
+            <div className="flex justify-between text-base mt-4">
               {/* Left Column - Doctor Details */}
               <div className="text-left">
                 {/* Space for signature */}
-                <div className="min-h-[40px]"></div>
-                <div className="pt-1 border-t border-gray-600 min-w-[180px]">
-                  <span className="font-black text-sm" style={{ color: '#003366' }}>{doctorName}</span>
-                  <p className="text-gray-700 text-xs font-bold">Navjeevan Hospital, Sirhind</p>
+                <div className="min-h-[60px]"></div>
+                <div className="pt-2 border-t-2 border-gray-600 min-w-[220px]">
+                  <span className="font-black text-base" style={{ color: '#003366' }}>{doctorName}</span>
+                  <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
                   <p className="text-gray-600 text-xs font-semibold italic">(Signature & Stamp)</p>
                 </div>
               </div>
               {/* Right Column - Date with signature line */}
               <div className="text-right flex flex-col justify-end">
                 {/* Space for signature */}
-                <div className="min-h-[40px]"></div>
-                <div className="pt-1 border-t border-gray-600 min-w-[140px]">
-                  <span className="font-black text-sm" style={{ color: '#003366' }}>Date: {formatDate(poDate)}</span>
+                <div className="min-h-[60px]"></div>
+                <div className="pt-2 border-t-2 border-gray-600 min-w-[160px]">
+                  <span className="font-black text-base" style={{ color: '#003366' }}>Date: {formatDate(poDate)}</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Footer - Blue background bar */}
-          <div className="mt-2 text-center text-xs font-black py-1.5 px-3 rounded" style={{ backgroundColor: '#003366' }}>
+          <div className="mt-4 text-center text-sm font-black py-2 px-4 rounded" style={{ backgroundColor: '#003366' }}>
             <p className="text-white">
               NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
             </p>
