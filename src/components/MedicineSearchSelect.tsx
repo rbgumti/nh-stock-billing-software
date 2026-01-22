@@ -42,7 +42,14 @@ export function MedicineSearchSelect({
 
   const selectedMedicine = medicines.find((m) => m.id === value);
 
-  // Filter and sort by expiry date (FIFO - earliest expiry first)
+  // Helper to check if expiry date is valid
+  const isValidExpiry = (date?: string): boolean => {
+    if (!date || date === 'N/A' || date.trim() === '') return false;
+    const parsed = new Date(date);
+    return !isNaN(parsed.getTime());
+  };
+
+  // Filter and sort by expiry date (FIFO - earliest valid expiry first, N/A at end)
   const filteredMedicines = medicines
     .filter((medicine) =>
       medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -52,11 +59,14 @@ export function MedicineSearchSelect({
       // First sort by name
       const nameCompare = a.name.localeCompare(b.name);
       if (nameCompare !== 0) return nameCompare;
-      // Then by expiry date (earliest first - FIFO)
-      if (!a.expiryDate && !b.expiryDate) return 0;
-      if (!a.expiryDate) return 1;
-      if (!b.expiryDate) return -1;
-      return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+      // Then by expiry date (earliest valid expiry first - FIFO)
+      // Invalid/N/A dates go to end
+      const aValid = isValidExpiry(a.expiryDate);
+      const bValid = isValidExpiry(b.expiryDate);
+      if (!aValid && !bValid) return 0;
+      if (!aValid) return 1; // N/A goes to end
+      if (!bValid) return -1; // N/A goes to end
+      return new Date(a.expiryDate!).getTime() - new Date(b.expiryDate!).getTime();
     });
 
   // Helper to format expiry date
@@ -71,17 +81,19 @@ export function MedicineSearchSelect({
     }
   };
 
-  // Check if this batch is the earliest expiry for its medicine name
+  // Check if this batch is the earliest valid expiry for its medicine name
   const isEarliestExpiry = (medicine: Medicine) => {
     const sameMedicines = medicines.filter(m => 
       m.name.toLowerCase() === medicine.name.toLowerCase() && m.currentStock > 0
     );
     if (sameMedicines.length <= 1) return false;
     const sorted = [...sameMedicines].sort((a, b) => {
-      if (!a.expiryDate && !b.expiryDate) return 0;
-      if (!a.expiryDate) return 1;
-      if (!b.expiryDate) return -1;
-      return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+      const aValid = isValidExpiry(a.expiryDate);
+      const bValid = isValidExpiry(b.expiryDate);
+      if (!aValid && !bValid) return 0;
+      if (!aValid) return 1;
+      if (!bValid) return -1;
+      return new Date(a.expiryDate!).getTime() - new Date(b.expiryDate!).getTime();
     });
     return sorted[0]?.id === medicine.id;
   };

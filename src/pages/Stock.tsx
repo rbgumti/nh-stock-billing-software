@@ -239,6 +239,13 @@ export default function Stock() {
     });
   };
 
+  // Helper to check if expiry date is valid (not N/A, empty, or invalid format)
+  const isValidExpiryDate = (date?: string): boolean => {
+    if (!date || date === 'N/A' || date.trim() === '') return false;
+    const parsed = new Date(date);
+    return !isNaN(parsed.getTime());
+  };
+
   const handleGRN = async (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (po) {
@@ -249,10 +256,22 @@ export default function Stock() {
         const stockItem = stockItems.find(s => s.id === grnItem.stockItemId);
         if (!stockItem) continue;
 
-        const batchNo = grnItem.batchNo || stockItem.batchNo;
-        const newExpiryDate = grnItem.expiryDate || stockItem.expiryDate;
-        const newCostPrice = grnItem.costPrice || stockItem.unitPrice;
-        const newMrp = grnItem.mrp || stockItem.mrp;
+        // Use GRN values, only fallback to stock item if GRN values are meaningful
+        const batchNo = grnItem.batchNo && grnItem.batchNo.trim() !== '' 
+          ? grnItem.batchNo 
+          : stockItem.batchNo;
+        
+        // Only use expiry from GRN if it's a valid date, otherwise keep existing (even if N/A)
+        const newExpiryDate = isValidExpiryDate(grnItem.expiryDate) 
+          ? grnItem.expiryDate 
+          : (isValidExpiryDate(stockItem.expiryDate) ? stockItem.expiryDate : grnItem.expiryDate || stockItem.expiryDate);
+        
+        const newCostPrice = grnItem.costPrice && grnItem.costPrice > 0 
+          ? grnItem.costPrice 
+          : stockItem.unitPrice;
+        const newMrp = grnItem.mrp && grnItem.mrp > 0 
+          ? grnItem.mrp 
+          : stockItem.mrp;
 
         try {
           // Find existing batch or create new one

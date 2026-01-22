@@ -40,6 +40,21 @@ interface GRNFormProps {
   stockItems: StockItem[];
 }
 
+// Helper to check if expiry date is valid (not N/A, empty, or invalid format)
+const isValidExpiryDate = (date?: string): boolean => {
+  if (!date || date === 'N/A' || date.trim() === '') return false;
+  const parsed = new Date(date);
+  return !isNaN(parsed.getTime());
+};
+
+// Clean expiry date - return empty string for invalid dates (for date input compatibility)
+const cleanExpiryDate = (date?: string): string => {
+  if (!date || date === 'N/A' || date.trim() === '') return '';
+  const parsed = new Date(date);
+  if (isNaN(parsed.getTime())) return '';
+  return date;
+};
+
 export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFormProps) {
   const [grnNumber, setGrnNumber] = useState("");
   const [grnDate, setGrnDate] = useState(new Date().toISOString().split('T')[0]);
@@ -51,12 +66,14 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
     purchaseOrder.items.map(item => {
       // Get stock item to auto-populate batch, expiry, and cost price from Item Master
       const stockItem = stockItems.find(s => s.id === item.stockItemId);
+      // Clean batch number - remove auto-generated BATCH prefix if present
+      const cleanBatchNo = stockItem?.batchNo?.startsWith('BATCH') ? '' : (stockItem?.batchNo || '');
       return {
         stockItemId: item.stockItemId,
         orderedQuantity: item.qtyInTabs || item.quantity, // Use tabs as primary quantity
         receivedQuantity: item.qtyInTabs || item.quantity,
-        batchNo: stockItem?.batchNo || "",
-        expiryDate: stockItem?.expiryDate || "",
+        batchNo: cleanBatchNo,
+        expiryDate: cleanExpiryDate(stockItem?.expiryDate), // Clean N/A and invalid dates
         costPrice: stockItem?.unitPrice || item.unitPrice || 0, // Cost price from Item Master
         mrp: stockItem?.mrp || 0,
         remarks: ""

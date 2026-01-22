@@ -254,6 +254,13 @@ export function useStockStore() {
     return { stockItemId: data.item_id, isNew: true };
   };
 
+  // Helper to check if expiry date is valid
+  const isValidExpiryDate = (date?: string): boolean => {
+    if (!date || date === 'N/A' || date.trim() === '') return false;
+    const parsed = new Date(date);
+    return !isNaN(parsed.getTime());
+  };
+
   /**
    * Groups stock items by medicine name for batch-wise display
    */
@@ -268,12 +275,14 @@ export function useStockStore() {
       groups[key].push(item);
     });
 
-    // Sort batches within each group by expiry date (FIFO)
+    // Sort batches within each group by expiry date (FIFO - valid dates first, N/A at end)
     Object.keys(groups).forEach(key => {
       groups[key].sort((a, b) => {
-        if (!a.expiryDate && !b.expiryDate) return 0;
-        if (!a.expiryDate) return 1;
-        if (!b.expiryDate) return -1;
+        const aValid = isValidExpiryDate(a.expiryDate);
+        const bValid = isValidExpiryDate(b.expiryDate);
+        if (!aValid && !bValid) return 0;
+        if (!aValid) return 1;
+        if (!bValid) return -1;
         return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
       });
     });
@@ -306,9 +315,11 @@ export function useStockStore() {
     return stockItems
       .filter(item => item.name.toLowerCase() === medicineName.toLowerCase())
       .sort((a, b) => {
-        if (!a.expiryDate && !b.expiryDate) return 0;
-        if (!a.expiryDate) return 1;
-        if (!b.expiryDate) return -1;
+        const aValid = isValidExpiryDate(a.expiryDate);
+        const bValid = isValidExpiryDate(b.expiryDate);
+        if (!aValid && !bValid) return 0;
+        if (!aValid) return 1;
+        if (!bValid) return -1;
         return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
       });
   };
