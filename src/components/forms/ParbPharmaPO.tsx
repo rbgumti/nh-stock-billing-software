@@ -50,6 +50,8 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
       const printWindow = window.open('', '_blank');
       if (!printWindow) return;
 
+      // A4 dimensions in mm: 210 x 297, with 10mm margins = 190 x 277 printable area
+      // Scale image to fit within printable height if needed
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
@@ -58,9 +60,26 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             <style>
               * { margin: 0; padding: 0; box-sizing: border-box; }
               @page { size: A4; margin: 10mm; }
-              body { display: flex; justify-content: center; align-items: flex-start; }
-              img { max-width: 100%; height: auto; }
-              @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+              html, body { width: 100%; height: 100%; }
+              body { 
+                display: flex; 
+                justify-content: center; 
+                align-items: flex-start;
+              }
+              img { 
+                max-width: 190mm; 
+                max-height: 277mm; 
+                width: auto; 
+                height: auto; 
+                object-fit: contain;
+              }
+              @media print { 
+                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } 
+                img { 
+                  max-width: 190mm; 
+                  max-height: 277mm; 
+                }
+              }
             </style>
           </head>
           <body>
