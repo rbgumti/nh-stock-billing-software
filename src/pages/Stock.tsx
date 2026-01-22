@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2 } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -22,6 +22,7 @@ import { ServiceGRNForm } from "@/components/forms/ServiceGRNForm";
 import { SupplierForm } from "@/components/forms/SupplierForm";
 import { SupplierPaymentForm } from "@/components/forms/SupplierPaymentForm";
 import { StockLedger } from "@/components/StockLedger";
+import { SupplierLedger } from "@/components/SupplierLedger";
 import { ParbPharmaPO } from "@/components/forms/ParbPharmaPO";
 import { RusanPharmaPO } from "@/components/forms/RusanPharmaPO";
 import { NeuroglamPO } from "@/components/forms/NeuroglamPO";
@@ -62,6 +63,8 @@ export default function Stock() {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [editingPayment, setEditingPayment] = useState<SupplierPayment | null>(null);
   const [showLedgerItem, setShowLedgerItem] = useState<any>(null);
+  const [showSupplierLedger, setShowSupplierLedger] = useState(false);
+  const [supplierLedgerId, setSupplierLedgerId] = useState<number | undefined>(undefined);
   const [showParbPharmaPO, setShowParbPharmaPO] = useState<PurchaseOrder | null>(null);
   const [showNeuroglamPO, setShowNeuroglamPO] = useState<PurchaseOrder | null>(null);
   const [showVyadoHealthcarePO, setShowVyadoHealthcarePO] = useState<PurchaseOrder | null>(null);
@@ -1863,10 +1866,20 @@ export default function Stock() {
         <TabsContent value="payments" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">Supplier Payments</h2>
-            <Button onClick={() => setShowPaymentForm(true)} className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white">
-              <Plus className="h-4 w-4 mr-2" />
-              Record Payment
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => { setSupplierLedgerId(undefined); setShowSupplierLedger(true); }} 
+                variant="outline"
+                className="glass-subtle border-cyan/30 hover:border-cyan/50"
+              >
+                <FileText className="h-4 w-4 mr-2 text-cyan" />
+                A/C Ledger
+              </Button>
+              <Button onClick={() => setShowPaymentForm(true)} className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Record Payment
+              </Button>
+            </div>
           </div>
 
           {/* Payment Stats */}
@@ -2148,6 +2161,15 @@ export default function Stock() {
                       {supplier.phone && <p className="text-sm text-muted-foreground">{supplier.phone}</p>}
                     </div>
                     <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setSupplierLedgerId(supplier.id); setShowSupplierLedger(true); }}
+                        className="hover:bg-cyan/10"
+                        title="View A/C Ledger"
+                      >
+                        <BookOpenCheck className="h-4 w-4 text-cyan" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -2502,6 +2524,17 @@ export default function Stock() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Supplier A/C Ledger */}
+      {showSupplierLedger && (
+        <SupplierLedger
+          suppliers={suppliers}
+          payments={payments}
+          purchaseOrders={purchaseOrders}
+          onClose={() => setShowSupplierLedger(false)}
+          initialSupplierId={supplierLedgerId}
+        />
+      )}
     </div>
   );
 }
