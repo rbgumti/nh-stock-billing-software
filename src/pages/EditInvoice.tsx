@@ -13,6 +13,7 @@ import { useStockStore } from "@/hooks/useStockStore";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
 import { addDays, format } from "date-fns";
+import ExpiryWarningBadge, { getExpiryWarningLevel } from "@/components/ExpiryWarningBadge";
 import {
   Dialog,
   DialogContent,
@@ -581,8 +582,14 @@ export default function EditInvoice() {
                       <div>
                         <span className="text-muted-foreground">Batch:</span> {item.batchNo}
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Expiry:</span> {item.expiryDate}
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">Expiry:</span> 
+                        <span className={getExpiryWarningLevel(item.expiryDate) === 'critical' ? 'text-red-600 font-medium' : 
+                                         getExpiryWarningLevel(item.expiryDate) === 'warning' ? 'text-orange-600 font-medium' : 
+                                         getExpiryWarningLevel(item.expiryDate) === 'caution' ? 'text-yellow-600 font-medium' : ''}>
+                          {item.expiryDate}
+                        </span>
+                        <ExpiryWarningBadge expiryDate={item.expiryDate} />
                       </div>
                       <div>
                         <span className="text-muted-foreground">Cost/Tab:</span> ₹{item.unitPrice.toFixed(2)}
