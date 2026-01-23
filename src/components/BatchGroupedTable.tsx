@@ -89,10 +89,11 @@ export function BatchGroupedTable({
           <tr>
             <th className="px-4 py-3 text-left font-semibold w-8"></th>
             <th className="px-4 py-3 text-left font-semibold">Item Name</th>
+            <th className="px-4 py-3 text-left font-semibold">Batch No</th>
+            <th className="px-4 py-3 text-left font-semibold">Expiry</th>
             <th className="px-4 py-3 text-left font-semibold">Vendor</th>
             <th className="px-4 py-3 text-left font-semibold">Category</th>
-            <th className="px-4 py-3 text-center font-semibold">Batches</th>
-            <th className="px-4 py-3 text-right font-semibold">Total Stock</th>
+            <th className="px-4 py-3 text-right font-semibold">Stock</th>
             <th className="px-4 py-3 text-right font-semibold">Cost/Tab (₹)</th>
             <th className="px-4 py-3 text-right font-semibold">MRP/Tab (₹)</th>
             <th className="px-4 py-3 text-left font-semibold">Packing</th>
@@ -102,7 +103,7 @@ export function BatchGroupedTable({
         <tbody>
           {uniqueMedicines.length === 0 ? (
             <tr>
-              <td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">
+              <td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">
                 No items found. Add your first item using the "Add Item Master" button.
               </td>
             </tr>
@@ -146,19 +147,35 @@ export function BatchGroupedTable({
                         )}
                       </div>
                     </td>
+                    <td className="px-4 py-3">
+                      {hasMutipleBatches ? (
+                        <span className="text-xs text-muted-foreground">Multiple</span>
+                      ) : (
+                        <span className="text-xs font-medium">{primaryItem.batchNo && primaryItem.batchNo !== 'N/A' && !primaryItem.batchNo.startsWith('BATCH') ? primaryItem.batchNo : '-'}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {hasMutipleBatches ? (
+                        <span className="text-xs text-muted-foreground">Multiple</span>
+                      ) : (
+                        <span className={`text-xs ${
+                          isExpired(primaryItem.expiryDate) 
+                            ? 'text-destructive font-medium' 
+                            : isExpiringSoon(primaryItem.expiryDate) 
+                              ? 'text-orange-500 font-medium' 
+                              : ''
+                        }`}>
+                          {formatExpiry(primaryItem.expiryDate)}
+                          {isExpired(primaryItem.expiryDate) && ' ⚠️'}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">{primaryItem.supplier || '-'}</td>
                     <td className="px-4 py-3">
                       <Badge className={`${style.badge} flex items-center gap-1 w-fit`}>
                         <IconComponent className="h-3 w-3" />
                         {primaryItem.category}
                       </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {hasMutipleBatches ? (
-                        <span className="text-muted-foreground">{batches.length}</span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">{primaryItem.batchNo || '-'}</span>
-                      )}
                     </td>
                     <td className="px-4 py-3 text-right font-semibold">
                       <span className={totalStock <= primaryItem.minimumStock ? 'text-destructive' : ''}>
@@ -200,25 +217,26 @@ export function BatchGroupedTable({
                       <td className="px-4 py-2 pl-8">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Package className="h-3 w-3" />
-                          <span className="text-xs">Batch: <span className="font-medium text-foreground">{batch.batchNo || 'N/A'}</span></span>
+                          <span className="text-xs italic">Sub-batch</span>
                         </div>
                       </td>
-                      <td className="px-4 py-2"></td>
+                      <td className="px-4 py-2">
+                        <span className="text-xs font-medium">{batch.batchNo && batch.batchNo !== 'N/A' && !batch.batchNo.startsWith('BATCH') ? batch.batchNo : '-'}</span>
+                      </td>
                       <td className="px-4 py-2">
                         <span className={`text-xs ${
                           isExpired(batch.expiryDate) 
                             ? 'text-destructive font-medium' 
                             : isExpiringSoon(batch.expiryDate) 
                               ? 'text-orange-500 font-medium' 
-                              : 'text-muted-foreground'
+                              : ''
                         }`}>
-                          Exp: {formatExpiry(batch.expiryDate)}
-                          {isExpired(batch.expiryDate) && ' (Expired)'}
+                          {formatExpiry(batch.expiryDate)}
+                          {isExpired(batch.expiryDate) && ' ⚠️'}
                         </span>
                       </td>
-                      <td className="px-4 py-2 text-center">
-                        <span className="text-xs text-muted-foreground">{batch.batchNo}</span>
-                      </td>
+                      <td className="px-4 py-2"></td>
+                      <td className="px-4 py-2"></td>
                       <td className="px-4 py-2 text-right">
                         <span className={`font-medium ${batch.currentStock <= batch.minimumStock ? 'text-destructive' : ''}`}>
                           {batch.currentStock}
