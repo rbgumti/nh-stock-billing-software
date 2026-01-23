@@ -285,7 +285,7 @@ export default function Stock() {
     return !isNaN(parsed.getTime());
   };
 
-  const handleGRN = async (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string }) => {
+  const handleGRN = async (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (po) {
       // Update stock levels based on GRN - with batch-wise tracking
@@ -380,7 +380,8 @@ export default function Stock() {
         grnDate: formatLocalISODate(),
         grnNumber: grnData.grnNumber,
         invoiceNumber: grnData.invoiceNumber,
-        invoiceDate: grnData.invoiceDate
+        invoiceDate: grnData.invoiceDate,
+        invoiceUrl: grnData.invoiceUrl
       });
     }
     
@@ -392,7 +393,7 @@ export default function Stock() {
     });
   };
 
-  const handleServiceGRN = (grnData: { grnNumber: string; purchaseOrderId: number; notes?: string; invoiceNumber?: string; invoiceDate?: string }) => {
+  const handleServiceGRN = (grnData: { grnNumber: string; purchaseOrderId: number; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (po) {
       // Update PO status with GRN number, invoice number and date (no stock update for service)
@@ -402,7 +403,8 @@ export default function Stock() {
         grnDate: formatLocalISODate(),
         grnNumber: grnData.grnNumber,
         invoiceNumber: grnData.invoiceNumber,
-        invoiceDate: grnData.invoiceDate
+        invoiceDate: grnData.invoiceDate,
+        invoiceUrl: grnData.invoiceUrl
       });
     }
     

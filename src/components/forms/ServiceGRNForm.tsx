@@ -5,24 +5,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, FileText, X } from "lucide-react";
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrecision } from "@/lib/formatUtils";
+import { useToast } from "@/hooks/use-toast";
 
 interface ServiceGRNFormProps {
   onClose: () => void;
-  onSubmit: (grnData: { grnNumber: string; purchaseOrderId: number; notes?: string; invoiceNumber?: string; invoiceDate?: string }) => void;
+  onSubmit: (grnData: { grnNumber: string; purchaseOrderId: number; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => void;
   purchaseOrder: PurchaseOrder;
 }
 
 export function ServiceGRNForm({ onClose, onSubmit, purchaseOrder }: ServiceGRNFormProps) {
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [grnNumber, setGrnNumber] = useState("");
   const [grnDate, setGrnDate] = useState(new Date().toISOString().split('T')[0]);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Auto-generate GRN number
   useEffect(() => {
@@ -44,17 +48,85 @@ export function ServiceGRNForm({ onClose, onSubmit, purchaseOrder }: ServiceGRNF
     generateGRNNumber();
   }, []);
 
+  const handleInvoiceFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        toast({
+          title: "File too large",
+          description: "Please upload a file smaller than 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      setInvoiceFile(file);
+    }
+  };
+
+  const removeInvoiceFile = () => {
+    setInvoiceFile(null);
+  };
+
+  const uploadInvoice = async (): Promise<string | null> => {
+    if (!invoiceFile) return null;
+    
+    setUploading(true);
+    try {
+      const fileExt = invoiceFile.name.split('.').pop()?.toLowerCase();
+      
+      const allowedTypes = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+      if (!fileExt || !allowedTypes.includes(fileExt)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a PDF or image file (JPG, PNG, WebP)",
+          variant: "destructive"
+        });
+        return null;
+      }
+
+      const fileName = `grn-invoices/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('payment-receipts')
+        .upload(fileName, invoiceFile);
+
+      if (uploadError) throw uploadError;
+
+      return fileName;
+    } catch (error) {
+      console.error('Error uploading invoice:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload invoice. Please try again.",
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
+      let invoiceUrl: string | undefined;
+      if (invoiceFile) {
+        const uploadedPath = await uploadInvoice();
+        if (uploadedPath) {
+          invoiceUrl = uploadedPath;
+        }
+      }
+
       onSubmit({
         grnNumber,
         purchaseOrderId: purchaseOrder.id,
         notes,
         invoiceNumber,
-        invoiceDate
+        invoiceDate,
+        invoiceUrl
       });
     } finally {
       setIsSubmitting(false);
@@ -141,6 +213,36 @@ export function ServiceGRNForm({ onClose, onSubmit, purchaseOrder }: ServiceGRNF
                 onChange={(e) => setInvoiceDate(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Invoice Upload */}
+          <div className="space-y-2">
+            <Label>Upload Invoice</Label>
+            {invoiceFile ? (
+              <div className="flex items-center gap-2 p-3 border rounded-md bg-muted/50">
+                <FileText className="h-5 w-5 text-muted-foreground" />
+                <span className="flex-1 text-sm truncate">{invoiceFile.name}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={removeInvoiceFile}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-md cursor-pointer hover:border-primary/50 transition-colors">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Click to upload invoice (PDF, Image - max 5MB)</span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  onChange={handleInvoiceFileChange}
+                />
+              </label>
+            )}
           </div>
 
           <div className="space-y-2">
