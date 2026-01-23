@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BookOpen, Check, X, Pencil } from "lucide-react";
+import { BookOpen, Check, X, Pencil, AlertTriangle, Clock } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,10 +43,26 @@ export function StockItemCard({
   const categoryStyle = getCategoryStyle(item.category);
   const CategoryIcon = categoryStyle.Icon;
 
+  const isValidExpiry = (dateStr: string) => {
+    return dateStr && dateStr !== 'N/A' && dateStr.trim() !== '' && !isNaN(new Date(dateStr).getTime());
+  };
+
+  const getExpiryStatus = (dateStr: string) => {
+    if (!isValidExpiry(dateStr)) return null;
+    const expiry = new Date(dateStr);
+    const today = new Date();
+    const diffDays = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays <= 0) return { status: 'expired', label: 'Expired', daysText: 'Expired', color: 'destructive' };
+    if (diffDays <= 30) return { status: 'critical', label: 'Expiring', daysText: `${diffDays}d left`, color: 'destructive' };
+    if (diffDays <= 60) return { status: 'warning', label: 'Expiring Soon', daysText: `${diffDays}d left`, color: 'orange' };
+    if (diffDays <= 90) return { status: 'caution', label: 'Check Expiry', daysText: `${diffDays}d left`, color: 'yellow' };
+    return null;
+  };
+
   const formatExpiry = (dateStr: string) => {
-    if (!dateStr || dateStr === 'N/A' || dateStr.trim() === '') return '-';
+    if (!isValidExpiry(dateStr)) return '-';
     const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return '-';
     return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
   };
 
@@ -83,15 +99,35 @@ export function StockItemCard({
     setIsEditingBatch(false);
   };
 
+  const expiryStatus = getExpiryStatus(item.expiryDate);
+
   return (
-    <Card className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 border-l-4 ${categoryStyle.border}`}>
+    <Card className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 border-l-4 ${categoryStyle.border} ${
+      expiryStatus?.status === 'expired' ? 'ring-2 ring-destructive/50' : 
+      expiryStatus?.status === 'critical' ? 'ring-2 ring-destructive/30' : ''
+    }`}>
+      {/* Expiry Warning Banner */}
+      {expiryStatus && (
+        <div className={`absolute top-0 left-0 right-0 px-3 py-1.5 flex items-center justify-between text-xs font-medium ${
+          expiryStatus.status === 'expired' ? 'bg-destructive text-white' :
+          expiryStatus.status === 'critical' ? 'bg-gradient-to-r from-destructive to-pink text-white' :
+          expiryStatus.status === 'warning' ? 'bg-gradient-to-r from-orange to-amber-500 text-white' :
+          'bg-gradient-to-r from-yellow-500 to-amber-400 text-black'
+        }`}>
+          <span className="flex items-center gap-1">
+            {expiryStatus.status === 'expired' ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+            {expiryStatus.label}
+          </span>
+          <span>{expiryStatus.daysText}</span>
+        </div>
+      )}
       <div className={`absolute inset-0 bg-gradient-to-br ${
         index % 4 === 0 ? 'from-purple/5 via-transparent to-cyan/5' :
         index % 4 === 1 ? 'from-cyan/5 via-transparent to-teal/5' :
         index % 4 === 2 ? 'from-gold/5 via-transparent to-orange/5' :
         'from-pink/5 via-transparent to-purple/5'
       } opacity-50 group-hover:opacity-100 transition-opacity`} />
-      <CardHeader className="relative">
+      <CardHeader className={`relative ${expiryStatus ? 'pt-10' : ''}`}>
         <div className="flex justify-between items-start">
           <div className="flex items-start gap-3">
             <div className={`p-2 rounded-lg bg-gradient-to-r ${
@@ -218,7 +254,15 @@ export function StockItemCard({
                 </div>
                 <div>
                   <p className="text-muted-foreground">Expiry</p>
-                  <p className="font-medium">{formatExpiry(item.expiryDate)}</p>
+                  <p className={`font-medium ${
+                    expiryStatus?.status === 'expired' ? 'text-destructive' :
+                    expiryStatus?.status === 'critical' ? 'text-destructive' :
+                    expiryStatus?.status === 'warning' ? 'text-orange-500' :
+                    expiryStatus?.status === 'caution' ? 'text-yellow-600' : ''
+                  }`}>
+                    {formatExpiry(item.expiryDate)}
+                    {expiryStatus && <span className="ml-1 text-xs">⚠️</span>}
+                  </p>
                 </div>
               </div>
             )}
