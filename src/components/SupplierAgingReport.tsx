@@ -223,6 +223,8 @@ export function SupplierAgingReport({
         'Supplier': data.supplier.name,
         'PO Number': po.poNumber,
         'GRN Number': po.grnNumber || '-',
+        'Invoice Number': po.invoiceNumber || '-',
+        'Invoice Date': po.invoiceDate || '-',
         'PO Date': po.orderDate,
         'GRN Date': po.grnDate || '-',
         'Due Date': po.paymentDueDate || '-',
