@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck, Clock, ArrowUpDown, ArrowUp, ArrowDown, SortAsc, SortDesc } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck, Clock, ArrowUpDown, ArrowUp, ArrowDown, SortAsc, SortDesc, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -445,6 +445,26 @@ export default function Stock() {
       toast({
         title: "Error",
         description: "Failed to update GRN",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const viewInvoice = async (invoiceUrl: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('payment-receipts')
+        .createSignedUrl(invoiceUrl, 3600); // 1 hour expiry
+
+      if (error) throw error;
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error viewing invoice:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load invoice document",
         variant: "destructive"
       });
     }
@@ -1824,6 +1844,17 @@ export default function Stock() {
                           </Button>
                         </>
                       )}
+                      {po.invoiceUrl && (
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          className="glass-subtle border-blue-500/20 hover:border-blue-500/40"
+                          onClick={() => viewInvoice(po.invoiceUrl!)}
+                        >
+                          <Eye className="h-4 w-4 mr-1 text-blue-500" />
+                          Invoice
+                        </Button>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="outline" className="glass-subtle border-purple/20 hover:border-purple/40">
@@ -1952,6 +1983,17 @@ export default function Stock() {
                         >
                           <Pencil className="h-4 w-4 mr-1 text-orange" />
                           Edit PO
+                        </Button>
+                      )}
+                      {po.invoiceUrl && (
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          className="glass-subtle border-blue-500/20 hover:border-blue-500/40"
+                          onClick={() => viewInvoice(po.invoiceUrl!)}
+                        >
+                          <Eye className="h-4 w-4 mr-1 text-blue-500" />
+                          Invoice
                         </Button>
                       )}
                       <Button 
