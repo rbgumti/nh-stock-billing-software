@@ -11,6 +11,7 @@ import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { PaymentReminders } from "@/components/PaymentReminders";
 import { MonthlyComparativeAnalysis } from "@/components/MonthlyComparativeAnalysis";
 import { AgingSummaryWidget } from "@/components/AgingSummaryWidget";
+import { ExpiryAlertsWidget } from "@/components/ExpiryAlertsWidget";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -726,9 +727,10 @@ export default function Dashboard() {
       <MonthlyComparativeAnalysis />
 
       {/* Payment Reminders & Aging Summary Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <PaymentReminders />
         <AgingSummaryWidget />
+        <ExpiryAlertsWidget />
       </div>
 
       {/* Low Stock Alerts */}
