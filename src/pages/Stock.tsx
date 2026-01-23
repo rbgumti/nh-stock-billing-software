@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck, Clock } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck, Clock, ArrowUpDown, ArrowUp, ArrowDown, SortAsc, SortDesc } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -51,6 +51,8 @@ export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
   const [poTypeFilter, setPoTypeFilter] = useState<"all" | "Stock" | "Service">("all");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [sortBy, setSortBy] = useState<"name" | "expiry" | "stock" | "value">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [showPOForm, setShowPOForm] = useState(false);
@@ -198,15 +200,51 @@ export default function Stock() {
     supplier.email?.toLowerCase().includes(supplierSearchTerm.toLowerCase())
   );
 
-  const filteredItems = stockItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.supplier.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = filterCategory === "all" || item.category === filterCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+  const filteredItems = stockItems
+    .filter(item => {
+      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           item.supplier.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesCategory = filterCategory === "all" || item.category === filterCategory;
+      
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case "name":
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case "expiry":
+          // Invalid dates go to the end
+          const aValid = a.expiryDate && a.expiryDate !== 'N/A' && !isNaN(new Date(a.expiryDate).getTime());
+          const bValid = b.expiryDate && b.expiryDate !== 'N/A' && !isNaN(new Date(b.expiryDate).getTime());
+          if (!aValid && !bValid) comparison = 0;
+          else if (!aValid) comparison = 1;
+          else if (!bValid) comparison = -1;
+          else comparison = new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+          break;
+        case "stock":
+          comparison = a.currentStock - b.currentStock;
+          break;
+        case "value":
+          comparison = (a.currentStock * a.unitPrice) - (b.currentStock * b.unitPrice);
+          break;
+      }
+      
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+  const handleSortChange = (newSortBy: typeof sortBy) => {
+    if (sortBy === newSortBy) {
+      setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(newSortBy);
+      setSortOrder("asc");
+    }
+  };
 
   const handleAddStockItem = (newItem: any) => {
     addStockItem(newItem);
@@ -1479,35 +1517,107 @@ export default function Stock() {
             </Card>
           </div>
 
-          {/* Search and Filter */}
+          {/* Search, Filter and Sort */}
           <Card className="glass-strong border-0 overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-r from-purple/5 via-transparent to-cyan/5" />
             <CardContent className="pt-6 relative">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name, category, or supplier..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 glass-subtle border-purple/20"
-                  />
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name, category, or supplier..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 glass-subtle border-purple/20"
+                    />
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {categories.map((category) => (
+                      <Button
+                        key={category}
+                        variant={filterCategory === category ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setFilterCategory(category)}
+                        className={filterCategory === category 
+                          ? "bg-gradient-to-r from-purple to-cyan text-white" 
+                          : "glass-subtle border-purple/20 hover:border-purple/40"
+                        }
+                      >
+                        {category === "all" ? "All Categories" : category}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  {categories.map((category) => (
-                    <Button
-                      key={category}
-                      variant={filterCategory === category ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setFilterCategory(category)}
-                      className={filterCategory === category 
-                        ? "bg-gradient-to-r from-purple to-cyan text-white" 
-                        : "glass-subtle border-purple/20 hover:border-purple/40"
-                      }
-                    >
-                      {category === "all" ? "All Categories" : category}
-                    </Button>
-                  ))}
+                
+                {/* Sorting Options */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                    <ArrowUpDown className="h-3.5 w-3.5" />
+                    Sort by:
+                  </span>
+                  <Button
+                    variant={sortBy === "name" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSortChange("name")}
+                    className={sortBy === "name" 
+                      ? "bg-gradient-to-r from-emerald to-teal text-white" 
+                      : "glass-subtle border-emerald/20 hover:border-emerald/40"
+                    }
+                  >
+                    Name
+                    {sortBy === "name" && (
+                      sortOrder === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />
+                    )}
+                  </Button>
+                  <Button
+                    variant={sortBy === "expiry" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSortChange("expiry")}
+                    className={sortBy === "expiry" 
+                      ? "bg-gradient-to-r from-orange to-amber-500 text-white" 
+                      : "glass-subtle border-orange/20 hover:border-orange/40"
+                    }
+                  >
+                    <Clock className="h-3 w-3 mr-1" />
+                    Expiry
+                    {sortBy === "expiry" && (
+                      sortOrder === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />
+                    )}
+                  </Button>
+                  <Button
+                    variant={sortBy === "stock" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSortChange("stock")}
+                    className={sortBy === "stock" 
+                      ? "bg-gradient-to-r from-cyan to-blue-500 text-white" 
+                      : "glass-subtle border-cyan/20 hover:border-cyan/40"
+                    }
+                  >
+                    <Package className="h-3 w-3 mr-1" />
+                    Stock Level
+                    {sortBy === "stock" && (
+                      sortOrder === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />
+                    )}
+                  </Button>
+                  <Button
+                    variant={sortBy === "value" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSortChange("value")}
+                    className={sortBy === "value" 
+                      ? "bg-gradient-to-r from-gold to-orange text-white" 
+                      : "glass-subtle border-gold/20 hover:border-gold/40"
+                    }
+                  >
+                    <DollarSign className="h-3 w-3 mr-1" />
+                    Value
+                    {sortBy === "value" && (
+                      sortOrder === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />
+                    )}
+                  </Button>
+                  <span className="text-xs text-muted-foreground ml-2">
+                    ({filteredItems.length} items)
+                  </span>
                 </div>
               </div>
             </CardContent>
