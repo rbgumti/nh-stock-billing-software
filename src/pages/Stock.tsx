@@ -44,6 +44,7 @@ import { formatLocalISODate } from "@/lib/dateUtils";
 import { GRNDocument, type GRNItem } from "@/components/forms/GRNDocument";
 import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
 import { BatchGroupedTable } from "@/components/BatchGroupedTable";
+import { StockItemCard } from "@/components/StockItemCard";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Stock() {
@@ -1514,120 +1515,18 @@ export default function Stock() {
 
           {/* Stock Items */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredItems.map((item, index) => {
-          const stockStatus = getStockStatus(item.currentStock, item.minimumStock);
-          const categoryStyle = getCategoryStyle(item.category);
-          const CategoryIcon = categoryStyle.Icon;
-          
-          return (
-            <Card key={item.id} className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 border-l-4 ${categoryStyle.border}`}>
-              <div className={`absolute inset-0 bg-gradient-to-br ${
-                index % 4 === 0 ? 'from-purple/5 via-transparent to-cyan/5' :
-                index % 4 === 1 ? 'from-cyan/5 via-transparent to-teal/5' :
-                index % 4 === 2 ? 'from-gold/5 via-transparent to-orange/5' :
-                'from-pink/5 via-transparent to-purple/5'
-              } opacity-50 group-hover:opacity-100 transition-opacity`} />
-              <CardHeader className="relative">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg bg-gradient-to-r ${
-                      item.category === 'BNX' ? 'from-blue-500 to-cyan' :
-                      item.category === 'TPN' ? 'from-amber-500 to-orange' :
-                      item.category === 'PSHY' ? 'from-purple to-pink' :
-                      'from-gray-500 to-gray-600'
-                    }`}>
-                      <CategoryIcon className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{item.name}</CardTitle>
-                      <Badge className={`${
-                        item.category === 'BNX' ? 'bg-gradient-to-r from-blue-500 to-cyan text-white border-0' :
-                        item.category === 'TPN' ? 'bg-gradient-to-r from-amber-500 to-orange text-white border-0' :
-                        item.category === 'PSHY' ? 'bg-gradient-to-r from-purple to-pink text-white border-0' :
-                        'bg-gray-500 text-white border-0'
-                      }`}>
-                        {item.category}
-                      </Badge>
-                    </div>
-                  </div>
-                  <Badge className={`${
-                    stockStatus.label === 'Critical' ? 'bg-gradient-to-r from-destructive to-pink text-white border-0' :
-                    stockStatus.label === 'Low Stock' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
-                    'bg-gradient-to-r from-emerald to-teal text-white border-0'
-                  }`}>
-                    {stockStatus.label}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-4 relative">
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Current Stock</p>
-                      <p className="font-semibold">{item.currentStock}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Minimum Stock</p>
-                      <p className="font-semibold">{item.minimumStock}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Unit Price</p>
-                      <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Total Value</p>
-                      <p className="font-semibold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{(item.currentStock * item.unitPrice).toFixed(2)}</p>
-                    </div>
-                  </div>
-
-                  <div className="text-sm">
-                    <p className="text-muted-foreground">Supplier</p>
-                    <p className="font-medium">{item.supplier}</p>
-                  </div>
-
-                  {item.expiryDate !== "N/A" && (
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Expiry Date</p>
-                      <p className="font-medium">{item.expiryDate}</p>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-2 pt-2">
-                    <Button 
-                      size="sm" 
-                      className="w-full bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white"
-                      onClick={() => setShowLedgerItem(item)}
-                    >
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Stock Ledger
-                    </Button>
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 glass-subtle border-cyan/20 hover:border-cyan/40"
-                        onClick={() => setEditingItem(item)}
-                      >
-                        Edit
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 glass-subtle border-gold/20 hover:border-gold/40"
-                        onClick={() => setShowPOForm(true)}
-                      >
-                        Reorder
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-            })}
+            {filteredItems.map((item, index) => (
+              <StockItemCard
+                key={item.id}
+                item={item}
+                index={index}
+                getCategoryStyle={getCategoryStyle}
+                getStockStatus={getStockStatus}
+                onViewLedger={setShowLedgerItem}
+                onEdit={setEditingItem}
+                onReorder={() => setShowPOForm(true)}
+              />
+            ))}
           </div>
 
           {filteredItems.length === 0 && (
