@@ -3,6 +3,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 interface AppSettingsContextType {
   performanceMode: boolean;
   setPerformanceMode: (enabled: boolean) => void;
+  ultraLowEndMode: boolean;
+  setUltraLowEndMode: (enabled: boolean) => void;
   compactMode: boolean;
   setCompactMode: (enabled: boolean) => void;
   doctorName: string;
@@ -12,12 +14,18 @@ interface AppSettingsContextType {
 const AppSettingsContext = createContext<AppSettingsContextType | undefined>(undefined);
 
 const PERFORMANCE_KEY = "performance_mode";
+const ULTRA_LOW_END_KEY = "ultra_low_end_mode";
 const COMPACT_KEY = "compact_mode";
 const DOCTOR_NAME_KEY = "doctor_name";
 
 export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
   const [performanceMode, setPerformanceModeState] = useState(() => {
     const stored = localStorage.getItem(PERFORMANCE_KEY);
+    return stored === "true";
+  });
+
+  const [ultraLowEndMode, setUltraLowEndModeState] = useState(() => {
+    const stored = localStorage.getItem(ULTRA_LOW_END_KEY);
     return stored === "true";
   });
 
@@ -39,6 +47,9 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
       }
       if (e.key === PERFORMANCE_KEY) {
         setPerformanceModeState(e.newValue === "true");
+      }
+      if (e.key === ULTRA_LOW_END_KEY) {
+        setUltraLowEndModeState(e.newValue === "true");
       }
       if (e.key === COMPACT_KEY) {
         setCompactModeState(e.newValue === "true");
@@ -65,6 +76,15 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
   const setPerformanceMode = (enabled: boolean) => {
     setPerformanceModeState(enabled);
     localStorage.setItem(PERFORMANCE_KEY, String(enabled));
+  };
+
+  const setUltraLowEndMode = (enabled: boolean) => {
+    setUltraLowEndModeState(enabled);
+    localStorage.setItem(ULTRA_LOW_END_KEY, String(enabled));
+    // Ultra low-end mode also enables performance mode
+    if (enabled && !performanceMode) {
+      setPerformanceMode(true);
+    }
   };
 
   const setCompactMode = (enabled: boolean) => {
@@ -96,10 +116,20 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     }
   }, [compactMode]);
 
+  useEffect(() => {
+    if (ultraLowEndMode) {
+      document.documentElement.classList.add("ultra-low-end-mode");
+    } else {
+      document.documentElement.classList.remove("ultra-low-end-mode");
+    }
+  }, [ultraLowEndMode]);
+
   return (
     <AppSettingsContext.Provider value={{ 
       performanceMode, 
       setPerformanceMode, 
+      ultraLowEndMode,
+      setUltraLowEndMode,
       compactMode, 
       setCompactMode,
       doctorName,

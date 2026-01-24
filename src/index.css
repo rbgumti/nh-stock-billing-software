@@ -413,6 +413,162 @@ All colors MUST be HSL.
   height: 2.25rem !important;
 }
 
+/* ============================================
+   ULTRA LOW-END MODE - Maximum Performance
+   For old/slow devices with limited resources
+   ============================================ */
+
+/* Disable ALL animations and transitions completely */
+:root.ultra-low-end-mode *,
+:root.ultra-low-end-mode *::before,
+:root.ultra-low-end-mode *::after {
+  animation: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition: none !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* Remove all backdrop blur effects */
+:root.ultra-low-end-mode * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Remove all box shadows */
+:root.ultra-low-end-mode * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Remove all filters */
+:root.ultra-low-end-mode * {
+  filter: none !important;
+}
+
+/* Remove all transforms (except essential layout ones) */
+:root.ultra-low-end-mode .glass-orb,
+:root.ultra-low-end-mode .glass-orb-gold,
+:root.ultra-low-end-mode .glass-orb-pink,
+:root.ultra-low-end-mode .liquid-blob,
+:root.ultra-low-end-mode .floating-particles,
+:root.ultra-low-end-mode .floating-particles::before,
+:root.ultra-low-end-mode .floating-particles::after,
+:root.ultra-low-end-mode [class*="FloatingOrbs"],
+:root.ultra-low-end-mode [class*="floating-orb"],
+:root.ultra-low-end-mode .shimmer-effect,
+:root.ultra-low-end-mode .shine-effect,
+:root.ultra-low-end-mode .glow-effect,
+:root.ultra-low-end-mode [class*="gradient-border"],
+:root.ultra-low-end-mode .liquid-shine,
+:root.ultra-low-end-mode .animated-gradient-border,
+:root.ultra-low-end-mode .mesh-gradient {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Simplify backgrounds - use solid colors */
+:root.ultra-low-end-mode body {
+  background: hsl(var(--background)) !important;
+  background-image: none !important;
+}
+
+:root.ultra-low-end-mode .glass,
+:root.ultra-low-end-mode .glass-subtle,
+:root.ultra-low-end-mode .glass-strong,
+:root.ultra-low-end-mode .glass-purple,
+:root.ultra-low-end-mode .glass-cyan,
+:root.ultra-low-end-mode .glass-pink,
+:root.ultra-low-end-mode .glass-gold,
+:root.ultra-low-end-mode .glass-emerald,
+:root.ultra-low-end-mode .glass-teal,
+:root.ultra-low-end-mode .glass-card,
+:root.ultra-low-end-mode .liquid-stat-card,
+:root.ultra-low-end-mode .sidebar-glass {
+  background: hsl(var(--card)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* Simplify gradients to solid colors */
+:root.ultra-low-end-mode [class*="bg-gradient"],
+:root.ultra-low-end-mode [class*="from-"],
+:root.ultra-low-end-mode [style*="linear-gradient"],
+:root.ultra-low-end-mode [style*="radial-gradient"] {
+  background: hsl(var(--muted)) !important;
+  background-image: none !important;
+}
+
+/* Remove opacity variations for better performance */
+:root.ultra-low-end-mode [class*="opacity-"] {
+  opacity: 1 !important;
+}
+
+/* Reduce border-radius for simpler rendering */
+:root.ultra-low-end-mode * {
+  border-radius: 4px !important;
+}
+
+:root.ultra-low-end-mode button,
+:root.ultra-low-end-mode input,
+:root.ultra-low-end-mode select,
+:root.ultra-low-end-mode textarea {
+  border-radius: 4px !important;
+}
+
+/* Remove hover effects that cause repaints */
+:root.ultra-low-end-mode *:hover {
+  transform: none !important;
+  scale: none !important;
+}
+
+/* Disable scroll smoothing */
+:root.ultra-low-end-mode * {
+  scroll-behavior: auto !important;
+}
+
+/* Force hardware acceleration off */
+:root.ultra-low-end-mode * {
+  will-change: auto !important;
+  contain: none !important;
+}
+
+/* Simplify sidebar */
+:root.ultra-low-end-mode [class*="Sidebar"] {
+  background: hsl(var(--sidebar-background)) !important;
+}
+
+:root.ultra-low-end-mode [class*="sidebar-item-glow"],
+:root.ultra-low-end-mode [class*="liquid-menu-item"],
+:root.ultra-low-end-mode [class*="liquid-active-indicator"] {
+  background: transparent !important;
+}
+
+:root.ultra-low-end-mode [class*="sidebar-item-glow"]:hover,
+:root.ultra-low-end-mode [class*="sidebar-item-glow"].active {
+  background: hsl(var(--accent)) !important;
+}
+
+/* Reduce image rendering quality for speed */
+:root.ultra-low-end-mode img {
+  image-rendering: optimizeSpeed !important;
+}
+
+/* Disable pointer events on decorative elements */
+:root.ultra-low-end-mode [class*="decorative"],
+:root.ultra-low-end-mode [class*="blob"],
+:root.ultra-low-end-mode [class*="orb"] {
+  pointer-events: none !important;
+  display: none !important;
+}
+
+/* Simplify charts for better performance */
+:root.ultra-low-end-mode .recharts-wrapper svg {
+  shape-rendering: optimizeSpeed !important;
+}
+
   /* Colorful gradient backgrounds */
   .bg-gradient-vibrant {
     background: linear-gradient(135deg, hsl(var(--purple)) 0%, hsl(var(--cyan)) 50%, hsl(var(--teal)) 100%);

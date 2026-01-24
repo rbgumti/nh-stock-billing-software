@@ -1,10 +1,18 @@
 import { cn } from "@/lib/utils";
+import { useAppSettings } from "@/hooks/usePerformanceMode";
 
 interface FloatingOrbsProps {
   className?: string;
 }
 
 export function FloatingOrbs({ className }: FloatingOrbsProps) {
+  const { ultraLowEndMode, performanceMode } = useAppSettings();
+  
+  // Don't render anything in ultra low-end mode or performance mode
+  if (ultraLowEndMode || performanceMode) {
+    return null;
+  }
+
   return (
     <div className={cn("fixed inset-0 overflow-hidden pointer-events-none -z-10", className)}>
       {/* Simplified orbs - reduced blur and opacity for performance */}
