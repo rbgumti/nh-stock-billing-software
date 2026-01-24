@@ -1,4 +1,4 @@
-import { Settings, Zap, Minimize2, User, Sun, Moon, Monitor } from "lucide-react";
+import { Settings, Zap, Minimize2, User, Sun, Moon, Monitor, Smartphone } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import { useTheme } from "next-themes";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export function SettingsDialog() {
-  const { performanceMode, setPerformanceMode, compactMode, setCompactMode, doctorName, setDoctorName } = useAppSettings();
+  const { performanceMode, setPerformanceMode, ultraLowEndMode, setUltraLowEndMode, compactMode, setCompactMode, doctorName, setDoctorName } = useAppSettings();
   const { theme, setTheme } = useTheme();
 
   return (
@@ -126,6 +126,30 @@ export function SettingsDialog() {
               id="performance-mode"
               checked={performanceMode}
               onCheckedChange={setPerformanceMode}
+          />
+          </div>
+
+          <Separator />
+
+          {/* Ultra Low-End Mode */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-red-500/10">
+                <Smartphone className="w-5 h-5 text-red-500" />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="ultra-low-end-mode" className="text-sm font-medium">
+                  Ultra Low-End Mode
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Maximum optimization for old/slow devices. Disables all effects.
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="ultra-low-end-mode"
+              checked={ultraLowEndMode}
+              onCheckedChange={setUltraLowEndMode}
             />
           </div>
 
