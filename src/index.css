@@ -430,50 +430,7 @@ All colors MUST be HSL.
   transition-delay: 0s !important;
 }
 
-/* Remove all backdrop blur effects */
-:root.ultra-low-end-mode * {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Remove all box shadows */
-:root.ultra-low-end-mode * {
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-
-/* Remove all filters */
-:root.ultra-low-end-mode * {
-  filter: none !important;
-}
-
-/* Remove all transforms (except essential layout ones) */
-:root.ultra-low-end-mode .glass-orb,
-:root.ultra-low-end-mode .glass-orb-gold,
-:root.ultra-low-end-mode .glass-orb-pink,
-:root.ultra-low-end-mode .liquid-blob,
-:root.ultra-low-end-mode .floating-particles,
-:root.ultra-low-end-mode .floating-particles::before,
-:root.ultra-low-end-mode .floating-particles::after,
-:root.ultra-low-end-mode [class*="FloatingOrbs"],
-:root.ultra-low-end-mode [class*="floating-orb"],
-:root.ultra-low-end-mode .shimmer-effect,
-:root.ultra-low-end-mode .shine-effect,
-:root.ultra-low-end-mode .glow-effect,
-:root.ultra-low-end-mode [class*="gradient-border"],
-:root.ultra-low-end-mode .liquid-shine,
-:root.ultra-low-end-mode .animated-gradient-border,
-:root.ultra-low-end-mode .mesh-gradient {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-/* Simplify backgrounds - use solid colors */
-:root.ultra-low-end-mode body {
-  background: hsl(var(--background)) !important;
-  background-image: none !important;
-}
-
+/* Remove backdrop blur effects - major performance killer */
 :root.ultra-low-end-mode .glass,
 :root.ultra-low-end-mode .glass-subtle,
 :root.ultra-low-end-mode .glass-strong,
@@ -485,70 +442,87 @@ All colors MUST be HSL.
 :root.ultra-low-end-mode .glass-teal,
 :root.ultra-low-end-mode .glass-card,
 :root.ultra-low-end-mode .liquid-stat-card,
-:root.ultra-low-end-mode .sidebar-glass {
-  background: hsl(var(--card)) !important;
+:root.ultra-low-end-mode .sidebar-glass,
+:root.ultra-low-end-mode [class*="backdrop-blur"] {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  background: hsl(var(--card)) !important;
   border: 1px solid hsl(var(--border)) !important;
 }
 
-/* Simplify gradients to solid colors */
-:root.ultra-low-end-mode [class*="bg-gradient"],
-:root.ultra-low-end-mode [class*="from-"],
-:root.ultra-low-end-mode [style*="linear-gradient"],
-:root.ultra-low-end-mode [style*="radial-gradient"] {
-  background: hsl(var(--muted)) !important;
+/* Remove box shadows from decorative elements only */
+:root.ultra-low-end-mode .glass,
+:root.ultra-low-end-mode .glass-subtle,
+:root.ultra-low-end-mode .glass-strong,
+:root.ultra-low-end-mode .liquid-stat-card,
+:root.ultra-low-end-mode .glass-card,
+:root.ultra-low-end-mode [class*="shadow-glow"],
+:root.ultra-low-end-mode [class*="shadow-lg"],
+:root.ultra-low-end-mode [class*="shadow-xl"],
+:root.ultra-low-end-mode [class*="shadow-2xl"] {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+/* Hide decorative elements completely */
+:root.ultra-low-end-mode .glass-orb,
+:root.ultra-low-end-mode .glass-orb-gold,
+:root.ultra-low-end-mode .glass-orb-pink,
+:root.ultra-low-end-mode .liquid-blob,
+:root.ultra-low-end-mode .floating-particles,
+:root.ultra-low-end-mode .floating-particles::before,
+:root.ultra-low-end-mode .floating-particles::after,
+:root.ultra-low-end-mode .shimmer-effect,
+:root.ultra-low-end-mode .shine-effect,
+:root.ultra-low-end-mode .glow-effect,
+:root.ultra-low-end-mode .liquid-shine,
+:root.ultra-low-end-mode .animated-gradient-border,
+:root.ultra-low-end-mode .mesh-gradient {
+  display: none !important;
+}
+
+/* Simplify body background */
+:root.ultra-low-end-mode body {
+  background: hsl(var(--background)) !important;
   background-image: none !important;
 }
 
-/* Remove opacity variations for better performance */
-:root.ultra-low-end-mode [class*="opacity-"] {
-  opacity: 1 !important;
+/* Simplify gradient backgrounds - but keep essential styling */
+:root.ultra-low-end-mode .bg-gradient-vibrant,
+:root.ultra-low-end-mode .bg-gradient-warm,
+:root.ultra-low-end-mode .bg-gradient-cool,
+:root.ultra-low-end-mode .bg-gradient-sunset,
+:root.ultra-low-end-mode .bg-gradient-ocean,
+:root.ultra-low-end-mode .bg-gradient-forest {
+  background: hsl(var(--primary)) !important;
 }
 
-/* Reduce border-radius for simpler rendering */
-:root.ultra-low-end-mode * {
-  border-radius: 4px !important;
-}
-
-:root.ultra-low-end-mode button,
-:root.ultra-low-end-mode input,
-:root.ultra-low-end-mode select,
-:root.ultra-low-end-mode textarea {
-  border-radius: 4px !important;
-}
-
-/* Remove hover effects that cause repaints */
-:root.ultra-low-end-mode *:hover {
-  transform: none !important;
-  scale: none !important;
+/* Remove filters from decorative elements */
+:root.ultra-low-end-mode .glass-orb,
+:root.ultra-low-end-mode .liquid-blob,
+:root.ultra-low-end-mode [class*="blur-"] {
+  filter: none !important;
 }
 
 /* Disable scroll smoothing */
+:root.ultra-low-end-mode,
 :root.ultra-low-end-mode * {
   scroll-behavior: auto !important;
 }
 
-/* Force hardware acceleration off */
+/* Force simple rendering */
 :root.ultra-low-end-mode * {
   will-change: auto !important;
-  contain: none !important;
 }
 
-/* Simplify sidebar */
-:root.ultra-low-end-mode [class*="Sidebar"] {
+/* Simplify sidebar background */
+:root.ultra-low-end-mode [data-sidebar] {
   background: hsl(var(--sidebar-background)) !important;
 }
 
-:root.ultra-low-end-mode [class*="sidebar-item-glow"],
-:root.ultra-low-end-mode [class*="liquid-menu-item"],
-:root.ultra-low-end-mode [class*="liquid-active-indicator"] {
-  background: transparent !important;
-}
-
-:root.ultra-low-end-mode [class*="sidebar-item-glow"]:hover,
-:root.ultra-low-end-mode [class*="sidebar-item-glow"].active {
-  background: hsl(var(--accent)) !important;
+/* Remove hover scale effects */
+:root.ultra-low-end-mode .hover-scale:hover,
+:root.ultra-low-end-mode [class*="hover:scale"]:hover {
+  transform: none !important;
 }
 
 /* Reduce image rendering quality for speed */
@@ -556,17 +530,18 @@ All colors MUST be HSL.
   image-rendering: optimizeSpeed !important;
 }
 
-/* Disable pointer events on decorative elements */
-:root.ultra-low-end-mode [class*="decorative"],
-:root.ultra-low-end-mode [class*="blob"],
-:root.ultra-low-end-mode [class*="orb"] {
-  pointer-events: none !important;
-  display: none !important;
-}
-
 /* Simplify charts for better performance */
 :root.ultra-low-end-mode .recharts-wrapper svg {
   shape-rendering: optimizeSpeed !important;
+}
+
+/* Remove text gradients */
+:root.ultra-low-end-mode .bg-clip-text {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  color: hsl(var(--foreground)) !important;
 }
 
   /* Colorful gradient backgrounds */

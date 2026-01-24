@@ -1,15 +1,39 @@
 import { cn } from "@/lib/utils";
-import { useAppSettings } from "@/hooks/usePerformanceMode";
+import { useEffect, useState } from "react";
 
 interface FloatingOrbsProps {
   className?: string;
 }
 
 export function FloatingOrbs({ className }: FloatingOrbsProps) {
-  const { ultraLowEndMode, performanceMode } = useAppSettings();
+  const [shouldRender, setShouldRender] = useState(false);
+  
+  useEffect(() => {
+    // Check localStorage directly to avoid context issues during initial render
+    const ultraLowEnd = localStorage.getItem("ultra_low_end_mode") === "true";
+    const performanceMode = localStorage.getItem("performance_mode") === "true";
+    setShouldRender(!ultraLowEnd && !performanceMode);
+    
+    // Listen for changes
+    const handleStorage = () => {
+      const ultraLowEnd = localStorage.getItem("ultra_low_end_mode") === "true";
+      const performanceMode = localStorage.getItem("performance_mode") === "true";
+      setShouldRender(!ultraLowEnd && !performanceMode);
+    };
+    
+    window.addEventListener('storage', handleStorage);
+    // Also listen for custom mode change events
+    const handleModeChange = () => handleStorage();
+    window.addEventListener('focus', handleModeChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('focus', handleModeChange);
+    };
+  }, []);
   
   // Don't render anything in ultra low-end mode or performance mode
-  if (ultraLowEndMode || performanceMode) {
+  if (!shouldRender) {
     return null;
   }
 
