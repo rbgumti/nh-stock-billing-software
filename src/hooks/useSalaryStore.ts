@@ -210,6 +210,12 @@ export const useSalaryStore = create<SalaryStore>()(
     }),
     {
       name: 'salary-store',
+      version: 1,
+      partialize: (state) => ({
+        employees: state.employees,
+        salaryRecords: state.salaryRecords,
+        attendanceRecords: state.attendanceRecords,
+      }),
     }
   )
 );
