@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, Plus, Pencil, Trash2, Download, Calculator, 
   Calendar, DollarSign, UserPlus, FileSpreadsheet, FileDown, Loader2,
-  TrendingUp, BarChart3, CheckCircle, XCircle, Clock, Sun, CalendarDays, RefreshCcw, ChevronLeft, ChevronRight, Wallet, LockKeyhole
+  TrendingUp, BarChart3, CheckCircle, XCircle, Clock, Sun, CalendarDays, RefreshCcw, ChevronLeft, ChevronRight, Wallet, LockKeyhole, HardDrive
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -470,6 +470,29 @@ const SalaryContent = () => {
     toast.success("Salary report exported successfully");
   };
 
+  // Backup all salary data to JSON
+  const backupToJSON = () => {
+    const backupData = {
+      exportDate: new Date().toISOString(),
+      version: 1,
+      employees,
+      salaryRecords,
+      attendanceRecords,
+    };
+
+    const jsonString = JSON.stringify(backupData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `salary-backup-${format(new Date(), 'yyyy-MM-dd-HHmm')}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Backup exported successfully");
+  };
+
   // Export attendance to Excel
   const exportAttendanceToExcel = () => {
     const monthStr = format(attendanceMonth, "yyyy-MM");
@@ -717,6 +740,16 @@ const SalaryContent = () => {
               <Download className="w-4 h-4" />
               Export
             </Button>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={backupToJSON} variant="outline" className="gap-2">
+                  <HardDrive className="w-4 h-4" />
+                  Backup
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Export all salary data as JSON backup</TooltipContent>
+            </Tooltip>
             
             <Button 
               onClick={revokeAccess} 
