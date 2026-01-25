@@ -50,11 +50,12 @@ interface InvoiceItem {
 export default function NewInvoice() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { stockItems, getMedicines, getStockItem, reduceStock } = useStockStore();
+  const { stockItems, loading: stockLoading, getMedicines, getStockItem, reduceStock } = useStockStore();
   const { getNextInvoiceNumber } = useSequentialNumbers();
   const { prescriptions, getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
   
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [patientsLoading, setPatientsLoading] = useState(true);
   const [selectedPatient, setSelectedPatient] = useState("");
   const [foundPatient, setFoundPatient] = useState<Patient | null>(null);
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
@@ -111,19 +112,22 @@ export default function NewInvoice() {
     return sorted[0];
   };
 
-  // Load patients on mount
+  // Load patients on mount - deferred to not block initial render
   useEffect(() => {
-    loadPatients();
-  }, []);
+    // Use requestIdleCallback for non-blocking load, fallback to setTimeout
+    const loadPatientsDeferred = () => {
+      loadAllPatients()
+        .then(data => setPatients(data))
+        .catch(error => console.error('Error loading patients:', error))
+        .finally(() => setPatientsLoading(false));
+    };
 
-  const loadPatients = async () => {
-    try {
-      const data = await loadAllPatients();
-      setPatients(data);
-    } catch (error) {
-      console.error('Error loading patients:', error);
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(loadPatientsDeferred, { timeout: 500 });
+    } else {
+      setTimeout(loadPatientsDeferred, 100);
     }
-  };
+  }, []);
 
   // Load prescription data if prescriptionId is in URL
   useEffect(() => {
@@ -398,6 +402,9 @@ export default function NewInvoice() {
     }
   };
 
+  // Show minimal loading state while critical data loads
+  const isInitialLoading = stockLoading && patients.length === 0;
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center space-x-4">
@@ -405,8 +412,8 @@ export default function NewInvoice() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Create New Invoice</h1>
-          <p className="text-gray-600 mt-2">Generate an invoice for patient services</p>
+          <h1 className="text-3xl font-bold text-foreground">Create New Invoice</h1>
+          <p className="text-muted-foreground mt-2">Generate an invoice for patient services</p>
         </div>
       </div>
 
@@ -424,18 +431,22 @@ export default function NewInvoice() {
                 selectedPatientId={foundPatient?.id}
                 onPatientSelect={handlePatientSelect}
                 label="Select Patient *"
+                disabled={patientsLoading}
               />
+              {patientsLoading && (
+                <p className="text-xs text-muted-foreground">Loading patients...</p>
+              )}
               
               {foundPatient && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <h4 className="font-medium text-green-800">Patient Details:</h4>
-                  <p className="text-sm text-green-700">
+                <div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                  <h4 className="font-medium text-green-800 dark:text-green-300">Patient Details:</h4>
+                  <p className="text-sm text-green-700 dark:text-green-400">
                     <strong>Name:</strong> {foundPatient.patient_name}
                   </p>
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm text-green-700 dark:text-green-400">
                     <strong>ID:</strong> {foundPatient.id}
                   </p>
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm text-green-700 dark:text-green-400">
                     <strong>Phone:</strong> {foundPatient.phone}
                   </p>
                 </div>
