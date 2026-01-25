@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, ChevronDown, FileText } from "lucide-react";
@@ -27,6 +27,21 @@ interface PatientSearchSelectProps {
   disabled?: boolean;
 }
 
+// Maximum results to display for performance
+const MAX_DISPLAY_RESULTS = 50;
+
+// Custom debounce hook for smooth input
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export function PatientSearchSelect({
   patients,
   selectedPatientId,
@@ -44,7 +59,10 @@ export function PatientSearchSelect({
   const inputRef = useRef<HTMLInputElement>(null);
   const fileNoInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  
+
+  // Debounce search queries for smooth typing (150ms feels instant but batches updates)
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 150);
+  const debouncedFileNoQuery = useDebouncedValue(fileNoQuery, 100);
 
   const selectedPatient = useMemo(() => 
     patients.find(p => p.id === selectedPatientId),
@@ -52,41 +70,74 @@ export function PatientSearchSelect({
   );
 
   // Normalize file number for comparison (removes leading zeros)
-  const normalizeFileNo = (fileNo: string | undefined): string => {
+  const normalizeFileNo = useCallback((fileNo: string | undefined): string => {
     if (!fileNo) return '';
-    return fileNo.replace(/^0+/, '') || '0'; // Remove leading zeros, keep at least '0' if all zeros
-  };
+    return fileNo.replace(/^0+/, '') || '0';
+  }, []);
 
-  // Filter patients based on search query
+  // Pre-index patients for faster file number lookups
+  const fileNoIndex = useMemo(() => {
+    const index = new Map<string, Patient>();
+    patients.forEach(p => {
+      if (p?.file_no) {
+        index.set(normalizeFileNo(p.file_no), p);
+        index.set(p.file_no.toLowerCase().trim(), p);
+      }
+    });
+    return index;
+  }, [patients, normalizeFileNo]);
+
+  // Filter patients based on search query - optimized with early returns and limits
   const filteredPatients = useMemo(() => {
-    // If file number search is active and has a query
-    if (activeSearch === "fileNo" && fileNoQuery.trim()) {
-      const normalizedQuery = normalizeFileNo(fileNoQuery.trim());
-      return patients.filter((patient) => {
-        if (!patient || patient.id == null) return false;
+    // File number search - use index for exact match, then filter for partial
+    if (activeSearch === "fileNo" && debouncedFileNoQuery.trim()) {
+      const queryTrimmed = debouncedFileNoQuery.trim();
+      const normalizedQuery = normalizeFileNo(queryTrimmed);
+      
+      // Check for exact match first (instant)
+      const exactMatch = fileNoIndex.get(normalizedQuery) || fileNoIndex.get(queryTrimmed.toLowerCase());
+      if (exactMatch) return [exactMatch];
+      
+      // Partial match with limit
+      const results: Patient[] = [];
+      for (const patient of patients) {
+        if (results.length >= MAX_DISPLAY_RESULTS) break;
+        if (!patient?.id) continue;
+        
         const normalizedFileNo = normalizeFileNo(patient.file_no);
-        return normalizedFileNo.includes(normalizedQuery) || 
-               patient.file_no?.toLowerCase().trim().includes(fileNoQuery.toLowerCase().trim());
-      });
+        if (normalizedFileNo.includes(normalizedQuery) || 
+            patient.file_no?.toLowerCase().includes(queryTrimmed.toLowerCase())) {
+          results.push(patient);
+        }
+      }
+      return results;
     }
     
-    // Main search
-    if (!searchQuery.trim()) return patients.filter(p => p && p.id != null);
+    // Main search - only search if query has content
+    if (!debouncedSearchQuery.trim()) {
+      // Return limited recent patients when no search
+      return patients.slice(0, MAX_DISPLAY_RESULTS).filter(p => p?.id != null);
+    }
     
-    const query = searchQuery.toLowerCase().trim();
-    return patients.filter((patient) => {
-      if (!patient || patient.id == null) return false;
-      const idMatch = patient.id.toString().includes(query);
-      const nameMatch = patient.patient_name?.toLowerCase().includes(query);
-      const phoneMatch = patient.phone?.toLowerCase().includes(query);
-      const aadharMatch = patient.aadhar_card?.toLowerCase().includes(query);
-      const govtIdMatch = patient.govt_id?.toLowerCase().includes(query);
+    const query = debouncedSearchQuery.toLowerCase().trim();
+    const results: Patient[] = [];
+    
+    for (const patient of patients) {
+      if (results.length >= MAX_DISPLAY_RESULTS) break;
+      if (!patient?.id) continue;
       
-      return idMatch || nameMatch || phoneMatch || aadharMatch || govtIdMatch;
-    });
-  }, [patients, searchQuery, fileNoQuery, activeSearch]);
-
-  // File No selection happens ONLY on Enter key (no auto-select)
+      // Check matches in order of likelihood
+      if (patient.patient_name?.toLowerCase().includes(query) ||
+          patient.id.toString().includes(query) ||
+          patient.phone?.toLowerCase().includes(query) ||
+          patient.aadhar_card?.toLowerCase().includes(query) ||
+          patient.govt_id?.toLowerCase().includes(query)) {
+        results.push(patient);
+      }
+    }
+    
+    return results;
+  }, [patients, debouncedSearchQuery, debouncedFileNoQuery, activeSearch, normalizeFileNo, fileNoIndex]);
 
   // Reset highlighted index when filtered patients change
   useEffect(() => {
@@ -115,6 +166,12 @@ export function PatientSearchSelect({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Instant file number lookup for Enter key (bypasses debounce)
+  const findExactFileNoMatch = useCallback((query: string) => {
+    const normalizedQuery = normalizeFileNo(query.trim());
+    return fileNoIndex.get(normalizedQuery) || fileNoIndex.get(query.toLowerCase().trim());
+  }, [fileNoIndex, normalizeFileNo]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -123,13 +180,9 @@ export function PatientSearchSelect({
       } else if (e.key === "Enter") {
         e.preventDefault();
 
-        // File No exact match selection (doesn't rely on dropdown ordering)
+        // File No exact match selection (instant, uses index)
         if (activeSearch === "fileNo" && fileNoQuery.trim()) {
-          const normalizedQuery = normalizeFileNo(fileNoQuery.trim());
-          const exactMatch = patients.find(
-            (p) => normalizeFileNo(p.file_no) === normalizedQuery ||
-                   p.file_no?.toLowerCase().trim() === fileNoQuery.toLowerCase().trim()
-          );
+          const exactMatch = findExactFileNoMatch(fileNoQuery);
           if (exactMatch) {
             handleSelect(exactMatch);
             return;
@@ -160,12 +213,9 @@ export function PatientSearchSelect({
       case "Enter": {
         e.preventDefault();
 
-        // File No exact match selection (preferred)
+        // File No exact match selection (preferred, uses index)
         if (activeSearch === "fileNo" && fileNoQuery.trim()) {
-          const query = fileNoQuery.toLowerCase().trim();
-          const exactMatch = patients.find(
-            (p) => p.file_no?.toLowerCase().trim() === query
-          );
+          const exactMatch = findExactFileNoMatch(fileNoQuery);
           if (exactMatch) {
             handleSelect(exactMatch);
             break;
@@ -187,12 +237,26 @@ export function PatientSearchSelect({
     }
   };
 
-  const handleSelect = (patient: Patient) => {
+  const handleSelect = useCallback((patient: Patient) => {
     onPatientSelect(patient);
     setSearchQuery("");
     setFileNoQuery("");
     setIsOpen(false);
-  };
+  }, [onPatientSelect]);
+
+  const handleMainSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setFileNoQuery("");
+    setActiveSearch("main");
+    setIsOpen(true);
+  }, []);
+
+  const handleFileNoSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileNoQuery(e.target.value);
+    setSearchQuery("");
+    setActiveSearch("fileNo");
+    setIsOpen(true);
+  }, []);
 
   return (
     <div ref={containerRef} className="space-y-2 relative">
@@ -207,12 +271,7 @@ export function PatientSearchSelect({
             ref={inputRef}
             placeholder={placeholder}
             value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setFileNoQuery("");
-              setActiveSearch("main");
-              setIsOpen(true);
-            }}
+            onChange={handleMainSearchChange}
             onFocus={() => {
               setActiveSearch("main");
               setIsOpen(true);
@@ -236,12 +295,7 @@ export function PatientSearchSelect({
             ref={fileNoInputRef}
             placeholder="File No..."
             value={fileNoQuery}
-            onChange={(e) => {
-              setFileNoQuery(e.target.value);
-              setSearchQuery("");
-              setActiveSearch("fileNo");
-              setIsOpen(true);
-            }}
+            onChange={handleFileNoSearchChange}
             onFocus={() => {
               setActiveSearch("fileNo");
               setIsOpen(true);
@@ -290,7 +344,7 @@ export function PatientSearchSelect({
         </div>
       )}
 
-      {/* Dropdown */}
+      {/* Dropdown - limited results for performance */}
       {isOpen && (
         <div 
           ref={listRef}
@@ -302,37 +356,44 @@ export function PatientSearchSelect({
               No patients found
             </div>
           ) : (
-            filteredPatients.map((patient, index) => (
-              <div
-                key={patient.id}
-                className={cn(
-                  "px-4 py-2.5 cursor-pointer transition-all duration-150 border-l-2",
-                  index === highlightedIndex 
-                    ? "bg-gold/15 text-foreground border-l-gold font-medium" 
-                    : "hover:bg-muted/50 border-l-transparent"
-                )}
-                onClick={() => handleSelect(patient)}
-                onMouseEnter={() => setHighlightedIndex(index)}
-              >
-                <div className="flex flex-col">
-                  <span className={cn(
-                    "font-medium",
-                    index === highlightedIndex && "text-navy dark:text-gold"
-                  )}>
-                    {patient.father_name && (
-                      <span className="text-muted-foreground font-normal text-xs mr-2">S/o {patient.father_name}</span>
-                    )}
-                    {patient.patient_name}
-                  </span>
-                  <span className="text-muted-foreground text-xs flex flex-wrap gap-x-2">
-                    <span>ID: {patient.id}</span>
-                    {patient.file_no && <span className="text-gold font-medium">File: {patient.file_no}</span>}
-                    {patient.phone && <span>Ph: {formatPhone(patient.phone)}</span>}
-                    {patient.aadhar_card && <span>Aadhar: {patient.aadhar_card}</span>}
-                  </span>
+            <>
+              {filteredPatients.map((patient, index) => (
+                <div
+                  key={patient.id}
+                  className={cn(
+                    "px-4 py-2.5 cursor-pointer transition-colors border-l-2",
+                    index === highlightedIndex 
+                      ? "bg-gold/15 text-foreground border-l-gold font-medium" 
+                      : "hover:bg-muted/50 border-l-transparent"
+                  )}
+                  onClick={() => handleSelect(patient)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                >
+                  <div className="flex flex-col">
+                    <span className={cn(
+                      "font-medium",
+                      index === highlightedIndex && "text-navy dark:text-gold"
+                    )}>
+                      {patient.father_name && (
+                        <span className="text-muted-foreground font-normal text-xs mr-2">S/o {patient.father_name}</span>
+                      )}
+                      {patient.patient_name}
+                    </span>
+                    <span className="text-muted-foreground text-xs flex flex-wrap gap-x-2">
+                      <span>ID: {patient.id}</span>
+                      {patient.file_no && <span className="text-gold font-medium">File: {patient.file_no}</span>}
+                      {patient.phone && <span>Ph: {formatPhone(patient.phone)}</span>}
+                      {patient.aadhar_card && <span>Aadhar: {patient.aadhar_card}</span>}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+              {filteredPatients.length === MAX_DISPLAY_RESULTS && (
+                <div className="py-2 px-4 text-xs text-muted-foreground text-center border-t">
+                  Showing first {MAX_DISPLAY_RESULTS} results. Type more to narrow search.
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
