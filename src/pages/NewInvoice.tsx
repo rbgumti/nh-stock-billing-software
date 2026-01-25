@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { useSequentialNumbers } from "@/hooks/useSequentialNumbers";
 import { usePrescriptionStore } from "@/hooks/usePrescriptionStore";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientSearchSelect } from "@/components/PatientSearchSelect";
-import { loadAllPatients, Patient } from "@/lib/patientUtils";
+import { usePatientCache, CachedPatient } from "@/hooks/usePatientCache";
 import ExpiryWarningBadge, { getExpiryWarningLevel } from "@/components/ExpiryWarningBadge";
 
 const FREQUENCY_OPTIONS = [
@@ -54,10 +54,11 @@ export default function NewInvoice() {
   const { getNextInvoiceNumber } = useSequentialNumbers();
   const { prescriptions, getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
   
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [patientsLoading, setPatientsLoading] = useState(true);
+  // Use cached patients for instant load
+  const { patients, loading: patientsLoading } = usePatientCache();
+  
   const [selectedPatient, setSelectedPatient] = useState("");
-  const [foundPatient, setFoundPatient] = useState<Patient | null>(null);
+  const [foundPatient, setFoundPatient] = useState<CachedPatient | null>(null);
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState("");
   const [prescriptionId, setPrescriptionId] = useState<string | null>(null);
@@ -91,43 +92,25 @@ export default function NewInvoice() {
   };
 
   // FIFO helper: Find the batch with earliest valid expiry date for a medicine name
-  const findFIFOBatch = (medicineName: string) => {
+  const findFIFOBatch = useMemo(() => (medicineName: string) => {
     const matchingMedicines = medicines.filter(med => 
       med.name.toLowerCase().includes(medicineName.toLowerCase()) ||
       medicineName.toLowerCase().includes(med.name.toLowerCase())
-    ).filter(med => med.currentStock > 0); // Only consider items with stock
+    ).filter(med => med.currentStock > 0);
     
     if (matchingMedicines.length === 0) return null;
     
-    // Sort by expiry date (earliest valid expiry first, N/A at end)
     const sorted = [...matchingMedicines].sort((a, b) => {
       const aValid = isValidExpiryDate(a.expiryDate);
       const bValid = isValidExpiryDate(b.expiryDate);
       if (!aValid && !bValid) return 0;
-      if (!aValid) return 1; // N/A goes to end
+      if (!aValid) return 1;
       if (!bValid) return -1;
       return new Date(a.expiryDate!).getTime() - new Date(b.expiryDate!).getTime();
     });
     
     return sorted[0];
-  };
-
-  // Load patients on mount - deferred to not block initial render
-  useEffect(() => {
-    // Use requestIdleCallback for non-blocking load, fallback to setTimeout
-    const loadPatientsDeferred = () => {
-      loadAllPatients()
-        .then(data => setPatients(data))
-        .catch(error => console.error('Error loading patients:', error))
-        .finally(() => setPatientsLoading(false));
-    };
-
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(loadPatientsDeferred, { timeout: 500 });
-    } else {
-      setTimeout(loadPatientsDeferred, 100);
-    }
-  }, []);
+  }, [medicines]);
 
   // Load prescription data if prescriptionId is in URL
   useEffect(() => {
@@ -202,7 +185,7 @@ export default function NewInvoice() {
   }, [searchParams, medicines, patients, prescriptions]);
 
   // Handle patient selection
-  const handlePatientSelect = (patient: Patient) => {
+  const handlePatientSelect = (patient: CachedPatient) => {
     setFoundPatient(patient);
     setSelectedPatient(patient.id.toString());
   };
