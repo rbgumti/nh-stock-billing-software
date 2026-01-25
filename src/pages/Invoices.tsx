@@ -13,6 +13,7 @@ import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
+import { preloadPatients } from "@/hooks/usePatientCache";
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +22,11 @@ export default function Invoices() {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { doctorName } = useAppSettings();
+
+  // Preload patients cache when user is on invoices page
+  useEffect(() => {
+    preloadPatients();
+  }, []);
 
   // Load invoices from Supabase
   useEffect(() => {
