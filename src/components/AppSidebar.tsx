@@ -20,6 +20,7 @@ import { formatLocalISODate } from "@/lib/dateUtils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { useUserRole } from "@/hooks/useUserRole";
+import { UserProfileSection } from "@/components/UserProfileSection";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
@@ -416,6 +417,16 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+
+        {/* User Profile Section */}
+        <SidebarGroup className="relative z-10 mt-2">
+          <SidebarGroupLabel className="text-slate-500/90 uppercase text-[10px] tracking-[0.2em] font-semibold mb-1 px-3">
+            Account
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <UserProfileSection collapsed={collapsed} />
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {/* Toggle Button with Enhanced Glass Effect */}
         <div className="mt-auto relative z-10">
