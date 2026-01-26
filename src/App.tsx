@@ -28,6 +28,7 @@ import NewPrescription from "./pages/NewPrescription";
 import ViewPrescription from "./pages/ViewPrescription";
 import EditPrescription from "./pages/EditPrescription";
 import Salary from "./pages/Salary";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -71,6 +72,7 @@ const App = () => (
                       <Route path="/prescriptions/view/:id" element={<ProtectedRoute><ViewPrescription /></ProtectedRoute>} />
                       <Route path="/prescriptions/edit/:id" element={<ProtectedRoute><EditPrescription /></ProtectedRoute>} />
                       <Route path="/salary" element={<ProtectedRoute><Salary /></ProtectedRoute>} />
+                      <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>
