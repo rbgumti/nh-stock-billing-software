@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Users, UserPlus, Shield, Trash2, Pencil, KeyRound, Loader2 } from 'lucide-react';
+import { Users, UserPlus, Shield, Trash2, Pencil, KeyRound, Loader2, Lock } from 'lucide-react';
 import { FloatingOrbs } from '@/components/ui/floating-orbs';
 import { Navigate } from 'react-router-dom';
 
@@ -20,8 +20,11 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isEditRoleDialogOpen, setIsEditRoleDialogOpen] = useState(false);
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [creating, setCreating] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
   
   const [newUserForm, setNewUserForm] = useState({
     email: '',
@@ -174,6 +177,42 @@ export default function AdminPanel() {
     }
   };
 
+  // Reset user password
+  const handleResetPassword = async () => {
+    if (!selectedUser || !newPassword) {
+      toast.error('Please enter a new password');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+
+    setResettingPassword(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+        body: {
+          userId: selectedUser.id,
+          newPassword: newPassword,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success('Password reset successfully');
+      setIsResetPasswordDialogOpen(false);
+      setNewPassword('');
+      setSelectedUser(null);
+    } catch (error: any) {
+      console.error('Error resetting password:', error);
+      toast.error(error.message || 'Failed to reset password');
+    } finally {
+      setResettingPassword(false);
+    }
+  };
+
   const getRoleBadgeVariant = (role: AppRole | null) => {
     switch (role) {
       case 'admin': return 'destructive';
@@ -286,6 +325,7 @@ export default function AdminPanel() {
                             <Button
                               size="icon"
                               variant="ghost"
+                              title="Edit Role"
                               onClick={() => {
                                 setSelectedUser(user);
                                 setIsEditRoleDialogOpen(true);
@@ -296,7 +336,20 @@ export default function AdminPanel() {
                             <Button
                               size="icon"
                               variant="ghost"
+                              title="Reset Password"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setNewPassword('');
+                                setIsResetPasswordDialogOpen(true);
+                              }}
+                            >
+                              <Lock className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
                               className="text-destructive hover:text-destructive"
+                              title="Delete User"
                               onClick={() => handleDeleteUser(user.id)}
                             >
                               <Trash2 className="w-4 h-4" />
@@ -430,6 +483,38 @@ export default function AdminPanel() {
               </Select>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Dialog */}
+      <Dialog open={isResetPasswordDialogOpen} onOpenChange={setIsResetPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Reset password for: <strong>{selectedUser?.email}</strong>
+            </p>
+            <div>
+              <Label>New Password *</Label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="Minimum 8 characters"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsResetPasswordDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleResetPassword} disabled={resettingPassword}>
+              {resettingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Reset Password
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
