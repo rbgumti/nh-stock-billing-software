@@ -35,12 +35,15 @@ export function useUserRole() {
   useEffect(() => {
     const fetchUserRole = async (userId: string) => {
       try {
+        console.log('Fetching role for user:', userId);
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', userId)
           .maybeSingle();
 
+        console.log('Role fetch result:', { data, error });
+        
         if (error) {
           console.error('Error fetching role:', error);
           setRole(null);
