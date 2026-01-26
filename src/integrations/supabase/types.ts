@@ -666,6 +666,30 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       purchase_order_items: {
         Row: {
           created_at: string | null
@@ -1095,7 +1119,7 @@ export type Database = {
       snapshot_opening_at_1am_ist: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "staff" | "user"
+      app_role: "admin" | "staff" | "user" | "reception" | "billing" | "manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1223,7 +1247,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "staff", "user"],
+      app_role: ["admin", "staff", "user", "reception", "billing", "manager"],
     },
   },
 } as const

@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Bell, Wallet } from "lucide-react";
+import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Bell, Wallet, Shield } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const navigationItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, color: "from-violet-500 to-purple-600", glow: "group-hover:shadow-violet-500/30" },
@@ -45,6 +46,13 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pendingFollowUps, setPendingFollowUps] = useState(0);
+  const { isAdmin, hasAccess } = useUserRole();
+
+  // Filter navigation items based on user role
+  const filteredNavigationItems = navigationItems.filter(item => {
+    const sectionName = item.url === '/' ? 'dashboard' : item.url.replace('/', '').split('/')[0];
+    return hasAccess(sectionName);
+  });
 
   // Fetch pending follow-ups count
   useEffect(() => {
@@ -190,7 +198,7 @@ export function AppSidebar() {
                     <div>
                       <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2 px-2">Navigate</p>
                       <div className="space-y-1">
-                        {navigationItems.map((item) => (
+                        {filteredNavigationItems.map((item) => (
                           <NavLink
                             key={item.title}
                             to={item.url}
@@ -211,6 +219,26 @@ export function AppSidebar() {
                             </span>
                           </NavLink>
                         ))}
+                        {isAdmin && (
+                          <NavLink
+                            to="/admin"
+                            onClick={() => setSheetOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150 ${
+                              isActive('/admin')
+                                ? "bg-white/10 border border-white/10"
+                                : "hover:bg-white/5"
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              isActive('/admin') ? "bg-gradient-to-br from-red-500 to-rose-600" : "bg-white/5"
+                            }`}>
+                              <Shield className={`h-4 w-4 ${isActive('/admin') ? "text-white" : "text-slate-400"}`} />
+                            </div>
+                            <span className={isActive('/admin') ? "text-white font-medium" : "text-slate-300"}>
+                              Admin Panel
+                            </span>
+                          </NavLink>
+                        )}
                       </div>
                     </div>
                     
@@ -247,7 +275,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {navigationItems.map((item) => (
+              {filteredNavigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
@@ -291,6 +319,50 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              {/* Admin Panel - Only for admins */}
+              {isAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/admin" 
+                      className={`relative rounded-xl transition-colors duration-150 flex items-center ${
+                        isActive('/admin') 
+                          ? "bg-white/10 border border-white/15" 
+                          : "hover:bg-white/5"
+                      }`}
+                    >
+                      {isActive('/admin') && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/5 bg-gradient-to-b from-red-500 to-rose-600 rounded-full" />
+                      )}
+                      
+                      <div className={`flex items-center justify-center w-9 h-9 rounded-xl ${
+                        isActive('/admin') 
+                          ? "bg-gradient-to-br from-red-500 to-rose-600" 
+                          : "bg-white/5"
+                      }`}>
+                        <Shield className={`h-5 w-5 ${
+                          isActive('/admin') ? 'text-white' : 'text-slate-400'
+                        }`} />
+                      </div>
+                      
+                      {!collapsed && (
+                        <>
+                          <span className={`ml-3 font-medium ${
+                            isActive('/admin') ? 'text-white' : 'text-slate-400'
+                          }`}>
+                            Admin Panel
+                          </span>
+                          
+                          {isActive('/admin') && (
+                            <ChevronRight className="ml-auto h-4 w-4 text-white/60" />
+                          )}
+                        </>
+                      )}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
