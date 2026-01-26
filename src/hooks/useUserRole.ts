@@ -15,7 +15,7 @@ export interface UserWithRole {
 // Define which sections each role can access
 export const ROLE_PERMISSIONS: Record<AppRole, string[]> = {
   admin: ['*'], // Full access
-  manager: ['dashboard', 'patients', 'prescriptions', 'invoices', 'stock', 'reports', 'appointments', 'salary'],
+  manager: ['dashboard', 'patients', 'prescriptions', 'invoices', 'stock', 'reports', 'appointments', 'salary', 'analytics'],
   billing: ['dashboard', 'invoices', 'patients', 'reports'],
   reception: ['dashboard', 'patients', 'appointments', 'prescriptions'],
 };
