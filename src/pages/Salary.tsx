@@ -20,7 +20,7 @@ import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { SalarySlipDocument } from "@/components/forms/SalarySlipDocument";
 import { SalaryPasswordGate } from "@/components/SalaryPasswordGate";
 import { useSalaryAccess } from "@/hooks/useSalaryAccess";
-import { useSalaryBackup } from "@/hooks/useSalaryBackup";
+// Backup now handled via Supabase - useSalaryBackup removed
 import { toast } from "sonner";
 import { format, startOfMonth, subMonths, addMonths, getDaysInMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay } from "date-fns";
 import * as XLSX from "xlsx";
@@ -38,6 +38,9 @@ const SalaryContent = () => {
     employees, 
     salaryRecords,
     attendanceRecords,
+    loading,
+    initialized,
+    fetchAll,
     addEmployee, 
     updateEmployee, 
     deleteEmployee,
@@ -53,9 +56,13 @@ const SalaryContent = () => {
   } = useSalaryStore();
 
   const { revokeAccess } = useSalaryAccess();
-  const { performBackup, restoreFromBackup, getBackupInfo } = useSalaryBackup();
-  const [backupInfo, setBackupInfo] = useState<{ timestamp: string; employeeCount: number } | null>(null);
-  const [isRestoring, setIsRestoring] = useState(false);
+
+  // Fetch data from Supabase on mount
+  useEffect(() => {
+    if (!initialized) {
+      fetchAll();
+    }
+  }, [initialized, fetchAll]);
 
   // Auto-lock when navigating away from the Salary page
   useEffect(() => {
@@ -63,11 +70,6 @@ const SalaryContent = () => {
       revokeAccess();
     };
   }, [revokeAccess]);
-
-  // Load backup info on mount
-  useEffect(() => {
-    getBackupInfo().then(setBackupInfo);
-  }, [getBackupInfo]);
 
   const { 
     monthlySummary: advancesSummary, 
@@ -716,6 +718,19 @@ const SalaryContent = () => {
     }
   };
 
+  // Show loading state while fetching from Supabase
+  if (loading && !initialized) {
+    return (
+      <div className="relative p-4 sm:p-6 min-h-screen flex items-center justify-center">
+        <FloatingOrbs />
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading salary data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative p-4 sm:p-6 min-h-screen">
       <FloatingOrbs />
@@ -760,30 +775,6 @@ const SalaryContent = () => {
               <TooltipContent>Export all salary data as JSON backup</TooltipContent>
             </Tooltip>
 
-            {backupInfo && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    onClick={async () => {
-                      if (confirm(`Restore from backup created on ${new Date(backupInfo.timestamp).toLocaleString()}?\n\nThis will replace all current data with ${backupInfo.employeeCount} employees.`)) {
-                        setIsRestoring(true);
-                        await restoreFromBackup();
-                        setIsRestoring(false);
-                      }
-                    }} 
-                    variant="outline" 
-                    className="gap-2"
-                    disabled={isRestoring}
-                  >
-                    {isRestoring ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
-                    Restore
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Restore from auto-backup ({new Date(backupInfo.timestamp).toLocaleDateString()})
-                </TooltipContent>
-              </Tooltip>
-            )}
             
             <Button 
               onClick={revokeAccess} 
