@@ -54,12 +54,12 @@ export default function AdminPanel() {
 
       // Combine profiles with roles
       const usersWithRoles: UserWithRole[] = (profiles || []).map(profile => {
-        const userRole = roles?.find(r => r.user_id === profile.id);
+        const userRoles = (roles || []).filter(r => r.user_id === profile.id);
         return {
           id: profile.id,
           email: profile.email,
           full_name: profile.full_name,
-          role: userRole?.role as AppRole || null,
+          roles: userRoles.map(r => r.role as AppRole),
           created_at: profile.created_at,
         };
       });
@@ -213,7 +213,7 @@ export default function AdminPanel() {
     }
   };
 
-  const getRoleBadgeVariant = (role: AppRole | null) => {
+  const getRoleBadgeVariant = (role: AppRole) => {
     switch (role) {
       case 'admin': return 'destructive';
       case 'manager': return 'default';
@@ -266,7 +266,7 @@ export default function AdminPanel() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">{ROLE_LABELS[r]}</p>
-                    <p className="text-2xl font-bold">{users.filter(u => u.role === r).length}</p>
+                    <p className="text-2xl font-bold">{users.filter(u => u.roles.includes(r)).length}</p>
                   </div>
                   <Users className="w-6 h-6 text-primary/60" />
                 </div>
@@ -313,9 +313,15 @@ export default function AdminPanel() {
                         </TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
-                          <Badge variant={getRoleBadgeVariant(user.role)}>
-                            {user.role ? ROLE_LABELS[user.role] : 'No role'}
-                          </Badge>
+                          <div className="flex flex-wrap gap-1">
+                            {user.roles.length > 0 ? user.roles.map(r => (
+                              <Badge key={r} variant={getRoleBadgeVariant(r)}>
+                                {ROLE_LABELS[r]}
+                              </Badge>
+                            )) : (
+                              <Badge variant="outline">No role</Badge>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           {new Date(user.created_at).toLocaleDateString()}
@@ -469,7 +475,7 @@ export default function AdminPanel() {
             <div>
               <Label>New Role</Label>
               <Select
-                defaultValue={selectedUser?.role || 'reception'}
+                defaultValue={selectedUser?.roles[0] || 'reception'}
                 onValueChange={value => handleUpdateRole(value as AppRole)}
               >
                 <SelectTrigger>

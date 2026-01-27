@@ -8,7 +8,7 @@ export interface UserWithRole {
   id: string;
   email: string;
   full_name: string | null;
-  role: AppRole | null;
+  roles: AppRole[];
   created_at: string;
 }
 
@@ -29,30 +29,30 @@ export const ROLE_LABELS: Record<AppRole, string> = {
 
 export function useUserRole() {
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<AppRole | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserRole = async (userId: string) => {
+    const fetchUserRoles = async (userId: string) => {
       try {
-        console.log('Fetching role for user:', userId);
+        console.log('Fetching roles for user:', userId);
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
-          .eq('user_id', userId)
-          .maybeSingle();
+          .eq('user_id', userId);
 
-        console.log('Role fetch result:', { data, error });
+        console.log('Roles fetch result:', { data, error });
         
         if (error) {
-          console.error('Error fetching role:', error);
-          setRole(null);
+          console.error('Error fetching roles:', error);
+          setRoles([]);
         } else {
-          setRole(data?.role as AppRole || null);
+          const userRoles = (data || []).map(r => r.role as AppRole);
+          setRoles(userRoles);
         }
       } catch (err) {
-        console.error('Error fetching role:', err);
-        setRole(null);
+        console.error('Error fetching roles:', err);
+        setRoles([]);
       } finally {
         setLoading(false);
       }
@@ -62,9 +62,9 @@ export function useUserRole() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserRole(session.user.id);
+        fetchUserRoles(session.user.id);
       } else {
-        setRole(null);
+        setRoles([]);
         setLoading(false);
       }
     });
@@ -73,7 +73,7 @@ export function useUserRole() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserRole(session.user.id);
+        fetchUserRoles(session.user.id);
       } else {
         setLoading(false);
       }
@@ -83,16 +83,34 @@ export function useUserRole() {
   }, []);
 
   const hasAccess = useCallback((section: string): boolean => {
-    if (!role) return false;
-    const permissions = ROLE_PERMISSIONS[role];
-    return permissions.includes('*') || permissions.includes(section);
-  }, [role]);
+    if (roles.length === 0) return false;
+    // Check if any of the user's roles has access to the section
+    return roles.some(role => {
+      const permissions = ROLE_PERMISSIONS[role];
+      return permissions.includes('*') || permissions.includes(section);
+    });
+  }, [roles]);
 
-  const isAdmin = role === 'admin';
+  const isAdmin = roles.includes('admin');
+  
+  // Primary role for display (highest privilege first)
+  const primaryRole: AppRole | null = roles.includes('admin') 
+    ? 'admin' 
+    : roles.includes('manager') 
+      ? 'manager' 
+      : roles.includes('billing') 
+        ? 'billing' 
+        : roles.includes('reception') 
+          ? 'reception' 
+          : null;
+
+  // Keep backward compatibility with single role
+  const role = primaryRole;
 
   return {
     user,
     role,
+    roles,
     loading,
     hasAccess,
     isAdmin,
