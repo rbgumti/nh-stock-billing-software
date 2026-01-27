@@ -67,6 +67,41 @@ export type Database = {
           },
         ]
       }
+      attendance_records: {
+        Row: {
+          created_at: string
+          date: string
+          employee_id: string
+          id: string
+          notes: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "salary_employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -817,6 +852,77 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      salary_employees: {
+        Row: {
+          created_at: string
+          designation: string
+          id: string
+          name: string
+          salary_fixed: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          designation: string
+          id?: string
+          name: string
+          salary_fixed?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          designation?: string
+          id?: string
+          name?: string
+          salary_fixed?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      salary_records: {
+        Row: {
+          advance_adjusted: number
+          advance_pending: number
+          created_at: string
+          employee_id: string
+          id: string
+          month: string
+          salary_payable: number
+          updated_at: string
+          working_days: number
+        }
+        Insert: {
+          advance_adjusted?: number
+          advance_pending?: number
+          created_at?: string
+          employee_id: string
+          id?: string
+          month: string
+          salary_payable?: number
+          updated_at?: string
+          working_days?: number
+        }
+        Update: {
+          advance_adjusted?: number
+          advance_pending?: number
+          created_at?: string
+          employee_id?: string
+          id?: string
+          month?: string
+          salary_payable?: number
+          updated_at?: string
+          working_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "salary_employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stock_items: {
         Row: {
