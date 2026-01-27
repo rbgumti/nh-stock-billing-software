@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole, ROLE_LABELS, AppRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
-import { LogOut, User, ChevronDown } from "lucide-react";
+import { LogOut, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -19,7 +19,7 @@ interface UserProfileSectionProps {
 }
 
 export function UserProfileSection({ collapsed = false }: UserProfileSectionProps) {
-  const { user, role, loading } = useUserRole();
+  const { user, role, roles, loading } = useUserRole();
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -48,10 +48,12 @@ export function UserProfileSection({ collapsed = false }: UserProfileSectionProp
   if (!user) return null;
 
   const displayEmail = user.email || "User";
-  const displayRole = role ? ROLE_LABELS[role as AppRole] : "No Role";
+  const displayRoles = roles.length > 0 
+    ? roles.map(r => ROLE_LABELS[r]).join(', ') 
+    : "No Role";
   const initials = displayEmail.charAt(0).toUpperCase();
 
-  // Role color mapping
+  // Role color mapping - use primary role color
   const roleColors: Record<AppRole, string> = {
     admin: "from-red-500 to-rose-600",
     manager: "from-violet-500 to-purple-600",
@@ -80,9 +82,19 @@ export function UserProfileSection({ collapsed = false }: UserProfileSectionProp
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium text-white truncate">{displayEmail}</p>
-                <p className={`text-xs font-medium bg-gradient-to-r ${roleColor} bg-clip-text text-transparent`}>
-                  {displayRole}
-                </p>
+                <div className="flex flex-wrap gap-1">
+                  {roles.map((r) => (
+                    <span 
+                      key={r}
+                      className={`text-xs font-medium px-1.5 py-0.5 rounded bg-gradient-to-r ${roleColors[r]} text-white`}
+                    >
+                      {ROLE_LABELS[r]}
+                    </span>
+                  ))}
+                  {roles.length === 0 && (
+                    <span className="text-xs text-slate-400">No Role</span>
+                  )}
+                </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-white/10" />
@@ -119,9 +131,26 @@ export function UserProfileSection({ collapsed = false }: UserProfileSectionProp
                 <span className="text-sm font-medium text-white/90 truncate max-w-[120px]">
                   {displayEmail.split('@')[0]}
                 </span>
-                <span className={`text-xs font-medium bg-gradient-to-r ${roleColor} bg-clip-text text-transparent`}>
-                  {displayRole}
-                </span>
+                <div className="flex flex-wrap gap-1">
+                  {roles.length > 0 ? (
+                    roles.length <= 2 ? (
+                      roles.map((r) => (
+                        <span 
+                          key={r}
+                          className={`text-[10px] font-medium px-1 py-0.5 rounded bg-gradient-to-r ${roleColors[r]} text-white`}
+                        >
+                          {ROLE_LABELS[r]}
+                        </span>
+                      ))
+                    ) : (
+                      <span className={`text-xs font-medium bg-gradient-to-r ${roleColor} bg-clip-text text-transparent`}>
+                        {roles.length} Roles
+                      </span>
+                    )
+                  ) : (
+                    <span className="text-xs text-slate-400">No Role</span>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -130,11 +159,21 @@ export function UserProfileSection({ collapsed = false }: UserProfileSectionProp
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 bg-slate-900/95 border-white/10 backdrop-blur-xl">
           <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
+            <div className="flex flex-col space-y-2">
               <p className="text-sm font-medium text-white">{displayEmail}</p>
-              <p className={`text-xs font-medium bg-gradient-to-r ${roleColor} bg-clip-text text-transparent`}>
-                Role: {displayRole}
-              </p>
+              <div className="flex flex-wrap gap-1">
+                {roles.map((r) => (
+                  <span 
+                    key={r}
+                    className={`text-xs font-medium px-2 py-0.5 rounded bg-gradient-to-r ${roleColors[r]} text-white`}
+                  >
+                    {ROLE_LABELS[r]}
+                  </span>
+                ))}
+                {roles.length === 0 && (
+                  <span className="text-xs text-slate-400">No Role Assigned</span>
+                )}
+              </div>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-white/10" />
