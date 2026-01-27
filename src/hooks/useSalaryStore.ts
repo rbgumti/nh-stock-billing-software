@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface Employee {
   id: string;
@@ -211,6 +211,8 @@ export const useSalaryStore = create<SalaryStore>()(
     {
       name: 'salary-store',
       version: 1,
+      // Be explicit about JSON storage to avoid hydration issues across browsers/environments
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         employees: state.employees,
         salaryRecords: state.salaryRecords,

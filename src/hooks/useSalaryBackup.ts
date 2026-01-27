@@ -84,6 +84,51 @@ const isBackupNeeded = (): boolean => {
 
 export function useSalaryBackup() {
   const { employees, salaryRecords, attendanceRecords } = useSalaryStore();
+
+  // If localStorage is missing (or got cleared) but we have an IndexedDB backup,
+  // automatically restore it once when opening Salary Management.
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const localPersistExists = !!localStorage.getItem('salary-store');
+        const current = useSalaryStore.getState();
+        const isEmptyNow =
+          (current.employees?.length ?? 0) === 0 &&
+          (current.salaryRecords?.length ?? 0) === 0 &&
+          (current.attendanceRecords?.length ?? 0) === 0;
+
+        // Only auto-restore when the persisted local store is missing AND state is empty.
+        // This prevents overwriting valid local data.
+        if (!localPersistExists && isEmptyNow) {
+          const backup = await getBackup();
+          const hasBackupData =
+            (backup?.employees?.length ?? 0) > 0 ||
+            (backup?.salaryRecords?.length ?? 0) > 0 ||
+            (backup?.attendanceRecords?.length ?? 0) > 0;
+
+          if (backup && hasBackupData && !cancelled) {
+            useSalaryStore.setState({
+              employees: backup.employees || [],
+              salaryRecords: backup.salaryRecords || [],
+              attendanceRecords: backup.attendanceRecords || [],
+            });
+
+            toast.success(
+              `Salary data restored from auto-backup (${new Date(backup.timestamp).toLocaleString()})`
+            );
+          }
+        }
+      } catch (error) {
+        console.error('Auto-restore check failed:', error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   
   // Perform automatic backup
   const performBackup = useCallback(async (silent = true) => {
