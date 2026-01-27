@@ -100,7 +100,7 @@ export function usePatientCache() {
     }
   }, []);
 
-  // Load on mount - use deferred loading to not block render
+  // Load on mount - immediate load, no deferral
   useEffect(() => {
     // If we have cached data, use it immediately
     if (globalPatientCache.length > 0) {
@@ -115,14 +115,8 @@ export function usePatientCache() {
       return;
     }
 
-    // No cache - load with low priority
-    if ('requestIdleCallback' in window) {
-      const id = (window as any).requestIdleCallback(() => loadPatients(), { timeout: 300 });
-      return () => (window as any).cancelIdleCallback(id);
-    } else {
-      const timer = setTimeout(() => loadPatients(), 50);
-      return () => clearTimeout(timer);
-    }
+    // No cache - load immediately (not deferred for faster UX)
+    loadPatients();
   }, [loadPatients]);
 
   const refreshPatients = useCallback(() => loadPatients(true), [loadPatients]);

@@ -14,6 +14,7 @@ import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
 import { preloadPatients } from "@/hooks/usePatientCache";
+import { preloadStockItems } from "@/hooks/useStockStore";
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,9 +24,10 @@ export default function Invoices() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { doctorName } = useAppSettings();
 
-  // Preload patients cache when user is on invoices page
+  // Preload patients and stock cache when user is on invoices page
   useEffect(() => {
     preloadPatients();
+    preloadStockItems();
   }, []);
 
   // Load invoices from Supabase

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -18,14 +18,129 @@ export interface StockItem {
   packing?: string;
 }
 
-export function useStockStore() {
-  const [stockItems, setStockItems] = useState<StockItem[]>([]);
-  const [loading, setLoading] = useState(true);
+// Global cache - persists across component mounts
+let globalStockCache: StockItem[] = [];
+let stockCacheTimestamp: number = 0;
+let isStockLoading = false;
+let stockLoadPromise: Promise<StockItem[]> | null = null;
 
+const STOCK_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes (shorter since stock changes more frequently)
+
+async function fetchAllStockItems(): Promise<StockItem[]> {
+  const { data, error } = await supabase
+    .from('stock_items')
+    .select('*')
+    .order('name', { ascending: true });
+
+  if (error) throw error;
+
+  return (data || []).map(item => ({
+    id: item.item_id,
+    name: item.name,
+    category: item.category,
+    currentStock: item.current_stock,
+    minimumStock: item.minimum_stock,
+    unitPrice: item.unit_price,
+    mrp: item.mrp || undefined,
+    supplier: item.supplier,
+    expiryDate: item.expiry_date,
+    batchNo: item.batch_no,
+    status: item.status || undefined,
+    composition: item.composition || undefined,
+    packing: item.packing || undefined
+  }));
+}
+
+// Preload function - call early to warm cache
+export function preloadStockItems() {
+  if (globalStockCache.length === 0 && !isStockLoading) {
+    isStockLoading = true;
+    stockLoadPromise = fetchAllStockItems().then(data => {
+      globalStockCache = data;
+      stockCacheTimestamp = Date.now();
+      isStockLoading = false;
+      stockLoadPromise = null;
+      return data;
+    }).catch(err => {
+      isStockLoading = false;
+      stockLoadPromise = null;
+      throw err;
+    });
+  }
+  return stockLoadPromise;
+}
+
+export function useStockStore() {
+  const [stockItems, setStockItems] = useState<StockItem[]>(globalStockCache);
+  const [loading, setLoading] = useState(globalStockCache.length === 0);
+
+  const loadStockItems = useCallback(async (force = false) => {
+    const now = Date.now();
+    const cacheValid = globalStockCache.length > 0 && (now - stockCacheTimestamp) < STOCK_CACHE_DURATION;
+
+    // Return cached data if valid and not forcing refresh
+    if (cacheValid && !force) {
+      setStockItems(globalStockCache);
+      setLoading(false);
+      return globalStockCache;
+    }
+
+    // If already loading, wait for existing promise
+    if (isStockLoading && stockLoadPromise) {
+      try {
+        const data = await stockLoadPromise;
+        setStockItems(data);
+        setLoading(false);
+        return data;
+      } catch {
+        setLoading(false);
+        return globalStockCache;
+      }
+    }
+
+    // Start new load
+    isStockLoading = true;
+    setLoading(true);
+
+    try {
+      const data = await fetchAllStockItems();
+      globalStockCache = data;
+      stockCacheTimestamp = Date.now();
+      setStockItems(data);
+      return data;
+    } catch (error) {
+      console.error('Error loading stock items:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load stock items",
+        variant: "destructive"
+      });
+      return globalStockCache;
+    } finally {
+      isStockLoading = false;
+      stockLoadPromise = null;
+      setLoading(false);
+    }
+  }, []);
+
+  // Load on mount - immediate if no cache
   useEffect(() => {
-    loadStockItems();
+    // If we have cached data, use it immediately
+    if (globalStockCache.length > 0) {
+      setStockItems(globalStockCache);
+      setLoading(false);
+      
+      // Refresh in background if cache is stale
+      const now = Date.now();
+      if ((now - stockCacheTimestamp) >= STOCK_CACHE_DURATION) {
+        loadStockItems(true);
+      }
+    } else {
+      // No cache - load immediately (not deferred)
+      loadStockItems();
+    }
     
-    // Subscribe to real-time changes
+    // Subscribe to real-time changes for cache invalidation
     const channel = supabase
       .channel('stock-changes')
       .on(
@@ -36,7 +151,10 @@ export function useStockStore() {
           table: 'stock_items'
         },
         () => {
-          loadStockItems();
+          // Invalidate cache and reload
+          globalStockCache = [];
+          stockCacheTimestamp = 0;
+          loadStockItems(true);
         }
       )
       .subscribe();
@@ -44,45 +162,12 @@ export function useStockStore() {
     return () => {
       supabase.removeChannel(channel);
     };
+  }, [loadStockItems]);
+
+  const invalidateCache = useCallback(() => {
+    globalStockCache = [];
+    stockCacheTimestamp = 0;
   }, []);
-
-  const loadStockItems = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('stock_items')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      const formattedItems: StockItem[] = (data || []).map(item => ({
-        id: item.item_id,
-        name: item.name,
-        category: item.category,
-        currentStock: item.current_stock,
-        minimumStock: item.minimum_stock,
-        unitPrice: item.unit_price,
-        mrp: item.mrp || undefined,
-        supplier: item.supplier,
-        expiryDate: item.expiry_date,
-        batchNo: item.batch_no,
-        status: item.status || undefined,
-        composition: item.composition || undefined,
-        packing: item.packing || undefined
-      }));
-
-      setStockItems(formattedItems);
-    } catch (error) {
-      console.error('Error loading stock items:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load stock items",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const addStockItem = async (item: StockItem) => {
     try {
@@ -104,6 +189,7 @@ export function useStockStore() {
         });
 
       if (error) throw error;
+      invalidateCache();
     } catch (error) {
       console.error('Error adding stock item:', error);
       toast({
@@ -136,6 +222,7 @@ export function useStockStore() {
         .eq('item_id', id);
 
       if (error) throw error;
+      invalidateCache();
     } catch (error) {
       console.error('Error updating stock item:', error);
       toast({
@@ -160,6 +247,12 @@ export function useStockStore() {
         .eq('item_id', id);
 
       if (error) throw error;
+      
+      // Update local cache optimistically
+      globalStockCache = globalStockCache.map(i => 
+        i.id === id ? { ...i, currentStock: newStock } : i
+      );
+      setStockItems(globalStockCache);
     } catch (error) {
       console.error('Error reducing stock:', error);
       toast({
@@ -184,6 +277,12 @@ export function useStockStore() {
         .eq('item_id', id);
 
       if (error) throw error;
+      
+      // Update local cache optimistically
+      globalStockCache = globalStockCache.map(i => 
+        i.id === id ? { ...i, currentStock: newStock } : i
+      );
+      setStockItems(globalStockCache);
     } catch (error) {
       console.error('Error increasing stock:', error);
       toast({
@@ -195,11 +294,6 @@ export function useStockStore() {
     }
   };
 
-  /**
-   * Finds an existing batch by name + batch number, or creates a new stock item if batch doesn't exist.
-   * Used during GRN processing for batch-wise stock tracking.
-   * @returns The stock item ID (existing or newly created)
-   */
   const findOrCreateBatch = async (
     itemName: string,
     batchNo: string,
@@ -210,7 +304,6 @@ export function useStockStore() {
       receivedQuantity: number;
     }
   ): Promise<{ stockItemId: number; isNew: boolean }> => {
-    // Find existing item with same name and batch number
     const existingBatch = stockItems.find(
       item => item.name.toLowerCase() === itemName.toLowerCase() && 
               item.batchNo.toLowerCase() === batchNo.toLowerCase()
@@ -220,7 +313,6 @@ export function useStockStore() {
       return { stockItemId: existingBatch.id, isNew: false };
     }
 
-    // Find any existing item with same name to copy base data
     const templateItem = stockItems.find(
       item => item.name.toLowerCase() === itemName.toLowerCase()
     );
@@ -229,13 +321,12 @@ export function useStockStore() {
       throw new Error(`No template item found for: ${itemName}`);
     }
 
-    // Create new stock item for this batch
     const { data, error } = await supabase
       .from('stock_items')
       .insert({
         name: templateItem.name,
         category: templateItem.category,
-        current_stock: 0, // Will be updated by GRN processing
+        current_stock: 0,
         minimum_stock: templateItem.minimumStock,
         unit_price: grnItemData.costPrice || templateItem.unitPrice,
         mrp: grnItemData.mrp || templateItem.mrp || null,
@@ -250,20 +341,17 @@ export function useStockStore() {
       .single();
 
     if (error) throw error;
+    invalidateCache();
 
     return { stockItemId: data.item_id, isNew: true };
   };
 
-  // Helper to check if expiry date is valid
   const isValidExpiryDate = (date?: string): boolean => {
     if (!date || date === 'N/A' || date.trim() === '') return false;
     const parsed = new Date(date);
     return !isNaN(parsed.getTime());
   };
 
-  /**
-   * Groups stock items by medicine name for batch-wise display
-   */
   const getGroupedByMedicine = () => {
     const groups: Record<string, StockItem[]> = {};
     
@@ -275,7 +363,6 @@ export function useStockStore() {
       groups[key].push(item);
     });
 
-    // Sort batches within each group by expiry date (FIFO - valid dates first, N/A at end)
     Object.keys(groups).forEach(key => {
       groups[key].sort((a, b) => {
         const aValid = isValidExpiryDate(a.expiryDate);
@@ -290,9 +377,6 @@ export function useStockStore() {
     return groups;
   };
 
-  /**
-   * Gets unique medicine names (for Item Master grouped view)
-   */
   const getUniqueMedicines = () => {
     const seen = new Set<string>();
     const unique: StockItem[] = [];
@@ -308,9 +392,6 @@ export function useStockStore() {
     return unique.sort((a, b) => a.name.localeCompare(b.name));
   };
 
-  /**
-   * Gets all batches for a specific medicine name
-   */
   const getBatchesForMedicine = (medicineName: string) => {
     return stockItems
       .filter(item => item.name.toLowerCase() === medicineName.toLowerCase())
@@ -324,19 +405,11 @@ export function useStockStore() {
       });
   };
 
-  const getMedicines = () => {
-    // Return all stock items as medicines (categories are BNX, TPN, PSHY, etc.)
-    return stockItems;
-  };
+  const getMedicines = () => stockItems;
 
-  const getStockItem = (id: number) => {
-    return stockItems.find(item => item.id === id);
-  };
+  const getStockItem = (id: number) => stockItems.find(item => item.id === id);
 
-  const subscribe = (listener: () => void) => {
-    // Legacy compatibility - not needed with real-time subscriptions
-    return () => {};
-  };
+  const subscribe = (listener: () => void) => () => {};
 
   return {
     stockItems,
@@ -351,6 +424,7 @@ export function useStockStore() {
     getBatchesForMedicine,
     getMedicines,
     getStockItem,
-    subscribe
+    subscribe,
+    invalidateCache
   };
 }
