@@ -39,10 +39,13 @@ export default function Invoices() {
     try {
       setLoading(true);
       
-      // Fetch invoices with their items
+      // Fetch invoices with their items in a SINGLE query using join
       const { data: invoicesData, error: invoicesError } = await supabase
         .from('invoices')
-        .select('*')
+        .select(`
+          *,
+          invoice_items (*)
+        `)
         .order('created_at', { ascending: false });
 
       if (invoicesError) throw invoicesError;
@@ -52,35 +55,24 @@ export default function Invoices() {
         return;
       }
 
-      // Fetch items for each invoice
-      const invoicesWithItems = await Promise.all(
-        invoicesData.map(async (invoice) => {
-          const { data: itemsData, error: itemsError } = await supabase
-            .from('invoice_items')
-            .select('*')
-            .eq('invoice_id', invoice.id);
-
-          if (itemsError) throw itemsError;
-
-          return {
-            id: invoice.id,
-            patientName: invoice.patient_name,
-            patientId: invoice.patient_id,
-            date: invoice.invoice_date,
-            amount: Number(invoice.total),
-            status: invoice.status,
-            items: (itemsData || []).map((item: any) => ({
-              name: item.medicine_name,
-              quantity: item.quantity,
-              price: Number(item.unit_price),
-              batchNo: item.batch_no || "",
-              expiryDate: item.expiry_date || "",
-              mrp: Number(item.mrp),
-            })),
-            originalData: invoice,
-          };
-        })
-      );
+      // Transform data - no additional queries needed
+      const invoicesWithItems = invoicesData.map((invoice: any) => ({
+        id: invoice.id,
+        patientName: invoice.patient_name,
+        patientId: invoice.patient_id,
+        date: invoice.invoice_date,
+        amount: Number(invoice.total),
+        status: invoice.status,
+        items: (invoice.invoice_items || []).map((item: any) => ({
+          name: item.medicine_name,
+          quantity: item.quantity,
+          price: Number(item.unit_price),
+          batchNo: item.batch_no || "",
+          expiryDate: item.expiry_date || "",
+          mrp: Number(item.mrp),
+        })),
+        originalData: invoice,
+      }));
 
       setInvoices(invoicesWithItems);
     } catch (error: any) {
