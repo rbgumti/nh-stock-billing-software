@@ -30,6 +30,7 @@ export default function AdminPanel() {
     email: '',
     password: '',
     fullName: '',
+    username: '',
     role: 'reception' as AppRole,
   });
 
@@ -99,6 +100,7 @@ export default function AdminPanel() {
           email: newUserForm.email,
           password: newUserForm.password,
           fullName: newUserForm.fullName,
+          username: newUserForm.username || null,
           role: newUserForm.role,
         },
       });
@@ -108,7 +110,7 @@ export default function AdminPanel() {
 
       toast.success('User created successfully');
       setIsAddUserDialogOpen(false);
-      setNewUserForm({ email: '', password: '', fullName: '', role: 'reception' });
+      setNewUserForm({ email: '', password: '', fullName: '', username: '', role: 'reception' });
       fetchUsers();
     } catch (error: any) {
       console.error('Error creating user:', error);
@@ -414,6 +416,15 @@ export default function AdminPanel() {
                 onChange={e => setNewUserForm({ ...newUserForm, fullName: e.target.value })}
                 placeholder="Enter full name"
               />
+            </div>
+            <div>
+              <Label>Username (for login)</Label>
+              <Input
+                value={newUserForm.username}
+                onChange={e => setNewUserForm({ ...newUserForm, username: e.target.value })}
+                placeholder="e.g. reception1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Optional. Users can login with username instead of email.</p>
             </div>
             <div>
               <Label>Email *</Label>

@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, password, fullName, role } = await req.json();
+    const { email, password, fullName, role, username } = await req.json();
 
     if (!email || !password || !role) {
       return new Response(JSON.stringify({ error: 'Email, password, and role are required' }), {
@@ -71,6 +71,22 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Check if username is already taken (if provided)
+    if (username) {
+      const { data: existingUsername } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .ilike('username', username)
+        .maybeSingle();
+
+      if (existingUsername) {
+        return new Response(JSON.stringify({ error: 'Username is already taken' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Create user with admin client
@@ -87,13 +103,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create profile
+    // Create profile with username
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
         id: newUser.user.id,
         email: email,
         full_name: fullName || null,
+        username: username || null,
       });
 
     if (profileError) {
