@@ -9,18 +9,13 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
-const authSchema = z.object({
-  email: z.string().trim().email('Invalid email format').max(255, 'Email too long'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password too long')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
-      'Password must include uppercase, lowercase, number, and special character')
+const loginSchema = z.object({
+  identifier: z.string().trim().min(1, 'Username or email is required'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // Can be username or email
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -42,13 +37,13 @@ export default function Auth() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       // Validate inputs
-      const validationResult = authSchema.safeParse({ email, password });
+      const validationResult = loginSchema.safeParse({ identifier, password });
       if (!validationResult.success) {
         toast({
           title: "Validation Error",
@@ -59,38 +54,41 @@ export default function Auth() {
         return;
       }
 
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: validationResult.data.email,
-          password: validationResult.data.password,
-        });
-
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Logged in successfully",
-        });
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email: validationResult.data.email,
-          password: validationResult.data.password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-          },
-        });
-
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Account created successfully. Please check your email for verification.",
-        });
+      let email = validationResult.data.identifier;
+      
+      // Check if identifier is not an email (doesn't contain @)
+      if (!email.includes('@')) {
+        // Look up email by username using the database function
+        const { data: foundEmail, error: lookupError } = await supabase
+          .rpc('get_email_by_username', { p_username: email });
+        
+        if (lookupError || !foundEmail) {
+          toast({
+            title: "Error",
+            description: "Invalid username or password",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        email = foundEmail;
       }
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: validationResult.data.password,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Logged in successfully",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "An error occurred during authentication",
+        description: error.message || "Invalid username or password",
         variant: "destructive",
       });
     } finally {
@@ -99,28 +97,29 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-background dark:to-muted p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            {isLogin ? "Welcome Back" : "Create Account"}
+            Welcome Back
           </CardTitle>
           <CardDescription className="text-center">
-            {isLogin ? "Access the NAVJEEVAN HIMS" : "Create account for NAVJEEVAN HIMS"}
+            Sign in to NAVJEEVAN HIMS
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="identifier">Username or Email</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="identifier"
+                type="text"
+                placeholder="Enter username or email"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete="username"
               />
             </div>
             <div className="space-y-2">
@@ -133,30 +132,23 @@ export default function Auth() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                minLength={8}
+                autoComplete="current-password"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
+                  Signing in...
                 </>
               ) : (
-                <>{isLogin ? "Sign In" : "Sign Up"}</>
+                "Sign In"
               )}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-600 hover:underline"
-              disabled={loading}
-            >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-            </button>
-          </div>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Contact admin if you need an account
+          </p>
         </CardContent>
       </Card>
     </div>
