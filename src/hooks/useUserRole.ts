@@ -8,6 +8,7 @@ export interface UserWithRole {
   id: string;
   email: string;
   full_name: string | null;
+  username: string | null;
   roles: AppRole[];
   created_at: string;
 }
