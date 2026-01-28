@@ -25,6 +25,8 @@ export default function AdminPanel() {
   const [creating, setCreating] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [editUsername, setEditUsername] = useState('');
+  const [updatingUser, setUpdatingUser] = useState(false);
   
   const [newUserForm, setNewUserForm] = useState({
     email: '',
@@ -60,6 +62,7 @@ export default function AdminPanel() {
           id: profile.id,
           email: profile.email,
           full_name: profile.full_name,
+          username: (profile as any).username || null,
           roles: userRoles.map(r => r.role as AppRole),
           created_at: profile.created_at,
         };
@@ -120,11 +123,39 @@ export default function AdminPanel() {
     }
   };
 
-  // Update user role
-  const handleUpdateRole = async (newRole: AppRole) => {
+  // Update user (role and username)
+  const handleUpdateUser = async (newRole: AppRole) => {
     if (!selectedUser) return;
 
+    setUpdatingUser(true);
     try {
+      // Update username in profiles
+      const trimmedUsername = editUsername.trim() || null;
+      
+      // Check if username is already taken by another user
+      if (trimmedUsername) {
+        const { data: existingUsername } = await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('username', trimmedUsername)
+          .neq('id', selectedUser.id)
+          .maybeSingle();
+
+        if (existingUsername) {
+          toast.error('Username is already taken');
+          setUpdatingUser(false);
+          return;
+        }
+      }
+
+      // Update profile username
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ username: trimmedUsername })
+        .eq('id', selectedUser.id);
+
+      if (profileError) throw profileError;
+
       // Check if user already has a role
       const { data: existingRole } = await supabase
         .from('user_roles')
@@ -149,12 +180,14 @@ export default function AdminPanel() {
         if (error) throw error;
       }
 
-      toast.success('Role updated successfully');
+      toast.success('User updated successfully');
       setIsEditRoleDialogOpen(false);
       fetchUsers();
     } catch (error: any) {
-      console.error('Error updating role:', error);
-      toast.error(error.message || 'Failed to update role');
+      console.error('Error updating user:', error);
+      toast.error(error.message || 'Failed to update user');
+    } finally {
+      setUpdatingUser(false);
     }
   };
 
@@ -301,6 +334,7 @@ export default function AdminPanel() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
+                      <TableHead>Username</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead>Created</TableHead>
@@ -312,6 +346,15 @@ export default function AdminPanel() {
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">
                           {user.full_name || 'No name'}
+                        </TableCell>
+                        <TableCell>
+                          {user.username ? (
+                            <Badge variant="secondary" className="font-mono">
+                              {user.username}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">—</span>
+                          )}
                         </TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
@@ -333,7 +376,7 @@ export default function AdminPanel() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              title="Edit Role"
+                              title="Edit User"
                               onClick={() => {
                                 setSelectedUser(user);
                                 setIsEditRoleDialogOpen(true);
@@ -473,21 +516,36 @@ export default function AdminPanel() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Role Dialog */}
-      <Dialog open={isEditRoleDialogOpen} onOpenChange={setIsEditRoleDialogOpen}>
+      {/* Edit User Dialog */}
+      <Dialog open={isEditRoleDialogOpen} onOpenChange={(open) => {
+        setIsEditRoleDialogOpen(open);
+        if (open && selectedUser) {
+          setEditUsername(selectedUser.username || '');
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Role</DialogTitle>
+            <DialogTitle>Edit User</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Changing role for: <strong>{selectedUser?.email}</strong>
+              Editing: <strong>{selectedUser?.email}</strong>
             </p>
             <div>
-              <Label>New Role</Label>
+              <Label>Username (for login)</Label>
+              <Input
+                value={editUsername}
+                onChange={e => setEditUsername(e.target.value)}
+                placeholder="e.g. reception1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Leave empty to remove username login.</p>
+            </div>
+            <div>
+              <Label>Role</Label>
               <Select
-                defaultValue={selectedUser?.roles[0] || 'reception'}
-                onValueChange={value => handleUpdateRole(value as AppRole)}
+                value={selectedUser?.roles[0] || 'reception'}
+                onValueChange={value => handleUpdateUser(value as AppRole)}
+                disabled={updatingUser}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -498,7 +556,14 @@ export default function AdminPanel() {
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">Select a role to save changes.</p>
             </div>
+            {updatingUser && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Updating...
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
