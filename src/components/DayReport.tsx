@@ -588,7 +588,7 @@ export default function DayReport() {
   const totalAdvances = advances.reduce((sum, item) => sum + item.amount, 0);
   const totalCash = cashDetails.reduce((sum, item) => sum + item.amount, 0);
   
-  const totalSale = bnxTotal + tpnTotal + pshyTotal + fees + labCollection;
+  const totalSale = bnxTotal + tpnTotal + pshyTotal + fees + labCollection + psychiatryCollection;
   const todaysCollection = totalSale;
   const cashLeftInHand = cashPreviousDay + todaysCollection - totalExpenses - depositInBank - paytmGpay - cashHandoverAmarjeet - cashHandoverMandeep - cashHandoverSir + adjustments;
   
