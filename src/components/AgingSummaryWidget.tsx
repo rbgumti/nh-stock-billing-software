@@ -155,20 +155,22 @@ export function AgingSummaryWidget() {
 
       <CardContent className="relative space-y-4">
         {/* Summary Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="text-center p-3 rounded-xl bg-muted/50">
-            <p className="text-2xl font-bold text-foreground">₹{formatNumber(agingData.totalPending)}</p>
-            <p className="text-xs text-muted-foreground">Total Pending</p>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-2 rounded-xl bg-muted/50 overflow-hidden">
+            <p className="text-sm sm:text-base lg:text-lg font-bold text-foreground truncate" title={`₹${formatNumber(agingData.totalPending)}`}>
+              ₹{formatNumber(agingData.totalPending)}
+            </p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Total Pending</p>
           </div>
-          <div className={`text-center p-3 rounded-xl ${hasOverdue ? 'bg-destructive/10' : 'bg-emerald-500/10'}`}>
-            <p className={`text-2xl font-bold ${hasOverdue ? 'text-destructive' : 'text-emerald-600'}`}>
+          <div className={`text-center p-2 rounded-xl overflow-hidden ${hasOverdue ? 'bg-destructive/10' : 'bg-emerald-500/10'}`}>
+            <p className={`text-sm sm:text-base lg:text-lg font-bold truncate ${hasOverdue ? 'text-destructive' : 'text-emerald-600'}`} title={`₹${formatNumber(agingData.totalOverdue)}`}>
               ₹{formatNumber(agingData.totalOverdue)}
             </p>
-            <p className="text-xs text-muted-foreground">Overdue</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Overdue</p>
           </div>
-          <div className="text-center p-3 rounded-xl bg-muted/50">
-            <p className="text-2xl font-bold text-foreground">{agingData.suppliersWithOverdue}</p>
-            <p className="text-xs text-muted-foreground">Suppliers Overdue</p>
+          <div className="text-center p-2 rounded-xl bg-muted/50 overflow-hidden">
+            <p className="text-sm sm:text-base lg:text-lg font-bold text-foreground">{agingData.suppliersWithOverdue}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Suppliers Overdue</p>
           </div>
         </div>
 
