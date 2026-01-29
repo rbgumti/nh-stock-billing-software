@@ -411,8 +411,9 @@ export default function DayReport() {
 
       const invoiceIds = invoiceData?.map(inv => inv.id) || [];
 
+      // Aggregate sold quantities by medicine NAME only (not by batch ID)
+      // This prevents double-counting when a medicine has multiple batches
       let soldQuantitiesByName: Record<string, number> = {};
-      let soldQuantitiesById: Record<number, number> = {};
 
       if (invoiceIds.length > 0) {
         const { data: invoiceItems } = await supabase
@@ -421,12 +422,12 @@ export default function DayReport() {
           .in('invoice_id', invoiceIds);
 
         (invoiceItems || []).forEach((it) => {
+          // Always aggregate by medicine name to avoid batch-level duplication
           soldQuantitiesByName[it.medicine_name] = (soldQuantitiesByName[it.medicine_name] || 0) + it.quantity;
-          soldQuantitiesById[it.medicine_id] = (soldQuantitiesById[it.medicine_id] || 0) + it.quantity;
         });
       }
 
-      // Get stock received from GRN
+      // Get stock received from GRN - also aggregate by name
       const { data: grnOrders } = await supabase
         .from('purchase_orders')
         .select('id')
@@ -436,7 +437,6 @@ export default function DayReport() {
       const grnOrderIds = grnOrders?.map(po => po.id) || [];
 
       let receivedQuantitiesByName: Record<string, number> = {};
-      let receivedQuantitiesById: Record<number, number> = {};
 
       if (grnOrderIds.length > 0) {
         const { data: poItems } = await supabase
@@ -446,40 +446,68 @@ export default function DayReport() {
 
         (poItems || []).forEach((it) => {
           receivedQuantitiesByName[it.stock_item_name] = (receivedQuantitiesByName[it.stock_item_name] || 0) + it.quantity;
-          receivedQuantitiesById[it.stock_item_id] = (receivedQuantitiesById[it.stock_item_id] || 0) + it.quantity;
         });
       }
 
-      // Create medicine data with category from stock item
-      const createMedicineData = (items: typeof stockItems): MedicineReportItem[] => {
-        return items
-          .map(item => {
-            const sold = soldQuantitiesById[item.id] ?? soldQuantitiesByName[item.name] ?? 0;
-            const received = receivedQuantitiesById[item.id] ?? receivedQuantitiesByName[item.name] ?? 0;
-            // Use opening from stock_snapshot (captured at 00:01 IST), fallback to current stock
-            const snapshotData = stockSnapshot[item.name];
+      // Group stock items by medicine name to avoid duplicate entries for multiple batches
+      const medicineGroups: Record<string, { 
+        name: string; 
+        category: string; 
+        totalStock: number; 
+        mrp: number; 
+        unitPrice: number;
+      }> = {};
+
+      stockItems.forEach(item => {
+        const key = item.name.toLowerCase();
+        if (!medicineGroups[key]) {
+          medicineGroups[key] = {
+            name: item.name,
+            category: item.category.toUpperCase(),
+            totalStock: 0,
+            mrp: item.mrp || item.unitPrice,
+            unitPrice: item.unitPrice,
+          };
+        }
+        // Sum stock across all batches
+        medicineGroups[key].totalStock += item.currentStock;
+        // Use highest MRP if different batches have different prices
+        if (item.mrp && item.mrp > medicineGroups[key].mrp) {
+          medicineGroups[key].mrp = item.mrp;
+        }
+      });
+
+      // Create medicine data grouped by medicine name (not by batch)
+      const createMedicineData = (): MedicineReportItem[] => {
+        return Object.values(medicineGroups)
+          .map(medicine => {
+            const sold = soldQuantitiesByName[medicine.name] ?? 0;
+            const received = receivedQuantitiesByName[medicine.name] ?? 0;
+            // Use opening from stock_snapshot (captured at 00:01 IST), fallback to current total stock
+            const snapshotData = stockSnapshot[medicine.name];
             const isFromSnapshot = snapshotData?.opening !== undefined;
-            const opening = isFromSnapshot ? snapshotData.opening : item.currentStock;
-            const liveStock = item.currentStock;
+            const opening = isFromSnapshot ? snapshotData.opening : medicine.totalStock;
+            const liveStock = medicine.totalStock;
             const closing = opening - sold + received;
+            const rate = medicine.mrp || medicine.unitPrice;
 
             return {
-              brand: item.name,
+              brand: medicine.name,
               qtySold: sold,
-              rate: item.mrp || item.unitPrice,
-              amount: sold * (item.mrp || item.unitPrice),
+              rate,
+              amount: sold * rate,
               opening,
               liveStock,
               stockReceived: received,
               closing,
               isFromSnapshot,
-              category: item.category.toUpperCase(),
+              category: medicine.category,
             };
           })
           .filter(item => item.opening > 0 || item.qtySold > 0 || item.stockReceived > 0 || item.isFromSnapshot);
       };
 
-      const allMedicineData = createMedicineData(stockItems);
+      const allMedicineData = createMedicineData();
       
       // Categorize by actual category field (BNX, TPN, PSHY)
       setBnxMedicines(allMedicineData.filter(m => m.category === 'BNX'));
