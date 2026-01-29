@@ -367,6 +367,14 @@ export default function DayReport() {
     loadMedicineData();
   }, [stockItems, reportDate]);
 
+  // Normalize medicine names so batches with minor naming differences (extra spaces, NBSP)
+  // don’t create duplicate rows in reports.
+  const normalizeMedicineName = (name: string) =>
+    (name || "")
+      .replace(/\u00A0/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
   // Real-time subscriptions for invoices and purchase orders
   useEffect(() => {
     const channel = supabase
@@ -403,6 +411,13 @@ export default function DayReport() {
       const stockSnapshot: Record<string, { opening?: number; sold?: number; closing?: number }> = 
         (dayReportData?.stock_snapshot as Record<string, { opening?: number; sold?: number; closing?: number }>) || {};
 
+      // Snapshot keys are stored by medicine name. Normalize once so lookups match even if
+      // the current stock item names have extra spaces.
+      const normalizedSnapshot: Record<string, { opening?: number; sold?: number; closing?: number }> = {};
+      Object.entries(stockSnapshot).forEach(([name, val]) => {
+        normalizedSnapshot[normalizeMedicineName(name).toLowerCase()] = val;
+      });
+
       // Get invoice items for the selected date
       const { data: invoiceData } = await supabase
         .from('invoices')
@@ -423,7 +438,8 @@ export default function DayReport() {
 
         (invoiceItems || []).forEach((it) => {
           // Always aggregate by medicine name to avoid batch-level duplication
-          soldQuantitiesByName[it.medicine_name] = (soldQuantitiesByName[it.medicine_name] || 0) + it.quantity;
+          const key = normalizeMedicineName(it.medicine_name).toLowerCase();
+          soldQuantitiesByName[key] = (soldQuantitiesByName[key] || 0) + it.quantity;
         });
       }
 
@@ -445,7 +461,8 @@ export default function DayReport() {
           .in('purchase_order_id', grnOrderIds);
 
         (poItems || []).forEach((it) => {
-          receivedQuantitiesByName[it.stock_item_name] = (receivedQuantitiesByName[it.stock_item_name] || 0) + it.quantity;
+          const key = normalizeMedicineName(it.stock_item_name).toLowerCase();
+          receivedQuantitiesByName[key] = (receivedQuantitiesByName[key] || 0) + it.quantity;
         });
       }
 
@@ -459,10 +476,11 @@ export default function DayReport() {
       }> = {};
 
       stockItems.forEach(item => {
-        const key = item.name.toLowerCase();
+        const normalizedName = normalizeMedicineName(item.name);
+        const key = normalizedName.toLowerCase();
         if (!medicineGroups[key]) {
           medicineGroups[key] = {
-            name: item.name,
+            name: normalizedName,
             category: item.category.toUpperCase(),
             totalStock: 0,
             mrp: item.mrp || item.unitPrice,
@@ -481,10 +499,11 @@ export default function DayReport() {
       const createMedicineData = (): MedicineReportItem[] => {
         return Object.values(medicineGroups)
           .map(medicine => {
-            const sold = soldQuantitiesByName[medicine.name] ?? 0;
-            const received = receivedQuantitiesByName[medicine.name] ?? 0;
+            const lookupKey = normalizeMedicineName(medicine.name).toLowerCase();
+            const sold = soldQuantitiesByName[lookupKey] ?? 0;
+            const received = receivedQuantitiesByName[lookupKey] ?? 0;
             // Use opening from stock_snapshot (captured at 00:01 IST), fallback to current total stock
-            const snapshotData = stockSnapshot[medicine.name];
+            const snapshotData = normalizedSnapshot[lookupKey];
             const isFromSnapshot = snapshotData?.opening !== undefined;
             const opening = isFromSnapshot ? snapshotData.opening : medicine.totalStock;
             const liveStock = medicine.totalStock;
