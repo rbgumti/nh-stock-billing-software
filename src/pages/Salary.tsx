@@ -908,13 +908,13 @@ const SalaryContent = () => {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto max-w-full">
+                  <Table className="relative">
                     <TableHeader>
                       <TableRow className="bg-green-100 dark:bg-green-900/30">
-                        <TableHead className="font-bold text-foreground w-14">S.No</TableHead>
-                        <TableHead className="font-bold text-foreground min-w-[150px]">Name of Employee</TableHead>
+                        <TableHead className="font-bold text-foreground w-14 sticky left-0 z-20 bg-green-100 dark:bg-green-900/80">S.No</TableHead>
+                        <TableHead className="font-bold text-foreground min-w-[180px] sticky left-14 z-20 bg-green-100 dark:bg-green-900/80 border-r border-border/50">Name of Employee</TableHead>
                         <TableHead className="font-bold text-foreground min-w-[120px]">Designation</TableHead>
                         <TableHead className="font-bold text-foreground text-right bg-yellow-100 dark:bg-yellow-900/30">Salary (Fixed)</TableHead>
                         <TableHead className="font-bold text-foreground text-center">Working Days</TableHead>
@@ -935,8 +935,8 @@ const SalaryContent = () => {
                         <>
                           {monthlySalaryData.map((item) => (
                             <TableRow key={item.employee.id} className="hover:bg-muted/50">
-                              <TableCell>{item.sNo}</TableCell>
-                              <TableCell className="font-medium">{item.employee.name}</TableCell>
+                              <TableCell className="sticky left-0 z-10 bg-background">{item.sNo}</TableCell>
+                              <TableCell className="font-medium sticky left-14 z-10 bg-background border-r border-border/50">{item.employee.name}</TableCell>
                               <TableCell>{item.employee.designation}</TableCell>
                               <TableCell className="text-right bg-yellow-50 dark:bg-yellow-900/10">
                                 ₹{item.employee.salaryFixed.toLocaleString('en-IN')}
@@ -997,7 +997,9 @@ const SalaryContent = () => {
                           ))}
                           {/* Totals Row */}
                           <TableRow className="bg-muted/50 font-bold border-t-2">
-                            <TableCell colSpan={3} className="text-right">TOTAL</TableCell>
+                            <TableCell className="sticky left-0 z-10 bg-muted/80"></TableCell>
+                            <TableCell className="sticky left-14 z-10 bg-muted/80 border-r border-border/50 text-right" colSpan={1}>TOTAL</TableCell>
+                            <TableCell></TableCell>
                             <TableCell className="text-right bg-yellow-100 dark:bg-yellow-900/30">
                               ₹{totals.salaryFixed.toLocaleString('en-IN')}
                             </TableCell>
