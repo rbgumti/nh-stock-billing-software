@@ -1101,12 +1101,12 @@ const SalaryContent = () => {
                   <p className="text-xs text-muted-foreground font-normal">Click column headers for bulk marking</p>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto max-w-full">
+                  <Table className="relative">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="sticky left-0 bg-background z-10 min-w-[140px]">Employee</TableHead>
+                        <TableHead className="sticky left-0 z-20 bg-card min-w-[140px] border-r border-border/50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Employee</TableHead>
                         {calendarDays.filter(day => isSameMonth(day, attendanceMonth)).map((day) => {
                           const dateStr = format(day, "yyyy-MM-dd");
                           return (
@@ -1203,7 +1203,7 @@ const SalaryContent = () => {
                           const summary = monthlyAttendanceSummary.find(s => s.employee.id === employee.id);
                           return (
                             <TableRow key={employee.id}>
-                              <TableCell className="sticky left-0 bg-background z-10 font-medium text-sm">
+                              <TableCell className="sticky left-0 z-10 bg-card font-medium text-sm border-r border-border/50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                                 {employee.name}
                               </TableCell>
                               {calendarDays.filter(day => isSameMonth(day, attendanceMonth)).map((day) => {
