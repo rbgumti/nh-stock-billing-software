@@ -127,7 +127,12 @@ const SalaryContent = () => {
     
     return employees.map((employee, index) => {
       const record = monthRecords.find(r => r.employeeId === employee.id);
-      const workingDays = record?.workingDays ?? 31;
+      
+      // Auto-pick working days from attendance if no manual override in salary record
+      const attendanceWorkingDays = calculateWorkingDaysFromAttendance(employee.id, selectedMonth);
+      // Use attendance-based working days if available (>0), otherwise fallback to record or default 31
+      const workingDays = record?.workingDays ?? (attendanceWorkingDays > 0 ? attendanceWorkingDays : 31);
+      
       const advanceAdjusted = record?.advanceAdjusted ?? 0;
       const advancePending = record?.advancePending ?? 0;
       
@@ -140,12 +145,13 @@ const SalaryContent = () => {
         employee,
         record,
         workingDays,
+        attendanceWorkingDays, // Include for display/debug
         advanceAdjusted,
         advancePending,
         salaryPayable,
       };
     });
-  }, [employees, salaryRecords, selectedMonth]);
+  }, [employees, salaryRecords, selectedMonth, attendanceRecords, calculateWorkingDaysFromAttendance]);
 
   // Calculate totals - use attendance-based working days if available
   const totals = useMemo(() => {
