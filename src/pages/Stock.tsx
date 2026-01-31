@@ -287,103 +287,122 @@ export default function Stock() {
 
   const handleGRN = async (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
-    if (po) {
-      // Update stock levels based on GRN - with batch-wise tracking
-      for (const grnItem of grnData.items) {
-        if (grnItem.receivedQuantity <= 0) continue;
+    if (!po) {
+      toast({
+        title: "Error",
+        description: "Purchase order not found",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Guard: Prevent re-processing if already received
+    if (po.status === 'Received') {
+      toast({
+        title: "Already Processed",
+        description: "This GRN has already been processed. Stock was not updated again.",
+        variant: "destructive"
+      });
+      setShowGRNForm(false);
+      setSelectedPO(null);
+      return;
+    }
 
-        const stockItem = stockItems.find(s => s.id === grnItem.stockItemId);
-        if (!stockItem) continue;
+    // Update stock levels based on GRN - with batch-wise tracking
+    for (const grnItem of grnData.items) {
+      if (grnItem.receivedQuantity <= 0) continue;
 
-        // Use GRN values, only fallback to stock item if GRN values are meaningful
-        const batchNo = grnItem.batchNo && grnItem.batchNo.trim() !== '' 
-          ? grnItem.batchNo 
-          : stockItem.batchNo;
-        
-        // Only use expiry from GRN if it's a valid date, otherwise keep existing (even if N/A)
-        const newExpiryDate = isValidExpiryDate(grnItem.expiryDate) 
-          ? grnItem.expiryDate 
-          : (isValidExpiryDate(stockItem.expiryDate) ? stockItem.expiryDate : grnItem.expiryDate || stockItem.expiryDate);
-        
-        const newCostPrice = grnItem.costPrice && grnItem.costPrice > 0 
-          ? grnItem.costPrice 
-          : stockItem.unitPrice;
-        const newMrp = grnItem.mrp && grnItem.mrp > 0 
-          ? grnItem.mrp 
-          : stockItem.mrp;
+      const stockItem = stockItems.find(s => s.id === grnItem.stockItemId);
+      if (!stockItem) continue;
 
-        try {
-          // Find existing batch or create new one
-          const { stockItemId, isNew } = await findOrCreateBatch(
-            stockItem.name,
-            batchNo,
-            {
-              expiryDate: newExpiryDate,
-              costPrice: newCostPrice,
-              mrp: newMrp,
-              receivedQuantity: grnItem.receivedQuantity,
-            }
-          );
+      // Use GRN values, only fallback to stock item if GRN values are meaningful
+      const batchNo = grnItem.batchNo && grnItem.batchNo.trim() !== '' 
+        ? grnItem.batchNo 
+        : stockItem.batchNo;
+      
+      // Only use expiry from GRN if it's a valid date, otherwise keep existing (even if N/A)
+      const newExpiryDate = isValidExpiryDate(grnItem.expiryDate) 
+        ? grnItem.expiryDate 
+        : (isValidExpiryDate(stockItem.expiryDate) ? stockItem.expiryDate : grnItem.expiryDate || stockItem.expiryDate);
+      
+      const newCostPrice = grnItem.costPrice && grnItem.costPrice > 0 
+        ? grnItem.costPrice 
+        : stockItem.unitPrice;
+      const newMrp = grnItem.mrp && grnItem.mrp > 0 
+        ? grnItem.mrp 
+        : stockItem.mrp;
 
-          // Fetch current stock from database to avoid stale data
-          const { data: currentData } = await supabase
-            .from('stock_items')
-            .select('current_stock')
-            .eq('item_id', stockItemId)
-            .single();
-
-          const currentStock = currentData?.current_stock || 0;
-          
-          // Update stock with new batch/expiry data and increased quantity
-          const { error: updateError } = await supabase
-            .from('stock_items')
-            .update({
-              current_stock: currentStock + grnItem.receivedQuantity,
-              batch_no: batchNo,
-              expiry_date: newExpiryDate,
-              unit_price: newCostPrice,
-              mrp: newMrp || null,
-            })
-            .eq('item_id', stockItemId);
-
-          if (updateError) throw updateError;
-
-          if (isNew) {
-            console.log(`Created new batch for ${stockItem.name}: ${batchNo}`);
-          } else {
-            console.log(`Updated batch ${batchNo} for ${stockItem.name}: +${grnItem.receivedQuantity}, Expiry: ${newExpiryDate}`);
+      try {
+        // Find existing batch or create new one
+        const { stockItemId, isNew } = await findOrCreateBatch(
+          stockItem.name,
+          batchNo,
+          {
+            expiryDate: newExpiryDate,
+            costPrice: newCostPrice,
+            mrp: newMrp,
+            receivedQuantity: grnItem.receivedQuantity,
           }
-        } catch (error) {
-          console.error('Error processing GRN item:', error);
-          // Fallback: update original stock item with basic stock increase
-          const { error: fallbackError } = await supabase
-            .from('stock_items')
-            .update({
-              current_stock: stockItem.currentStock + grnItem.receivedQuantity,
-              batch_no: batchNo,
-              expiry_date: newExpiryDate,
-              unit_price: newCostPrice,
-              mrp: newMrp || null,
-            })
-            .eq('item_id', stockItem.id);
+        );
 
-          if (fallbackError) {
-            console.error('Fallback update also failed:', fallbackError);
-          }
+        // Fetch current stock from database to avoid stale data
+        const { data: currentData } = await supabase
+          .from('stock_items')
+          .select('current_stock')
+          .eq('item_id', stockItemId)
+          .single();
+
+        const currentStock = currentData?.current_stock || 0;
+        
+        // Update stock with new batch/expiry data and increased quantity
+        const { error: updateError } = await supabase
+          .from('stock_items')
+          .update({
+            current_stock: currentStock + grnItem.receivedQuantity,
+            batch_no: batchNo,
+            expiry_date: newExpiryDate,
+            unit_price: newCostPrice,
+            mrp: newMrp || null,
+          })
+          .eq('item_id', stockItemId);
+
+        if (updateError) throw updateError;
+
+        if (isNew) {
+          console.log(`Created new batch for ${stockItem.name}: ${batchNo}`);
+        } else {
+          console.log(`Updated batch ${batchNo} for ${stockItem.name}: +${grnItem.receivedQuantity}, Expiry: ${newExpiryDate}`);
+        }
+      } catch (error) {
+        console.error('Error processing GRN item:', error);
+        // Fallback: update original stock item with basic stock increase
+        const { error: fallbackError } = await supabase
+          .from('stock_items')
+          .update({
+            current_stock: stockItem.currentStock + grnItem.receivedQuantity,
+            batch_no: batchNo,
+            expiry_date: newExpiryDate,
+            unit_price: newCostPrice,
+            mrp: newMrp || null,
+          })
+          .eq('item_id', stockItem.id);
+
+        if (fallbackError) {
+          console.error('Fallback update also failed:', fallbackError);
         }
       }
-
-      // Update PO status with GRN number, invoice number and date
-      updatePurchaseOrder(po.id, {
-        ...po,
-        status: 'Received',
-        grnDate: formatLocalISODate(),
-        grnNumber: grnData.grnNumber,
-        invoiceNumber: grnData.invoiceNumber,
-        invoiceDate: grnData.invoiceDate,
-        invoiceUrl: grnData.invoiceUrl
-      });
     }
+
+    // Update PO status with GRN number, invoice number and date
+    updatePurchaseOrder(po.id, {
+      ...po,
+      status: 'Received',
+      grnDate: formatLocalISODate(),
+      grnNumber: grnData.grnNumber,
+      invoiceNumber: grnData.invoiceNumber,
+      invoiceDate: grnData.invoiceDate,
+      invoiceUrl: grnData.invoiceUrl
+    });
     
     setShowGRNForm(false);
     setSelectedPO(null);
@@ -1660,15 +1679,23 @@ export default function Stock() {
               });
               
               return uniqueMedicines.map((medicineName, index) => {
-                const batches = getBatchesForMedicine(medicineName);
-                const primaryItem = batches[0];
+                const allBatches = getBatchesForMedicine(medicineName);
+                // Filter out zero-stock batches for display
+                const batches = allBatches.filter(b => b.currentStock > 0);
+                // Calculate total stock
+                const totalStock = allBatches.reduce((sum, b) => sum + b.currentStock, 0);
+                
+                // Skip medicines with zero total stock
+                if (totalStock === 0) return null;
+                
+                const primaryItem = allBatches[0]; // Use first batch for item details
                 if (!primaryItem) return null;
                 
                 return (
                   <StockItemCard
                     key={`medicine-${medicineName}`}
                     item={primaryItem}
-                    batches={batches}
+                    batches={batches.length > 0 ? batches : [primaryItem]} // Show at least the primary
                     index={index}
                     getCategoryStyle={getCategoryStyle}
                     getStockStatus={getStockStatus}
