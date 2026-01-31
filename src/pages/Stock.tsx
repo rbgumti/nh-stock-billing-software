@@ -1033,24 +1033,31 @@ export default function Stock() {
       );
 
       // Let React commit & ensure images are loaded before capture
-      await new Promise<void>((resolve) => setTimeout(() => resolve(), 0));
+      // Give React more time to fully render
+      await new Promise<void>((resolve) => setTimeout(() => resolve(), 100));
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
+      // Wait for all images to load
       const imgs = Array.from(mount.querySelectorAll("img")) as HTMLImageElement[];
       await Promise.all(
         imgs.map(
           (img) =>
-            img.complete
+            img.complete && img.naturalWidth > 0
               ? Promise.resolve()
               : new Promise<void>((resolve) => {
-                  img.onload = () => resolve();
-                  img.onerror = () => resolve();
+                  const timeout = setTimeout(() => resolve(), 2000); // Max 2s per image
+                  img.onload = () => { clearTimeout(timeout); resolve(); };
+                  img.onerror = () => { clearTimeout(timeout); resolve(); };
                 })
         )
       );
 
-      const target = mount.firstElementChild as HTMLElement | null;
+      // Additional delay to ensure DOM is fully painted
+      await new Promise<void>((resolve) => setTimeout(() => resolve(), 200));
+
+      // Find the actual GRN document div (the one with white background and specific styling)
+      const target = mount.querySelector('div[style*="font-family"]') as HTMLElement || mount.firstElementChild as HTMLElement | null;
       if (!target) throw new Error("Failed to render GRN document");
 
       const canvas = await html2canvas(target, {
