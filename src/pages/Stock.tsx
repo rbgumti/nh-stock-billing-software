@@ -1645,20 +1645,40 @@ export default function Stock() {
             </CardContent>
           </Card>
 
-          {/* Stock Items */}
+          {/* Stock Items - Grouped by Medicine Name */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredItems.map((item, index) => (
-              <StockItemCard
-                key={item.id}
-                item={item}
-                index={index}
-                getCategoryStyle={getCategoryStyle}
-                getStockStatus={getStockStatus}
-                onViewLedger={setShowLedgerItem}
-                onEdit={setEditingItem}
-                onReorder={() => setShowPOForm(true)}
-              />
-            ))}
+            {(() => {
+              // Get unique medicine names from filtered items
+              const seen = new Set<string>();
+              const uniqueMedicines: string[] = [];
+              filteredItems.forEach(item => {
+                const key = item.name.toLowerCase();
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  uniqueMedicines.push(item.name);
+                }
+              });
+              
+              return uniqueMedicines.map((medicineName, index) => {
+                const batches = getBatchesForMedicine(medicineName);
+                const primaryItem = batches[0];
+                if (!primaryItem) return null;
+                
+                return (
+                  <StockItemCard
+                    key={`medicine-${medicineName}`}
+                    item={primaryItem}
+                    batches={batches}
+                    index={index}
+                    getCategoryStyle={getCategoryStyle}
+                    getStockStatus={getStockStatus}
+                    onViewLedger={setShowLedgerItem}
+                    onEdit={setEditingItem}
+                    onReorder={() => setShowPOForm(true)}
+                  />
+                );
+              });
+            })()}
           </div>
 
           {filteredItems.length === 0 && (
