@@ -117,8 +117,8 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
     
     let insertIndex = parentIndex + 1;
     while (insertIndex < grnItems.length && 
-           grnItems[insertIndex].isAdditionalBatch && 
-           grnItems[insertIndex].stockItemId === stockItemId) {
+           grnItems[insertIndex].isAdditionalBatch &&
+           grnItems[insertIndex].parentIndex === parentIndex) {
       insertIndex++;
     }
     
@@ -133,20 +133,24 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
     setGRNItems(newItems);
   };
 
-  const getTotalReceivedForItem = (stockItemId: number) => {
-    return grnItems
-      .filter(item => item.stockItemId === stockItemId)
-      .reduce((sum, item) => sum + item.receivedQuantity, 0);
+  // NOTE: compute totals/status per *PO line item* (not per stockItemId) to avoid
+  // incorrect "double" totals when the same stockItemId appears multiple times in the PO.
+  const getTotalReceivedForLine = (lineIndex: number) => {
+    return grnItems.reduce((sum, item, idx) => {
+      const belongsToLine =
+        (!item.isAdditionalBatch && idx === lineIndex) ||
+        (item.isAdditionalBatch && item.parentIndex === lineIndex);
+      return belongsToLine ? sum + item.receivedQuantity : sum;
+    }, 0);
   };
 
-  const getOrderedQuantityForItem = (stockItemId: number) => {
-    const originalItem = grnItems.find(item => item.stockItemId === stockItemId && !item.isAdditionalBatch);
-    return originalItem?.orderedQuantity || 0;
+  const getOrderedQuantityForLine = (lineIndex: number) => {
+    return grnItems[lineIndex]?.orderedQuantity || 0;
   };
 
-  const getItemStatus = (stockItemId: number) => {
-    const ordered = getOrderedQuantityForItem(stockItemId);
-    const received = getTotalReceivedForItem(stockItemId);
+  const getItemStatus = (lineIndex: number) => {
+    const ordered = getOrderedQuantityForLine(lineIndex);
+    const received = getTotalReceivedForLine(lineIndex);
     if (received === 0) return { label: "Not Received", variant: "destructive" as const, icon: AlertCircle };
     if (received < ordered) return { label: "Partial", variant: "secondary" as const, icon: AlertCircle };
     if (received === ordered) return { label: "Complete", variant: "default" as const, icon: CheckCircle };
@@ -436,7 +440,9 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                 </div>
 
                 {grnItems.map((grnItem, index) => {
-                  const status = getItemStatus(grnItem.stockItemId);
+                  const lineIndex = grnItem.isAdditionalBatch ? (grnItem.parentIndex ?? index) : index;
+
+                  const status = getItemStatus(lineIndex);
                   const StatusIcon = status.icon;
                   const stockItem = stockItems.find(s => s.id === grnItem.stockItemId);
                   const masterCostPrice = stockItem?.unitPrice || 0;
@@ -445,7 +451,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                     masterCostPrice > 0 && 
                     Math.abs(grnItem.costPrice - masterCostPrice) > 0.00001;
                   const isAdditional = grnItem.isAdditionalBatch;
-                  const totalReceived = getTotalReceivedForItem(grnItem.stockItemId);
+                  const totalReceived = getTotalReceivedForLine(lineIndex);
                   
                   return (
                     <div 
@@ -455,7 +461,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                       <div className="font-medium text-sm">
                         {isAdditional ? (
                           <span className="text-muted-foreground italic">↳ Batch #{
-                            grnItems.slice(0, index).filter(i => i.stockItemId === grnItem.stockItemId).length + 1
+                            2 + grnItems.slice(0, index).filter(i => i.isAdditionalBatch && i.parentIndex === (grnItem.parentIndex ?? -1)).length
                           }</span>
                         ) : (
                           getStockItemName(grnItem.stockItemId)
