@@ -7,9 +7,11 @@ import { BookOpen, Check, X, Pencil, AlertTriangle, Clock } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPrecision } from "@/lib/formatUtils";
 
 interface StockItemCardProps {
   item: StockItem;
+  batches: StockItem[]; // All batches for this medicine
   index: number;
   getCategoryStyle: (category: string) => {
     bg: string;
@@ -27,6 +29,7 @@ interface StockItemCardProps {
 
 export function StockItemCard({
   item,
+  batches,
   index,
   getCategoryStyle,
   getStockStatus,
@@ -34,12 +37,14 @@ export function StockItemCard({
   onEdit,
   onReorder,
 }: StockItemCardProps) {
-  const [isEditingBatch, setIsEditingBatch] = useState(false);
-  const [editBatchNo, setEditBatchNo] = useState(item.batchNo || "");
-  const [editExpiryDate, setEditExpiryDate] = useState(item.expiryDate || "");
+  const [editingBatchId, setEditingBatchId] = useState<number | null>(null);
+  const [editBatchNo, setEditBatchNo] = useState("");
+  const [editExpiryDate, setEditExpiryDate] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  const stockStatus = getStockStatus(item.currentStock, item.minimumStock);
+  // Calculate total stock across all batches
+  const totalStock = batches.reduce((sum, b) => sum + b.currentStock, 0);
+  const stockStatus = getStockStatus(totalStock, item.minimumStock);
   const categoryStyle = getCategoryStyle(item.category);
   const CategoryIcon = categoryStyle.Icon;
 
@@ -54,9 +59,9 @@ export function StockItemCard({
     const diffDays = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
     if (diffDays <= 0) return { status: 'expired', label: 'Expired', daysText: 'Expired', color: 'destructive' };
-    if (diffDays <= 30) return { status: 'critical', label: 'Expiring', daysText: `${diffDays}d left`, color: 'destructive' };
-    if (diffDays <= 60) return { status: 'warning', label: 'Expiring Soon', daysText: `${diffDays}d left`, color: 'orange' };
-    if (diffDays <= 90) return { status: 'caution', label: 'Check Expiry', daysText: `${diffDays}d left`, color: 'yellow' };
+    if (diffDays <= 30) return { status: 'critical', label: 'Expiring', daysText: `${diffDays}d`, color: 'destructive' };
+    if (diffDays <= 60) return { status: 'warning', label: 'Soon', daysText: `${diffDays}d`, color: 'orange' };
+    if (diffDays <= 90) return { status: 'caution', label: 'Check', daysText: `${diffDays}d`, color: 'yellow' };
     return null;
   };
 
@@ -70,21 +75,27 @@ export function StockItemCard({
     return batch && batch !== 'N/A' && !batch.startsWith('BATCH');
   };
 
-  const handleSaveBatchExpiry = async () => {
+  const startEditingBatch = (batch: StockItem) => {
+    setEditingBatchId(batch.id);
+    setEditBatchNo(batch.batchNo || "");
+    setEditExpiryDate(batch.expiryDate || "");
+  };
+
+  const handleSaveBatchExpiry = async (batch: StockItem) => {
     setIsSaving(true);
     try {
       const { error } = await supabase
         .from('stock_items')
         .update({
-          batch_no: editBatchNo || item.batchNo,
-          expiry_date: editExpiryDate || item.expiryDate,
+          batch_no: editBatchNo || batch.batchNo,
+          expiry_date: editExpiryDate || batch.expiryDate,
         })
-        .eq('item_id', item.id);
+        .eq('item_id', batch.id);
 
       if (error) throw error;
 
       toast.success("Batch & Expiry updated successfully");
-      setIsEditingBatch(false);
+      setEditingBatchId(null);
     } catch (error) {
       console.error("Error updating batch/expiry:", error);
       toast.error("Failed to update batch & expiry");
@@ -94,42 +105,42 @@ export function StockItemCard({
   };
 
   const handleCancelEdit = () => {
-    setEditBatchNo(item.batchNo || "");
-    setEditExpiryDate(item.expiryDate || "");
-    setIsEditingBatch(false);
+    setEditingBatchId(null);
+    setEditBatchNo("");
+    setEditExpiryDate("");
   };
 
-  const expiryStatus = getExpiryStatus(item.expiryDate);
+  // Check if any batch has expiry warning
+  const hasExpiryWarning = batches.some(b => getExpiryStatus(b.expiryDate));
+  const criticalBatch = batches.find(b => {
+    const status = getExpiryStatus(b.expiryDate);
+    return status?.status === 'expired' || status?.status === 'critical';
+  });
 
   return (
     <Card className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 border-l-4 ${categoryStyle.border} ${
-      expiryStatus?.status === 'expired' ? 'ring-2 ring-destructive/50' : 
-      expiryStatus?.status === 'critical' ? 'ring-2 ring-destructive/30' : ''
+      criticalBatch ? 'ring-2 ring-destructive/30' : ''
     }`}>
-      {/* Expiry Warning Banner */}
-      {expiryStatus && (
-        <div className={`absolute top-0 left-0 right-0 px-3 py-1.5 flex items-center justify-between text-xs font-medium ${
-          expiryStatus.status === 'expired' ? 'bg-destructive text-white' :
-          expiryStatus.status === 'critical' ? 'bg-gradient-to-r from-destructive to-pink text-white' :
-          expiryStatus.status === 'warning' ? 'bg-gradient-to-r from-orange to-amber-500 text-white' :
-          'bg-gradient-to-r from-yellow-500 to-amber-400 text-black'
-        }`}>
+      {/* Warning Banner for critical items */}
+      {criticalBatch && (
+        <div className="absolute top-0 left-0 right-0 px-3 py-1 flex items-center justify-between text-xs font-medium bg-gradient-to-r from-destructive to-pink text-white">
           <span className="flex items-center gap-1">
-            {expiryStatus.status === 'expired' ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-            {expiryStatus.label}
+            <AlertTriangle className="h-3 w-3" />
+            Expiry Alert
           </span>
-          <span>{expiryStatus.daysText}</span>
         </div>
       )}
+      
       <div className={`absolute inset-0 bg-gradient-to-br ${
         index % 4 === 0 ? 'from-purple/5 via-transparent to-cyan/5' :
         index % 4 === 1 ? 'from-cyan/5 via-transparent to-teal/5' :
         index % 4 === 2 ? 'from-gold/5 via-transparent to-orange/5' :
         'from-pink/5 via-transparent to-purple/5'
       } opacity-50 group-hover:opacity-100 transition-opacity`} />
-      <CardHeader className={`relative ${expiryStatus ? 'pt-10' : ''}`}>
+      
+      <CardHeader className={`relative pb-2 ${criticalBatch ? 'pt-8' : ''}`}>
         <div className="flex justify-between items-start">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 flex-1">
             <div className={`p-2 rounded-lg bg-gradient-to-r ${
               item.category === 'BNX' ? 'from-blue-500 to-cyan' :
               item.category === 'TPN' ? 'from-amber-500 to-orange' :
@@ -138,137 +149,164 @@ export function StockItemCard({
             }`}>
               <CategoryIcon className="h-5 w-5 text-white" />
             </div>
-            <div>
-              <CardTitle className="text-lg">{item.name}</CardTitle>
-              <Badge className={`${
-                item.category === 'BNX' ? 'bg-gradient-to-r from-blue-500 to-cyan text-white border-0' :
-                item.category === 'TPN' ? 'bg-gradient-to-r from-amber-500 to-orange text-white border-0' :
-                item.category === 'PSHY' ? 'bg-gradient-to-r from-purple to-pink text-white border-0' :
-                'bg-gray-500 text-white border-0'
-              }`}>
-                {item.category}
-              </Badge>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <CardTitle className="text-lg">{item.name}</CardTitle>
+                <Badge className={`${
+                  item.category === 'BNX' ? 'bg-gradient-to-r from-blue-500 to-cyan text-white border-0' :
+                  item.category === 'TPN' ? 'bg-gradient-to-r from-amber-500 to-orange text-white border-0' :
+                  item.category === 'PSHY' ? 'bg-gradient-to-r from-purple to-pink text-white border-0' :
+                  'bg-gray-500 text-white border-0'
+                }`}>
+                  {item.category}
+                </Badge>
+              </div>
+              {/* Total Stock Display */}
+              <div className="mt-1 flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Total Qty:</span>
+                <span className={`text-xl font-bold ${
+                  stockStatus.label === 'Critical' ? 'text-destructive' :
+                  stockStatus.label === 'Low Stock' ? 'text-orange-500' :
+                  'bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent'
+                }`}>
+                  {totalStock}
+                </span>
+                <Badge className={`${
+                  stockStatus.label === 'Critical' ? 'bg-gradient-to-r from-destructive to-pink text-white border-0' :
+                  stockStatus.label === 'Low Stock' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
+                  'bg-gradient-to-r from-emerald to-teal text-white border-0'
+                }`}>
+                  {stockStatus.label}
+                </Badge>
+              </div>
             </div>
           </div>
-          <Badge className={`${
-            stockStatus.label === 'Critical' ? 'bg-gradient-to-r from-destructive to-pink text-white border-0' :
-            stockStatus.label === 'Low Stock' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
-            'bg-gradient-to-r from-emerald to-teal text-white border-0'
-          }`}>
-            {stockStatus.label}
-          </Badge>
         </div>
       </CardHeader>
-      <CardContent className="pt-4 relative">
+      
+      <CardContent className="pt-2 relative">
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">Current Stock</p>
-              <p className="font-semibold">{item.currentStock}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Minimum Stock</p>
-              <p className="font-semibold">{item.minimumStock}</p>
-            </div>
+          {/* Batch-wise Details Table */}
+          <div className="border border-border/50 rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="px-2 py-1.5 text-left font-medium text-muted-foreground text-xs">Batch No</th>
+                  <th className="px-2 py-1.5 text-right font-medium text-muted-foreground text-xs">Qty</th>
+                  <th className="px-2 py-1.5 text-left font-medium text-muted-foreground text-xs">Expiry</th>
+                  <th className="px-2 py-1.5 text-right font-medium text-muted-foreground text-xs">MRP</th>
+                  <th className="px-2 py-1.5 text-center font-medium text-muted-foreground text-xs w-10"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {batches.map((batch, idx) => {
+                  const expiryStatus = getExpiryStatus(batch.expiryDate);
+                  const isEditing = editingBatchId === batch.id;
+                  
+                  return (
+                    <tr 
+                      key={batch.id} 
+                      className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/20'} ${
+                        expiryStatus?.status === 'expired' ? 'bg-destructive/10' :
+                        expiryStatus?.status === 'critical' ? 'bg-destructive/5' : ''
+                      }`}
+                    >
+                      <td className="px-2 py-1.5">
+                        {isEditing ? (
+                          <Input
+                            value={editBatchNo}
+                            onChange={(e) => setEditBatchNo(e.target.value)}
+                            placeholder="Batch"
+                            className="h-6 text-xs px-1"
+                          />
+                        ) : (
+                          <span className="font-medium">{isValidBatch(batch.batchNo) ? batch.batchNo : '-'}</span>
+                        )}
+                      </td>
+                      <td className="px-2 py-1.5 text-right font-semibold">
+                        {batch.currentStock}
+                      </td>
+                      <td className="px-2 py-1.5">
+                        {isEditing ? (
+                          <Input
+                            type="date"
+                            value={editExpiryDate}
+                            onChange={(e) => setEditExpiryDate(e.target.value)}
+                            className="h-6 text-xs px-1"
+                          />
+                        ) : (
+                          <span className={`flex items-center gap-1 ${
+                            expiryStatus?.status === 'expired' ? 'text-destructive font-medium' :
+                            expiryStatus?.status === 'critical' ? 'text-destructive' :
+                            expiryStatus?.status === 'warning' ? 'text-orange-500' :
+                            expiryStatus?.status === 'caution' ? 'text-yellow-600' : ''
+                          }`}>
+                            {formatExpiry(batch.expiryDate)}
+                            {expiryStatus && (
+                              <span className="text-xs">({expiryStatus.daysText})</span>
+                            )}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-2 py-1.5 text-right">
+                        {batch.mrp ? `₹${formatPrecision(batch.mrp)}` : '-'}
+                      </td>
+                      <td className="px-2 py-1.5 text-center">
+                        {isEditing ? (
+                          <div className="flex gap-0.5 justify-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-5 w-5 p-0 hover:bg-emerald/10 text-emerald"
+                              onClick={() => handleSaveBatchExpiry(batch)}
+                              disabled={isSaving}
+                            >
+                              <Check className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-5 w-5 p-0 hover:bg-destructive/10 text-destructive"
+                              onClick={handleCancelEdit}
+                              disabled={isSaving}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-5 w-5 p-0 hover:bg-purple/10"
+                            onClick={() => startEditingBatch(batch)}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-          
-          <div className="grid grid-cols-2 gap-4 text-sm">
+
+          {/* Unit Price & Value Summary */}
+          <div className="grid grid-cols-2 gap-4 text-sm pt-1">
             <div>
-              <p className="text-muted-foreground">Unit Price</p>
-              <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
+              <p className="text-muted-foreground text-xs">Cost/Tab</p>
+              <p className="font-semibold">₹{formatPrecision(item.unitPrice)}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Total Value</p>
-              <p className="font-semibold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{(item.currentStock * item.unitPrice).toFixed(2)}</p>
+              <p className="text-muted-foreground text-xs">Total Value</p>
+              <p className="font-semibold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">
+                ₹{formatPrecision(totalStock * item.unitPrice)}
+              </p>
             </div>
           </div>
 
-          <div className="text-sm">
-            <p className="text-muted-foreground">Supplier</p>
-            <p className="font-medium">{item.supplier}</p>
-          </div>
-
-          {/* Batch & Expiry Section */}
-          <div className="border-t border-border/50 pt-3 mt-3">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Batch & Expiry</p>
-              {!isEditingBatch ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 hover:bg-purple/10"
-                  onClick={() => setIsEditingBatch(true)}
-                >
-                  <Pencil className="h-3 w-3" />
-                </Button>
-              ) : (
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 hover:bg-emerald/10 text-emerald"
-                    onClick={handleSaveBatchExpiry}
-                    disabled={isSaving}
-                  >
-                    <Check className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 hover:bg-destructive/10 text-destructive"
-                    onClick={handleCancelEdit}
-                    disabled={isSaving}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-            </div>
-            
-            {isEditingBatch ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-muted-foreground">Batch No</label>
-                  <Input
-                    value={editBatchNo}
-                    onChange={(e) => setEditBatchNo(e.target.value)}
-                    placeholder="Enter batch"
-                    className="h-8 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Expiry Date</label>
-                  <Input
-                    type="date"
-                    value={editExpiryDate}
-                    onChange={(e) => setEditExpiryDate(e.target.value)}
-                    className="h-8 text-sm"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Batch No</p>
-                  <p className="font-medium">{isValidBatch(item.batchNo) ? item.batchNo : '-'}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Expiry</p>
-                  <p className={`font-medium ${
-                    expiryStatus?.status === 'expired' ? 'text-destructive' :
-                    expiryStatus?.status === 'critical' ? 'text-destructive' :
-                    expiryStatus?.status === 'warning' ? 'text-orange-500' :
-                    expiryStatus?.status === 'caution' ? 'text-yellow-600' : ''
-                  }`}>
-                    {formatExpiry(item.expiryDate)}
-                    {expiryStatus && <span className="ml-1 text-xs">⚠️</span>}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2 pt-2">
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-2 pt-1">
             <Button 
               size="sm" 
               className="w-full bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white"
