@@ -161,9 +161,9 @@ export default function SaleReport() {
         };
       });
 
-      // Filter to show items with stock or activity (so Opening Stock is always visible)
+      // Filter out zero-stock items with no activity - only show items that have stock or transactions
       const filteredItems = items.filter(
-        item => item.openingStock > 0 || item.saleQty > 0 || item.stockReceived > 0 || item.isFromSnapshot
+        item => item.currentStock > 0 || item.openingStock > 0 || item.saleQty > 0 || item.stockReceived > 0
       );
 
       // Re-number after filtering
