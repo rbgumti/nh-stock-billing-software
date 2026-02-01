@@ -49,11 +49,13 @@ export function MedicineSearchSelect({
     return !isNaN(parsed.getTime());
   };
 
-  // Filter and sort by expiry date (FIFO - earliest valid expiry first, N/A at end)
+  // Filter out zero-stock items and sort by expiry date (FIFO - earliest valid expiry first, N/A at end)
   const filteredMedicines = medicines
     .filter((medicine) =>
-      medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      medicine.batchNo.toLowerCase().includes(searchQuery.toLowerCase())
+      medicine.currentStock > 0 && (
+        medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        medicine.batchNo.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     )
     .sort((a, b) => {
       // First sort by name

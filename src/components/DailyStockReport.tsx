@@ -116,6 +116,7 @@ export default function DailyStockReport() {
       }
 
       // Calculate report data for each stock item (medicines)
+      // Filter out zero-stock items with no activity
       const data: StockReportItem[] = stockItems
         .map(item => {
           const issued = issuedQuantities[item.name] || 0;
@@ -132,7 +133,14 @@ export default function DailyStockReport() {
             stockClosing,
           };
         })
-        .filter(item => !showOnlyActive || item.issuedToPatients > 0 || item.stockReceived > 0);
+        .filter(item => {
+          // Always hide items with zero stock and no activity
+          const hasStock = item.stockOpening > 0 || item.stockClosing > 0;
+          const hasActivity = item.issuedToPatients > 0 || item.stockReceived > 0;
+          if (!hasStock && !hasActivity) return false;
+          // Apply additional filter if showOnlyActive is enabled
+          return !showOnlyActive || hasActivity;
+        });
 
       setReportData(data);
       setLastUpdated(new Date());
