@@ -49,7 +49,7 @@ export function MedicineSearchSelect({
     return !isNaN(parsed.getTime());
   };
 
-  // Filter out zero-stock items and sort by expiry date (FIFO - earliest valid expiry first, N/A at end)
+  // Filter out zero-stock items and sort: by name, then no-batch items first, then by expiry (FIFO)
   const filteredMedicines = medicines
     .filter((medicine) =>
       medicine.currentStock > 0 && (
@@ -61,8 +61,14 @@ export function MedicineSearchSelect({
       // First sort by name
       const nameCompare = a.name.localeCompare(b.name);
       if (nameCompare !== 0) return nameCompare;
+      
+      // Within same medicine: no-batch items come first
+      const aHasBatch = a.batchNo && a.batchNo.trim() !== '' && a.batchNo !== 'N/A';
+      const bHasBatch = b.batchNo && b.batchNo.trim() !== '' && b.batchNo !== 'N/A';
+      if (!aHasBatch && bHasBatch) return -1; // a (no batch) comes first
+      if (aHasBatch && !bHasBatch) return 1;  // b (no batch) comes first
+      
       // Then by expiry date (earliest valid expiry first - FIFO)
-      // Invalid/N/A dates go to end
       const aValid = isValidExpiry(a.expiryDate);
       const bValid = isValidExpiry(b.expiryDate);
       if (!aValid && !bValid) return 0;
