@@ -49,7 +49,7 @@ export function MedicineSearchSelect({
     return !isNaN(parsed.getTime());
   };
 
-  // Filter out zero-stock items and sort: by name, then no-batch items first, then by expiry (FIFO)
+  // Filter out zero-stock items and sort: by name, then batched items first (FIFO by expiry)
   const filteredMedicines = medicines
     .filter((medicine) =>
       medicine.currentStock > 0 && (
@@ -62,11 +62,11 @@ export function MedicineSearchSelect({
       const nameCompare = a.name.localeCompare(b.name);
       if (nameCompare !== 0) return nameCompare;
       
-      // Within same medicine: no-batch items come first
+      // Within same medicine: items WITH batch come first (FIFO principle)
       const aHasBatch = a.batchNo && a.batchNo.trim() !== '' && a.batchNo !== 'N/A';
       const bHasBatch = b.batchNo && b.batchNo.trim() !== '' && b.batchNo !== 'N/A';
-      if (!aHasBatch && bHasBatch) return -1; // a (no batch) comes first
-      if (aHasBatch && !bHasBatch) return 1;  // b (no batch) comes first
+      if (aHasBatch && !bHasBatch) return -1; // a (has batch) comes first
+      if (!aHasBatch && bHasBatch) return 1;  // b (has batch) comes first
       
       // Then by expiry date (earliest valid expiry first - FIFO)
       const aValid = isValidExpiry(a.expiryDate);
@@ -133,20 +133,20 @@ export function MedicineSearchSelect({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0 bg-background z-50" align="start">
-        <Command shouldFilter={false}>
-          <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+      <PopoverContent className="w-[450px] p-0 bg-card border border-border shadow-xl z-50" align="start">
+        <Command shouldFilter={false} className="bg-card">
+          <div className="flex items-center border-b border-border px-3 bg-muted/50">
+            <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
             <input
               placeholder="Search medicines..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
-          <CommandList>
-            <CommandEmpty>No medicine found.</CommandEmpty>
-            <CommandGroup className="max-h-60 overflow-auto">
+          <CommandList className="bg-card">
+            <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">No medicine found.</CommandEmpty>
+            <CommandGroup className="max-h-64 overflow-auto p-1">
               {filteredMedicines.map((medicine) => (
                 <CommandItem
                   key={medicine.id}
@@ -156,26 +156,37 @@ export function MedicineSearchSelect({
                     setOpen(false);
                     setSearchQuery("");
                   }}
-                  className="cursor-pointer"
+                  className="cursor-pointer rounded-md px-3 py-2.5 hover:bg-primary/10 data-[selected=true]:bg-primary/15 transition-colors"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-4 w-4 text-primary",
                       value === medicine.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex flex-col flex-1">
+                  <div className="flex flex-col flex-1 gap-0.5">
                     <div className="flex items-center gap-2">
-                      <span>{medicine.name}</span>
+                      <span className="font-medium text-foreground">{medicine.name}</span>
                       {isEarliestExpiry(medicine) && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 font-medium">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 font-semibold">
                           FIFO
                         </span>
                       )}
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      Batch: {medicine.batchNo} | Exp: {formatExpiry(medicine.expiryDate)} | Stock: {medicine.currentStock}
-                    </span>
+                    <div className="flex items-center gap-3 text-xs">
+                      <span className="text-muted-foreground">
+                        Batch: <span className="font-medium text-foreground/80">{medicine.batchNo || '-'}</span>
+                      </span>
+                      <span className="text-muted-foreground">
+                        Exp: <span className="font-medium text-foreground/80">{formatExpiry(medicine.expiryDate)}</span>
+                      </span>
+                      <span className={cn(
+                        "font-semibold",
+                        medicine.currentStock <= 10 ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
+                      )}>
+                        Stock: {medicine.currentStock}
+                      </span>
+                    </div>
                   </div>
                 </CommandItem>
               ))}
