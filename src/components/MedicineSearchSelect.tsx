@@ -49,7 +49,12 @@ export function MedicineSearchSelect({
     return !isNaN(parsed.getTime());
   };
 
-  // Filter out zero-stock items and sort: by name, then batched items first (FIFO by expiry)
+  // Helper to check if batch starts with "BATCH" (case-insensitive)
+  const isBatchPrefixed = (batchNo?: string): boolean => {
+    return batchNo ? batchNo.trim().toUpperCase().startsWith('BATCH') : false;
+  };
+
+  // Filter out zero-stock items and sort: by name, then BATCH-prefixed items first (FIFO), then by expiry
   const filteredMedicines = medicines
     .filter((medicine) =>
       medicine.currentStock > 0 && (
@@ -62,11 +67,11 @@ export function MedicineSearchSelect({
       const nameCompare = a.name.localeCompare(b.name);
       if (nameCompare !== 0) return nameCompare;
       
-      // Within same medicine: items WITH batch come first (FIFO principle)
-      const aHasBatch = a.batchNo && a.batchNo.trim() !== '' && a.batchNo !== 'N/A';
-      const bHasBatch = b.batchNo && b.batchNo.trim() !== '' && b.batchNo !== 'N/A';
-      if (aHasBatch && !bHasBatch) return -1; // a (has batch) comes first
-      if (!aHasBatch && bHasBatch) return 1;  // b (has batch) comes first
+      // Within same medicine: items with batch starting with "BATCH" come first (FIFO)
+      const aIsBatchPrefixed = isBatchPrefixed(a.batchNo);
+      const bIsBatchPrefixed = isBatchPrefixed(b.batchNo);
+      if (aIsBatchPrefixed && !bIsBatchPrefixed) return -1; // BATCH-prefixed comes first
+      if (!aIsBatchPrefixed && bIsBatchPrefixed) return 1;
       
       // Then by expiry date (earliest valid expiry first - FIFO)
       const aValid = isValidExpiry(a.expiryDate);
@@ -89,12 +94,19 @@ export function MedicineSearchSelect({
     }
   };
 
-  // Check if this batch is the earliest valid expiry for its medicine name
-  const isEarliestExpiry = (medicine: Medicine) => {
+  // Check if this batch should be marked as FIFO (batch starting with "BATCH" and earliest expiry)
+  const isFIFOItem = (medicine: Medicine) => {
+    // Must have batch starting with "BATCH"
+    if (!isBatchPrefixed(medicine.batchNo)) return false;
+    
     const sameMedicines = medicines.filter(m => 
-      m.name.toLowerCase() === medicine.name.toLowerCase() && m.currentStock > 0
+      m.name.toLowerCase() === medicine.name.toLowerCase() && 
+      m.currentStock > 0 &&
+      isBatchPrefixed(m.batchNo)
     );
-    if (sameMedicines.length <= 1) return false;
+    if (sameMedicines.length === 0) return false;
+    
+    // Sort by expiry and check if this is the earliest
     const sorted = [...sameMedicines].sort((a, b) => {
       const aValid = isValidExpiry(a.expiryDate);
       const bValid = isValidExpiry(b.expiryDate);
@@ -167,7 +179,7 @@ export function MedicineSearchSelect({
                   <div className="flex flex-col flex-1 gap-0.5">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-foreground">{medicine.name}</span>
-                      {isEarliestExpiry(medicine) && (
+                      {isFIFOItem(medicine) && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 font-semibold">
                           FIFO
                         </span>
