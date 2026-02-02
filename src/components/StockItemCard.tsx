@@ -25,6 +25,7 @@ interface StockItemCardProps {
   onViewLedger: (item: StockItem) => void;
   onEdit: (item: StockItem) => void;
   onReorder: () => void;
+  isAdmin?: boolean;
 }
 
 export function StockItemCard({
@@ -36,10 +37,13 @@ export function StockItemCard({
   onViewLedger,
   onEdit,
   onReorder,
+  isAdmin = false,
 }: StockItemCardProps) {
   const [editingBatchId, setEditingBatchId] = useState<number | null>(null);
   const [editBatchNo, setEditBatchNo] = useState("");
   const [editExpiryDate, setEditExpiryDate] = useState("");
+  const [editQty, setEditQty] = useState<number>(0);
+  const [editMrp, setEditMrp] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   // Calculate total stock across all batches
@@ -79,6 +83,8 @@ export function StockItemCard({
     setEditingBatchId(batch.id);
     setEditBatchNo(batch.batchNo || "");
     setEditExpiryDate(batch.expiryDate || "");
+    setEditQty(batch.currentStock || 0);
+    setEditMrp(batch.mrp?.toString() || "");
   };
 
   const handleSaveBatchExpiry = async (batch: StockItem) => {
@@ -89,16 +95,18 @@ export function StockItemCard({
         .update({
           batch_no: editBatchNo || batch.batchNo,
           expiry_date: editExpiryDate || batch.expiryDate,
+          current_stock: editQty,
+          mrp: editMrp ? parseFloat(editMrp) : batch.mrp,
         })
         .eq('item_id', batch.id);
 
       if (error) throw error;
 
-      toast.success("Batch & Expiry updated successfully");
+      toast.success("Batch details updated successfully");
       setEditingBatchId(null);
     } catch (error) {
-      console.error("Error updating batch/expiry:", error);
-      toast.error("Failed to update batch & expiry");
+      console.error("Error updating batch details:", error);
+      toast.error("Failed to update batch details");
     } finally {
       setIsSaving(false);
     }
@@ -108,6 +116,8 @@ export function StockItemCard({
     setEditingBatchId(null);
     setEditBatchNo("");
     setEditExpiryDate("");
+    setEditQty(0);
+    setEditMrp("");
   };
 
   // Check if any batch has expiry warning
@@ -224,7 +234,17 @@ export function StockItemCard({
                         )}
                       </td>
                       <td className="px-2 py-1.5 text-right font-semibold">
-                        {batch.currentStock}
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            value={editQty}
+                            onChange={(e) => setEditQty(parseInt(e.target.value) || 0)}
+                            min={0}
+                            className="h-6 text-xs px-1 w-16 text-right"
+                          />
+                        ) : (
+                          batch.currentStock
+                        )}
                       </td>
                       <td className="px-2 py-1.5">
                         {isEditing ? (
@@ -249,7 +269,19 @@ export function StockItemCard({
                         )}
                       </td>
                       <td className="px-2 py-1.5 text-right">
-                        {batch.mrp ? `₹${formatPrecision(batch.mrp)}` : '-'}
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            value={editMrp}
+                            onChange={(e) => setEditMrp(e.target.value)}
+                            step="0.00001"
+                            min={0}
+                            placeholder="MRP"
+                            className="h-6 text-xs px-1 w-20 text-right"
+                          />
+                        ) : (
+                          batch.mrp ? `₹${formatPrecision(batch.mrp)}` : '-'
+                        )}
                       </td>
                       <td className="px-2 py-1.5 text-center">
                         {isEditing ? (
@@ -273,7 +305,7 @@ export function StockItemCard({
                               <X className="h-3 w-3" />
                             </Button>
                           </div>
-                        ) : (
+                        ) : isAdmin ? (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -282,7 +314,7 @@ export function StockItemCard({
                           >
                             <Pencil className="h-3 w-3" />
                           </Button>
-                        )}
+                        ) : null}
                       </td>
                     </tr>
                   );
