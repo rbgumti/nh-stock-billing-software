@@ -9,6 +9,14 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrecision } from "@/lib/formatUtils";
 
+interface EditingState {
+  id: number;
+  batchNo: string;
+  expiryDate: string;
+  qty: number;
+  mrp: string;
+}
+
 interface StockItemCardProps {
   item: StockItem;
   batches: StockItem[]; // All batches for this medicine
@@ -26,6 +34,7 @@ interface StockItemCardProps {
   onEdit: (item: StockItem) => void;
   onReorder: () => void;
   isAdmin?: boolean;
+  onStockUpdated?: () => void; // Callback to refresh stock data
 }
 
 export function StockItemCard({
@@ -38,12 +47,10 @@ export function StockItemCard({
   onEdit,
   onReorder,
   isAdmin = false,
+  onStockUpdated,
 }: StockItemCardProps) {
-  const [editingBatchId, setEditingBatchId] = useState<number | null>(null);
-  const [editBatchNo, setEditBatchNo] = useState("");
-  const [editExpiryDate, setEditExpiryDate] = useState("");
-  const [editQty, setEditQty] = useState<number>(0);
-  const [editMrp, setEditMrp] = useState("");
+  // Store editing state per batch using a map-like state
+  const [editingState, setEditingState] = useState<EditingState | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Calculate total stock across all batches
@@ -80,30 +87,42 @@ export function StockItemCard({
   };
 
   const startEditingBatch = (batch: StockItem) => {
-    setEditingBatchId(batch.id);
-    setEditBatchNo(batch.batchNo || "");
-    setEditExpiryDate(batch.expiryDate || "");
-    setEditQty(batch.currentStock || 0);
-    setEditMrp(batch.mrp?.toString() || "");
+    setEditingState({
+      id: batch.id,
+      batchNo: batch.batchNo || "",
+      expiryDate: batch.expiryDate || "",
+      qty: batch.currentStock || 0,
+      mrp: batch.mrp?.toString() || "",
+    });
+  };
+
+  const updateEditingField = (field: keyof Omit<EditingState, 'id'>, value: string | number) => {
+    if (!editingState) return;
+    setEditingState(prev => prev ? { ...prev, [field]: value } : null);
   };
 
   const handleSaveBatchExpiry = async (batch: StockItem) => {
+    if (!editingState || editingState.id !== batch.id) return;
+    
     setIsSaving(true);
     try {
       const { error } = await supabase
         .from('stock_items')
         .update({
-          batch_no: editBatchNo || batch.batchNo,
-          expiry_date: editExpiryDate || batch.expiryDate,
-          current_stock: editQty,
-          mrp: editMrp ? parseFloat(editMrp) : batch.mrp,
+          batch_no: editingState.batchNo || batch.batchNo,
+          expiry_date: editingState.expiryDate || batch.expiryDate,
+          current_stock: editingState.qty,
+          mrp: editingState.mrp ? parseFloat(editingState.mrp) : batch.mrp,
         })
         .eq('item_id', batch.id);
 
       if (error) throw error;
 
       toast.success("Batch details updated successfully");
-      setEditingBatchId(null);
+      setEditingState(null);
+      
+      // Trigger stock data refresh to update cumulative totals
+      onStockUpdated?.();
     } catch (error) {
       console.error("Error updating batch details:", error);
       toast.error("Failed to update batch details");
@@ -113,11 +132,7 @@ export function StockItemCard({
   };
 
   const handleCancelEdit = () => {
-    setEditingBatchId(null);
-    setEditBatchNo("");
-    setEditExpiryDate("");
-    setEditQty(0);
-    setEditMrp("");
+    setEditingState(null);
   };
 
   // Check if any batch has expiry warning
@@ -211,7 +226,7 @@ export function StockItemCard({
               <tbody>
                 {batches.map((batch, idx) => {
                   const expiryStatus = getExpiryStatus(batch.expiryDate);
-                  const isEditing = editingBatchId === batch.id;
+                  const isEditing = editingState?.id === batch.id;
                   
                   return (
                     <tr 
@@ -224,8 +239,8 @@ export function StockItemCard({
                       <td className="px-2 py-1.5">
                         {isEditing ? (
                           <Input
-                            value={editBatchNo}
-                            onChange={(e) => setEditBatchNo(e.target.value)}
+                            value={editingState.batchNo}
+                            onChange={(e) => updateEditingField('batchNo', e.target.value)}
                             placeholder="Batch"
                             className="h-6 text-xs px-1"
                           />
@@ -237,8 +252,8 @@ export function StockItemCard({
                         {isEditing ? (
                           <Input
                             type="number"
-                            value={editQty}
-                            onChange={(e) => setEditQty(parseInt(e.target.value) || 0)}
+                            value={editingState.qty}
+                            onChange={(e) => updateEditingField('qty', parseInt(e.target.value) || 0)}
                             min={0}
                             className="h-6 text-xs px-1 w-16 text-right"
                           />
@@ -250,8 +265,8 @@ export function StockItemCard({
                         {isEditing ? (
                           <Input
                             type="date"
-                            value={editExpiryDate}
-                            onChange={(e) => setEditExpiryDate(e.target.value)}
+                            value={editingState.expiryDate}
+                            onChange={(e) => updateEditingField('expiryDate', e.target.value)}
                             className="h-6 text-xs px-1"
                           />
                         ) : (
@@ -272,8 +287,8 @@ export function StockItemCard({
                         {isEditing ? (
                           <Input
                             type="number"
-                            value={editMrp}
-                            onChange={(e) => setEditMrp(e.target.value)}
+                            value={editingState.mrp}
+                            onChange={(e) => updateEditingField('mrp', e.target.value)}
                             step="0.00001"
                             min={0}
                             placeholder="MRP"
