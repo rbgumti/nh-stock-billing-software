@@ -46,6 +46,7 @@ import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
 import { BatchGroupedTable } from "@/components/BatchGroupedTable";
 import { StockItemCard } from "@/components/StockItemCard";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -85,6 +86,7 @@ export default function Stock() {
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
   const { payments, addPayment, updatePayment, deletePayment, getOutstandingPayments, getUpcomingPayments } = useSupplierPaymentStore();
+  const { isAdmin } = useUserRole();
 
   // Force re-render when stock items and purchase orders are updated
   useEffect(() => {
@@ -1709,6 +1711,7 @@ export default function Stock() {
                     onViewLedger={setShowLedgerItem}
                     onEdit={setEditingItem}
                     onReorder={() => setShowPOForm(true)}
+                    isAdmin={isAdmin}
                   />
                 );
               });
