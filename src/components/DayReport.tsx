@@ -365,10 +365,115 @@ export default function DayReport() {
     });
   }, [loadSavedReport]);
 
+  // Compute BNX follow-up patients when report date changes
+  const computeBnxFollowUpPatients = useCallback(async () => {
+    setIsComputingFollowUp(true);
+    try {
+      // Get invoices for the selected date
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('id, patient_id, invoice_date')
+        .gte('invoice_date', `${reportDate}T00:00:00`)
+        .lt('invoice_date', `${reportDate}T23:59:59.999`)
+        .not('patient_id', 'is', null);
+
+      console.log('BNX Follow-up: Found invoices for date', reportDate, invoices?.length || 0);
+
+      if (!invoices || invoices.length === 0) {
+        setComputedBnxFollowUp(0);
+        return;
+      }
+
+      const invoiceIds = invoices.map(inv => inv.id);
+      const patientIds = [...new Set(invoices.map(inv => inv.patient_id).filter(Boolean))] as string[];
+
+      // Get invoice items to check which invoices have BNX category medicines
+      const { data: invoiceItems } = await supabase
+        .from('invoice_items')
+        .select('invoice_id, medicine_id')
+        .in('invoice_id', invoiceIds);
+
+      console.log('BNX Follow-up: Found invoice items', invoiceItems?.length || 0);
+
+      if (!invoiceItems || invoiceItems.length === 0) {
+        setComputedBnxFollowUp(0);
+        return;
+      }
+
+      // Get stock items to check categories
+      const medicineIds = [...new Set(invoiceItems.map(it => it.medicine_id).filter(Boolean))];
+      
+      if (medicineIds.length === 0) {
+        setComputedBnxFollowUp(0);
+        return;
+      }
+
+      const { data: stockItemsData } = await supabase
+        .from('stock_items')
+        .select('item_id, category')
+        .in('item_id', medicineIds);
+
+      const bnxMedicineIds = new Set(
+        (stockItemsData || [])
+          .filter(s => s.category?.toUpperCase() === 'BNX')
+          .map(s => s.item_id)
+      );
+
+      console.log('BNX Follow-up: BNX medicine IDs found', bnxMedicineIds.size);
+
+      // Find invoices that have at least one BNX medicine
+      const invoicesWithBnx = new Set<string>();
+      invoiceItems.forEach(item => {
+        if (bnxMedicineIds.has(item.medicine_id)) {
+          invoicesWithBnx.add(item.invoice_id);
+        }
+      });
+
+      // Get patient IDs from invoices with BNX medicines
+      const bnxPatientIds = [...new Set(
+        invoices
+          .filter(inv => invoicesWithBnx.has(inv.id))
+          .map(inv => inv.patient_id)
+          .filter(Boolean)
+      )] as string[];
+
+      console.log('BNX Follow-up: Patients with BNX invoices', bnxPatientIds.length);
+
+      if (bnxPatientIds.length === 0) {
+        setComputedBnxFollowUp(0);
+        return;
+      }
+
+      // Get patient creation dates to identify new patients
+      const { data: patients } = await supabase
+        .from('patients')
+        .select('id, created_at')
+        .in('id', bnxPatientIds);
+
+      // Count patients who were NOT created on the report date (follow-up patients)
+      let followUpCount = 0;
+      (patients || []).forEach(patient => {
+        const createdDate = patient.created_at ? patient.created_at.split('T')[0] : null;
+        // If patient was created on a different day, they are a follow-up patient
+        if (createdDate !== reportDate) {
+          followUpCount++;
+        }
+      });
+
+      console.log('BNX Follow-up: Final count', followUpCount);
+      setComputedBnxFollowUp(followUpCount);
+    } catch (error) {
+      console.error('Error computing BNX follow-up patients:', error);
+      setComputedBnxFollowUp(null);
+    } finally {
+      setIsComputingFollowUp(false);
+    }
+  }, [reportDate]);
+
   useEffect(() => {
     loadMedicineData();
     computeBnxFollowUpPatients();
-  }, [stockItems, reportDate]);
+  }, [stockItems, reportDate, computeBnxFollowUpPatients]);
 
   // Normalize medicine names so batches with minor naming differences (extra spaces, NBSP)
   // don’t create duplicate rows in reports.
@@ -541,102 +646,6 @@ export default function DayReport() {
     }
   };
 
-  // Compute BNX follow-up patients automatically from invoices
-  // Logic: Count unique patients who have invoices with BNX category medicines on the report date
-  // Exclude patients whose patient record was created on the same day (new patients)
-  const computeBnxFollowUpPatients = async () => {
-    setIsComputingFollowUp(true);
-    try {
-      // Get invoices for the selected date
-      const { data: invoices } = await supabase
-        .from('invoices')
-        .select('id, patient_id, invoice_date')
-        .like('invoice_date', `${reportDate}%`)
-        .not('patient_id', 'is', null);
-
-      if (!invoices || invoices.length === 0) {
-        setComputedBnxFollowUp(0);
-        return;
-      }
-
-      const invoiceIds = invoices.map(inv => inv.id);
-      const patientIds = [...new Set(invoices.map(inv => inv.patient_id).filter(Boolean))] as string[];
-
-      // Get invoice items to check which invoices have BNX category medicines
-      const { data: invoiceItems } = await supabase
-        .from('invoice_items')
-        .select('invoice_id, medicine_id')
-        .in('invoice_id', invoiceIds);
-
-      if (!invoiceItems || invoiceItems.length === 0) {
-        setComputedBnxFollowUp(0);
-        return;
-      }
-
-      // Get stock items to check categories
-      const medicineIds = [...new Set(invoiceItems.map(it => it.medicine_id).filter(Boolean))];
-      
-      if (medicineIds.length === 0) {
-        setComputedBnxFollowUp(0);
-        return;
-      }
-
-      const { data: stockItemsData } = await supabase
-        .from('stock_items')
-        .select('item_id, category')
-        .in('item_id', medicineIds);
-
-      const bnxMedicineIds = new Set(
-        (stockItemsData || [])
-          .filter(s => s.category?.toUpperCase() === 'BNX')
-          .map(s => s.item_id)
-      );
-
-      // Find invoices that have at least one BNX medicine
-      const invoicesWithBnx = new Set<string>();
-      invoiceItems.forEach(item => {
-        if (bnxMedicineIds.has(item.medicine_id)) {
-          invoicesWithBnx.add(item.invoice_id);
-        }
-      });
-
-      // Get patient IDs from invoices with BNX medicines
-      const bnxPatientIds = [...new Set(
-        invoices
-          .filter(inv => invoicesWithBnx.has(inv.id))
-          .map(inv => inv.patient_id)
-          .filter(Boolean)
-      )] as string[];
-
-      if (bnxPatientIds.length === 0) {
-        setComputedBnxFollowUp(0);
-        return;
-      }
-
-      // Get patient creation dates to identify new patients
-      const { data: patients } = await supabase
-        .from('patients')
-        .select('id, created_at')
-        .in('id', bnxPatientIds);
-
-      // Count patients who were NOT created on the report date (follow-up patients)
-      let followUpCount = 0;
-      (patients || []).forEach(patient => {
-        const createdDate = patient.created_at ? patient.created_at.split('T')[0] : null;
-        // If patient was created on a different day, they are a follow-up patient
-        if (createdDate !== reportDate) {
-          followUpCount++;
-        }
-      });
-
-      setComputedBnxFollowUp(followUpCount);
-    } catch (error) {
-      console.error('Error computing BNX follow-up patients:', error);
-      setComputedBnxFollowUp(null);
-    } finally {
-      setIsComputingFollowUp(false);
-    }
-  };
 
   const updateCashCount = (index: number, count: number) => {
     const updated = [...cashDetails];
