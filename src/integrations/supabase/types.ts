@@ -100,6 +100,47 @@ export type Database = {
           },
         ]
       }
+      attendance_records: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string | null
+          date: string
+          employee_id: string | null
+          id: string
+          notes: string | null
+          status: string | null
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          date: string
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          date?: string
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       day_reports: {
         Row: {
           adjustments: number | null
@@ -587,8 +628,11 @@ export type Database = {
           id: string
           instructions: string | null
           medicines: Json | null
+          notes: string | null
+          patient_age: string | null
           patient_id: string | null
           patient_name: string | null
+          patient_phone: string | null
           prescription_date: string | null
           prescription_number: string | null
           status: string | null
@@ -603,8 +647,11 @@ export type Database = {
           id?: string
           instructions?: string | null
           medicines?: Json | null
+          notes?: string | null
+          patient_age?: string | null
           patient_id?: string | null
           patient_name?: string | null
+          patient_phone?: string | null
           prescription_date?: string | null
           prescription_number?: string | null
           status?: string | null
@@ -619,8 +666,11 @@ export type Database = {
           id?: string
           instructions?: string | null
           medicines?: Json | null
+          notes?: string | null
+          patient_age?: string | null
           patient_id?: string | null
           patient_name?: string | null
+          patient_phone?: string | null
           prescription_date?: string | null
           prescription_number?: string | null
           status?: string | null
@@ -860,6 +910,50 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salary_employees: {
+        Row: {
+          allowances: number | null
+          basic_salary: number | null
+          created_at: string | null
+          deductions: number | null
+          employee_id: string | null
+          id: string
+          name: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          allowances?: number | null
+          basic_salary?: number | null
+          created_at?: string | null
+          deductions?: number | null
+          employee_id?: string | null
+          id?: string
+          name: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          allowances?: number | null
+          basic_salary?: number | null
+          created_at?: string | null
+          deductions?: number | null
+          employee_id?: string | null
+          id?: string
+          name?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
