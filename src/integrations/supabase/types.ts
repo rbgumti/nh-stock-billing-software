@@ -441,6 +441,7 @@ export type Database = {
           phone_alt: string | null
           pincode: string | null
           referred_by: string | null
+          s_no: number
           state: string | null
           status: string | null
           updated_at: string
@@ -482,6 +483,7 @@ export type Database = {
           phone_alt?: string | null
           pincode?: string | null
           referred_by?: string | null
+          s_no?: number
           state?: string | null
           status?: string | null
           updated_at?: string
@@ -523,12 +525,57 @@ export type Database = {
           phone_alt?: string | null
           pincode?: string | null
           referred_by?: string | null
+          s_no?: number
           state?: string | null
           status?: string | null
           updated_at?: string
           visit_type?: string | null
         }
         Relationships: []
+      }
+      prescription_items: {
+        Row: {
+          created_at: string | null
+          dosage: string | null
+          duration: string | null
+          frequency: string | null
+          id: string
+          instructions: string | null
+          medicine_name: string
+          prescription_id: string | null
+          quantity: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          dosage?: string | null
+          duration?: string | null
+          frequency?: string | null
+          id?: string
+          instructions?: string | null
+          medicine_name: string
+          prescription_id?: string | null
+          quantity?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          dosage?: string | null
+          duration?: string | null
+          frequency?: string | null
+          id?: string
+          instructions?: string | null
+          medicine_name?: string
+          prescription_id?: string | null
+          quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_items_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prescriptions: {
         Row: {
@@ -541,6 +588,8 @@ export type Database = {
           instructions: string | null
           medicines: Json | null
           patient_id: string | null
+          patient_name: string | null
+          prescription_date: string | null
           prescription_number: string | null
           status: string | null
           updated_at: string
@@ -555,6 +604,8 @@ export type Database = {
           instructions?: string | null
           medicines?: Json | null
           patient_id?: string | null
+          patient_name?: string | null
+          prescription_date?: string | null
           prescription_number?: string | null
           status?: string | null
           updated_at?: string
@@ -569,6 +620,8 @@ export type Database = {
           instructions?: string | null
           medicines?: Json | null
           patient_id?: string | null
+          patient_name?: string | null
+          prescription_date?: string | null
           prescription_number?: string | null
           status?: string | null
           updated_at?: string
@@ -629,13 +682,16 @@ export type Database = {
           id: string
           item_name: string
           mrp: number | null
+          pack_size: string | null
           purchase_order_id: string
+          qty_in_strips: number | null
           qty_in_tabs: number | null
           quantity: number
           received_quantity: number | null
           stock_item_id: number | null
           stock_item_name: string | null
           total: number
+          total_price: number | null
           unit_price: number
         }
         Insert: {
@@ -646,13 +702,16 @@ export type Database = {
           id?: string
           item_name: string
           mrp?: number | null
+          pack_size?: string | null
           purchase_order_id: string
+          qty_in_strips?: number | null
           qty_in_tabs?: number | null
           quantity?: number
           received_quantity?: number | null
           stock_item_id?: number | null
           stock_item_name?: string | null
           total?: number
+          total_price?: number | null
           unit_price?: number
         }
         Update: {
@@ -663,13 +722,16 @@ export type Database = {
           id?: string
           item_name?: string
           mrp?: number | null
+          pack_size?: string | null
           purchase_order_id?: string
+          qty_in_strips?: number | null
           qty_in_tabs?: number | null
           quantity?: number
           received_quantity?: number | null
           stock_item_id?: number | null
           stock_item_name?: string | null
           total?: number
+          total_price?: number | null
           unit_price?: number
         }
         Relationships: [
@@ -694,12 +756,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           discount: number | null
+          expected_delivery: string | null
           expected_delivery_date: string | null
           grn_date: string | null
           grn_number: string | null
           id: string
           invoice_date: string | null
           invoice_number: string | null
+          invoice_url: string | null
           is_service_po: boolean | null
           notes: string | null
           order_date: string
@@ -709,6 +773,9 @@ export type Database = {
           payment_notes: string | null
           payment_status: string | null
           po_number: string | null
+          po_type: string | null
+          service_amount: number | null
+          service_description: string | null
           status: string | null
           subtotal: number | null
           supplier: string | null
@@ -716,18 +783,21 @@ export type Database = {
           supplier_name: string | null
           tax: number | null
           total: number | null
+          total_amount: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           discount?: number | null
+          expected_delivery?: string | null
           expected_delivery_date?: string | null
           grn_date?: string | null
           grn_number?: string | null
           id?: string
           invoice_date?: string | null
           invoice_number?: string | null
+          invoice_url?: string | null
           is_service_po?: boolean | null
           notes?: string | null
           order_date?: string
@@ -737,6 +807,9 @@ export type Database = {
           payment_notes?: string | null
           payment_status?: string | null
           po_number?: string | null
+          po_type?: string | null
+          service_amount?: number | null
+          service_description?: string | null
           status?: string | null
           subtotal?: number | null
           supplier?: string | null
@@ -744,18 +817,21 @@ export type Database = {
           supplier_name?: string | null
           tax?: number | null
           total?: number | null
+          total_amount?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
           discount?: number | null
+          expected_delivery?: string | null
           expected_delivery_date?: string | null
           grn_date?: string | null
           grn_number?: string | null
           id?: string
           invoice_date?: string | null
           invoice_number?: string | null
+          invoice_url?: string | null
           is_service_po?: boolean | null
           notes?: string | null
           order_date?: string
@@ -765,6 +841,9 @@ export type Database = {
           payment_notes?: string | null
           payment_status?: string | null
           po_number?: string | null
+          po_type?: string | null
+          service_amount?: number | null
+          service_description?: string | null
           status?: string | null
           subtotal?: number | null
           supplier?: string | null
@@ -772,6 +851,7 @@ export type Database = {
           supplier_name?: string | null
           tax?: number | null
           total?: number | null
+          total_amount?: number | null
           updated_at?: string
         }
         Relationships: [
