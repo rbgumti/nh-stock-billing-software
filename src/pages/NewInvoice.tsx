@@ -247,16 +247,10 @@ export default function NewInvoice() {
           }
         }
         
-        // Recalculate quantity when frequency or duration changes
+        // No auto-calculation for quantity - manual entry only
+        // Just update totals if frequency/duration change (for reference purposes)
         if (field === "frequency" || field === "durationDays") {
-          const freq = field === "frequency" ? value as string : updatedItem.frequency;
-          const days = field === "durationDays" ? value as number : updatedItem.durationDays;
-          const freqOption = FREQUENCY_OPTIONS.find(f => f.value === freq);
-          if (freqOption && days && days > 0) {
-            updatedItem.quantity = freqOption.multiplier * days;
-            updatedItem.stockAfterInvoice = updatedItem.availableStock - updatedItem.quantity;
-            updatedItem.total = updatedItem.quantity * updatedItem.mrp;
-          }
+          // Keep frequency/duration as reference but don't auto-calculate quantity
         }
         
         // Recalculate when quantity changes directly
@@ -389,94 +383,72 @@ export default function NewInvoice() {
   const isInitialLoading = stockLoading && patients.length === 0;
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center space-x-4">
-        <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+    <div className="p-4 space-y-3">
+      <div className="flex items-center space-x-3">
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Create New Invoice</h1>
-          <p className="text-muted-foreground mt-2">Generate an invoice for patient services</p>
+          <h1 className="text-xl font-bold text-foreground">Create New Invoice</h1>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Invoice Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Invoice Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Patient Search */}
-            <div className="space-y-4 relative">
-              <PatientSearchSelect
-                patients={patients}
-                selectedPatientId={foundPatient?.id}
-                onPatientSelect={handlePatientSelect}
-                label="Select Patient *"
-                disabled={patientsLoading}
-              />
-              {patientsLoading && (
-                <p className="text-xs text-muted-foreground">Loading patients...</p>
-              )}
-              
-              {foundPatient && (
-                <div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-                  <h4 className="font-medium text-green-800 dark:text-green-300">Patient Details:</h4>
-                  <p className="text-sm text-green-700 dark:text-green-400">
-                    <strong>Name:</strong> {foundPatient.patient_name}
-                  </p>
-                  <p className="text-sm text-green-700 dark:text-green-400">
-                    <strong>ID:</strong> {foundPatient.id}
-                  </p>
-                  <p className="text-sm text-green-700 dark:text-green-400">
-                    <strong>Phone:</strong> {foundPatient.phone}
-                  </p>
-                </div>
-              )}
+      <form onSubmit={handleSubmit} className="space-y-3">
+        {/* Invoice Details - Compact */}
+        <Card className="shadow-sm">
+          <CardContent className="p-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+              <div className="md:col-span-2">
+                <PatientSearchSelect
+                  patients={patients}
+                  selectedPatientId={foundPatient?.id}
+                  onPatientSelect={handlePatientSelect}
+                  label="Patient *"
+                  disabled={patientsLoading}
+                />
+              </div>
+              <div>
+                <Label htmlFor="invoiceDate" className="text-xs">Date</Label>
+                <Input
+                  id="invoiceDate"
+                  type="date"
+                  value={invoiceDate}
+                  onChange={(e) => setInvoiceDate(e.target.value)}
+                  className="h-9"
+                />
+              </div>
             </div>
-
-            <div>
-              <Label htmlFor="invoiceDate">Invoice Date</Label>
-              <Input
-                id="invoiceDate"
-                type="date"
-                value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
-              />
-            </div>
+            {foundPatient && (
+              <div className="mt-2 p-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded text-xs flex gap-4">
+                <span><strong>Name:</strong> {foundPatient.patient_name}</span>
+                <span><strong>ID:</strong> {foundPatient.id}</span>
+                <span><strong>Phone:</strong> {foundPatient.phone}</span>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Invoice Items */}
-        <Card>
-          <CardHeader>
+        <Card className="shadow-sm">
+          <CardHeader className="p-3 pb-2">
             <div className="flex justify-between items-center">
-              <CardTitle>Invoice Items</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Item
+              <CardTitle className="text-base">Items</CardTitle>
+              <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={addItem}>
+                <Plus className="h-3 w-3 mr-1" />
+                Add
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
+          <CardContent className="p-3 pt-0">
+            <div className="space-y-3">
               {items.map((item, index) => (
-                <div key={item.id} className={`p-4 border rounded-lg space-y-4 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500 bg-red-50 dark:bg-red-950/30' : ''}`}>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Label htmlFor={`medicine-${item.id}`}>Select Medicine *</Label>
-                        {item.fromPrescription ? (
-                          <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                            <FileText className="h-3 w-3 mr-1" />
-                            From Rx
-                          </Badge>
-                        ) : item.medicineId > 0 && (
-                          <Badge variant="outline" className="text-xs">
-                            <Hand className="h-3 w-3 mr-1" />
-                            Manual
-                          </Badge>
+                <div key={item.id} className={`p-3 border rounded-lg space-y-2 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500 bg-red-50 dark:bg-red-950/30' : ''}`}>
+                  <div className="grid grid-cols-12 gap-2 items-end">
+                    <div className="col-span-12 md:col-span-6">
+                      <div className="flex items-center gap-1 mb-1">
+                        <Label className="text-xs">Medicine *</Label>
+                        {item.fromPrescription && (
+                          <Badge variant="secondary" className="text-[10px] px-1 py-0 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">Rx</Badge>
                         )}
                       </div>
                       <MedicineSearchSelect
@@ -486,182 +458,97 @@ export default function NewInvoice() {
                         triggerRef={(el) => { selectRefs.current[item.id] = el; }}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor={`frequency-${item.id}`}>Frequency</Label>
-                      <Select
-                        value={item.frequency || ""}
-                        onValueChange={(value) => updateItem(item.id, "frequency", value)}
-                      >
-                        <SelectTrigger id={`frequency-${item.id}`}>
-                          <SelectValue placeholder="Select frequency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {FREQUENCY_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor={`duration-${item.id}`}>Duration (Days)</Label>
+                    <div className="col-span-4 md:col-span-2">
+                      <Label className="text-xs">Qty *</Label>
                       <Input
-                        id={`duration-${item.id}`}
-                        type="number"
-                        min="1"
-                        value={item.durationDays || ""}
-                        onChange={(e) => updateItem(item.id, "durationDays", parseInt(e.target.value) || 0)}
-                        placeholder="Enter days"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
-                      <Input
-                        id={`quantity-${item.id}`}
                         type="number"
                         min="0"
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 0)}
-                        className={item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}
+                        className={`h-9 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}`}
                       />
                       {item.quantity > item.availableStock && item.medicineId > 0 && (
-                        <p className="text-xs text-red-500 mt-1">Exceeds available stock ({item.availableStock})</p>
+                        <p className="text-[10px] text-red-500">Max: {item.availableStock}</p>
+                      )}
+                    </div>
+                    <div className="col-span-4 md:col-span-2">
+                      <Label className="text-xs">MRP/Tab</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={item.mrp}
+                        onChange={(e) => updateItem(item.id, "mrp", parseFloat(e.target.value) || 0)}
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="col-span-4 md:col-span-2 flex items-end gap-1">
+                      <div className="flex-1">
+                        <Label className="text-xs">Total</Label>
+                        <div className="h-9 flex items-center font-semibold text-sm">₹{item.total.toFixed(2)}</div>
+                      </div>
+                      {items.length > 1 && (
+                        <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive" onClick={() => removeItem(item.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       )}
                     </div>
                   </div>
                   
-                  {item.medicineName && (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor={`batchNo-${item.id}`}>Batch No</Label>
-                          <Input
-                            id={`batchNo-${item.id}`}
-                            value={item.batchNo}
-                            onChange={(e) => updateItem(item.id, "batchNo", e.target.value)}
-                            placeholder="Enter batch number"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`expiryDate-${item.id}`} className="flex items-center gap-2">
-                            Expiry Date
-                            <ExpiryWarningBadge expiryDate={item.expiryDate} />
-                          </Label>
-                          <Input
-                            id={`expiryDate-${item.id}`}
-                            type="date"
-                            value={item.expiryDate}
-                            onChange={(e) => updateItem(item.id, "expiryDate", e.target.value)}
-                            className={getExpiryWarningLevel(item.expiryDate) === 'critical' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 
-                                       getExpiryWarningLevel(item.expiryDate) === 'warning' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' : 
-                                       getExpiryWarningLevel(item.expiryDate) === 'caution' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : ''}
-                          />
-                        </div>
-                      <div>
-                        <Label htmlFor={`mrp-${item.id}`}>MRP/Tab (₹)</Label>
-                        <Input
-                          id={`mrp-${item.id}`}
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={item.mrp}
-                          onChange={(e) => updateItem(item.id, "mrp", parseFloat(e.target.value) || 0)}
-                          placeholder="0.00"
-                        />
-                      </div>
-                    </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg text-sm">
-                        <div>
-                          <span className="font-medium text-gray-600">Cost/Tab:</span>
-                          <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-600">Available Stock:</span>
-                          <p className="font-semibold text-blue-600">{item.availableStock}</p>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-600">Stock After Invoice:</span>
-                          <p className={`font-semibold ${item.stockAfterInvoice < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {item.stockAfterInvoice}
-                          </p>
-                        </div>
-                      </div>
-                    </>
-                  )}
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-lg font-medium text-gray-600">Total: </span>
-                      <span className="text-xl font-bold">₹{item.total.toFixed(2)}</span>
+                  {item.medicineName && (
+                    <div className="grid grid-cols-12 gap-2 text-xs bg-muted/50 rounded p-2">
+                      <div className="col-span-3">
+                        <span className="text-muted-foreground">Batch:</span>
+                        <p className="font-medium truncate">{item.batchNo || '-'}</p>
+                      </div>
+                      <div className="col-span-3">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          Exp: <ExpiryWarningBadge expiryDate={item.expiryDate} />
+                        </span>
+                        <p className="font-medium">{item.expiryDate || '-'}</p>
+                      </div>
+                      <div className="col-span-3">
+                        <span className="text-muted-foreground">Stock:</span>
+                        <p className="font-medium text-blue-600">{item.availableStock}</p>
+                      </div>
+                      <div className="col-span-3">
+                        <span className="text-muted-foreground">After:</span>
+                        <p className={`font-medium ${item.stockAfterInvoice < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                          {item.stockAfterInvoice}
+                        </p>
+                      </div>
                     </div>
-                    {items.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+                  )}
                 </div>
               ))}
             </div>
 
-            {/* Invoice Summary */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span className="font-medium">₹{subtotal.toFixed(2)}</span>
-                </div>
-                {/* Tax removed */}
-                <div className="flex justify-between text-lg font-bold border-t pt-2">
-                  <span>Total:</span>
-                  <span>₹{total.toFixed(2)}</span>
-                </div>
-                {followUpDate && (
-                  <div className="flex justify-between items-center text-sm border-t pt-2 mt-2">
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      Follow-up Date:
-                    </span>
-                    <span className="font-medium text-primary">{format(new Date(followUpDate), 'dd MMM yyyy')}</span>
-                  </div>
-                )}
-              </div>
+            {/* Invoice Summary - Compact */}
+            <div className="mt-3 p-3 bg-muted/50 rounded-lg flex justify-between items-center">
+              <span className="font-semibold">Total:</span>
+              <span className="text-lg font-bold">₹{total.toFixed(2)}</span>
             </div>
           </CardContent>
         </Card>
 
-        {/* Notes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Additional Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Notes - Compact */}
+        <Card className="shadow-sm">
+          <CardContent className="p-3">
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any additional notes or payment terms..."
-              rows={3}
+              placeholder="Notes (optional)"
+              rows={2}
+              className="text-sm"
             />
           </CardContent>
         </Card>
 
         {/* Actions */}
-        <div className="flex space-x-4">
-          <Button type="submit" className="flex-1">
-            Create Invoice
-          </Button>
-          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-            Cancel
-          </Button>
+        <div className="flex gap-2">
+          <Button type="submit" className="flex-1 h-9">Create Invoice</Button>
+          <Button type="button" variant="outline" className="h-9" onClick={() => navigate(-1)}>Cancel</Button>
         </div>
       </form>
     </div>
