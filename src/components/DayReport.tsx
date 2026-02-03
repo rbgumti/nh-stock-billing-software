@@ -66,6 +66,8 @@ export default function DayReport() {
   const [isRefreshingMedicine, setIsRefreshingMedicine] = useState(false);
   const [isRefreshingPrevCash, setIsRefreshingPrevCash] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [computedBnxFollowUp, setComputedBnxFollowUp] = useState<number | null>(null);
+  const [isComputingFollowUp, setIsComputingFollowUp] = useState(false);
   const [showDateRangeExport, setShowDateRangeExport] = useState(false);
   
   // Patient counts
@@ -365,6 +367,7 @@ export default function DayReport() {
 
   useEffect(() => {
     loadMedicineData();
+    computeBnxFollowUpPatients();
   }, [stockItems, reportDate]);
 
   // Normalize medicine names so batches with minor naming differences (extra spaces, NBSP)
@@ -535,6 +538,103 @@ export default function DayReport() {
       setMedicineDataUpdated(new Date());
     } finally {
       setIsRefreshingMedicine(false);
+    }
+  };
+
+  // Compute BNX follow-up patients automatically from invoices
+  // Logic: Count unique patients who have invoices with BNX category medicines on the report date
+  // Exclude patients whose patient record was created on the same day (new patients)
+  const computeBnxFollowUpPatients = async () => {
+    setIsComputingFollowUp(true);
+    try {
+      // Get invoices for the selected date
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('id, patient_id, invoice_date')
+        .like('invoice_date', `${reportDate}%`)
+        .not('patient_id', 'is', null);
+
+      if (!invoices || invoices.length === 0) {
+        setComputedBnxFollowUp(0);
+        return;
+      }
+
+      const invoiceIds = invoices.map(inv => inv.id);
+      const patientIds = [...new Set(invoices.map(inv => inv.patient_id).filter(Boolean))] as string[];
+
+      // Get invoice items to check which invoices have BNX category medicines
+      const { data: invoiceItems } = await supabase
+        .from('invoice_items')
+        .select('invoice_id, medicine_id')
+        .in('invoice_id', invoiceIds);
+
+      if (!invoiceItems || invoiceItems.length === 0) {
+        setComputedBnxFollowUp(0);
+        return;
+      }
+
+      // Get stock items to check categories
+      const medicineIds = [...new Set(invoiceItems.map(it => it.medicine_id).filter(Boolean))];
+      
+      if (medicineIds.length === 0) {
+        setComputedBnxFollowUp(0);
+        return;
+      }
+
+      const { data: stockItemsData } = await supabase
+        .from('stock_items')
+        .select('item_id, category')
+        .in('item_id', medicineIds);
+
+      const bnxMedicineIds = new Set(
+        (stockItemsData || [])
+          .filter(s => s.category?.toUpperCase() === 'BNX')
+          .map(s => s.item_id)
+      );
+
+      // Find invoices that have at least one BNX medicine
+      const invoicesWithBnx = new Set<string>();
+      invoiceItems.forEach(item => {
+        if (bnxMedicineIds.has(item.medicine_id)) {
+          invoicesWithBnx.add(item.invoice_id);
+        }
+      });
+
+      // Get patient IDs from invoices with BNX medicines
+      const bnxPatientIds = [...new Set(
+        invoices
+          .filter(inv => invoicesWithBnx.has(inv.id))
+          .map(inv => inv.patient_id)
+          .filter(Boolean)
+      )] as string[];
+
+      if (bnxPatientIds.length === 0) {
+        setComputedBnxFollowUp(0);
+        return;
+      }
+
+      // Get patient creation dates to identify new patients
+      const { data: patients } = await supabase
+        .from('patients')
+        .select('id, created_at')
+        .in('id', bnxPatientIds);
+
+      // Count patients who were NOT created on the report date (follow-up patients)
+      let followUpCount = 0;
+      (patients || []).forEach(patient => {
+        const createdDate = patient.created_at ? patient.created_at.split('T')[0] : null;
+        // If patient was created on a different day, they are a follow-up patient
+        if (createdDate !== reportDate) {
+          followUpCount++;
+        }
+      });
+
+      setComputedBnxFollowUp(followUpCount);
+    } catch (error) {
+      console.error('Error computing BNX follow-up patients:', error);
+      setComputedBnxFollowUp(null);
+    } finally {
+      setIsComputingFollowUp(false);
     }
   };
 
@@ -1606,13 +1706,35 @@ export default function DayReport() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Follow up Patients</label>
-                  <Input
-                    type="number"
-                    value={followUpPatients || ''}
-                    onChange={(e) => setFollowUpPatients(parseInt(e.target.value) || 0)}
-                    className="h-8"
-                  />
+                  <label className="text-xs text-muted-foreground flex items-center gap-1">
+                    Follow up Patients
+                    {isComputingFollowUp && <Loader2 className="h-3 w-3 animate-spin" />}
+                  </label>
+                  <div className="flex gap-1">
+                    <Input
+                      type="number"
+                      value={followUpPatients || ''}
+                      onChange={(e) => setFollowUpPatients(parseInt(e.target.value) || 0)}
+                      className="h-8"
+                    />
+                    {computedBnxFollowUp !== null && computedBnxFollowUp !== followUpPatients && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2 text-xs bg-green-50 hover:bg-green-100 border-green-300 text-green-700"
+                        onClick={() => setFollowUpPatients(computedBnxFollowUp)}
+                        title={`Apply computed value: ${computedBnxFollowUp} follow-up patients from BNX invoices`}
+                      >
+                        <Check className="h-3 w-3 mr-1" />
+                        {computedBnxFollowUp}
+                      </Button>
+                    )}
+                  </div>
+                  {computedBnxFollowUp !== null && (
+                    <span className="text-[10px] text-muted-foreground mt-0.5 block">
+                      Auto-detected: {computedBnxFollowUp} from BNX invoices
+                    </span>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground">Total Patients</label>
