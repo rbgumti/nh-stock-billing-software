@@ -14,16 +14,998 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string | null
+          created_at: string
+          created_by: string | null
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          patient_id: string | null
+          status: string | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      day_reports: {
+        Row: {
+          adjustments: number | null
+          advances: Json | null
+          cash_denominations: Json | null
+          cash_handover_amarjeet: number | null
+          cash_handover_mandeep: number | null
+          cash_handover_sir: number | null
+          cash_previous_day: number | null
+          created_at: string
+          created_by: string | null
+          deposit_in_bank: number | null
+          expenses: Json | null
+          fees: number | null
+          follow_up_patients: number | null
+          id: string
+          lab_collection: number | null
+          loose_balance: number | null
+          new_patients: number | null
+          paytm_gpay: number | null
+          psychiatry_collection: number | null
+          psychiatry_patients: number | null
+          report_date: string
+          stock_snapshot: Json | null
+          tapentadol_patients: number | null
+          updated_at: string
+        }
+        Insert: {
+          adjustments?: number | null
+          advances?: Json | null
+          cash_denominations?: Json | null
+          cash_handover_amarjeet?: number | null
+          cash_handover_mandeep?: number | null
+          cash_handover_sir?: number | null
+          cash_previous_day?: number | null
+          created_at?: string
+          created_by?: string | null
+          deposit_in_bank?: number | null
+          expenses?: Json | null
+          fees?: number | null
+          follow_up_patients?: number | null
+          id?: string
+          lab_collection?: number | null
+          loose_balance?: number | null
+          new_patients?: number | null
+          paytm_gpay?: number | null
+          psychiatry_collection?: number | null
+          psychiatry_patients?: number | null
+          report_date: string
+          stock_snapshot?: Json | null
+          tapentadol_patients?: number | null
+          updated_at?: string
+        }
+        Update: {
+          adjustments?: number | null
+          advances?: Json | null
+          cash_denominations?: Json | null
+          cash_handover_amarjeet?: number | null
+          cash_handover_mandeep?: number | null
+          cash_handover_sir?: number | null
+          cash_previous_day?: number | null
+          created_at?: string
+          created_by?: string | null
+          deposit_in_bank?: number | null
+          expenses?: Json | null
+          fees?: number | null
+          follow_up_patients?: number | null
+          id?: string
+          lab_collection?: number | null
+          loose_balance?: number | null
+          new_patients?: number | null
+          paytm_gpay?: number | null
+          psychiatry_collection?: number | null
+          psychiatry_patients?: number | null
+          report_date?: string
+          stock_snapshot?: Json | null
+          tapentadol_patients?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          aadhar_number: string | null
+          address: string | null
+          bank_account_number: string | null
+          bank_name: string | null
+          created_at: string
+          date_of_joining: string | null
+          department: string | null
+          designation: string | null
+          email: string | null
+          id: string
+          ifsc_code: string | null
+          name: string
+          pan_number: string | null
+          phone: string | null
+          salary: number | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          aadhar_number?: string | null
+          address?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
+          created_at?: string
+          date_of_joining?: string | null
+          department?: string | null
+          designation?: string | null
+          email?: string | null
+          id?: string
+          ifsc_code?: string | null
+          name: string
+          pan_number?: string | null
+          phone?: string | null
+          salary?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aadhar_number?: string | null
+          address?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
+          created_at?: string
+          date_of_joining?: string | null
+          department?: string | null
+          designation?: string | null
+          email?: string | null
+          id?: string
+          ifsc_code?: string | null
+          name?: string
+          pan_number?: string | null
+          phone?: string | null
+          salary?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invoice_items: {
+        Row: {
+          batch_no: string | null
+          created_at: string
+          discount: number | null
+          duration_days: number | null
+          expiry_date: string | null
+          frequency: string | null
+          id: string
+          invoice_id: string
+          is_returned: boolean | null
+          medicine_name: string
+          mrp: number | null
+          quantity: number
+          returned_quantity: number | null
+          stock_item_id: number | null
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          batch_no?: string | null
+          created_at?: string
+          discount?: number | null
+          duration_days?: number | null
+          expiry_date?: string | null
+          frequency?: string | null
+          id?: string
+          invoice_id: string
+          is_returned?: boolean | null
+          medicine_name: string
+          mrp?: number | null
+          quantity?: number
+          returned_quantity?: number | null
+          stock_item_id?: number | null
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          batch_no?: string | null
+          created_at?: string
+          discount?: number | null
+          duration_days?: number | null
+          expiry_date?: string | null
+          frequency?: string | null
+          id?: string
+          invoice_id?: string
+          is_returned?: boolean | null
+          medicine_name?: string
+          mrp?: number | null
+          quantity?: number
+          returned_quantity?: number | null
+          stock_item_id?: number | null
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["item_id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          discount: number | null
+          follow_up_date: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string | null
+          notes: string | null
+          patient_id: string | null
+          payment_method: string | null
+          payment_status: string | null
+          prescription_id: string | null
+          status: string | null
+          subtotal: number | null
+          tax: number | null
+          total: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          discount?: number | null
+          follow_up_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string | null
+          notes?: string | null
+          patient_id?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          prescription_id?: string | null
+          status?: string | null
+          subtotal?: number | null
+          tax?: number | null
+          total?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          discount?: number | null
+          follow_up_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string | null
+          notes?: string | null
+          patient_id?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          prescription_id?: string | null
+          status?: string | null
+          subtotal?: number | null
+          tax?: number | null
+          total?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          address: string | null
+          allergies: string | null
+          blood_group: string | null
+          chief_complaint: string | null
+          chronic_conditions: string | null
+          city: string | null
+          created_at: string
+          created_by: string | null
+          current_medications: string | null
+          date_of_birth: string | null
+          email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relation: string | null
+          first_name: string
+          gender: string | null
+          id: string
+          insurance_policy_number: string | null
+          insurance_provider: string | null
+          last_name: string | null
+          medical_notes: string | null
+          notes: string | null
+          patient_id: string | null
+          phone: string | null
+          pincode: string | null
+          referred_by: string | null
+          state: string | null
+          status: string | null
+          updated_at: string
+          visit_type: string | null
+        }
+        Insert: {
+          address?: string | null
+          allergies?: string | null
+          blood_group?: string | null
+          chief_complaint?: string | null
+          chronic_conditions?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_medications?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
+          first_name: string
+          gender?: string | null
+          id?: string
+          insurance_policy_number?: string | null
+          insurance_provider?: string | null
+          last_name?: string | null
+          medical_notes?: string | null
+          notes?: string | null
+          patient_id?: string | null
+          phone?: string | null
+          pincode?: string | null
+          referred_by?: string | null
+          state?: string | null
+          status?: string | null
+          updated_at?: string
+          visit_type?: string | null
+        }
+        Update: {
+          address?: string | null
+          allergies?: string | null
+          blood_group?: string | null
+          chief_complaint?: string | null
+          chronic_conditions?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_medications?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
+          first_name?: string
+          gender?: string | null
+          id?: string
+          insurance_policy_number?: string | null
+          insurance_provider?: string | null
+          last_name?: string | null
+          medical_notes?: string | null
+          notes?: string | null
+          patient_id?: string | null
+          phone?: string | null
+          pincode?: string | null
+          referred_by?: string | null
+          state?: string | null
+          status?: string | null
+          updated_at?: string
+          visit_type?: string | null
+        }
+        Relationships: []
+      }
+      prescriptions: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          created_by: string | null
+          diagnosis: string | null
+          follow_up_date: string | null
+          id: string
+          instructions: string | null
+          medicines: Json | null
+          patient_id: string | null
+          prescription_number: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          follow_up_date?: string | null
+          id?: string
+          instructions?: string | null
+          medicines?: Json | null
+          patient_id?: string | null
+          prescription_number?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          follow_up_date?: string | null
+          id?: string
+          instructions?: string | null
+          medicines?: Json | null
+          patient_id?: string | null
+          prescription_number?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      purchase_order_items: {
+        Row: {
+          batch_no: string | null
+          created_at: string
+          expiry_date: string | null
+          free_quantity: number | null
+          id: string
+          item_name: string
+          mrp: number | null
+          purchase_order_id: string
+          quantity: number
+          received_quantity: number | null
+          stock_item_id: number | null
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          batch_no?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          free_quantity?: number | null
+          id?: string
+          item_name: string
+          mrp?: number | null
+          purchase_order_id: string
+          quantity?: number
+          received_quantity?: number | null
+          stock_item_id?: number | null
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          batch_no?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          free_quantity?: number | null
+          id?: string
+          item_name?: string
+          mrp?: number | null
+          purchase_order_id?: string
+          quantity?: number
+          received_quantity?: number | null
+          stock_item_id?: number | null
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["item_id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          discount: number | null
+          expected_delivery_date: string | null
+          grn_date: string | null
+          grn_number: string | null
+          id: string
+          invoice_date: string | null
+          invoice_number: string | null
+          is_service_po: boolean | null
+          notes: string | null
+          order_date: string
+          payment_amount: number | null
+          payment_date: string | null
+          payment_due_date: string | null
+          payment_notes: string | null
+          payment_status: string | null
+          po_number: string | null
+          status: string | null
+          subtotal: number | null
+          supplier_id: string | null
+          supplier_name: string | null
+          tax: number | null
+          total: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          discount?: number | null
+          expected_delivery_date?: string | null
+          grn_date?: string | null
+          grn_number?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          is_service_po?: boolean | null
+          notes?: string | null
+          order_date?: string
+          payment_amount?: number | null
+          payment_date?: string | null
+          payment_due_date?: string | null
+          payment_notes?: string | null
+          payment_status?: string | null
+          po_number?: string | null
+          status?: string | null
+          subtotal?: number | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          tax?: number | null
+          total?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          discount?: number | null
+          expected_delivery_date?: string | null
+          grn_date?: string | null
+          grn_number?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          is_service_po?: boolean | null
+          notes?: string | null
+          order_date?: string
+          payment_amount?: number | null
+          payment_date?: string | null
+          payment_due_date?: string | null
+          payment_notes?: string | null
+          payment_status?: string | null
+          po_number?: string | null
+          status?: string | null
+          subtotal?: number | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          tax?: number | null
+          total?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salary_records: {
+        Row: {
+          advances: number | null
+          allowances: number | null
+          basic_salary: number | null
+          created_at: string
+          deductions: number | null
+          employee_id: string
+          id: string
+          month: number
+          net_salary: number | null
+          notes: string | null
+          payment_date: string | null
+          payment_method: string | null
+          status: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          advances?: number | null
+          allowances?: number | null
+          basic_salary?: number | null
+          created_at?: string
+          deductions?: number | null
+          employee_id: string
+          id?: string
+          month: number
+          net_salary?: number | null
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          status?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          advances?: number | null
+          allowances?: number | null
+          basic_salary?: number | null
+          created_at?: string
+          deductions?: number | null
+          employee_id?: string
+          id?: string
+          month?: number
+          net_salary?: number | null
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          status?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sequence_numbers: {
+        Row: {
+          current_value: number
+          id: string
+          prefix: string | null
+          sequence_type: string
+          updated_at: string
+        }
+        Insert: {
+          current_value?: number
+          id?: string
+          prefix?: string | null
+          sequence_type: string
+          updated_at?: string
+        }
+        Update: {
+          current_value?: number
+          id?: string
+          prefix?: string | null
+          sequence_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stock_items: {
+        Row: {
+          batch_no: string | null
+          category: string
+          composition: string | null
+          created_at: string
+          current_stock: number
+          expiry_date: string | null
+          item_id: number
+          minimum_stock: number
+          mrp: number | null
+          name: string
+          packing: string | null
+          status: string | null
+          supplier: string | null
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          batch_no?: string | null
+          category?: string
+          composition?: string | null
+          created_at?: string
+          current_stock?: number
+          expiry_date?: string | null
+          item_id?: number
+          minimum_stock?: number
+          mrp?: number | null
+          name: string
+          packing?: string | null
+          status?: string | null
+          supplier?: string | null
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          batch_no?: string | null
+          category?: string
+          composition?: string | null
+          created_at?: string
+          current_stock?: number
+          expiry_date?: string | null
+          item_id?: number
+          minimum_stock?: number
+          mrp?: number | null
+          name?: string
+          packing?: string | null
+          status?: string | null
+          supplier?: string | null
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      supplier_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string | null
+          purchase_order_id: string | null
+          receipt_url: string | null
+          reference_number: string | null
+          status: string | null
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+          purchase_order_id?: string | null
+          receipt_url?: string | null
+          reference_number?: string | null
+          status?: string | null
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+          purchase_order_id?: string | null
+          receipt_url?: string | null
+          reference_number?: string | null
+          status?: string | null
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_payments_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_payments_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          address: string | null
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          gst_number: string | null
+          id: string
+          name: string
+          notes: string | null
+          payment_terms: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          gst_number?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          payment_terms?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          gst_number?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          payment_terms?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_email_by_username: { Args: { p_username: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      snapshot_opening_stock: { Args: never; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +1132,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user", "staff"],
+    },
   },
 } as const
