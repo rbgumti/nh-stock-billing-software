@@ -112,7 +112,6 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .insert([{
-          s_no: patient.patientId,
           file_no: patient.fileNo || '',
           patient_name: `${patient.firstName} ${patient.lastName}`.trim(),
           age: patient.dateOfBirth 
@@ -124,7 +123,8 @@ export function usePatientStore() {
           phone: patient.phone || '',
           address: patient.address || '',
           new_govt_id: patient.govtIdNew || '',
-          category: patient.category || null
+          category: patient.category || null,
+          first_name: patient.firstName || ''
         }]);
 
       if (error) throw error;
@@ -160,7 +160,7 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .update(updateData)
-        .eq('id', parseInt(patientId))
+        .eq('id', patientId)
         .select();
 
       if (error) {
@@ -189,7 +189,7 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .delete()
-        .eq('id', parseInt(patientId));
+        .eq('id', patientId);
 
       if (error) throw error;
     } catch (error) {

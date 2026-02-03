@@ -167,7 +167,7 @@ export default function AdminPanel() {
         // Update existing role
         const { error } = await supabase
           .from('user_roles')
-          .update({ role: newRole })
+          .update({ role: newRole } as any)
           .eq('user_id', selectedUser.id);
 
         if (error) throw error;
@@ -175,7 +175,7 @@ export default function AdminPanel() {
         // Insert new role
         const { error } = await supabase
           .from('user_roles')
-          .insert({ user_id: selectedUser.id, role: newRole });
+          .insert({ user_id: selectedUser.id, role: newRole } as any);
 
         if (error) throw error;
       }

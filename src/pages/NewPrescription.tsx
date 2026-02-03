@@ -29,7 +29,7 @@ export default function NewPrescription() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [formData, setFormData] = useState({
-    patient_id: 0,
+    patient_id: '',
     patient_name: '',
     patient_phone: '',
     patient_age: '',
@@ -103,7 +103,7 @@ export default function NewPrescription() {
 
         setFormData(prev => ({
           ...prev,
-          patient_id: data.patient_id,
+          patient_id: data.patient_id || '',
           patient_name: data.patient_name,
           patient_phone: data.patient_phone || '',
           patient_age: patientAge,
@@ -125,7 +125,7 @@ export default function NewPrescription() {
   const handlePatientSelect = (patient: Patient) => {
     setFormData(prev => ({
       ...prev,
-      patient_id: patient.id,
+      patient_id: String(patient.id),
       patient_name: patient.patient_name,
       patient_phone: patient.phone || '',
       patient_age: patient.age || '',

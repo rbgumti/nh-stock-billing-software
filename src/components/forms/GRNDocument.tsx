@@ -6,7 +6,7 @@ import type { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import type { StockItem } from "@/hooks/useStockStore";
 
 export interface GRNItem {
-  stockItemId: number;
+  stockItemId: string | number;
   orderedQuantity: number;
   receivedQuantity: number;
   batchNo?: string;
@@ -59,16 +59,16 @@ export const GRNDocument = React.forwardRef<HTMLDivElement, GRNDocumentProps>(
         .replace(/\//g, "-");
     };
 
-    const getStockItemDetails = (stockItemId: number) => {
-      return stockItems.find((item) => item.id === stockItemId);
+    const getStockItemDetails = (stockItemId: string | number) => {
+      return stockItems.find((item) => String(item.id) === String(stockItemId));
     };
 
     // Get cost price from GRN item first, then fallback to PO items, then stock item
     const getCostPrice = (item: GRNItem) => {
       if (item.costPrice && item.costPrice > 0) return item.costPrice;
-      const poItem = purchaseOrder.items.find((poi) => poi.stockItemId === item.stockItemId);
+      const poItem = purchaseOrder.items.find((poi) => String(poi.stockItemId) === String(item.stockItemId));
       if (poItem?.unitPrice) return poItem.unitPrice;
-      const stockItem = stockItems.find((s) => s.id === item.stockItemId);
+      const stockItem = stockItems.find((s) => String(s.id) === String(item.stockItemId));
       return stockItem?.unitPrice || 0;
     };
 
