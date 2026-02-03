@@ -1674,7 +1674,7 @@ export default function Stock() {
           </Card>
 
           {/* Stock Items - Grouped by Medicine Name */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             {(() => {
               // Get unique medicine names from filtered items
               const seen = new Set<string>();
