@@ -143,14 +143,14 @@ export function StockItemCard({
   });
 
   return (
-    <Card className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 border-l-4 ${categoryStyle.border} ${
-      criticalBatch ? 'ring-2 ring-destructive/30' : ''
+    <Card className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 border-l-3 ${categoryStyle.border} ${
+      criticalBatch ? 'ring-1 ring-destructive/30' : ''
     }`}>
       {/* Warning Banner for critical items */}
       {criticalBatch && (
-        <div className="absolute top-0 left-0 right-0 px-3 py-1 flex items-center justify-between text-xs font-medium bg-gradient-to-r from-destructive to-pink text-white">
-          <span className="flex items-center gap-1">
-            <AlertTriangle className="h-3 w-3" />
+        <div className="absolute top-0 left-0 right-0 px-2 py-0.5 flex items-center justify-between text-[10px] font-medium bg-gradient-to-r from-destructive to-pink text-white">
+          <span className="flex items-center gap-0.5">
+            <AlertTriangle className="h-2.5 w-2.5" />
             Expiry Alert
           </span>
         </div>
@@ -163,21 +163,21 @@ export function StockItemCard({
         'from-pink/5 via-transparent to-purple/5'
       } opacity-50 group-hover:opacity-100 transition-opacity`} />
       
-      <CardHeader className={`relative pb-2 ${criticalBatch ? 'pt-8' : ''}`}>
+      <CardHeader className={`relative p-3 pb-1.5 ${criticalBatch ? 'pt-6' : ''}`}>
         <div className="flex justify-between items-start">
-          <div className="flex items-start gap-3 flex-1">
-            <div className={`p-2 rounded-lg bg-gradient-to-r ${
+          <div className="flex items-start gap-2 flex-1">
+            <div className={`p-1.5 rounded-md bg-gradient-to-r ${
               item.category === 'BNX' ? 'from-blue-500 to-cyan' :
               item.category === 'TPN' ? 'from-amber-500 to-orange' :
               item.category === 'PSHY' ? 'from-purple to-pink' :
               'from-gray-500 to-gray-600'
             }`}>
-              <CategoryIcon className="h-5 w-5 text-white" />
+              <CategoryIcon className="h-4 w-4 text-white" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <CardTitle className="text-lg">{item.name}</CardTitle>
-                <Badge className={`${
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <CardTitle className="text-sm font-semibold truncate">{item.name}</CardTitle>
+                <Badge className={`text-[10px] px-1.5 py-0 h-4 ${
                   item.category === 'BNX' ? 'bg-gradient-to-r from-blue-500 to-cyan text-white border-0' :
                   item.category === 'TPN' ? 'bg-gradient-to-r from-amber-500 to-orange text-white border-0' :
                   item.category === 'PSHY' ? 'bg-gradient-to-r from-purple to-pink text-white border-0' :
@@ -187,16 +187,16 @@ export function StockItemCard({
                 </Badge>
               </div>
               {/* Total Stock Display */}
-              <div className="mt-1 flex items-center gap-3">
-                <span className="text-sm text-muted-foreground">Total Qty:</span>
-                <span className={`text-xl font-bold ${
+              <div className="mt-0.5 flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Qty:</span>
+                <span className={`text-base font-bold ${
                   stockStatus.label === 'Critical' ? 'text-destructive' :
                   stockStatus.label === 'Low Stock' ? 'text-orange-500' :
                   'bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent'
                 }`}>
                   {totalStock}
                 </span>
-                <Badge className={`${
+                <Badge className={`text-[10px] px-1.5 py-0 h-4 ${
                   stockStatus.label === 'Critical' ? 'bg-gradient-to-r from-destructive to-pink text-white border-0' :
                   stockStatus.label === 'Low Stock' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
                   'bg-gradient-to-r from-emerald to-teal text-white border-0'
@@ -209,18 +209,18 @@ export function StockItemCard({
         </div>
       </CardHeader>
       
-      <CardContent className="pt-2 relative">
-        <div className="space-y-3">
+      <CardContent className="p-3 pt-1.5 relative">
+        <div className="space-y-2">
           {/* Batch-wise Details Table */}
-          <div className="border border-border/50 rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="border border-border/50 rounded-md overflow-hidden">
+            <table className="w-full text-xs">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="px-2 py-1.5 text-left font-medium text-muted-foreground text-xs">Batch No</th>
-                  <th className="px-2 py-1.5 text-right font-medium text-muted-foreground text-xs">Qty</th>
-                  <th className="px-2 py-1.5 text-left font-medium text-muted-foreground text-xs">Expiry</th>
-                  <th className="px-2 py-1.5 text-right font-medium text-muted-foreground text-xs">MRP</th>
-                  <th className="px-2 py-1.5 text-center font-medium text-muted-foreground text-xs w-10"></th>
+                  <th className="px-1.5 py-1 text-left font-medium text-muted-foreground text-[10px]">Batch</th>
+                  <th className="px-1.5 py-1 text-right font-medium text-muted-foreground text-[10px]">Qty</th>
+                  <th className="px-1.5 py-1 text-left font-medium text-muted-foreground text-[10px]">Expiry</th>
+                  <th className="px-1.5 py-1 text-right font-medium text-muted-foreground text-[10px]">MRP</th>
+                  <th className="px-1 py-1 text-center font-medium text-muted-foreground text-[10px] w-8"></th>
                 </tr>
               </thead>
               <tbody>
@@ -236,41 +236,41 @@ export function StockItemCard({
                         expiryStatus?.status === 'critical' ? 'bg-destructive/5' : ''
                       }`}
                     >
-                      <td className="px-2 py-1.5">
+                      <td className="px-1.5 py-1">
                         {isEditing ? (
                           <Input
                             value={editingState.batchNo}
                             onChange={(e) => updateEditingField('batchNo', e.target.value)}
                             placeholder="Batch"
-                            className="h-6 text-xs px-1"
+                            className="h-5 text-[10px] px-1"
                           />
                         ) : (
-                          <span className="font-medium">{isValidBatch(batch.batchNo) ? batch.batchNo : '-'}</span>
+                          <span className="font-medium text-[11px]">{isValidBatch(batch.batchNo) ? batch.batchNo : '-'}</span>
                         )}
                       </td>
-                      <td className="px-2 py-1.5 text-right font-semibold">
+                      <td className="px-1.5 py-1 text-right font-semibold text-[11px]">
                         {isEditing ? (
                           <Input
                             type="number"
                             value={editingState.qty}
                             onChange={(e) => updateEditingField('qty', parseInt(e.target.value) || 0)}
                             min={0}
-                            className="h-6 text-xs px-1 w-16 text-right"
+                            className="h-5 text-[10px] px-1 w-12 text-right"
                           />
                         ) : (
                           batch.currentStock
                         )}
                       </td>
-                      <td className="px-2 py-1.5">
+                      <td className="px-1.5 py-1">
                         {isEditing ? (
                           <Input
                             type="date"
                             value={editingState.expiryDate}
                             onChange={(e) => updateEditingField('expiryDate', e.target.value)}
-                            className="h-6 text-xs px-1"
+                            className="h-5 text-[10px] px-1"
                           />
                         ) : (
-                          <span className={`flex items-center gap-1 ${
+                          <span className={`flex items-center gap-0.5 text-[11px] ${
                             expiryStatus?.status === 'expired' ? 'text-destructive font-medium' :
                             expiryStatus?.status === 'critical' ? 'text-destructive' :
                             expiryStatus?.status === 'warning' ? 'text-orange-500' :
@@ -278,12 +278,12 @@ export function StockItemCard({
                           }`}>
                             {formatExpiry(batch.expiryDate)}
                             {expiryStatus && (
-                              <span className="text-xs">({expiryStatus.daysText})</span>
+                              <span className="text-[10px]">({expiryStatus.daysText})</span>
                             )}
                           </span>
                         )}
                       </td>
-                      <td className="px-2 py-1.5 text-right">
+                      <td className="px-1.5 py-1 text-right text-[11px]">
                         {isEditing ? (
                           <Input
                             type="number"
@@ -292,29 +292,27 @@ export function StockItemCard({
                             step="0.00001"
                             min={0}
                             placeholder="MRP"
-                            className="h-6 text-xs px-1 w-20 text-right"
+                            className="h-5 text-[10px] px-1 w-16 text-right"
                           />
                         ) : (
                           batch.mrp ? `₹${formatPrecision(batch.mrp)}` : '-'
                         )}
                       </td>
-                      <td className="px-2 py-1.5 text-center">
+                      <td className="px-1 py-1 text-center">
                         {isEditing ? (
-                          <div className="flex gap-1 justify-center">
+                          <div className="flex gap-0.5 justify-center">
                             <Button
                               variant="default"
                               size="sm"
-                              className="h-6 px-2 text-xs bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white"
+                              className="h-5 px-1.5 text-[10px] bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white"
                               onClick={() => handleSaveBatchExpiry(batch)}
                               disabled={isSaving}
                             >
                               {isSaving ? (
-                                <span className="flex items-center gap-1">
-                                  <span className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" />
-                                </span>
+                                <span className="animate-spin h-2.5 w-2.5 border border-white border-t-transparent rounded-full" />
                               ) : (
                                 <>
-                                  <Check className="h-3 w-3 mr-0.5" />
+                                  <Check className="h-2.5 w-2.5 mr-0.5" />
                                   Save
                                 </>
                               )}
@@ -322,21 +320,21 @@ export function StockItemCard({
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-6 px-2 text-xs border-destructive/30 text-destructive hover:bg-destructive/10"
+                              className="h-5 px-1 text-[10px] border-destructive/30 text-destructive hover:bg-destructive/10"
                               onClick={handleCancelEdit}
                               disabled={isSaving}
                             >
-                              <X className="h-3 w-3" />
+                              <X className="h-2.5 w-2.5" />
                             </Button>
                           </div>
                         ) : isAdmin ? (
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-5 w-5 p-0 hover:bg-purple/10"
+                            className="h-4 w-4 p-0 hover:bg-purple/10"
                             onClick={() => startEditingBatch(batch)}
                           >
-                            <Pencil className="h-3 w-3" />
+                            <Pencil className="h-2.5 w-2.5" />
                           </Button>
                         ) : null}
                       </td>
@@ -348,47 +346,45 @@ export function StockItemCard({
           </div>
 
           {/* Unit Price & Value Summary */}
-          <div className="grid grid-cols-2 gap-4 text-sm pt-1">
+          <div className="grid grid-cols-2 gap-2 text-xs pt-1">
             <div>
-              <p className="text-muted-foreground text-xs">Cost/Tab</p>
-              <p className="font-semibold">₹{formatPrecision(item.unitPrice)}</p>
+              <p className="text-muted-foreground text-[10px]">Cost/Tab</p>
+              <p className="font-semibold text-xs">₹{formatPrecision(item.unitPrice)}</p>
             </div>
             <div>
-              <p className="text-muted-foreground text-xs">Total Value</p>
-              <p className="font-semibold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">
+              <p className="text-muted-foreground text-[10px]">Total Value</p>
+              <p className="font-semibold text-xs bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">
                 ₹{formatPrecision(totalStock * item.unitPrice)}
               </p>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col gap-2 pt-1">
+          <div className="flex gap-1.5 pt-1">
             <Button 
               size="sm" 
-              className="w-full bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white"
+              className="flex-1 h-7 text-xs bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white"
               onClick={() => onViewLedger(item)}
             >
-              <BookOpen className="h-4 w-4 mr-2" />
-              Stock Ledger
+              <BookOpen className="h-3 w-3 mr-1" />
+              Ledger
             </Button>
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex-1 glass-subtle border-cyan/20 hover:border-cyan/40"
-                onClick={() => onEdit(item)}
-              >
-                Edit
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex-1 glass-subtle border-gold/20 hover:border-gold/40"
-                onClick={onReorder}
-              >
-                Reorder
-              </Button>
-            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-7 text-xs px-2 glass-subtle border-cyan/20 hover:border-cyan/40"
+              onClick={() => onEdit(item)}
+            >
+              Edit
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-7 text-xs px-2 glass-subtle border-gold/20 hover:border-gold/40"
+              onClick={onReorder}
+            >
+              Reorder
+            </Button>
           </div>
         </div>
       </CardContent>
