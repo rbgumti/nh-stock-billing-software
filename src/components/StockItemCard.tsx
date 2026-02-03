@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BookOpen, Check, X, Pencil, AlertTriangle, Clock } from "lucide-react";
+import { BookOpen, Check, X, Pencil, AlertTriangle } from "lucide-react";
 import { StockItem } from "@/hooks/useStockStore";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +34,7 @@ interface StockItemCardProps {
   onEdit: (item: StockItem) => void;
   onReorder: () => void;
   isAdmin?: boolean;
-  onStockUpdated?: () => void; // Callback to refresh stock data
+  onStockUpdated?: () => void;
 }
 
 export function StockItemCard({
@@ -49,11 +49,9 @@ export function StockItemCard({
   isAdmin = false,
   onStockUpdated,
 }: StockItemCardProps) {
-  // Store editing state per batch using a map-like state
   const [editingState, setEditingState] = useState<EditingState | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Calculate total stock across all batches
   const totalStock = batches.reduce((sum, b) => sum + b.currentStock, 0);
   const stockStatus = getStockStatus(totalStock, item.minimumStock);
   const categoryStyle = getCategoryStyle(item.category);
@@ -120,8 +118,6 @@ export function StockItemCard({
 
       toast.success("Batch details updated successfully");
       setEditingState(null);
-      
-      // Trigger stock data refresh to update cumulative totals
       onStockUpdated?.();
     } catch (error) {
       console.error("Error updating batch details:", error);
@@ -135,48 +131,40 @@ export function StockItemCard({
     setEditingState(null);
   };
 
-  // Check if any batch has expiry warning
-  const hasExpiryWarning = batches.some(b => getExpiryStatus(b.expiryDate));
   const criticalBatch = batches.find(b => {
     const status = getExpiryStatus(b.expiryDate);
     return status?.status === 'expired' || status?.status === 'critical';
   });
 
   return (
-    <Card className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 border-l-3 ${categoryStyle.border} ${
+    <Card className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 ${
       criticalBatch ? 'ring-1 ring-destructive/30' : ''
     }`}>
-      {/* Warning Banner for critical items */}
+      {/* Warning Banner */}
       {criticalBatch && (
-        <div className="absolute top-0 left-0 right-0 px-2 py-0.5 flex items-center justify-between text-[10px] font-medium bg-gradient-to-r from-destructive to-pink text-white">
-          <span className="flex items-center gap-0.5">
-            <AlertTriangle className="h-2.5 w-2.5" />
-            Expiry Alert
-          </span>
+        <div className="absolute top-0 left-0 right-0 px-3 py-1 flex items-center gap-2 text-xs font-medium bg-gradient-to-r from-destructive to-pink text-white">
+          <AlertTriangle className="h-3 w-3" />
+          Expiry Alert
         </div>
       )}
       
-      <div className={`absolute inset-0 bg-gradient-to-br ${
-        index % 4 === 0 ? 'from-purple/5 via-transparent to-cyan/5' :
-        index % 4 === 1 ? 'from-cyan/5 via-transparent to-teal/5' :
-        index % 4 === 2 ? 'from-gold/5 via-transparent to-orange/5' :
-        'from-pink/5 via-transparent to-purple/5'
-      } opacity-50 group-hover:opacity-100 transition-opacity`} />
-      
-      <CardHeader className={`relative p-3 pb-1.5 ${criticalBatch ? 'pt-6' : ''}`}>
-        <div className="flex justify-between items-start">
-          <div className="flex items-start gap-2 flex-1">
-            <div className={`p-1.5 rounded-md bg-gradient-to-r ${
+      <CardContent className={`p-4 ${criticalBatch ? 'pt-8' : ''}`}>
+        {/* Horizontal Layout Container */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          
+          {/* Left Section: Medicine Info */}
+          <div className="flex items-start gap-3 lg:w-64 lg:flex-shrink-0">
+            <div className={`p-2 rounded-lg bg-gradient-to-r ${
               item.category === 'BNX' ? 'from-blue-500 to-cyan' :
               item.category === 'TPN' ? 'from-amber-500 to-orange' :
               item.category === 'PSHY' ? 'from-purple to-pink' :
               'from-gray-500 to-gray-600'
             }`}>
-              <CategoryIcon className="h-4 w-4 text-white" />
+              <CategoryIcon className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <CardTitle className="text-sm font-semibold truncate">{item.name}</CardTitle>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-semibold text-base truncate">{item.name}</h3>
                 <Badge className={`text-[10px] px-1.5 py-0 h-4 ${
                   item.category === 'BNX' ? 'bg-gradient-to-r from-blue-500 to-cyan text-white border-0' :
                   item.category === 'TPN' ? 'bg-gradient-to-r from-amber-500 to-orange text-white border-0' :
@@ -186,16 +174,18 @@ export function StockItemCard({
                   {item.category}
                 </Badge>
               </div>
-              {/* Total Stock Display */}
-              <div className="mt-0.5 flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Qty:</span>
-                <span className={`text-base font-bold ${
-                  stockStatus.label === 'Critical' ? 'text-destructive' :
-                  stockStatus.label === 'Low Stock' ? 'text-orange-500' :
-                  'bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent'
-                }`}>
-                  {totalStock}
-                </span>
+              {/* Stock Summary */}
+              <div className="mt-1 flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-muted-foreground">Total:</span>
+                  <span className={`text-lg font-bold ${
+                    stockStatus.label === 'Critical' ? 'text-destructive' :
+                    stockStatus.label === 'Low Stock' ? 'text-orange-500' :
+                    'bg-gradient-to-r from-emerald to-teal bg-clip-text text-transparent'
+                  }`}>
+                    {totalStock}
+                  </span>
+                </div>
                 <Badge className={`text-[10px] px-1.5 py-0 h-4 ${
                   stockStatus.label === 'Critical' ? 'bg-gradient-to-r from-destructive to-pink text-white border-0' :
                   stockStatus.label === 'Low Stock' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
@@ -204,175 +194,173 @@ export function StockItemCard({
                   {stockStatus.label}
                 </Badge>
               </div>
+              {/* Unit Price & Value */}
+              <div className="mt-1 flex items-center gap-4 text-xs">
+                <span className="text-muted-foreground">
+                  Cost: <span className="font-medium text-foreground">₹{formatPrecision(item.unitPrice)}</span>
+                </span>
+                <span className="text-muted-foreground">
+                  Value: <span className="font-semibold bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">
+                    ₹{formatPrecision(totalStock * item.unitPrice)}
+                  </span>
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-3 pt-1.5 relative">
-        <div className="space-y-2">
-          {/* Batch-wise Details Table */}
-          <div className="border border-border/50 rounded-md overflow-hidden">
-            <table className="w-full text-xs">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="px-1.5 py-1 text-left font-medium text-muted-foreground text-[10px]">Batch</th>
-                  <th className="px-1.5 py-1 text-right font-medium text-muted-foreground text-[10px]">Qty</th>
-                  <th className="px-1.5 py-1 text-left font-medium text-muted-foreground text-[10px]">Expiry</th>
-                  <th className="px-1.5 py-1 text-right font-medium text-muted-foreground text-[10px]">MRP</th>
-                  <th className="px-1 py-1 text-center font-medium text-muted-foreground text-[10px] w-8"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {batches.map((batch, idx) => {
-                  const expiryStatus = getExpiryStatus(batch.expiryDate);
-                  const isEditing = editingState?.id === batch.id;
-                  
-                  return (
-                    <tr 
-                      key={batch.id} 
-                      className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/20'} ${
-                        expiryStatus?.status === 'expired' ? 'bg-destructive/10' :
-                        expiryStatus?.status === 'critical' ? 'bg-destructive/5' : ''
-                      }`}
-                    >
-                      <td className="px-1.5 py-1">
-                        {isEditing ? (
-                          <Input
-                            value={editingState.batchNo}
-                            onChange={(e) => updateEditingField('batchNo', e.target.value)}
-                            placeholder="Batch"
-                            className="h-5 text-[10px] px-1"
-                          />
-                        ) : (
-                          <span className="font-medium text-[11px]">{isValidBatch(batch.batchNo) ? batch.batchNo : '-'}</span>
-                        )}
-                      </td>
-                      <td className="px-1.5 py-1 text-right font-semibold text-[11px]">
-                        {isEditing ? (
-                          <Input
-                            type="number"
-                            value={editingState.qty}
-                            onChange={(e) => updateEditingField('qty', parseInt(e.target.value) || 0)}
-                            min={0}
-                            className="h-5 text-[10px] px-1 w-12 text-right"
-                          />
-                        ) : (
-                          batch.currentStock
-                        )}
-                      </td>
-                      <td className="px-1.5 py-1">
-                        {isEditing ? (
-                          <Input
-                            type="date"
-                            value={editingState.expiryDate}
-                            onChange={(e) => updateEditingField('expiryDate', e.target.value)}
-                            className="h-5 text-[10px] px-1"
-                          />
-                        ) : (
-                          <span className={`flex items-center gap-0.5 text-[11px] ${
-                            expiryStatus?.status === 'expired' ? 'text-destructive font-medium' :
-                            expiryStatus?.status === 'critical' ? 'text-destructive' :
-                            expiryStatus?.status === 'warning' ? 'text-orange-500' :
-                            expiryStatus?.status === 'caution' ? 'text-yellow-600' : ''
-                          }`}>
-                            {formatExpiry(batch.expiryDate)}
-                            {expiryStatus && (
-                              <span className="text-[10px]">({expiryStatus.daysText})</span>
-                            )}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-1.5 py-1 text-right text-[11px]">
-                        {isEditing ? (
-                          <Input
-                            type="number"
-                            value={editingState.mrp}
-                            onChange={(e) => updateEditingField('mrp', e.target.value)}
-                            step="0.00001"
-                            min={0}
-                            placeholder="MRP"
-                            className="h-5 text-[10px] px-1 w-16 text-right"
-                          />
-                        ) : (
-                          batch.mrp ? `₹${formatPrecision(batch.mrp)}` : '-'
-                        )}
-                      </td>
-                      <td className="px-1 py-1 text-center">
-                        {isEditing ? (
-                          <div className="flex gap-0.5 justify-center">
-                            <Button
-                              variant="default"
-                              size="sm"
-                              className="h-5 px-1.5 text-[10px] bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white"
-                              onClick={() => handleSaveBatchExpiry(batch)}
-                              disabled={isSaving}
-                            >
-                              {isSaving ? (
-                                <span className="animate-spin h-2.5 w-2.5 border border-white border-t-transparent rounded-full" />
-                              ) : (
-                                <>
-                                  <Check className="h-2.5 w-2.5 mr-0.5" />
-                                  Save
-                                </>
+
+          {/* Center Section: Batch Table */}
+          <div className="flex-1 min-w-0">
+            <div className="border border-border/50 rounded-lg overflow-hidden">
+              <table className="w-full text-xs">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Batch</th>
+                    <th className="px-2 py-1.5 text-center font-medium text-muted-foreground w-20">Qty</th>
+                    <th className="px-2 py-1.5 text-left font-medium text-muted-foreground">Expiry</th>
+                    <th className="px-2 py-1.5 text-right font-medium text-muted-foreground w-20">MRP</th>
+                    {isAdmin && <th className="px-2 py-1.5 text-center font-medium text-muted-foreground w-28">Actions</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {batches.map((batch, idx) => {
+                    const expiryStatus = getExpiryStatus(batch.expiryDate);
+                    const isEditing = editingState?.id === batch.id;
+                    
+                    return (
+                      <tr 
+                        key={batch.id} 
+                        className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/20'} ${
+                          expiryStatus?.status === 'expired' ? 'bg-destructive/10' :
+                          expiryStatus?.status === 'critical' ? 'bg-destructive/5' : ''
+                        }`}
+                      >
+                        <td className="px-2 py-1.5">
+                          {isEditing ? (
+                            <Input
+                              value={editingState.batchNo}
+                              onChange={(e) => updateEditingField('batchNo', e.target.value)}
+                              placeholder="Batch"
+                              className="h-7 text-xs px-2"
+                            />
+                          ) : (
+                            <span className="font-medium">{isValidBatch(batch.batchNo) ? batch.batchNo : '-'}</span>
+                          )}
+                        </td>
+                        <td className="px-2 py-1.5 text-center">
+                          {isEditing ? (
+                            <Input
+                              type="number"
+                              value={editingState.qty}
+                              onChange={(e) => updateEditingField('qty', parseInt(e.target.value) || 0)}
+                              min={0}
+                              className="h-7 text-xs px-2 w-16 text-center mx-auto"
+                            />
+                          ) : (
+                            <span className="font-semibold">{batch.currentStock}</span>
+                          )}
+                        </td>
+                        <td className="px-2 py-1.5">
+                          {isEditing ? (
+                            <Input
+                              type="date"
+                              value={editingState.expiryDate}
+                              onChange={(e) => updateEditingField('expiryDate', e.target.value)}
+                              className="h-7 text-xs px-2"
+                            />
+                          ) : (
+                            <span className={`flex items-center gap-1 ${
+                              expiryStatus?.status === 'expired' ? 'text-destructive font-medium' :
+                              expiryStatus?.status === 'critical' ? 'text-destructive' :
+                              expiryStatus?.status === 'warning' ? 'text-orange-500' :
+                              expiryStatus?.status === 'caution' ? 'text-yellow-600' : ''
+                            }`}>
+                              {formatExpiry(batch.expiryDate)}
+                              {expiryStatus && (
+                                <span className="text-[10px]">({expiryStatus.daysText})</span>
                               )}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-5 px-1 text-[10px] border-destructive/30 text-destructive hover:bg-destructive/10"
-                              onClick={handleCancelEdit}
-                              disabled={isSaving}
-                            >
-                              <X className="h-2.5 w-2.5" />
-                            </Button>
-                          </div>
-                        ) : isAdmin ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-4 w-4 p-0 hover:bg-purple/10"
-                            onClick={() => startEditingBatch(batch)}
-                          >
-                            <Pencil className="h-2.5 w-2.5" />
-                          </Button>
-                        ) : null}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-2 py-1.5 text-right">
+                          {isEditing ? (
+                            <Input
+                              type="number"
+                              value={editingState.mrp}
+                              onChange={(e) => updateEditingField('mrp', e.target.value)}
+                              step="0.00001"
+                              min={0}
+                              placeholder="MRP"
+                              className="h-7 text-xs px-2 w-20 text-right ml-auto"
+                            />
+                          ) : (
+                            batch.mrp ? `₹${formatPrecision(batch.mrp)}` : '-'
+                          )}
+                        </td>
+                        {isAdmin && (
+                          <td className="px-2 py-1.5 text-center">
+                            {isEditing ? (
+                              <div className="flex gap-1 justify-center">
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  className="h-7 px-3 text-xs bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white"
+                                  onClick={() => handleSaveBatchExpiry(batch)}
+                                  disabled={isSaving}
+                                >
+                                  {isSaving ? (
+                                    <span className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" />
+                                  ) : (
+                                    <>
+                                      <Check className="h-3 w-3 mr-1" />
+                                      Save
+                                    </>
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs border-destructive/30 text-destructive hover:bg-destructive/10"
+                                  onClick={handleCancelEdit}
+                                  disabled={isSaving}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 hover:bg-purple/10"
+                                onClick={() => startEditingBatch(batch)}
+                              >
+                                <Pencil className="h-3 w-3 mr-1" />
+                                Edit
+                              </Button>
+                            )}
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          {/* Unit Price & Value Summary */}
-          <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-            <div>
-              <p className="text-muted-foreground text-[10px]">Cost/Tab</p>
-              <p className="font-semibold text-xs">₹{formatPrecision(item.unitPrice)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground text-[10px]">Total Value</p>
-              <p className="font-semibold text-xs bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">
-                ₹{formatPrecision(totalStock * item.unitPrice)}
-              </p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-1.5 pt-1">
+          {/* Right Section: Action Buttons */}
+          <div className="flex lg:flex-col gap-2 lg:w-24 lg:flex-shrink-0 justify-end">
             <Button 
               size="sm" 
-              className="flex-1 h-7 text-xs bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white"
+              className="h-8 text-xs bg-gradient-to-r from-purple to-cyan hover:shadow-glow text-white"
               onClick={() => onViewLedger(item)}
             >
-              <BookOpen className="h-3 w-3 mr-1" />
+              <BookOpen className="h-3.5 w-3.5 mr-1" />
               Ledger
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-7 text-xs px-2 glass-subtle border-cyan/20 hover:border-cyan/40"
+              className="h-8 text-xs glass-subtle border-cyan/20 hover:border-cyan/40"
               onClick={() => onEdit(item)}
             >
               Edit
@@ -380,7 +368,7 @@ export function StockItemCard({
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-7 text-xs px-2 glass-subtle border-gold/20 hover:border-gold/40"
+              className="h-8 text-xs glass-subtle border-gold/20 hover:border-gold/40"
               onClick={onReorder}
             >
               Reorder
