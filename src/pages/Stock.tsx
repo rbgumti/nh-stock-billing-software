@@ -71,7 +71,7 @@ export default function Stock() {
   const [editingPayment, setEditingPayment] = useState<SupplierPayment | null>(null);
   const [showLedgerItem, setShowLedgerItem] = useState<any>(null);
   const [showSupplierLedger, setShowSupplierLedger] = useState(false);
-  const [supplierLedgerId, setSupplierLedgerId] = useState<number | undefined>(undefined);
+  const [supplierLedgerId, setSupplierLedgerId] = useState<string | undefined>(undefined);
   const [showAgingReport, setShowAgingReport] = useState(false);
   const [showParbPharmaPO, setShowParbPharmaPO] = useState<PurchaseOrder | null>(null);
   const [showNeuroglamPO, setShowNeuroglamPO] = useState<PurchaseOrder | null>(null);
@@ -81,7 +81,7 @@ export default function Stock() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportStartDate, setExportStartDate] = useState<Date | undefined>(undefined);
   const [exportEndDate, setExportEndDate] = useState<Date | undefined>(undefined);
-  const [downloadingGrnId, setDownloadingGrnId] = useState<number | null>(null);
+  const [downloadingGrnId, setDownloadingGrnId] = useState<string | null>(null);
   const { stockItems, addStockItem, updateStockItem, subscribe, findOrCreateBatch, getBatchesForMedicine, invalidateCache } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
@@ -287,7 +287,7 @@ export default function Stock() {
     return !isNaN(parsed.getTime());
   };
 
-  const handleGRN = async (grnData: { grnNumber: string; purchaseOrderId: number; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
+  const handleGRN = async (grnData: { grnNumber: string; purchaseOrderId: string; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (!po) {
       toast({
@@ -414,7 +414,7 @@ export default function Stock() {
     });
   };
 
-  const handleServiceGRN = (grnData: { grnNumber: string; purchaseOrderId: number; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
+  const handleServiceGRN = (grnData: { grnNumber: string; purchaseOrderId: string; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (po) {
       // Update PO status with GRN number, invoice number and date (no stock update for service)
@@ -527,7 +527,7 @@ export default function Stock() {
     }
   };
 
-  const handleDeleteSupplier = async (id: number) => {
+  const handleDeleteSupplier = async (id: string) => {
     if (!confirm("Are you sure you want to delete this supplier?")) return;
     try {
       await deleteSupplier(id);
@@ -546,7 +546,7 @@ export default function Stock() {
 
   const handleAddPayment = async (
     paymentData: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>,
-    linkedPOIds: number[] = []
+    linkedPOIds: string[] = []
   ) => {
     try {
       await addPayment(paymentData);
@@ -598,7 +598,7 @@ export default function Stock() {
 
   const handleEditPayment = async (
     paymentData: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>,
-    linkedPOIds: number[] = []
+    linkedPOIds: string[] = []
   ) => {
     if (!editingPayment) return;
     try {
@@ -642,7 +642,7 @@ export default function Stock() {
     }
   };
 
-  const handleDeletePayment = async (id: number) => {
+  const handleDeletePayment = async (id: string) => {
     if (!confirm("Are you sure you want to delete this payment record?")) return;
     try {
       await deletePayment(id);
@@ -659,7 +659,7 @@ export default function Stock() {
     }
   };
 
-  const handleUpdatePOPayment = async (poId: number, paymentStatus: string) => {
+  const handleUpdatePOPayment = async (poId: string, paymentStatus: string) => {
     const po = purchaseOrders.find(p => p.id === poId);
     if (!po) return;
     
