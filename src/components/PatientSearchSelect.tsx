@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/patientUtils";
 
 interface Patient {
-  id: number;
+  id: string;
   patient_name: string;
   father_name?: string;
   phone: string;
@@ -16,11 +16,12 @@ interface Patient {
   new_govt_id: string;
   address: string;
   age?: string;
+  category?: string;
 }
 
 interface PatientSearchSelectProps {
   patients: Patient[];
-  selectedPatientId?: number;
+  selectedPatientId?: string;
   onPatientSelect: (patient: Patient) => void;
   label?: string;
   placeholder?: string;

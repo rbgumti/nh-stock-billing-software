@@ -14,7 +14,7 @@ export interface PurchaseOrderItem {
 }
 
 export interface PurchaseOrder {
-  id: number;
+  id: string;
   poNumber: string;
   supplier: string;
   orderDate: string;
@@ -87,39 +87,39 @@ export function usePurchaseOrderStore() {
         const poItems = (allItems || [])
           .filter(item => item.purchase_order_id === po.id)
           .map(item => ({
-            stockItemId: item.stock_item_id,
-            stockItemName: item.stock_item_name,
+            stockItemId: (item as any).stock_item_id || 0,
+            stockItemName: (item as any).stock_item_name || item.item_name || '',
             quantity: item.quantity,
             unitPrice: Number(item.unit_price),
-            totalPrice: Number(item.total_price),
-            packSize: item.pack_size || undefined,
-            qtyInStrips: item.qty_in_strips || undefined,
-            qtyInTabs: item.qty_in_tabs || undefined
+            totalPrice: Number((item as any).total_price) || Number(item.total),
+            packSize: (item as any).pack_size || undefined,
+            qtyInStrips: (item as any).qty_in_strips || undefined,
+            qtyInTabs: (item as any).qty_in_tabs || undefined
           }));
 
         return {
           id: po.id,
-          poNumber: po.po_number,
-          supplier: po.supplier,
+          poNumber: po.po_number || '',
+          supplier: (po as any).supplier || po.supplier_name || '',
           orderDate: po.order_date,
-          expectedDelivery: po.expected_delivery,
+          expectedDelivery: (po as any).expected_delivery || po.expected_delivery_date || '',
           status: po.status as 'Pending' | 'Received' | 'Cancelled',
           items: poItems,
-          totalAmount: Number(po.total_amount),
+          totalAmount: Number((po as any).total_amount) || Number(po.total) || 0,
           grnDate: po.grn_date || undefined,
           grnNumber: po.grn_number || undefined,
           invoiceNumber: po.invoice_number || undefined,
           invoiceDate: po.invoice_date || undefined,
-          invoiceUrl: po.invoice_url || undefined,
+          invoiceUrl: (po as any).invoice_url || undefined,
           notes: po.notes || undefined,
           paymentStatus: (po.payment_status as 'Pending' | 'Partial' | 'Paid' | 'Overdue') || 'Pending',
           paymentDueDate: po.payment_due_date || undefined,
           paymentDate: po.payment_date || undefined,
           paymentAmount: po.payment_amount ? Number(po.payment_amount) : undefined,
           paymentNotes: po.payment_notes || undefined,
-          poType: (po.po_type as 'Stock' | 'Service') || 'Stock',
-          serviceDescription: po.service_description || undefined,
-          serviceAmount: po.service_amount ? Number(po.service_amount) : undefined
+          poType: ((po as any).po_type as 'Stock' | 'Service') || 'Stock',
+          serviceDescription: (po as any).service_description || undefined,
+          serviceAmount: (po as any).service_amount ? Number((po as any).service_amount) : undefined
         };
       });
 
@@ -172,9 +172,11 @@ export function usePurchaseOrderStore() {
         purchase_order_id: poData.id,
         stock_item_id: item.stockItemId,
         stock_item_name: item.stockItemName,
+        item_name: item.stockItemName,
         quantity: item.quantity,
         unit_price: item.unitPrice,
         total_price: item.totalPrice,
+        total: item.totalPrice,
         pack_size: item.packSize || null,
         qty_in_strips: item.qtyInStrips || null,
         qty_in_tabs: item.qtyInTabs || null
@@ -182,7 +184,7 @@ export function usePurchaseOrderStore() {
 
       const { error: itemsError } = await supabase
         .from('purchase_order_items')
-        .insert(itemsToInsert);
+        .insert(itemsToInsert as any);
 
       if (itemsError) throw itemsError;
     } catch (error) {
@@ -196,17 +198,20 @@ export function usePurchaseOrderStore() {
     }
   };
 
-  const updatePurchaseOrder = async (id: number, updatedPO: PurchaseOrder) => {
+  const updatePurchaseOrder = async (id: string, updatedPO: PurchaseOrder) => {
     try {
       const { error: updateError } = await supabase
         .from('purchase_orders')
         .update({
           po_number: updatedPO.poNumber,
           supplier: updatedPO.supplier,
+          supplier_name: updatedPO.supplier,
           order_date: updatedPO.orderDate,
           expected_delivery: updatedPO.expectedDelivery,
+          expected_delivery_date: updatedPO.expectedDelivery,
           status: updatedPO.status,
           total_amount: updatedPO.totalAmount,
+          total: updatedPO.totalAmount,
           grn_date: updatedPO.grnDate || null,
           grn_number: updatedPO.grnNumber || null,
           invoice_number: updatedPO.invoiceNumber || null,
@@ -221,7 +226,7 @@ export function usePurchaseOrderStore() {
           po_type: updatedPO.poType || 'Stock',
           service_description: updatedPO.serviceDescription || null,
           service_amount: updatedPO.serviceAmount || null
-        })
+        } as any)
         .eq('id', id);
 
       if (updateError) throw updateError;
@@ -239,9 +244,11 @@ export function usePurchaseOrderStore() {
         purchase_order_id: id,
         stock_item_id: item.stockItemId,
         stock_item_name: item.stockItemName,
+        item_name: item.stockItemName,
         quantity: item.quantity,
         unit_price: item.unitPrice,
         total_price: item.totalPrice,
+        total: item.totalPrice,
         pack_size: item.packSize || null,
         qty_in_strips: item.qtyInStrips || null,
         qty_in_tabs: item.qtyInTabs || null
@@ -249,7 +256,7 @@ export function usePurchaseOrderStore() {
 
       const { error: itemsError } = await supabase
         .from('purchase_order_items')
-        .insert(itemsToInsert);
+        .insert(itemsToInsert as any);
 
       if (itemsError) throw itemsError;
     } catch (error) {
@@ -263,7 +270,7 @@ export function usePurchaseOrderStore() {
     }
   };
 
-  const getPurchaseOrder = (id: number) => {
+  const getPurchaseOrder = (id: string) => {
     return purchaseOrders.find(po => po.id === id);
   };
 
