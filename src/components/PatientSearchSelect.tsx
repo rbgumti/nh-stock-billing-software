@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/patientUtils";
 
 interface Patient {
-  id: number;
+  id: string;
   patient_name: string;
   father_name?: string;
   phone: string;
@@ -18,13 +18,16 @@ interface Patient {
   age?: string;
 }
 
-interface PatientSearchSelectProps {
+export interface PatientSearchSelectProps {
   patients: Patient[];
-  selectedPatientId?: number;
+  selectedPatientId?: string;
   onPatientSelect: (patient: Patient) => void;
   label?: string;
   placeholder?: string;
   disabled?: boolean;
+  // Legacy props for compatibility
+  selectedPatient?: Patient | null;
+  onSelect?: (patient: Patient | null) => void;
 }
 
 // Maximum results to display for performance
@@ -49,6 +52,9 @@ export function PatientSearchSelect({
   label = "Patient *",
   placeholder = "Search by Name, Phone, Aadhar, or Govt ID...",
   disabled = false,
+  // Legacy props
+  selectedPatient: legacySelectedPatient,
+  onSelect: legacyOnSelect,
 }: PatientSearchSelectProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [fileNoQuery, setFileNoQuery] = useState("");
@@ -60,13 +66,24 @@ export function PatientSearchSelect({
   const fileNoInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // Handle legacy onSelect prop
+  const handlePatientSelect = useCallback((patient: Patient) => {
+    if (legacyOnSelect) {
+      legacyOnSelect(patient);
+    } else {
+      onPatientSelect(patient);
+    }
+  }, [onPatientSelect, legacyOnSelect]);
+
   // Debounce search queries for smooth typing (150ms feels instant but batches updates)
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 150);
   const debouncedFileNoQuery = useDebouncedValue(fileNoQuery, 100);
 
-  const selectedPatient = useMemo(() => 
-    patients.find(p => p.id === selectedPatientId),
-    [patients, selectedPatientId]
+  // Resolve selected patient from either prop
+  const effectiveSelectedPatientId = selectedPatientId || legacySelectedPatient?.id;
+  const selectedPatientMemo = useMemo(() => 
+    patients.find(p => p.id === effectiveSelectedPatientId),
+    [patients, effectiveSelectedPatientId]
   );
 
   // Normalize file number for comparison (removes leading zeros)
@@ -238,11 +255,11 @@ export function PatientSearchSelect({
   };
 
   const handleSelect = useCallback((patient: Patient) => {
-    onPatientSelect(patient);
+    handlePatientSelect(patient);
     setSearchQuery("");
     setFileNoQuery("");
     setIsOpen(false);
-  }, [onPatientSelect]);
+  }, [handlePatientSelect]);
 
   const handleMainSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -308,37 +325,37 @@ export function PatientSearchSelect({
       </div>
 
       {/* Selected Patient Display */}
-      {selectedPatient && !isOpen && (
+      {selectedPatientMemo && !isOpen && (
         <div className="p-3 bg-muted/50 rounded-md text-sm space-y-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-base">{selectedPatient.patient_name}</span>
+            <span className="font-semibold text-base">{selectedPatientMemo.patient_name}</span>
             <span className="text-muted-foreground">
-              (ID: {selectedPatient.id})
+              (ID: {selectedPatientMemo.id})
             </span>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            {selectedPatient.file_no && (
-              <span><span className="font-medium text-gold">File No:</span> {selectedPatient.file_no}</span>
+            {selectedPatientMemo.file_no && (
+              <span><span className="font-medium text-gold">File No:</span> {selectedPatientMemo.file_no}</span>
             )}
-            {selectedPatient.phone && (
-              <span><span className="font-medium">Phone:</span> {formatPhone(selectedPatient.phone)}</span>
+            {selectedPatientMemo.phone && (
+              <span><span className="font-medium">Phone:</span> {formatPhone(selectedPatientMemo.phone)}</span>
             )}
-            {selectedPatient.govt_id && (
-              <span><span className="font-medium">Govt ID:</span> {selectedPatient.govt_id}</span>
+            {selectedPatientMemo.govt_id && (
+              <span><span className="font-medium">Govt ID:</span> {selectedPatientMemo.govt_id}</span>
             )}
-            {selectedPatient.new_govt_id && (
-              <span><span className="font-medium">New Govt ID:</span> {selectedPatient.new_govt_id}</span>
+            {selectedPatientMemo.new_govt_id && (
+              <span><span className="font-medium">New Govt ID:</span> {selectedPatientMemo.new_govt_id}</span>
             )}
-            {selectedPatient.aadhar_card && (
-              <span><span className="font-medium">Aadhar:</span> {selectedPatient.aadhar_card}</span>
+            {selectedPatientMemo.aadhar_card && (
+              <span><span className="font-medium">Aadhar:</span> {selectedPatientMemo.aadhar_card}</span>
             )}
-            {selectedPatient.age && (
-              <span><span className="font-medium">Age:</span> {selectedPatient.age}</span>
+            {selectedPatientMemo.age && (
+              <span><span className="font-medium">Age:</span> {selectedPatientMemo.age}</span>
             )}
           </div>
-          {selectedPatient.address && (
+          {selectedPatientMemo.address && (
             <div className="text-xs text-muted-foreground pt-1 border-t border-border/50">
-              <span className="font-medium">Address:</span> {selectedPatient.address}
+              <span className="font-medium">Address:</span> {selectedPatientMemo.address}
             </div>
           )}
         </div>

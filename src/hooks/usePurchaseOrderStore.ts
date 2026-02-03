@@ -14,7 +14,7 @@ export interface PurchaseOrderItem {
 }
 
 export interface PurchaseOrder {
-  id: number;
+  id: string;
   poNumber: string;
   supplier: string;
   orderDate: string;
@@ -88,7 +88,7 @@ export function usePurchaseOrderStore() {
           .filter(item => item.purchase_order_id === po.id)
           .map(item => ({
             stockItemId: item.stock_item_id,
-            stockItemName: item.stock_item_name,
+            stockItemName: item.stock_item_name || item.item_name || '',
             quantity: item.quantity,
             unitPrice: Number(item.unit_price),
             totalPrice: Number(item.total_price),
@@ -170,6 +170,7 @@ export function usePurchaseOrderStore() {
       // Insert items
       const itemsToInsert = po.items.map(item => ({
         purchase_order_id: poData.id,
+        item_name: item.stockItemName,
         stock_item_id: item.stockItemId,
         stock_item_name: item.stockItemName,
         quantity: item.quantity,
@@ -196,7 +197,7 @@ export function usePurchaseOrderStore() {
     }
   };
 
-  const updatePurchaseOrder = async (id: number, updatedPO: PurchaseOrder) => {
+  const updatePurchaseOrder = async (id: string, updatedPO: PurchaseOrder) => {
     try {
       const { error: updateError } = await supabase
         .from('purchase_orders')
@@ -237,6 +238,7 @@ export function usePurchaseOrderStore() {
       // Insert updated items
       const itemsToInsert = updatedPO.items.map(item => ({
         purchase_order_id: id,
+        item_name: item.stockItemName,
         stock_item_id: item.stockItemId,
         stock_item_name: item.stockItemName,
         quantity: item.quantity,
@@ -263,7 +265,7 @@ export function usePurchaseOrderStore() {
     }
   };
 
-  const getPurchaseOrder = (id: number) => {
+  const getPurchaseOrder = (id: string) => {
     return purchaseOrders.find(po => po.id === id);
   };
 

@@ -34,7 +34,7 @@ interface StockItem {
 }
 
 interface Patient {
-  id: number;
+  id: string;
   patient_name: string;
   created_at?: string;
 }

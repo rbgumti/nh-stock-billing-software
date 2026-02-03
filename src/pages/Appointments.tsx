@@ -16,7 +16,7 @@ import { FloatingOrbs } from "@/components/ui/floating-orbs";
 
 interface Appointment {
   id: string;
-  patient_id: number;
+  patient_id: string;
   patient_name: string;
   patient_phone: string | null;
   appointment_date: string;

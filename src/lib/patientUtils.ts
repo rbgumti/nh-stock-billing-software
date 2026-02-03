@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Patient {
-  id: number;
+  id: string;
   patient_name: string;
   phone: string;
   file_no: string;
@@ -49,7 +49,21 @@ export async function loadAllPatients(): Promise<Patient[]> {
     if (!data || data.length === 0) {
       hasMore = false;
     } else {
-      allPatients = [...allPatients, ...data];
+      // Map data to ensure proper string types for id
+      const mappedData: Patient[] = data.map(p => ({
+        id: String(p.id),
+        patient_name: p.patient_name || '',
+        phone: p.phone || '',
+        file_no: p.file_no || '',
+        aadhar_card: p.aadhar_card || '',
+        govt_id: p.govt_id || '',
+        new_govt_id: p.new_govt_id || '',
+        address: p.address || '',
+        age: p.age || undefined,
+        father_name: p.father_name || undefined,
+        category: p.category || undefined,
+      }));
+      allPatients = [...allPatients, ...mappedData];
       from += batchSize;
       if (data.length < batchSize) {
         hasMore = false;

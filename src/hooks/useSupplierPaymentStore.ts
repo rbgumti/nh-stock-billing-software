@@ -3,9 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 export interface SupplierPayment {
-  id: number;
-  supplier_id: number;
-  purchase_order_id?: number;
+  id: string;
+  supplier_id: string;
+  purchase_order_id?: string;
   amount: number;
   payment_date: string;
   due_date?: string;
@@ -99,8 +99,6 @@ export function useSupplierPaymentStore() {
         due_date: payment.due_date || null,
         payment_method: payment.payment_method || null,
         reference_number: payment.reference_number || null,
-        utr_number: payment.utr_number || null,
-        bank_reference: payment.bank_reference || null,
         receipt_url: payment.receipt_url || null,
         status: payment.status,
         notes: payment.notes || null
@@ -116,7 +114,7 @@ export function useSupplierPaymentStore() {
     return data;
   };
 
-  const updatePayment = async (id: number, payment: Partial<SupplierPayment>) => {
+  const updatePayment = async (id: string, payment: Partial<SupplierPayment>) => {
     const { error } = await supabase
       .from('supplier_payments')
       .update({
@@ -127,8 +125,6 @@ export function useSupplierPaymentStore() {
         due_date: payment.due_date || null,
         payment_method: payment.payment_method || null,
         reference_number: payment.reference_number || null,
-        utr_number: payment.utr_number || null,
-        bank_reference: payment.bank_reference || null,
         receipt_url: payment.receipt_url || null,
         status: payment.status,
         notes: payment.notes || null
@@ -141,7 +137,7 @@ export function useSupplierPaymentStore() {
     }
   };
 
-  const deletePayment = async (id: number) => {
+  const deletePayment = async (id: string) => {
     const { error } = await supabase
       .from('supplier_payments')
       .delete()
@@ -153,7 +149,7 @@ export function useSupplierPaymentStore() {
     }
   };
 
-  const getPaymentsBySupplier = (supplierId: number) => {
+  const getPaymentsBySupplier = (supplierId: string) => {
     return payments.filter(p => p.supplier_id === supplierId);
   };
 
