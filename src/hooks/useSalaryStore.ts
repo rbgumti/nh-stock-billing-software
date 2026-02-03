@@ -78,11 +78,11 @@ const toEmployee = (row: any): Employee => ({
 const toSalaryRecord = (row: any): SalaryRecord => ({
   id: row.id,
   employeeId: row.employee_id,
-  month: row.month,
-  workingDays: Number(row.working_days),
-  advanceAdjusted: Number(row.advance_adjusted),
-  advancePending: Number(row.advance_pending),
-  salaryPayable: Number(row.salary_payable),
+  month: `${row.year}-${String(row.month).padStart(2, '0')}`,
+  workingDays: 0, // Not stored in current schema
+  advanceAdjusted: Number(row.advances || 0),
+  advancePending: 0, // Not stored in current schema
+  salaryPayable: Number(row.net_salary || 0),
   createdAt: row.created_at,
 });
 
@@ -211,14 +211,11 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
     try {
       const { data, error } = await supabase
         .from('salary_records')
-        .insert({
+        .insert([{
           employee_id: record.employeeId,
-          month: record.month,
-          working_days: record.workingDays,
-          advance_adjusted: record.advanceAdjusted,
-          advance_pending: record.advancePending,
-          salary_payable: record.salaryPayable,
-        })
+          month: parseInt(record.month.split('-')[1]),
+          year: parseInt(record.month.split('-')[0]),
+        }])
         .select()
         .single();
 
@@ -238,11 +235,13 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
     try {
       const updateData: any = {};
       if (record.employeeId !== undefined) updateData.employee_id = record.employeeId;
-      if (record.month !== undefined) updateData.month = record.month;
-      if (record.workingDays !== undefined) updateData.working_days = record.workingDays;
-      if (record.advanceAdjusted !== undefined) updateData.advance_adjusted = record.advanceAdjusted;
-      if (record.advancePending !== undefined) updateData.advance_pending = record.advancePending;
-      if (record.salaryPayable !== undefined) updateData.salary_payable = record.salaryPayable;
+      if (record.month !== undefined) {
+        const [year, month] = record.month.split('-');
+        updateData.year = parseInt(year);
+        updateData.month = parseInt(month);
+      }
+      if (record.advanceAdjusted !== undefined) updateData.advances = record.advanceAdjusted;
+      if (record.salaryPayable !== undefined) updateData.net_salary = record.salaryPayable;
 
       const { error } = await supabase
         .from('salary_records')

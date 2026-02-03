@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPhone } from "@/lib/patientUtils";
 
 interface Patient {
-  id: number;
+  id: string;
   patient_name: string;
   phone: string;
   address: string;
@@ -159,7 +159,7 @@ export default function Patients() {
     };
   }, [loadPatients]);
 
-  const deletePatient = async (patientId: number) => {
+  const deletePatient = async (patientId: string) => {
     try {
       const { error } = await supabase
         .from('patients')

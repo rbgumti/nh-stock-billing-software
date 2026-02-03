@@ -31,7 +31,7 @@ interface GRNFormProps {
   onClose: () => void;
   onSubmit: (grnData: { 
     grnNumber: string; 
-    purchaseOrderId: number; 
+    purchaseOrderId: string; 
     items: GRNItem[]; 
     notes?: string;
     invoiceNumber?: string;

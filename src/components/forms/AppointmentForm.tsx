@@ -177,7 +177,7 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
         <Label>Patient</Label>
         <PatientSearchSelect
           patients={patients}
-          onSelect={handlePatientSelect}
+          onPatientSelect={handlePatientSelect}
           selectedPatient={selectedPatient || null}
           placeholder="Search patient by name or phone..."
         />
