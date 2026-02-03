@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface CachedPatient {
-  id: string;
+  id: number;
   patient_name: string;
   phone: string;
   file_no: string;

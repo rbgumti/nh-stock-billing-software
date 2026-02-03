@@ -116,7 +116,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
       const finalPoNumber = formData.poNumber || poNumber;
 
       const purchaseOrder: PurchaseOrder = {
-        id: crypto.randomUUID(),
+        id: Date.now(),
         poNumber: finalPoNumber,
         supplier: formData.supplier,
         orderDate: formData.poDate,

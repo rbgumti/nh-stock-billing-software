@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Patient {
-  id: string;
+  id: number;
   patient_name: string;
   phone: string;
   file_no: string;

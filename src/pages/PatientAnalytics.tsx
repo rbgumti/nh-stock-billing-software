@@ -8,7 +8,7 @@ import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { motion } from "framer-motion";
 
 interface Patient {
-  id: string;
+  id: number;
   patient_name: string;
   age: string;
   phone: string;

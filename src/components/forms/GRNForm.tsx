@@ -15,7 +15,7 @@ import { formatPrecision } from "@/lib/formatUtils";
 import { useToast } from "@/hooks/use-toast";
 
 interface GRNItem {
-  stockItemId: number | string;
+  stockItemId: number;
   orderedQuantity: number;
   receivedQuantity: number;
   batchNo?: string;
@@ -31,7 +31,7 @@ interface GRNFormProps {
   onClose: () => void;
   onSubmit: (grnData: { 
     grnNumber: string; 
-    purchaseOrderId: string; 
+    purchaseOrderId: number; 
     items: GRNItem[]; 
     notes?: string;
     invoiceNumber?: string;
@@ -156,7 +156,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
   };
 
   // Add a new batch row for an item
-  const addBatchRow = (stockItemId: string | number, parentIndex: number) => {
+  const addBatchRow = (stockItemId: number, parentIndex: number) => {
     const stockItem = stockItems.find(s => s.id === stockItemId);
     const newBatchItem: GRNItem = {
       stockItemId,
@@ -298,8 +298,8 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
     });
   };
 
-  const getStockItemName = (stockItemId: string | number) => {
-    const item = stockItems.find(s => String(s.id) === String(stockItemId));
+  const getStockItemName = (stockItemId: number) => {
+    const item = stockItems.find(s => s.id === stockItemId);
     return item ? item.name : 'Unknown Item';
   };
 

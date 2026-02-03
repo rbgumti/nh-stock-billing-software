@@ -59,7 +59,7 @@ export function ServicePOForm({ onClose, onSubmit }: ServicePOFormProps) {
     setIsSubmitting(true);
     try {
       const purchaseOrder: PurchaseOrder = {
-        id: crypto.randomUUID(),
+        id: Date.now(),
         poNumber: formData.poNumber,
         supplier: formData.supplier,
         orderDate: formData.poDate,

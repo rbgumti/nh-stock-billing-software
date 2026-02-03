@@ -15,7 +15,7 @@ interface StockItem {
 
 interface PrescriptionFormProps {
   formData: {
-    patient_id: string;
+    patient_id: number;
     patient_name: string;
     patient_phone: string;
     patient_age: string;

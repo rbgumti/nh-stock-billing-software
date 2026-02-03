@@ -213,9 +213,12 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
         .from('salary_records')
         .insert({
           employee_id: record.employeeId,
-          month: parseInt(record.month.split('-')[1]) || 1,
-          year: parseInt(record.month.split('-')[0]) || new Date().getFullYear(),
-        } as any)
+          month: record.month,
+          working_days: record.workingDays,
+          advance_adjusted: record.advanceAdjusted,
+          advance_pending: record.advancePending,
+          salary_payable: record.salaryPayable,
+        })
         .select()
         .single();
 

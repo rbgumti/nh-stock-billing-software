@@ -1,1 +1,16 @@
-project_id = "bzbiehprbvbkgfrcktvk"
+project_id = "kafzdrmvbdsyvsffrhes"
+
+[functions.create-prescription]
+verify_jwt = false
+
+[functions.run-snapshot]
+verify_jwt = false
+
+[functions.verify-salary-access]
+verify_jwt = false
+
+[functions.create-user]
+verify_jwt = false
+
+[functions.delete-user]
+verify_jwt = false
