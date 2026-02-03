@@ -1243,7 +1243,14 @@ export type Database = {
       snapshot_opening_stock: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "user" | "staff" | "manager" | "billing" | "reception"
+      app_role:
+        | "admin"
+        | "user"
+        | "staff"
+        | "manager"
+        | "billing"
+        | "reception"
+        | "pharma"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1371,7 +1378,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "staff", "manager", "billing", "reception"],
+      app_role: [
+        "admin",
+        "user",
+        "staff",
+        "manager",
+        "billing",
+        "reception",
+        "pharma",
+      ],
     },
   },
 } as const
