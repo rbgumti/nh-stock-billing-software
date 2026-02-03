@@ -48,6 +48,10 @@ export type Database = {
           id: string
           notes: string | null
           patient_id: string | null
+          patient_name: string | null
+          patient_phone: string | null
+          reason: string | null
+          reminder_sent: boolean | null
           status: string | null
           type: string | null
           updated_at: string
@@ -61,6 +65,10 @@ export type Database = {
           id?: string
           notes?: string | null
           patient_id?: string | null
+          patient_name?: string | null
+          patient_phone?: string | null
+          reason?: string | null
+          reminder_sent?: boolean | null
           status?: string | null
           type?: string | null
           updated_at?: string
@@ -74,6 +82,10 @@ export type Database = {
           id?: string
           notes?: string | null
           patient_id?: string | null
+          patient_name?: string | null
+          patient_phone?: string | null
+          reason?: string | null
+          reminder_sent?: boolean | null
           status?: string | null
           type?: string | null
           updated_at?: string
@@ -240,6 +252,7 @@ export type Database = {
           id: string
           invoice_id: string
           is_returned: boolean | null
+          medicine_id: number | null
           medicine_name: string
           mrp: number | null
           quantity: number
@@ -258,6 +271,7 @@ export type Database = {
           id?: string
           invoice_id: string
           is_returned?: boolean | null
+          medicine_id?: number | null
           medicine_name: string
           mrp?: number | null
           quantity?: number
@@ -276,6 +290,7 @@ export type Database = {
           id?: string
           invoice_id?: string
           is_returned?: boolean | null
+          medicine_id?: number | null
           medicine_name?: string
           mrp?: number | null
           quantity?: number
@@ -291,6 +306,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "invoices"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_medicine_id_fkey"
+            columns: ["medicine_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["item_id"]
           },
           {
             foreignKeyName: "invoice_items_stock_item_id_fkey"
@@ -312,6 +334,8 @@ export type Database = {
           invoice_number: string | null
           notes: string | null
           patient_id: string | null
+          patient_name: string | null
+          patient_phone: string | null
           payment_method: string | null
           payment_status: string | null
           prescription_id: string | null
@@ -331,6 +355,8 @@ export type Database = {
           invoice_number?: string | null
           notes?: string | null
           patient_id?: string | null
+          patient_name?: string | null
+          patient_phone?: string | null
           payment_method?: string | null
           payment_status?: string | null
           prescription_id?: string | null
@@ -350,6 +376,8 @@ export type Database = {
           invoice_number?: string | null
           notes?: string | null
           patient_id?: string | null
+          patient_name?: string | null
+          patient_phone?: string | null
           payment_method?: string | null
           payment_status?: string | null
           prescription_id?: string | null
@@ -378,9 +406,12 @@ export type Database = {
       }
       patients: {
         Row: {
+          aadhar_card: string | null
           address: string | null
+          age: string | null
           allergies: string | null
           blood_group: string | null
+          category: string | null
           chief_complaint: string | null
           chronic_conditions: string | null
           city: string | null
@@ -392,16 +423,22 @@ export type Database = {
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           emergency_contact_relation: string | null
+          father_name: string | null
+          file_no: string | null
           first_name: string
           gender: string | null
+          govt_id: string | null
           id: string
           insurance_policy_number: string | null
           insurance_provider: string | null
           last_name: string | null
           medical_notes: string | null
+          new_govt_id: string | null
           notes: string | null
           patient_id: string | null
+          patient_name: string | null
           phone: string | null
+          phone_alt: string | null
           pincode: string | null
           referred_by: string | null
           state: string | null
@@ -410,9 +447,12 @@ export type Database = {
           visit_type: string | null
         }
         Insert: {
+          aadhar_card?: string | null
           address?: string | null
+          age?: string | null
           allergies?: string | null
           blood_group?: string | null
+          category?: string | null
           chief_complaint?: string | null
           chronic_conditions?: string | null
           city?: string | null
@@ -424,16 +464,22 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
+          father_name?: string | null
+          file_no?: string | null
           first_name: string
           gender?: string | null
+          govt_id?: string | null
           id?: string
           insurance_policy_number?: string | null
           insurance_provider?: string | null
           last_name?: string | null
           medical_notes?: string | null
+          new_govt_id?: string | null
           notes?: string | null
           patient_id?: string | null
+          patient_name?: string | null
           phone?: string | null
+          phone_alt?: string | null
           pincode?: string | null
           referred_by?: string | null
           state?: string | null
@@ -442,9 +488,12 @@ export type Database = {
           visit_type?: string | null
         }
         Update: {
+          aadhar_card?: string | null
           address?: string | null
+          age?: string | null
           allergies?: string | null
           blood_group?: string | null
+          category?: string | null
           chief_complaint?: string | null
           chronic_conditions?: string | null
           city?: string | null
@@ -456,16 +505,22 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
+          father_name?: string | null
+          file_no?: string | null
           first_name?: string
           gender?: string | null
+          govt_id?: string | null
           id?: string
           insurance_policy_number?: string | null
           insurance_provider?: string | null
           last_name?: string | null
           medical_notes?: string | null
+          new_govt_id?: string | null
           notes?: string | null
           patient_id?: string | null
+          patient_name?: string | null
           phone?: string | null
+          phone_alt?: string | null
           pincode?: string | null
           referred_by?: string | null
           state?: string | null
@@ -575,9 +630,11 @@ export type Database = {
           item_name: string
           mrp: number | null
           purchase_order_id: string
+          qty_in_tabs: number | null
           quantity: number
           received_quantity: number | null
           stock_item_id: number | null
+          stock_item_name: string | null
           total: number
           unit_price: number
         }
@@ -590,9 +647,11 @@ export type Database = {
           item_name: string
           mrp?: number | null
           purchase_order_id: string
+          qty_in_tabs?: number | null
           quantity?: number
           received_quantity?: number | null
           stock_item_id?: number | null
+          stock_item_name?: string | null
           total?: number
           unit_price?: number
         }
@@ -605,9 +664,11 @@ export type Database = {
           item_name?: string
           mrp?: number | null
           purchase_order_id?: string
+          qty_in_tabs?: number | null
           quantity?: number
           received_quantity?: number | null
           stock_item_id?: number | null
+          stock_item_name?: string | null
           total?: number
           unit_price?: number
         }
@@ -650,6 +711,7 @@ export type Database = {
           po_number: string | null
           status: string | null
           subtotal: number | null
+          supplier: string | null
           supplier_id: string | null
           supplier_name: string | null
           tax: number | null
@@ -677,6 +739,7 @@ export type Database = {
           po_number?: string | null
           status?: string | null
           subtotal?: number | null
+          supplier?: string | null
           supplier_id?: string | null
           supplier_name?: string | null
           tax?: number | null
@@ -704,6 +767,7 @@ export type Database = {
           po_number?: string | null
           status?: string | null
           subtotal?: number | null
+          supplier?: string | null
           supplier_id?: string | null
           supplier_name?: string | null
           tax?: number | null
