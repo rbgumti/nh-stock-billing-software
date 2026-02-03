@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Supplier {
-  id: number;
+  id: string;
   name: string;
   phone?: string;
   email?: string;
@@ -66,7 +66,7 @@ export function useSupplierStore() {
     return data;
   };
 
-  const updateSupplier = async (id: number, supplier: Partial<Supplier>) => {
+  const updateSupplier = async (id: string, supplier: Partial<Supplier>) => {
     const { error } = await supabase
       .from('suppliers')
       .update(supplier)
@@ -78,7 +78,7 @@ export function useSupplierStore() {
     }
   };
 
-  const deleteSupplier = async (id: number) => {
+  const deleteSupplier = async (id: string) => {
     const { error } = await supabase
       .from('suppliers')
       .delete()

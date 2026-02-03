@@ -60,7 +60,7 @@ export function SupplierAgingReport({
   purchaseOrders, 
   onClose 
 }: SupplierAgingReportProps) {
-  const [expandedSuppliers, setExpandedSuppliers] = useState<Set<number>>(new Set());
+  const [expandedSuppliers, setExpandedSuppliers] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState('summary');
 
   const today = new Date();
@@ -176,7 +176,7 @@ export function SupplierAgingReport({
     }).format(amount);
   };
 
-  const toggleSupplier = (supplierId: number) => {
+  const toggleSupplier = (supplierId: string) => {
     const newExpanded = new Set(expandedSuppliers);
     if (newExpanded.has(supplierId)) {
       newExpanded.delete(supplierId);

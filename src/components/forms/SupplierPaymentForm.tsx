@@ -20,7 +20,7 @@ interface SupplierPaymentFormProps {
   onClose: () => void;
   onSubmit: (
     payment: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>,
-    linkedPOIds: number[]
+    linkedPOIds: string[]
   ) => void;
   suppliers: Supplier[];
   purchaseOrders: PurchaseOrder[];
@@ -43,7 +43,7 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
   });
   
   // Multi-select PO IDs
-  const [selectedPOIds, setSelectedPOIds] = useState<number[]>(
+  const [selectedPOIds, setSelectedPOIds] = useState<string[]>(
     initialData?.purchase_order_id ? [initialData.purchase_order_id] : []
   );
   
@@ -70,7 +70,7 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
       .reduce((sum, po) => sum + po.totalAmount, 0);
   }, [filteredPOs, selectedPOIds]);
 
-  const handlePOToggle = (poId: number, checked: boolean) => {
+  const handlePOToggle = (poId: string, checked: boolean) => {
     if (checked) {
       setSelectedPOIds(prev => [...prev, poId]);
     } else {
@@ -179,7 +179,7 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
     const primaryPOId = selectedPOIds.length > 0 ? selectedPOIds[0] : undefined;
 
     onSubmit({
-      supplier_id: parseInt(formData.supplier_id),
+      supplier_id: formData.supplier_id,
       purchase_order_id: primaryPOId,
       amount: parseFloat(formData.amount),
       payment_date: formData.payment_date,

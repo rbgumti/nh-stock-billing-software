@@ -28,7 +28,7 @@ export interface PrescriptionItem {
 export interface Prescription {
   id?: string;
   prescription_number: string;
-  patient_id: number;
+  patient_id: string;
   patient_name: string;
   patient_phone?: string;
   patient_age?: string;
@@ -165,7 +165,7 @@ export const usePrescriptionStore = () => {
   };
 
   const updatePrescription = async (id: string, updates: {
-    patient_id?: number;
+    patient_id?: string;
     patient_name?: string;
     patient_phone?: string;
     patient_age?: string;

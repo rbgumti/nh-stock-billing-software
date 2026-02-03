@@ -36,7 +36,7 @@ interface SupplierLedgerProps {
   payments: SupplierPayment[];
   purchaseOrders: PurchaseOrder[];
   onClose: () => void;
-  initialSupplierId?: number;
+  initialSupplierId?: string;
 }
 
 interface LedgerEntry {
@@ -49,17 +49,17 @@ interface LedgerEntry {
   status: string;
   balance: number;
   source: 'po' | 'grn' | 'payment';
-  sourceId: number;
+  sourceId: string;
 }
 
-export function SupplierLedger({ 
+export function SupplierLedger({
   suppliers, 
   payments, 
   purchaseOrders, 
   onClose,
   initialSupplierId 
 }: SupplierLedgerProps) {
-  const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(initialSupplierId || null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(initialSupplierId || null);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [activeTab, setActiveTab] = useState('ledger');
@@ -331,8 +331,8 @@ export function SupplierLedger({
             <div className="flex-1 min-w-[200px]">
               <label className="text-sm font-medium mb-1.5 block text-muted-foreground">Select Supplier</label>
               <Select
-                value={selectedSupplierId?.toString() || ''}
-                onValueChange={(val) => setSelectedSupplierId(Number(val))}
+                value={selectedSupplierId || ''}
+                onValueChange={(val) => setSelectedSupplierId(val)}
               >
                 <SelectTrigger className="glass-subtle">
                   <SelectValue placeholder="Choose a supplier..." />
