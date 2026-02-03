@@ -33,7 +33,7 @@ const getNextTimeSlot = (): string => {
 };
 
 const appointmentSchema = z.object({
-  patient_id: z.number({ required_error: "Please select a patient" }),
+  patient_id: z.string({ required_error: "Please select a patient" }),
   patient_name: z.string().min(1, "Patient name is required"),
   patient_phone: z.string().optional(),
   appointment_date: z.date({ required_error: "Please select a date" }),
@@ -48,7 +48,7 @@ type AppointmentFormData = z.infer<typeof appointmentSchema>;
 
 interface Appointment {
   id: string;
-  patient_id: number;
+  patient_id: string;
   patient_name: string;
   patient_phone: string | null;
   appointment_date: string;
@@ -160,43 +160,35 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     }
   };
 
-  const handlePatientSelect = (patient: Patient) => {
-    setValue('patient_id', patient.id);
-    setValue('patient_name', patient.patient_name);
-    setValue('patient_phone', patient.phone || '');
+  const handlePatientSelect = (patient: Patient | null) => {
+    if (patient) {
+      setValue("patient_id", patient.id);
+      setValue("patient_name", patient.patient_name || '');
+      setValue("patient_phone", patient.phone || '');
+    }
   };
 
-  const selectedPatient = patients.find(p => p.id === watch('patient_id'));
+  const watchedPatientId = watch("patient_id");
+  const selectedPatient = patients.find(p => p.id === watchedPatientId);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-2 relative">
+      <div className="space-y-2">
+        <Label>Patient</Label>
         <PatientSearchSelect
           patients={patients}
-          selectedPatientId={watch("patient_id")}
-          onPatientSelect={handlePatientSelect}
+          onSelect={handlePatientSelect}
+          selectedPatient={selectedPatient || null}
+          placeholder="Search patient by name or phone..."
         />
         {errors.patient_id && (
           <p className="text-sm text-destructive">{errors.patient_id.message}</p>
         )}
       </div>
 
-      {selectedPatient && (
-        <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1 border">
-          <div className="font-medium text-foreground">{selectedPatient.patient_name}</div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
-            <div><span className="font-medium">S/O, D/O:</span> {selectedPatient.father_name || '-'}</div>
-            <div><span className="font-medium">Age:</span> {selectedPatient.age || '-'}</div>
-            <div><span className="font-medium">Phone:</span> {selectedPatient.phone || '-'}</div>
-            <div><span className="font-medium">Category:</span> {selectedPatient.category || '-'}</div>
-            <div className="col-span-2"><span className="font-medium">Address:</span> {selectedPatient.address || '-'}</div>
-          </div>
-        </div>
-      )}
-
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Appointment Date *</Label>
+          <Label>Date</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -207,7 +199,7 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
+                {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -216,11 +208,9 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
                 selected={selectedDate}
                 onSelect={(date) => {
                   setSelectedDate(date);
-                  if (date) setValue('appointment_date', date);
+                  if (date) setValue("appointment_date", date);
                 }}
-                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                 initialFocus
-                className={cn("p-3 pointer-events-auto")}
               />
             </PopoverContent>
           </Popover>
@@ -230,11 +220,11 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="appointment_time">Time *</Label>
+          <Label htmlFor="appointment_time">Time</Label>
           <Input
             id="appointment_time"
             type="time"
-            {...register('appointment_time')}
+            {...register("appointment_time")}
           />
           {errors.appointment_time && (
             <p className="text-sm text-destructive">{errors.appointment_time.message}</p>
@@ -242,42 +232,61 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="duration_minutes">Duration (minutes) *</Label>
-        <Select
-          onValueChange={(value) => setValue('duration_minutes', parseInt(value))}
-          defaultValue={watch('duration_minutes')?.toString()}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select duration" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="2">2 minutes</SelectItem>
-            <SelectItem value="5">5 minutes</SelectItem>
-            <SelectItem value="10">10 minutes</SelectItem>
-            <SelectItem value="15">15 minutes</SelectItem>
-            <SelectItem value="30">30 minutes</SelectItem>
-            <SelectItem value="45">45 minutes</SelectItem>
-            <SelectItem value="60">60 minutes</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.duration_minutes && (
-          <p className="text-sm text-destructive">{errors.duration_minutes.message}</p>
-        )}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="duration_minutes">Duration (minutes)</Label>
+          <Select
+            value={String(watch("duration_minutes"))}
+            onValueChange={(val) => setValue("duration_minutes", parseInt(val))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select duration" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2">2 minutes</SelectItem>
+              <SelectItem value="5">5 minutes</SelectItem>
+              <SelectItem value="10">10 minutes</SelectItem>
+              <SelectItem value="15">15 minutes</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.duration_minutes && (
+            <p className="text-sm text-destructive">{errors.duration_minutes.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <Select
+            value={watch("status")}
+            onValueChange={(val) => setValue("status", val)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Confirmed">Confirmed</SelectItem>
+              <SelectItem value="Pending">Pending</SelectItem>
+              <SelectItem value="Completed">Completed</SelectItem>
+              <SelectItem value="Cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="reason">Reason for Visit *</Label>
+        <Label htmlFor="reason">Reason / Category</Label>
         <Select
-          onValueChange={(value) => setValue('reason', value)}
-          defaultValue={watch('reason')}
+          value={watch("reason")}
+          onValueChange={(val) => setValue("reason", val)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder="Select reason" />
           </SelectTrigger>
           <SelectContent>
-            {PATIENT_CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+            {PATIENT_CATEGORIES.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -287,37 +296,17 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <Select
-          onValueChange={(value) => setValue('status', value)}
-          defaultValue={watch('status')}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Scheduled">Scheduled</SelectItem>
-            <SelectItem value="Confirmed">Confirmed</SelectItem>
-            <SelectItem value="Completed">Completed</SelectItem>
-            <SelectItem value="Cancelled">Cancelled</SelectItem>
-            <SelectItem value="No-Show">No-Show</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">Notes (optional)</Label>
         <Textarea
           id="notes"
-          placeholder="Additional notes or special instructions"
-          rows={3}
-          {...register('notes')}
+          placeholder="Add any additional notes..."
+          {...register("notes")}
         />
       </div>
 
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 pt-4">
         <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : appointment ? 'Update Appointment' : 'Schedule Appointment'}
+          {loading ? "Saving..." : appointment ? "Update Appointment" : "Schedule Appointment"}
         </Button>
       </div>
     </form>

@@ -112,7 +112,7 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .insert([{
-          s_no: patient.patientId,
+          s_no: patient.patientId ? parseInt(patient.patientId) : undefined,
           file_no: patient.fileNo || '',
           patient_name: `${patient.firstName} ${patient.lastName}`.trim(),
           age: patient.dateOfBirth 
@@ -160,7 +160,7 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .update(updateData)
-        .eq('id', parseInt(patientId))
+        .eq('id', patientId)
         .select();
 
       if (error) {
@@ -189,7 +189,7 @@ export function usePatientStore() {
       const { error } = await supabase
         .from('patients')
         .delete()
-        .eq('id', parseInt(patientId));
+        .eq('id', patientId);
 
       if (error) throw error;
     } catch (error) {

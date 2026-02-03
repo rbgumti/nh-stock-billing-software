@@ -40,7 +40,7 @@ export default function EditPrescription() {
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [medicineSearches, setMedicineSearches] = useState<Record<number, string>>({});
   const [formData, setFormData] = useState({
-    patient_id: 0,
+    patient_id: '' as string,
     patient_name: '',
     patient_phone: '',
     patient_age: '',

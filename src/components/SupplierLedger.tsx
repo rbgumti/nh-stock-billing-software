@@ -49,7 +49,7 @@ interface LedgerEntry {
   status: string;
   balance: number;
   source: 'po' | 'grn' | 'payment';
-  sourceId: number;
+  sourceId: string;
 }
 
 export function SupplierLedger({ 
@@ -59,7 +59,7 @@ export function SupplierLedger({
   onClose,
   initialSupplierId 
 }: SupplierLedgerProps) {
-  const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(initialSupplierId || null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(initialSupplierId || null);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [activeTab, setActiveTab] = useState('ledger');

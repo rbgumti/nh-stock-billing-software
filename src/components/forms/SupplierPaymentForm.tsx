@@ -20,7 +20,7 @@ interface SupplierPaymentFormProps {
   onClose: () => void;
   onSubmit: (
     payment: Omit<SupplierPayment, 'id' | 'created_at' | 'updated_at' | 'supplier_name' | 'po_number'>,
-    linkedPOIds: number[]
+    linkedPOIds: string[]
   ) => void;
   suppliers: Supplier[];
   purchaseOrders: PurchaseOrder[];
@@ -43,7 +43,7 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
   });
   
   // Multi-select PO IDs
-  const [selectedPOIds, setSelectedPOIds] = useState<number[]>(
+  const [selectedPOIds, setSelectedPOIds] = useState<string[]>(
     initialData?.purchase_order_id ? [initialData.purchase_order_id] : []
   );
   

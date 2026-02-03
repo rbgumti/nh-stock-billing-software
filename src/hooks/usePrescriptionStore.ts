@@ -28,7 +28,7 @@ export interface PrescriptionItem {
 export interface Prescription {
   id?: string;
   prescription_number: string;
-  patient_id: number;
+  patient_id: string;
   patient_name: string;
   patient_phone?: string;
   patient_age?: string;
@@ -78,13 +78,31 @@ export const usePrescriptionStore = () => {
           if (itemsError) throw itemsError;
 
           return {
-            ...prescription,
-            items: itemsData || []
-          };
+            id: prescription.id,
+            prescription_number: prescription.prescription_number || '',
+            patient_id: String(prescription.patient_id || ''),
+            patient_name: prescription.patient_name || '',
+            patient_phone: prescription.patient_phone || undefined,
+            patient_age: prescription.patient_age || undefined,
+            diagnosis: prescription.diagnosis || '',
+            notes: prescription.notes || undefined,
+            prescription_date: prescription.prescription_date || '',
+            status: (prescription.status as 'Active' | 'Dispensed' | 'Cancelled') || 'Active',
+            appointment_id: prescription.appointment_id || undefined,
+            items: (itemsData || []).map(item => ({
+              id: item.id,
+              medicine_name: item.medicine_name,
+              dosage: item.dosage || '',
+              frequency: item.frequency || '',
+              duration: item.duration || '',
+              quantity: item.quantity || 0,
+              instructions: item.instructions || undefined,
+            }))
+          } as Prescription;
         })
       );
 
-      setPrescriptions(prescriptionsWithItems as Prescription[]);
+      setPrescriptions(prescriptionsWithItems);
     } catch (error: any) {
       toast({
         title: "Error loading prescriptions",
@@ -165,7 +183,7 @@ export const usePrescriptionStore = () => {
   };
 
   const updatePrescription = async (id: string, updates: {
-    patient_id?: number;
+    patient_id?: string;
     patient_name?: string;
     patient_phone?: string;
     patient_age?: string;

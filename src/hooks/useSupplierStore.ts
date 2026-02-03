@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Supplier {
-  id: number;
+  id: string;
   name: string;
   phone?: string;
   email?: string;
@@ -46,7 +46,19 @@ export function useSupplierStore() {
     if (error) {
       console.error('Error loading suppliers:', error);
     } else {
-      setSuppliers(data || []);
+      // Map data to ensure proper types
+      const mappedData: Supplier[] = (data || []).map(s => ({
+        id: s.id,
+        name: s.name,
+        phone: s.phone || undefined,
+        email: s.email || undefined,
+        address: s.address || undefined,
+        payment_terms: s.payment_terms || undefined,
+        notes: s.notes || undefined,
+        created_at: s.created_at || undefined,
+        updated_at: s.updated_at || undefined,
+      }));
+      setSuppliers(mappedData);
     }
     setLoading(false);
   };
@@ -54,7 +66,14 @@ export function useSupplierStore() {
   const addSupplier = async (supplier: Omit<Supplier, 'id' | 'created_at' | 'updated_at'>) => {
     const { data, error } = await supabase
       .from('suppliers')
-      .insert(supplier)
+      .insert({
+        name: supplier.name,
+        phone: supplier.phone || null,
+        email: supplier.email || null,
+        address: supplier.address || null,
+        payment_terms: supplier.payment_terms || null,
+        notes: supplier.notes || null,
+      })
       .select()
       .single();
 
@@ -66,10 +85,17 @@ export function useSupplierStore() {
     return data;
   };
 
-  const updateSupplier = async (id: number, supplier: Partial<Supplier>) => {
+  const updateSupplier = async (id: string, supplier: Partial<Supplier>) => {
     const { error } = await supabase
       .from('suppliers')
-      .update(supplier)
+      .update({
+        name: supplier.name,
+        phone: supplier.phone || null,
+        email: supplier.email || null,
+        address: supplier.address || null,
+        payment_terms: supplier.payment_terms || null,
+        notes: supplier.notes || null,
+      })
       .eq('id', id);
 
     if (error) {
@@ -78,7 +104,7 @@ export function useSupplierStore() {
     }
   };
 
-  const deleteSupplier = async (id: number) => {
+  const deleteSupplier = async (id: string) => {
     const { error } = await supabase
       .from('suppliers')
       .delete()
