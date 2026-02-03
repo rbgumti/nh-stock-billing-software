@@ -300,20 +300,29 @@ export function StockItemCard({
                       </td>
                       <td className="px-2 py-1.5 text-center">
                         {isEditing ? (
-                          <div className="flex gap-0.5 justify-center">
+                          <div className="flex gap-1 justify-center">
                             <Button
-                              variant="ghost"
+                              variant="default"
                               size="sm"
-                              className="h-5 w-5 p-0 hover:bg-emerald/10 text-emerald"
+                              className="h-6 px-2 text-xs bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white"
                               onClick={() => handleSaveBatchExpiry(batch)}
                               disabled={isSaving}
                             >
-                              <Check className="h-3 w-3" />
+                              {isSaving ? (
+                                <span className="flex items-center gap-1">
+                                  <span className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" />
+                                </span>
+                              ) : (
+                                <>
+                                  <Check className="h-3 w-3 mr-0.5" />
+                                  Save
+                                </>
+                              )}
                             </Button>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
-                              className="h-5 w-5 p-0 hover:bg-destructive/10 text-destructive"
+                              className="h-6 px-2 text-xs border-destructive/30 text-destructive hover:bg-destructive/10"
                               onClick={handleCancelEdit}
                               disabled={isSaving}
                             >
