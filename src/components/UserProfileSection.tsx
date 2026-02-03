@@ -59,6 +59,7 @@ export function UserProfileSection({ collapsed = false }: UserProfileSectionProp
     manager: "from-violet-500 to-purple-600",
     billing: "from-green-500 to-emerald-500",
     reception: "from-blue-500 to-cyan-500",
+    pharma: "from-amber-500 to-orange-500",
   };
 
   const roleColor = role ? roleColors[role as AppRole] : "from-slate-500 to-slate-600";

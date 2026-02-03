@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 
-export type AppRole = 'admin' | 'manager' | 'billing' | 'reception';
+export type AppRole = 'admin' | 'manager' | 'billing' | 'reception' | 'pharma';
 
 export interface UserWithRole {
   id: string;
@@ -19,6 +19,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, string[]> = {
   manager: ['dashboard', 'patients', 'prescriptions', 'invoices', 'stock', 'reports', 'appointments', 'salary', 'analytics'],
   billing: ['dashboard', 'invoices', 'patients', 'reports'],
   reception: ['dashboard', 'patients', 'appointments', 'prescriptions'],
+  pharma: ['dashboard', 'invoices', 'patients', 'reports', 'stock'],
 };
 
 export const ROLE_LABELS: Record<AppRole, string> = {
@@ -26,6 +27,7 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   manager: 'Manager',
   billing: 'Billing',
   reception: 'Reception',
+  pharma: 'Pharma',
 };
 
 export function useUserRole() {
@@ -103,7 +105,9 @@ export function useUserRole() {
         ? 'billing' 
         : roles.includes('reception') 
           ? 'reception' 
-          : null;
+          : roles.includes('pharma')
+            ? 'pharma'
+            : null;
 
   // Keep backward compatibility with single role
   const role = primaryRole;
