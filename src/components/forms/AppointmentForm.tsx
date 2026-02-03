@@ -33,7 +33,7 @@ const getNextTimeSlot = (): string => {
 };
 
 const appointmentSchema = z.object({
-  patient_id: z.number({ required_error: "Please select a patient" }),
+  patient_id: z.string({ required_error: "Please select a patient" }),
   patient_name: z.string().min(1, "Patient name is required"),
   patient_phone: z.string().optional(),
   appointment_date: z.date({ required_error: "Please select a date" }),
@@ -48,7 +48,7 @@ type AppointmentFormData = z.infer<typeof appointmentSchema>;
 
 interface Appointment {
   id: string;
-  patient_id: number;
+  patient_id: string;
   patient_name: string;
   patient_phone: string | null;
   appointment_date: string;
