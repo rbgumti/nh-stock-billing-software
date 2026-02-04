@@ -45,5 +45,31 @@ export async function invokeWithAuth<T = any>(
     headers,
   });
 
-  return { data, error };
+  if (!error) return { data, error };
+
+  // Supabase-style Functions error often contains a Response in `context`.
+  // We decode it so UI shows the real error (e.g. "Only admins can create users",
+  // "User already registered", etc.) instead of the generic "non-2xx".
+  let message = (error as any)?.message ?? "Request failed";
+  try {
+    const res = (error as any)?.context as Response | undefined;
+    if (res && typeof res.text === "function") {
+      const raw = await res.text();
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed?.error) message = String(parsed.error);
+          else message = raw;
+        } catch {
+          message = raw;
+        }
+      }
+    }
+  } catch {
+    // ignore parsing issues
+  }
+
+  const wrapped = new Error(message);
+  (wrapped as any).cause = error as any;
+  return { data, error: wrapped };
 }
