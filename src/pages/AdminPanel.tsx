@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole, AppRole, ROLE_LABELS, ROLE_PERMISSIONS, UserWithRole } from '@/hooks/useUserRole';
+import { invokeWithAuth } from '@/lib/invokeWithAuth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -100,7 +101,7 @@ export default function AdminPanel() {
     setCreating(true);
     try {
       // Call edge function to create user (requires service role)
-      const { data, error } = await supabase.functions.invoke('create-user', {
+      const { data, error } = await invokeWithAuth('create-user', {
         body: {
           email: newUserForm.email,
           password: newUserForm.password,
@@ -134,7 +135,7 @@ export default function AdminPanel() {
       const trimmedUsername = editUsername.trim();
 
       // Use backend function so updates work regardless of RLS and always target auth user id
-      const { data, error } = await supabase.functions.invoke('set-user-role', {
+      const { data, error } = await invokeWithAuth('set-user-role', {
         body: {
           userId: selectedUser.id,
           role: newRole,
@@ -163,7 +164,7 @@ export default function AdminPanel() {
     }
 
     try {
-      const { error } = await supabase.functions.invoke('delete-user', {
+      const { error } = await invokeWithAuth('delete-user', {
         body: { userId },
       });
 
@@ -191,7 +192,7 @@ export default function AdminPanel() {
 
     setResettingPassword(true);
     try {
-      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+      const { data, error } = await invokeWithAuth('reset-user-password', {
         body: {
           userId: selectedUser.id,
           newPassword: newPassword,
