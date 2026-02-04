@@ -21,15 +21,34 @@ export default function Auth() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const ensureProfile = async (user: { id: string; email?: string | null }) => {
+      try {
+        // Keep profiles in sync even if a user was created before profile/roles were fixed.
+        await supabase
+          .from('profiles')
+          .upsert(
+            {
+              user_id: user.id,
+              email: user.email ?? null,
+            },
+            { onConflict: 'user_id' }
+          );
+      } catch (err) {
+        console.error('ensureProfile failed', err);
+      }
+    };
+
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
+        ensureProfile(session.user);
         navigate("/");
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
+        ensureProfile(session.user);
         navigate("/");
       }
     });
