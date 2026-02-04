@@ -56,10 +56,12 @@ export default function AdminPanel() {
       if (rolesError) throw rolesError;
 
       // Combine profiles with roles
+      // IMPORTANT: profiles.user_id is the auth user id (used by user_roles + admin functions)
       const usersWithRoles: UserWithRole[] = (profiles || []).map(profile => {
-        const userRoles = (roles || []).filter(r => r.user_id === profile.id);
+        const authUserId = (profile as any).user_id as string | undefined;
+        const userRoles = (roles || []).filter(r => r.user_id === authUserId);
         return {
-          id: profile.id,
+          id: authUserId || profile.id,
           email: profile.email,
           full_name: profile.full_name,
           username: (profile as any).username || null,
@@ -129,56 +131,19 @@ export default function AdminPanel() {
 
     setUpdatingUser(true);
     try {
-      // Update username in profiles
-      const trimmedUsername = editUsername.trim() || null;
-      
-      // Check if username is already taken by another user
-      if (trimmedUsername) {
-        const { data: existingUsername } = await supabase
-          .from('profiles')
-          .select('id')
-          .ilike('username', trimmedUsername)
-          .neq('id', selectedUser.id)
-          .maybeSingle();
+      const trimmedUsername = editUsername.trim();
 
-        if (existingUsername) {
-          toast.error('Username is already taken');
-          setUpdatingUser(false);
-          return;
-        }
-      }
+      // Use backend function so updates work regardless of RLS and always target auth user id
+      const { data, error } = await supabase.functions.invoke('set-user-role', {
+        body: {
+          userId: selectedUser.id,
+          role: newRole,
+          username: trimmedUsername,
+        },
+      });
 
-      // Update profile username
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ username: trimmedUsername })
-        .eq('id', selectedUser.id);
-
-      if (profileError) throw profileError;
-
-      // Check if user already has a role
-      const { data: existingRole } = await supabase
-        .from('user_roles')
-        .select('id')
-        .eq('user_id', selectedUser.id)
-        .maybeSingle();
-
-      if (existingRole) {
-        // Update existing role
-        const { error } = await supabase
-          .from('user_roles')
-          .update({ role: newRole })
-          .eq('user_id', selectedUser.id);
-
-        if (error) throw error;
-      } else {
-        // Insert new role
-        const { error } = await supabase
-          .from('user_roles')
-          .insert({ user_id: selectedUser.id, role: newRole });
-
-        if (error) throw error;
-      }
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
 
       toast.success('User updated successfully');
       setIsEditRoleDialogOpen(false);
