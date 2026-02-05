@@ -139,16 +139,20 @@ export function PatientSearchSelect({
     }
     
     const query = debouncedSearchQuery.toLowerCase().trim();
+    const normalizedQuery = normalizeFileNo(query);
     const results: Patient[] = [];
     
     for (const patient of patients) {
       if (results.length >= MAX_DISPLAY_RESULTS) break;
       if (!patient?.id) continue;
       
-      // Check matches in order of likelihood
+      // Check matches in order of likelihood - including file_no search
+      const normalizedFileNo = normalizeFileNo(patient.file_no);
       if (patient.patient_name?.toLowerCase().includes(query) ||
           patient.id.toString().includes(query) ||
           patient.phone?.toLowerCase().includes(query) ||
+          patient.file_no?.toLowerCase().includes(query) ||
+          normalizedFileNo.includes(normalizedQuery) ||
           patient.aadhar_card?.toLowerCase().includes(query) ||
           patient.govt_id?.toLowerCase().includes(query)) {
         results.push(patient);
@@ -288,7 +292,7 @@ export function PatientSearchSelect({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             ref={inputRef}
-            placeholder={compact ? "Search patient..." : placeholder}
+            placeholder={compact ? "Name, Phone, File No..." : placeholder}
             value={searchQuery}
             onChange={handleMainSearchChange}
             onFocus={() => {
