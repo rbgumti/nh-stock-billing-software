@@ -462,18 +462,19 @@ export default function NewInvoice() {
           <CardContent>
             <div className="space-y-6">
               {items.map((item, index) => (
-                <div key={item.id} className={`p-4 border rounded-lg space-y-4 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500 bg-red-50 dark:bg-red-950/30' : ''}`}>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Label htmlFor={`medicine-${item.id}`}>Select Medicine *</Label>
+                <div key={item.id} className={`p-3 border rounded-lg space-y-3 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500 bg-red-50 dark:bg-red-950/30' : ''}`}>
+                  {/* Compact single-row layout: Medicine | Frequency | Days | Qty */}
+                  <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-end">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Label htmlFor={`medicine-${item.id}`} className="text-xs">Medicine *</Label>
                         {item.fromPrescription ? (
-                          <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
                             <FileText className="h-3 w-3 mr-1" />
-                            From Rx
+                            Rx
                           </Badge>
                         ) : item.medicineId > 0 && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                             <Hand className="h-3 w-3 mr-1" />
                             Manual
                           </Badge>
@@ -486,13 +487,13 @@ export default function NewInvoice() {
                         triggerRef={(el) => { selectRefs.current[item.id] = el; }}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor={`frequency-${item.id}`}>Frequency</Label>
+                    <div className="w-full lg:w-32">
+                      <Label htmlFor={`frequency-${item.id}`} className="text-xs">Frequency</Label>
                       <Select
                         value={item.frequency || ""}
                         onValueChange={(value) => updateItem(item.id, "frequency", value)}
                       >
-                        <SelectTrigger id={`frequency-${item.id}`}>
+                        <SelectTrigger id={`frequency-${item.id}`} className="h-10">
                           <SelectValue placeholder="Select frequency" />
                         </SelectTrigger>
                         <SelectContent>
@@ -504,52 +505,55 @@ export default function NewInvoice() {
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor={`duration-${item.id}`}>Duration (Days)</Label>
+                    <div className="w-full lg:w-20">
+                      <Label htmlFor={`duration-${item.id}`} className="text-xs">Days</Label>
                       <Input
                         id={`duration-${item.id}`}
                         type="number"
                         min="1"
                         value={item.durationDays || ""}
                         onChange={(e) => updateItem(item.id, "durationDays", parseInt(e.target.value) || 0)}
-                        placeholder="Enter days"
+                        placeholder="Days"
+                        className="h-10"
+                        onWheel={(e) => e.currentTarget.blur()}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
+                    <div className="w-full lg:w-20">
+                      <Label htmlFor={`quantity-${item.id}`} className="text-xs">Qty</Label>
                       <Input
                         id={`quantity-${item.id}`}
                         type="number"
                         min="0"
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 0)}
-                        className={item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}
+                        className={`h-10 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}`}
                         onWheel={(e) => e.currentTarget.blur()}
                         style={{ MozAppearance: 'textfield' }}
+                        placeholder="Qty"
                       />
-                      {item.quantity > item.availableStock && item.medicineId > 0 && (
-                        <p className="text-xs text-red-500 mt-1">Exceeds available stock ({item.availableStock})</p>
-                      )}
                     </div>
                   </div>
                   
+                  {/* Stock warning below the row */}
+                  {item.quantity > item.availableStock && item.medicineId > 0 && (
+                    <p className="text-xs text-red-500">Exceeds available stock ({item.availableStock})</p>
+                  )}
+                  
                   {item.medicineName && (
                     <>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor={`batchNo-${item.id}`}>Batch No</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="col-span-1">
+                          <Label htmlFor={`batchNo-${item.id}`} className="text-xs">Batch No</Label>
                           <Input
                             id={`batchNo-${item.id}`}
                             value={item.batchNo}
                             onChange={(e) => updateItem(item.id, "batchNo", e.target.value)}
                             placeholder="Enter batch number"
+                            className="h-9"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor={`expiryDate-${item.id}`} className="flex items-center gap-2">
+                        <div className="col-span-1">
+                          <Label htmlFor={`expiryDate-${item.id}`} className="flex items-center gap-1 text-xs">
                             Expiry Date
                             <ExpiryWarningBadge expiryDate={item.expiryDate} />
                           </Label>
@@ -558,38 +562,37 @@ export default function NewInvoice() {
                             type="date"
                             value={item.expiryDate}
                             onChange={(e) => updateItem(item.id, "expiryDate", e.target.value)}
-                            className={getExpiryWarningLevel(item.expiryDate) === 'critical' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 
+                            className={`h-9 ${getExpiryWarningLevel(item.expiryDate) === 'critical' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 
                                        getExpiryWarningLevel(item.expiryDate) === 'warning' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' : 
-                                       getExpiryWarningLevel(item.expiryDate) === 'caution' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : ''}
+                                       getExpiryWarningLevel(item.expiryDate) === 'caution' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
                           />
                         </div>
-                      <div>
-                        <Label htmlFor={`mrp-${item.id}`}>MRP/Tab (₹)</Label>
-                        <Input
-                          id={`mrp-${item.id}`}
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={item.mrp}
-                          onChange={(e) => updateItem(item.id, "mrp", parseFloat(e.target.value) || 0)}
-                          placeholder="0.00"
-                        />
+                        <div className="col-span-1">
+                          <Label htmlFor={`mrp-${item.id}`} className="text-xs">MRP/Tab (₹)</Label>
+                          <Input
+                            id={`mrp-${item.id}`}
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={item.mrp}
+                            onChange={(e) => updateItem(item.id, "mrp", parseFloat(e.target.value) || 0)}
+                            placeholder="0.00"
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="col-span-1">
+                          <Label className="text-xs">Cost/Tab</Label>
+                          <div className="h-9 flex items-center text-sm font-semibold">₹{item.unitPrice.toFixed(2)}</div>
+                        </div>
                       </div>
-                    </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg text-sm">
-                        <div>
-                          <span className="font-medium text-gray-600">Cost/Tab:</span>
-                          <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
+                      <div className="flex flex-wrap gap-4 p-2 bg-muted/50 rounded-md text-xs">
+                        <div className="flex gap-1.5">
+                          <span className="text-muted-foreground">Stock:</span>
+                          <span className="font-semibold text-blue-600">{item.availableStock}</span>
                         </div>
-                        <div>
-                          <span className="font-medium text-gray-600">Available Stock:</span>
-                          <p className="font-semibold text-blue-600">{item.availableStock}</p>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-600">Stock After Invoice:</span>
-                          <p className={`font-semibold ${item.stockAfterInvoice < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {item.stockAfterInvoice}
-                          </p>
+                        <div className="flex gap-1.5">
+                          <span className="text-muted-foreground">After:</span>
+                          <span className={`font-semibold ${item.stockAfterInvoice < 0 ? 'text-red-600' : 'text-green-600'}`}>{item.stockAfterInvoice}</span>
                         </div>
                       </div>
                     </>
