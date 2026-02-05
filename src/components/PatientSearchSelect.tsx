@@ -25,7 +25,6 @@ export interface PatientSearchSelectProps {
   label?: string;
   placeholder?: string;
   disabled?: boolean;
-  compact?: boolean;
   // Legacy props for compatibility
   selectedPatient?: Patient | null;
   onSelect?: (patient: Patient | null) => void;
@@ -53,7 +52,6 @@ export function PatientSearchSelect({
   label = "Patient *",
   placeholder = "Search by Name, Phone, Aadhar, or Govt ID...",
   disabled = false,
-  compact = false,
   // Legacy props
   selectedPatient: legacySelectedPatient,
   onSelect: legacyOnSelect,
@@ -139,20 +137,16 @@ export function PatientSearchSelect({
     }
     
     const query = debouncedSearchQuery.toLowerCase().trim();
-    const normalizedQuery = normalizeFileNo(query);
     const results: Patient[] = [];
     
     for (const patient of patients) {
       if (results.length >= MAX_DISPLAY_RESULTS) break;
       if (!patient?.id) continue;
       
-      // Check matches in order of likelihood - including file_no search
-      const normalizedFileNo = normalizeFileNo(patient.file_no);
+      // Check matches in order of likelihood
       if (patient.patient_name?.toLowerCase().includes(query) ||
           patient.id.toString().includes(query) ||
           patient.phone?.toLowerCase().includes(query) ||
-          patient.file_no?.toLowerCase().includes(query) ||
-          normalizedFileNo.includes(normalizedQuery) ||
           patient.aadhar_card?.toLowerCase().includes(query) ||
           patient.govt_id?.toLowerCase().includes(query)) {
         results.push(patient);
@@ -282,17 +276,17 @@ export function PatientSearchSelect({
   }, []);
 
   return (
-    <div ref={containerRef} className={cn("relative", compact ? "space-y-1" : "space-y-2")}>
-      {label && !compact && <Label>{label}</Label>}
+    <div ref={containerRef} className="space-y-2 relative">
+      {label && <Label>{label}</Label>}
       
       {/* Search Inputs */}
-      <div className={cn("grid gap-2", compact ? "grid-cols-1" : "grid-cols-3")}>
+      <div className="grid grid-cols-3 gap-2">
         {/* Main Search */}
-        <div className={cn("relative", !compact && "col-span-2")}>
+        <div className="relative col-span-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             ref={inputRef}
-            placeholder={compact ? "Name, Phone, File No..." : placeholder}
+            placeholder={placeholder}
             value={searchQuery}
             onChange={handleMainSearchChange}
             onFocus={() => {
@@ -300,7 +294,7 @@ export function PatientSearchSelect({
               setIsOpen(true);
             }}
             onKeyDown={handleKeyDown}
-            className={cn("pl-9 pr-9", compact && "h-9 text-sm")}
+            className="pl-9 pr-9"
             disabled={disabled}
           />
           <ChevronDown 
@@ -311,8 +305,7 @@ export function PatientSearchSelect({
           />
         </div>
         
-        {/* File No Quick Search - hidden in compact mode */}
-        {!compact && (
+        {/* File No Quick Search */}
         <div className="relative">
           <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gold pointer-events-none" />
           <Input
@@ -329,11 +322,10 @@ export function PatientSearchSelect({
             disabled={disabled}
           />
         </div>
-        )}
       </div>
 
       {/* Selected Patient Display */}
-      {selectedPatientMemo && !isOpen && !compact && (
+      {selectedPatientMemo && !isOpen && (
         <div className="p-3 bg-muted/50 rounded-md text-sm space-y-1">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-base">{selectedPatientMemo.patient_name}</span>
