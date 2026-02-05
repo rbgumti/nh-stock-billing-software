@@ -1,6 +1,23 @@
 import { create } from 'zustand';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { eachDayOfInterval, endOfMonth, getDay } from 'date-fns';
+
+// Helper function to count Sundays in a given month (YYYY-MM format)
+export function getSundaysInMonth(month: string): number {
+  const [year, monthNum] = month.split('-').map(Number);
+  const startDate = new Date(year, monthNum - 1, 1);
+  const endDate = endOfMonth(startDate);
+  
+  const days = eachDayOfInterval({ start: startDate, end: endDate });
+  return days.filter(day => getDay(day) === 0).length;
+}
+
+// Get base working days for a month (30 - Sundays, treated as 30 days)
+export function getBaseWorkingDays(month: string): number {
+  const sundaysCount = getSundaysInMonth(month);
+  return 30 - sundaysCount; // e.g., 30 - 4 = 26 days (counted as 30)
+}
 
 export interface Employee {
   id: string;
@@ -289,8 +306,8 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
     const employee = get().employees.find((e) => e.id === employeeId);
     if (!employee) return 0;
     
-    // Standard month = 31 days, calculate per day rate
-    const perDayRate = employee.salaryFixed / 31;
+    // Standard month = 30 days (base), calculate per day rate
+    const perDayRate = employee.salaryFixed / 30;
     const calculatedSalary = perDayRate * workingDays;
     
     // Subtract advance adjusted
