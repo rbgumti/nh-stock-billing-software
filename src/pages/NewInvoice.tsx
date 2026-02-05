@@ -404,47 +404,47 @@ export default function NewInvoice() {
         {/* Invoice Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Invoice Details</CardTitle>
+            <CardTitle className="text-base">Invoice Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Patient Search */}
-            <div className="space-y-4 relative">
+          <CardContent>
+            {/* Compact: Patient | File No | Date in one row */}
+            <div className="flex items-end gap-3">
+              <div className="flex-1 min-w-0">
+                <Label className="text-xs">Patient *</Label>
               <PatientSearchSelect
                 patients={patients}
                 selectedPatientId={foundPatient?.id}
                 onPatientSelect={handlePatientSelect}
-                label="Select Patient *"
                 disabled={patientsLoading}
+                compact
               />
-              {patientsLoading && (
-                <p className="text-xs text-muted-foreground">Loading patients...</p>
-              )}
-              
-              {foundPatient && (
-                <div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-                  <h4 className="font-medium text-green-800 dark:text-green-300">Patient Details:</h4>
-                  <p className="text-sm text-green-700 dark:text-green-400">
-                    <strong>Name:</strong> {foundPatient.patient_name}
-                  </p>
-                  <p className="text-sm text-green-700 dark:text-green-400">
-                    <strong>ID:</strong> {foundPatient.id}
-                  </p>
-                  <p className="text-sm text-green-700 dark:text-green-400">
-                    <strong>Phone:</strong> {foundPatient.phone}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="invoiceDate">Invoice Date</Label>
+              </div>
+              <div className="w-24 shrink-0">
+                <Label className="text-xs">File No</Label>
+                <Input
+                  value={foundPatient?.file_no || '-'}
+                  readOnly
+                  className="h-9 text-sm bg-muted"
+                />
+              </div>
+              <div className="w-32 shrink-0">
+                <Label className="text-xs">Date</Label>
               <Input
-                id="invoiceDate"
                 type="date"
                 value={invoiceDate}
                 onChange={(e) => setInvoiceDate(e.target.value)}
+                  className="h-9 text-sm"
               />
             </div>
+            </div>
+            {/* Compact patient info bar */}
+            {foundPatient && (
+              <div className="mt-2 flex items-center gap-4 px-2 py-1.5 bg-muted/50 rounded text-xs">
+                <span><span className="text-muted-foreground">Name:</span> <span className="font-medium">{foundPatient.patient_name}</span></span>
+                <span><span className="text-muted-foreground">Phone:</span> <span className="font-medium">{foundPatient.phone || '-'}</span></span>
+                <span><span className="text-muted-foreground">ID:</span> <span className="font-medium">{foundPatient.id}</span></span>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -516,7 +516,7 @@ export default function NewInvoice() {
                         value={item.durationDays || ""}
                         onChange={(e) => updateItem(item.id, "durationDays", parseInt(e.target.value) || 0)}
                         placeholder="0"
-                        className="h-9 text-sm px-2"
+                        className="h-9 text-sm px-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                     {/* Quantity - compact */}
@@ -527,7 +527,7 @@ export default function NewInvoice() {
                         min="0"
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 0)}
-                        className={`h-9 text-sm px-2 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}`}
+                        className={`h-9 text-sm px-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}`}
                       />
                     </div>
                     {/* Delete button inline */}
