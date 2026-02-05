@@ -462,20 +462,22 @@ export default function NewInvoice() {
           <CardContent>
             <div className="space-y-6">
               {items.map((item, index) => (
-                <div key={item.id} className={`p-4 border rounded-lg space-y-4 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500 bg-red-50 dark:bg-red-950/30' : ''}`}>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Label htmlFor={`medicine-${item.id}`}>Select Medicine *</Label>
+                <div key={item.id} className={`p-3 border rounded-lg space-y-3 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500 bg-red-50 dark:bg-red-950/30' : ''}`}>
+                  {/* Compact single-row layout: Medicine | Freq | Days | Qty */}
+                  <div className="flex items-end gap-2">
+                    {/* Medicine Select - takes most space */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1 mb-1">
+                        <Label className="text-xs">Medicine *</Label>
                         {item.fromPrescription ? (
-                          <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                            <FileText className="h-3 w-3 mr-1" />
-                            From Rx
+                          <Badge variant="secondary" className="text-[10px] px-1 py-0 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                            <FileText className="h-2.5 w-2.5 mr-0.5" />
+                            Rx
                           </Badge>
                         ) : item.medicineId > 0 && (
-                          <Badge variant="outline" className="text-xs">
-                            <Hand className="h-3 w-3 mr-1" />
-                            Manual
+                          <Badge variant="outline" className="text-[10px] px-1 py-0">
+                            <Hand className="h-2.5 w-2.5 mr-0.5" />
+                            M
                           </Badge>
                         )}
                       </div>
@@ -486,69 +488,83 @@ export default function NewInvoice() {
                         triggerRef={(el) => { selectRefs.current[item.id] = el; }}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor={`frequency-${item.id}`}>Frequency</Label>
+                    {/* Frequency - compact */}
+                    <div className="w-24 shrink-0">
+                      <Label className="text-xs">Freq</Label>
                       <Select
                         value={item.frequency || ""}
                         onValueChange={(value) => updateItem(item.id, "frequency", value)}
                       >
-                        <SelectTrigger id={`frequency-${item.id}`}>
-                          <SelectValue placeholder="Select frequency" />
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder="Freq" />
                         </SelectTrigger>
                         <SelectContent>
                           {FREQUENCY_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
+                            <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                              {opt.value}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor={`duration-${item.id}`}>Duration (Days)</Label>
+                    {/* Days - compact */}
+                    <div className="w-16 shrink-0">
+                      <Label className="text-xs">Days</Label>
                       <Input
-                        id={`duration-${item.id}`}
                         type="number"
                         min="1"
                         value={item.durationDays || ""}
                         onChange={(e) => updateItem(item.id, "durationDays", parseInt(e.target.value) || 0)}
-                        placeholder="Enter days"
+                        placeholder="0"
+                        className="h-9 text-sm px-2"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor={`quantity-${item.id}`}>Quantity</Label>
+                    {/* Quantity - compact */}
+                    <div className="w-16 shrink-0">
+                      <Label className="text-xs">Qty</Label>
                       <Input
-                        id={`quantity-${item.id}`}
                         type="number"
                         min="0"
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 0)}
-                        className={item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}
+                        className={`h-9 text-sm px-2 ${item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}`}
                       />
-                      {item.quantity > item.availableStock && item.medicineId > 0 && (
-                        <p className="text-xs text-red-500 mt-1">Exceeds available stock ({item.availableStock})</p>
-                      )}
                     </div>
+                    {/* Delete button inline */}
+                    {items.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 shrink-0"
+                        onClick={() => removeItem(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
                   </div>
+                  
+                  {/* Stock warning */}
+                  {item.quantity > item.availableStock && item.medicineId > 0 && (
+                    <p className="text-xs text-red-500">Exceeds available stock ({item.availableStock})</p>
+                  )}
                   
                   {item.medicineName && (
                     <>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-3 gap-3">
                         <div>
-                          <Label htmlFor={`batchNo-${item.id}`}>Batch No</Label>
+                          <Label className="text-xs">Batch No</Label>
                           <Input
                             id={`batchNo-${item.id}`}
                             value={item.batchNo}
                             onChange={(e) => updateItem(item.id, "batchNo", e.target.value)}
                             placeholder="Enter batch number"
+                            className="h-9 text-sm"
                           />
                         </div>
                         <div>
-                          <Label htmlFor={`expiryDate-${item.id}`} className="flex items-center gap-2">
-                            Expiry Date
+                          <Label className="text-xs flex items-center gap-1">
+                            Expiry
                             <ExpiryWarningBadge expiryDate={item.expiryDate} />
                           </Label>
                           <Input
@@ -556,13 +572,13 @@ export default function NewInvoice() {
                             type="date"
                             value={item.expiryDate}
                             onChange={(e) => updateItem(item.id, "expiryDate", e.target.value)}
-                            className={getExpiryWarningLevel(item.expiryDate) === 'critical' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 
+                            className={`h-9 text-sm ${getExpiryWarningLevel(item.expiryDate) === 'critical' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 
                                        getExpiryWarningLevel(item.expiryDate) === 'warning' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' : 
-                                       getExpiryWarningLevel(item.expiryDate) === 'caution' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : ''}
+                                       getExpiryWarningLevel(item.expiryDate) === 'caution' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
                           />
                         </div>
                       <div>
-                        <Label htmlFor={`mrp-${item.id}`}>MRP/Tab (₹)</Label>
+                        <Label className="text-xs">MRP/Tab (₹)</Label>
                         <Input
                           id={`mrp-${item.id}`}
                           type="number"
@@ -571,44 +587,18 @@ export default function NewInvoice() {
                           value={item.mrp}
                           onChange={(e) => updateItem(item.id, "mrp", parseFloat(e.target.value) || 0)}
                           placeholder="0.00"
+                          className="h-9 text-sm"
                         />
                       </div>
                     </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg text-sm">
-                        <div>
-                          <span className="font-medium text-gray-600">Cost/Tab:</span>
-                          <p className="font-semibold">₹{item.unitPrice.toFixed(2)}</p>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-600">Available Stock:</span>
-                          <p className="font-semibold text-blue-600">{item.availableStock}</p>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-600">Stock After Invoice:</span>
-                          <p className={`font-semibold ${item.stockAfterInvoice < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {item.stockAfterInvoice}
-                          </p>
-                        </div>
+                      <div className="flex items-center justify-between p-2 bg-muted/50 rounded text-xs">
+                        <span><span className="text-muted-foreground">Cost:</span> <span className="font-medium">₹{item.unitPrice.toFixed(2)}</span></span>
+                        <span><span className="text-muted-foreground">Stock:</span> <span className="font-medium text-blue-600">{item.availableStock}</span></span>
+                        <span><span className="text-muted-foreground">After:</span> <span className={`font-medium ${item.stockAfterInvoice < 0 ? 'text-red-600' : 'text-green-600'}`}>{item.stockAfterInvoice}</span></span>
+                        <span className="text-base font-semibold">₹{item.total.toFixed(2)}</span>
                       </div>
                     </>
                   )}
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-lg font-medium text-gray-600">Total: </span>
-                      <span className="text-xl font-bold">₹{item.total.toFixed(2)}</span>
-                    </div>
-                    {items.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
                 </div>
               ))}
             </div>
