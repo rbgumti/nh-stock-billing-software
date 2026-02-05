@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSalaryStore, Employee, SalaryRecord, AttendanceStatus } from "@/hooks/useSalaryStore";
+import { useSalaryStore, Employee, SalaryRecord, AttendanceStatus, getSundaysInMonth, getBaseWorkingDays } from "@/hooks/useSalaryStore";
 import { useAdvancesFromDayReports } from "@/hooks/useAdvancesFromDayReports";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { SalarySlipDocument } from "@/components/forms/SalarySlipDocument";
@@ -124,28 +124,52 @@ const SalaryContent = () => {
   // Get salary data for selected month with employee details
   const monthlySalaryData = useMemo(() => {
     const monthRecords = salaryRecords.filter(r => r.month === selectedMonth);
+    const sundaysInMonth = getSundaysInMonth(selectedMonth);
+    const baseWorkingDays = getBaseWorkingDays(selectedMonth); // 30 - sundays (e.g., 26)
     
     return employees.map((employee, index) => {
       const record = monthRecords.find(r => r.employeeId === employee.id);
       
-      // Auto-pick working days from attendance if no manual override in salary record
+      // Get attendance-based working days
       const attendanceWorkingDays = calculateWorkingDaysFromAttendance(employee.id, selectedMonth);
-      // Use attendance-based working days if available (>0), otherwise fallback to record or default 31
-      const workingDays = record?.workingDays ?? (attendanceWorkingDays > 0 ? attendanceWorkingDays : 31);
+      
+      // Use record working days if set, otherwise attendance-based, otherwise base working days
+      // Working days now represents actual days worked including any Sundays
+      const workingDays = record?.workingDays ?? (attendanceWorkingDays > 0 ? attendanceWorkingDays : baseWorkingDays);
       
       const advanceAdjusted = record?.advanceAdjusted ?? 0;
       const advancePending = record?.advancePending ?? 0;
       
-      // Calculate salary payable
-      const perDayRate = employee.salaryFixed / 31;
-      const salaryPayable = Math.round((perDayRate * workingDays) - advanceAdjusted);
+      // NEW SALARY CALCULATION:
+      // Base = 30 days (fixed), Per day rate = Fixed Salary / 30
+      // If workingDays <= baseWorkingDays (e.g., 26), count as proportional of 30
+      // If workingDays > baseWorkingDays, extra days (Sundays worked) count as bonus days
+      const perDayRate = employee.salaryFixed / 30;
+      
+      // Calculate effective days for salary:
+      // If workingDays <= baseWorkingDays: scale up to 30-day equivalent
+      // If workingDays > baseWorkingDays: 30 + extra Sunday days
+      let effectiveDaysForSalary: number;
+      if (workingDays <= baseWorkingDays) {
+        // Proportional: (workingDays / baseWorkingDays) * 30
+        effectiveDaysForSalary = (workingDays / baseWorkingDays) * 30;
+      } else {
+        // Full 30 + extra Sundays worked
+        const sundaysWorked = workingDays - baseWorkingDays;
+        effectiveDaysForSalary = 30 + sundaysWorked;
+      }
+      
+      const salaryPayable = Math.round((perDayRate * effectiveDaysForSalary) - advanceAdjusted);
       
       return {
         sNo: index + 1,
         employee,
         record,
         workingDays,
-        attendanceWorkingDays, // Include for display/debug
+        attendanceWorkingDays,
+        baseWorkingDays,
+        sundaysInMonth,
+        effectiveDaysForSalary: Math.round(effectiveDaysForSalary * 10) / 10,
         advanceAdjusted,
         advancePending,
         salaryPayable,
@@ -213,6 +237,7 @@ const SalaryContent = () => {
 
     return months.map(monthData => {
       const monthRecords = salaryRecords.filter(r => r.month === monthData.month);
+      const baseWorkingDays = getBaseWorkingDays(monthData.month);
       
       let totalPayable = 0;
       let totalAdvanceAdjusted = 0;
@@ -221,12 +246,20 @@ const SalaryContent = () => {
 
       employees.forEach(employee => {
         const record = monthRecords.find(r => r.employeeId === employee.id);
-        const workingDays = record?.workingDays ?? 31;
+        const workingDays = record?.workingDays ?? baseWorkingDays;
         const advanceAdjusted = record?.advanceAdjusted ?? 0;
         const advancePending = record?.advancePending ?? 0;
         
-        const perDayRate = employee.salaryFixed / 31;
-        const salaryPayable = Math.round((perDayRate * workingDays) - advanceAdjusted);
+        const perDayRate = employee.salaryFixed / 30;
+        
+        let effectiveDays: number;
+        if (workingDays <= baseWorkingDays) {
+          effectiveDays = (workingDays / baseWorkingDays) * 30;
+        } else {
+          effectiveDays = 30 + (workingDays - baseWorkingDays);
+        }
+        
+        const salaryPayable = Math.round((perDayRate * effectiveDays) - advanceAdjusted);
         
         if (record) {
           totalPayable += salaryPayable;
@@ -252,20 +285,28 @@ const SalaryContent = () => {
   const employeeComparison = useMemo(() => {
     const currentMonth = selectedMonth;
     const previousMonth = format(subMonths(new Date(selectedMonth + "-01"), 1), "yyyy-MM");
+    const currentBaseWorkingDays = getBaseWorkingDays(currentMonth);
+    const previousBaseWorkingDays = getBaseWorkingDays(previousMonth);
 
     return employees.map(employee => {
       const currentRecord = salaryRecords.find(r => r.employeeId === employee.id && r.month === currentMonth);
       const previousRecord = salaryRecords.find(r => r.employeeId === employee.id && r.month === previousMonth);
 
-      const perDayRate = employee.salaryFixed / 31;
+      const perDayRate = employee.salaryFixed / 30;
       
-      const currentWorkingDays = currentRecord?.workingDays ?? 31;
+      const currentWorkingDays = currentRecord?.workingDays ?? currentBaseWorkingDays;
       const currentAdvance = currentRecord?.advanceAdjusted ?? 0;
-      const currentPayable = Math.round((perDayRate * currentWorkingDays) - currentAdvance);
+      const currentEffective = currentWorkingDays <= currentBaseWorkingDays 
+        ? (currentWorkingDays / currentBaseWorkingDays) * 30 
+        : 30 + (currentWorkingDays - currentBaseWorkingDays);
+      const currentPayable = Math.round((perDayRate * currentEffective) - currentAdvance);
 
-      const previousWorkingDays = previousRecord?.workingDays ?? 31;
+      const previousWorkingDays = previousRecord?.workingDays ?? previousBaseWorkingDays;
       const previousAdvance = previousRecord?.advanceAdjusted ?? 0;
-      const previousPayable = Math.round((perDayRate * previousWorkingDays) - previousAdvance);
+      const previousEffective = previousWorkingDays <= previousBaseWorkingDays
+        ? (previousWorkingDays / previousBaseWorkingDays) * 30
+        : 30 + (previousWorkingDays - previousBaseWorkingDays);
+      const previousPayable = Math.round((perDayRate * previousEffective) - previousAdvance);
 
       const change = currentPayable - previousPayable;
       const changePercent = previousPayable !== 0 ? ((change / previousPayable) * 100).toFixed(1) : 0;
@@ -337,10 +378,19 @@ const SalaryContent = () => {
       const employee = employees.find(e => e.id === employeeId);
       if (!employee) return;
       
-      const perDayRate = employee.salaryFixed / 31;
-      const workingDays = field === 'workingDays' ? value : 31;
+      const baseWorkingDays = getBaseWorkingDays(selectedMonth);
+      const perDayRate = employee.salaryFixed / 30;
+      const workingDays = field === 'workingDays' ? value : baseWorkingDays;
       const advanceAdjusted = field === 'advanceAdjusted' ? value : 0;
       const advancePending = field === 'advancePending' ? value : 0;
+      
+      // Calculate effective days
+      let effectiveDays: number;
+      if (workingDays <= baseWorkingDays) {
+        effectiveDays = (workingDays / baseWorkingDays) * 30;
+      } else {
+        effectiveDays = 30 + (workingDays - baseWorkingDays);
+      }
       
       addSalaryRecord({
         employeeId,
@@ -348,7 +398,7 @@ const SalaryContent = () => {
         workingDays,
         advanceAdjusted,
         advancePending,
-        salaryPayable: Math.round((perDayRate * workingDays) - advanceAdjusted),
+        salaryPayable: Math.round((perDayRate * effectiveDays) - advanceAdjusted),
       });
     }
   };
@@ -663,6 +713,7 @@ const SalaryContent = () => {
               advanceAdjusted={salaryData.advanceAdjusted}
               advancePending={salaryData.advancePending}
               salaryPayable={salaryData.salaryPayable}
+              effectiveDaysForSalary={salaryData.effectiveDaysForSalary}
             />
           </AppSettingsProvider>
         );
@@ -917,7 +968,21 @@ const SalaryContent = () => {
                         <TableHead className="font-bold text-foreground min-w-[180px] sticky left-14 z-20 bg-green-100 dark:bg-green-900/80 border-r border-border/50">Name of Employee</TableHead>
                         <TableHead className="font-bold text-foreground min-w-[120px]">Designation</TableHead>
                         <TableHead className="font-bold text-foreground text-right bg-yellow-100 dark:bg-yellow-900/30">Salary (Fixed)</TableHead>
-                        <TableHead className="font-bold text-foreground text-center">Working Days</TableHead>
+                        <TableHead className="font-bold text-foreground text-center">
+                          <Tooltip>
+                            <TooltipTrigger className="cursor-help underline decoration-dotted">
+                              Working Days ({monthlySalaryData[0]?.baseWorkingDays || getBaseWorkingDays(selectedMonth)} base)
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs text-left">
+                              <p className="font-medium mb-1">30-Day Salary Calculation:</p>
+                              <ul className="text-xs space-y-1">
+                                <li>• Base = 30 days − Sundays in month</li>
+                                <li>• Full month worked = 30 days salary</li>
+                                <li>• Extra Sundays worked = bonus days</li>
+                              </ul>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableHead>
                         <TableHead className="font-bold text-foreground text-right">Advance (Adjusted)</TableHead>
                         <TableHead className="font-bold text-foreground text-right">Advance Pending</TableHead>
                         <TableHead className="font-bold text-foreground text-right bg-green-200 dark:bg-green-800/50">Salary Payable</TableHead>
@@ -942,15 +1007,20 @@ const SalaryContent = () => {
                                 ₹{item.employee.salaryFixed.toLocaleString('en-IN')}
                               </TableCell>
                               <TableCell>
-                                <Input
-                                  type="number"
-                                  value={item.workingDays}
-                                  onChange={(e) => handleSalaryUpdate(item.employee.id, 'workingDays', Number(e.target.value))}
-                                  className="w-20 text-center mx-auto"
-                                  min={0}
-                                  max={31}
-                                  step={0.5}
-                                />
+                                <div className="flex flex-col items-center gap-1">
+                                  <Input
+                                    type="number"
+                                    value={item.workingDays}
+                                    onChange={(e) => handleSalaryUpdate(item.employee.id, 'workingDays', Number(e.target.value))}
+                                    className="w-20 text-center mx-auto"
+                                    min={0}
+                                    max={35}
+                                    step={0.5}
+                                  />
+                                  <span className="text-xs text-muted-foreground">
+                                    = {item.effectiveDaysForSalary} eff
+                                  </span>
+                                </div>
                               </TableCell>
                               <TableCell>
                                 <Input
