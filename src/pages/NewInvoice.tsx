@@ -404,13 +404,14 @@ export default function NewInvoice() {
         {/* Invoice Details */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Invoice Details</CardTitle>
+            <CardTitle className="text-sm">Invoice</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {/* Compact: Patient | File No | Date in one row */}
-            <div className="flex items-end gap-3">
-              <div className="flex-1 min-w-0">
-                <Label className="text-xs">Patient *</Label>
+            <div className="flex items-end gap-2">
+              {/* Patient Search - flexible width */}
+              <div className="flex-1 min-w-[200px]">
+                <Label className="text-xs mb-1 block">Patient *</Label>
               <PatientSearchSelect
                 patients={patients}
                 selectedPatientId={foundPatient?.id}
@@ -419,30 +420,31 @@ export default function NewInvoice() {
                 compact
               />
               </div>
-              <div className="w-24 shrink-0">
-                <Label className="text-xs">File No</Label>
+              {/* File No - narrow */}
+              <div className="w-20 shrink-0">
+                <Label className="text-xs mb-1 block">File</Label>
                 <Input
                   value={foundPatient?.file_no || '-'}
                   readOnly
-                  className="h-9 text-sm bg-muted"
+                  className="h-9 text-xs bg-muted px-2 text-center font-medium"
                 />
               </div>
-              <div className="w-32 shrink-0">
-                <Label className="text-xs">Date</Label>
+              {/* Date - narrow */}
+              <div className="w-28 shrink-0">
+                <Label className="text-xs mb-1 block">Date</Label>
               <Input
                 type="date"
                 value={invoiceDate}
                 onChange={(e) => setInvoiceDate(e.target.value)}
-                  className="h-9 text-sm"
+                  className="h-9 text-xs px-2"
               />
             </div>
             </div>
             {/* Compact patient info bar */}
             {foundPatient && (
-              <div className="mt-2 flex items-center gap-4 px-2 py-1.5 bg-muted/50 rounded text-xs">
-                <span><span className="text-muted-foreground">Name:</span> <span className="font-medium">{foundPatient.patient_name}</span></span>
-                <span><span className="text-muted-foreground">Phone:</span> <span className="font-medium">{foundPatient.phone || '-'}</span></span>
-                <span><span className="text-muted-foreground">ID:</span> <span className="font-medium">{foundPatient.id}</span></span>
+              <div className="mt-2 flex items-center gap-3 px-2 py-1 bg-muted/50 rounded text-[11px]">
+                <span className="font-medium truncate max-w-[180px]">{foundPatient.patient_name}</span>
+                <span className="text-muted-foreground">Ph: {foundPatient.phone || '-'}</span>
               </div>
             )}
           </CardContent>
