@@ -527,6 +527,8 @@ export default function NewInvoice() {
                         value={item.quantity}
                         onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 0)}
                         className={item.quantity > item.availableStock && item.medicineId > 0 ? 'border-red-500' : ''}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        style={{ MozAppearance: 'textfield' }}
                       />
                       {item.quantity > item.availableStock && item.medicineId > 0 && (
                         <p className="text-xs text-red-500 mt-1">Exceeds available stock ({item.availableStock})</p>
