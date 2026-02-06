@@ -211,9 +211,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error("Unexpected error:", error);
-    const err = error instanceof Error ? error : new Error(String(error));
     return new Response(
-      JSON.stringify({ success: false, error: err.message || "An unexpected error occurred" }),
+      JSON.stringify({ success: false, error: error.message || "An unexpected error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
