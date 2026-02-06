@@ -12,7 +12,7 @@ import { useSupplierStore } from "@/hooks/useSupplierStore";
 interface EditServicePOFormProps {
   purchaseOrder: PurchaseOrder;
   onClose: () => void;
-  onSubmit: (po: PurchaseOrder) => void;
+  onSubmit: (po: PurchaseOrder) => Promise<void> | void;
 }
 
 export function EditServicePOForm({ purchaseOrder, onClose, onSubmit }: EditServicePOFormProps) {
@@ -68,7 +68,10 @@ export function EditServicePOForm({ purchaseOrder, onClose, onSubmit }: EditServ
         serviceAmount: parseFloat(formData.serviceAmount) || 0
       };
 
-      onSubmit(updatedPO);
+      await onSubmit(updatedPO);
+    } catch (error) {
+      console.error('Error updating Service PO:', error);
+      throw error;
     } finally {
       setIsSubmitting(false);
     }

@@ -15,7 +15,7 @@ import { formatPrecision } from "@/lib/formatUtils";
 interface EditPurchaseOrderFormProps {
   purchaseOrder: PurchaseOrder;
   onClose: () => void;
-  onSubmit: (po: PurchaseOrder) => void;
+  onSubmit: (po: PurchaseOrder) => Promise<void> | void;
   stockItems: StockItem[];
 }
 
@@ -118,7 +118,7 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.supplier || items.length === 0) {
       return;
     }
@@ -136,7 +136,10 @@ export function EditPurchaseOrderForm({ purchaseOrder, onClose, onSubmit, stockI
         notes: formData.notes
       };
 
-      onSubmit(updatedPO);
+      await onSubmit(updatedPO);
+    } catch (error) {
+      console.error('Error updating PO:', error);
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
