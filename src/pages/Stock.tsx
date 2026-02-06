@@ -491,10 +491,10 @@ export default function Stock() {
         title: "Success",
         description: "Purchase order has been updated successfully!"
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update purchase order",
+        description: error?.message || "Failed to update purchase order",
         variant: "destructive"
       });
     }

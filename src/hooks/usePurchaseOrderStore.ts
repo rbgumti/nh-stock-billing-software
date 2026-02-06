@@ -137,28 +137,57 @@ export function usePurchaseOrderStore() {
   };
 
   const addPurchaseOrder = async (po: PurchaseOrder) => {
+    const toDbDate = (label: string, value?: string, required = false) => {
+      const v = value?.trim() || "";
+      if (!v) {
+        if (required) throw new Error(`${label} is required`);
+        return null;
+      }
+      // Accept YYYY-MM-DD or any string parsable by Date
+      if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) throw new Error(`Invalid ${label}: ${value}`);
+      return d.toISOString().slice(0, 10);
+    };
+
+    const toDbTimestamp = (label: string, value?: string) => {
+      const v = value?.trim() || "";
+      if (!v) return null;
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) throw new Error(`Invalid ${label}: ${value}`);
+      return d.toISOString();
+    };
+
     try {
+      const poType = po.poType || "Stock";
+      if (poType === "Stock" && (!po.items || po.items.length === 0)) {
+        throw new Error("Cannot create a Stock PO with 0 items");
+      }
+
+      const orderDate = toDbDate("PO Date", po.orderDate, true);
+      const expectedDelivery = toDbDate("Expected Delivery", po.expectedDelivery, false);
+
       const { data: poData, error: poError } = await supabase
         .from('purchase_orders')
         .insert({
           po_number: po.poNumber,
           supplier: po.supplier,
-          order_date: po.orderDate,
-          expected_delivery: po.expectedDelivery,
+          order_date: orderDate,
+          expected_delivery: expectedDelivery,
           status: po.status,
           total_amount: po.totalAmount,
-          grn_date: po.grnDate || null,
+          grn_date: toDbTimestamp("GRN Date", po.grnDate),
           grn_number: po.grnNumber || null,
           invoice_number: po.invoiceNumber || null,
           invoice_date: po.invoiceDate || null,
           invoice_url: po.invoiceUrl || null,
           notes: po.notes || null,
           payment_status: po.paymentStatus || 'Pending',
-          payment_due_date: po.paymentDueDate || null,
-          payment_date: po.paymentDate || null,
+          payment_due_date: toDbDate("Payment Due Date", po.paymentDueDate),
+          payment_date: toDbDate("Payment Date", po.paymentDate),
           payment_amount: po.paymentAmount || null,
           payment_notes: po.paymentNotes || null,
-          po_type: po.poType || 'Stock',
+          po_type: poType,
           service_description: po.serviceDescription || null,
           service_amount: po.serviceAmount || null
         })
@@ -167,30 +196,36 @@ export function usePurchaseOrderStore() {
 
       if (poError) throw poError;
 
-      // Insert items
-      const itemsToInsert = po.items.map(item => ({
-        purchase_order_id: poData.id,
-        item_name: item.stockItemName,
-        stock_item_id: item.stockItemId,
-        stock_item_name: item.stockItemName,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        total_price: item.totalPrice,
-        pack_size: item.packSize || null,
-        qty_in_strips: item.qtyInStrips || null,
-        qty_in_tabs: item.qtyInTabs || null
-      }));
+      // Insert items (Stock POs only)
+      if (poType === "Stock") {
+        const itemsToInsert = po.items.map(item => ({
+          purchase_order_id: poData.id,
+          item_name: item.stockItemName,
+          stock_item_id: item.stockItemId,
+          stock_item_name: item.stockItemName,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          total_price: item.totalPrice,
+          pack_size: item.packSize || null,
+          qty_in_strips: item.qtyInStrips || null,
+          qty_in_tabs: item.qtyInTabs || null
+        }));
 
-      const { error: itemsError } = await supabase
-        .from('purchase_order_items')
-        .insert(itemsToInsert);
+        const { error: itemsError } = await supabase
+          .from('purchase_order_items')
+          .insert(itemsToInsert);
 
-      if (itemsError) throw itemsError;
-    } catch (error) {
+        if (itemsError) {
+          // Roll back header insert to avoid creating an empty PO
+          await supabase.from('purchase_orders').delete().eq('id', poData.id);
+          throw itemsError;
+        }
+      }
+    } catch (error: any) {
       console.error('Error adding purchase order:', error);
       toast({
         title: "Error",
-        description: "Failed to add purchase order",
+        description: error?.message || "Failed to add purchase order",
         variant: "destructive"
       });
       throw error;
@@ -198,28 +233,72 @@ export function usePurchaseOrderStore() {
   };
 
   const updatePurchaseOrder = async (id: string, updatedPO: PurchaseOrder) => {
+    const toDbDate = (label: string, value?: string, required = false) => {
+      const v = value?.trim() || "";
+      if (!v) {
+        if (required) throw new Error(`${label} is required`);
+        return null;
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) throw new Error(`Invalid ${label}: ${value}`);
+      return d.toISOString().slice(0, 10);
+    };
+
+    const toDbTimestamp = (label: string, value?: string) => {
+      const v = value?.trim() || "";
+      if (!v) return null;
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) throw new Error(`Invalid ${label}: ${value}`);
+      return d.toISOString();
+    };
+
     try {
+      const poType = updatedPO.poType || 'Stock';
+      if (poType === 'Stock' && (!updatedPO.items || updatedPO.items.length === 0)) {
+        // Critical guard to avoid accidentally wiping items
+        throw new Error('Cannot update a Stock PO with 0 items');
+      }
+
+      // Fetch fresh state (authoritative) to reduce race-condition issues
+      const { data: freshPo, error: freshPoError } = await supabase
+        .from('purchase_orders')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (freshPoError) throw freshPoError;
+      if (!freshPo) throw new Error('Purchase order not found');
+
+      // Backup existing items so we can restore if the insert fails
+      const { data: existingItems, error: existingItemsError } = await supabase
+        .from('purchase_order_items')
+        .select('*')
+        .eq('purchase_order_id', id);
+
+      if (existingItemsError) throw existingItemsError;
+
       const { error: updateError } = await supabase
         .from('purchase_orders')
         .update({
           po_number: updatedPO.poNumber,
           supplier: updatedPO.supplier,
-          order_date: updatedPO.orderDate,
-          expected_delivery: updatedPO.expectedDelivery,
+          order_date: toDbDate('PO Date', updatedPO.orderDate, true),
+          expected_delivery: toDbDate('Expected Delivery', updatedPO.expectedDelivery, false),
           status: updatedPO.status,
           total_amount: updatedPO.totalAmount,
-          grn_date: updatedPO.grnDate || null,
+          grn_date: toDbTimestamp('GRN Date', updatedPO.grnDate),
           grn_number: updatedPO.grnNumber || null,
           invoice_number: updatedPO.invoiceNumber || null,
           invoice_date: updatedPO.invoiceDate || null,
           invoice_url: updatedPO.invoiceUrl || null,
           notes: updatedPO.notes || null,
           payment_status: updatedPO.paymentStatus || 'Pending',
-          payment_due_date: updatedPO.paymentDueDate || null,
-          payment_date: updatedPO.paymentDate || null,
+          payment_due_date: toDbDate('Payment Due Date', updatedPO.paymentDueDate),
+          payment_date: toDbDate('Payment Date', updatedPO.paymentDate),
           payment_amount: updatedPO.paymentAmount || null,
           payment_notes: updatedPO.paymentNotes || null,
-          po_type: updatedPO.poType || 'Stock',
+          po_type: poType,
           service_description: updatedPO.serviceDescription || null,
           service_amount: updatedPO.serviceAmount || null
         })
@@ -227,38 +306,45 @@ export function usePurchaseOrderStore() {
 
       if (updateError) throw updateError;
 
-      // Delete existing items
-      const { error: deleteError } = await supabase
-        .from('purchase_order_items')
-        .delete()
-        .eq('purchase_order_id', id);
+      // Replace items (Stock POs only)
+      if (poType === 'Stock') {
+        const { error: deleteError } = await supabase
+          .from('purchase_order_items')
+          .delete()
+          .eq('purchase_order_id', id);
 
-      if (deleteError) throw deleteError;
+        if (deleteError) throw deleteError;
 
-      // Insert updated items
-      const itemsToInsert = updatedPO.items.map(item => ({
-        purchase_order_id: id,
-        item_name: item.stockItemName,
-        stock_item_id: item.stockItemId,
-        stock_item_name: item.stockItemName,
-        quantity: item.quantity,
-        unit_price: item.unitPrice,
-        total_price: item.totalPrice,
-        pack_size: item.packSize || null,
-        qty_in_strips: item.qtyInStrips || null,
-        qty_in_tabs: item.qtyInTabs || null
-      }));
+        const itemsToInsert = updatedPO.items.map(item => ({
+          purchase_order_id: id,
+          item_name: item.stockItemName,
+          stock_item_id: item.stockItemId,
+          stock_item_name: item.stockItemName,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          total_price: item.totalPrice,
+          pack_size: item.packSize || null,
+          qty_in_strips: item.qtyInStrips || null,
+          qty_in_tabs: item.qtyInTabs || null
+        }));
 
-      const { error: itemsError } = await supabase
-        .from('purchase_order_items')
-        .insert(itemsToInsert);
+        const { error: itemsError } = await supabase
+          .from('purchase_order_items')
+          .insert(itemsToInsert);
 
-      if (itemsError) throw itemsError;
-    } catch (error) {
+        if (itemsError) {
+          // Restore previous items so the PO doesn't end up empty
+          if (existingItems && existingItems.length > 0) {
+            await supabase.from('purchase_order_items').insert(existingItems);
+          }
+          throw itemsError;
+        }
+      }
+    } catch (error: any) {
       console.error('Error updating purchase order:', error);
       toast({
         title: "Error",
-        description: "Failed to update purchase order",
+        description: error?.message || "Failed to update purchase order",
         variant: "destructive"
       });
       throw error;
