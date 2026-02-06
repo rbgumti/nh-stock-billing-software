@@ -105,9 +105,9 @@ const toSalaryRecord = (row: any): SalaryRecord => ({
   id: row.id,
   employeeId: row.employee_id,
   month: `${row.year}-${String(row.month).padStart(2, '0')}`,
-  workingDays: 0, // Not stored in current schema
+  workingDays: row.working_days !== null ? Number(row.working_days) : 0,
   advanceAdjusted: Number(row.advances || 0),
-  advancePending: 0, // Not stored in current schema
+  advancePending: Number(row.advance_pending || 0),
   salaryPayable: Number(row.net_salary || 0),
   createdAt: row.created_at,
 });
@@ -241,6 +241,10 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
           employee_id: record.employeeId,
           month: parseInt(record.month.split('-')[1]),
           year: parseInt(record.month.split('-')[0]),
+          working_days: record.workingDays,
+          advances: record.advanceAdjusted,
+          advance_pending: record.advancePending,
+          net_salary: record.salaryPayable,
         }])
         .select()
         .single();
@@ -266,7 +270,9 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
         updateData.year = parseInt(year);
         updateData.month = parseInt(month);
       }
+      if (record.workingDays !== undefined) updateData.working_days = record.workingDays;
       if (record.advanceAdjusted !== undefined) updateData.advances = record.advanceAdjusted;
+      if (record.advancePending !== undefined) updateData.advance_pending = record.advancePending;
       if (record.salaryPayable !== undefined) updateData.net_salary = record.salaryPayable;
 
       const { error } = await supabase
