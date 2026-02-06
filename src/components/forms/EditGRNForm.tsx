@@ -423,7 +423,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Received Items (Read-only)</CardTitle>
+              <CardTitle>Received Items</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
