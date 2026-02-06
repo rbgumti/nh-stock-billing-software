@@ -385,18 +385,19 @@ const SalaryContent = () => {
       const employee = employees.find(e => e.id === employeeId);
       if (!employee) return;
       
+      const calendarDays = getCalendarDaysInMonth(selectedMonth);
       const baseWorkingDays = getBaseWorkingDays(selectedMonth);
-      const perDayRate = employee.salaryFixed / 30;
+      const perDayRate = employee.salaryFixed / calendarDays;
       const workingDays = field === 'workingDays' ? value : baseWorkingDays;
       const advanceAdjusted = field === 'advanceAdjusted' ? value : 0;
       const advancePending = field === 'advancePending' ? value : 0;
       
-      // Calculate effective days
+      // Calculate effective days using calendar days
       let effectiveDays: number;
       if (workingDays <= baseWorkingDays) {
-        effectiveDays = (workingDays / baseWorkingDays) * 30;
+        effectiveDays = (workingDays / baseWorkingDays) * calendarDays;
       } else {
-        effectiveDays = 30 + (workingDays - baseWorkingDays);
+        effectiveDays = calendarDays + (workingDays - baseWorkingDays);
       }
       
       addSalaryRecord({

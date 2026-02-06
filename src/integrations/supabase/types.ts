@@ -960,6 +960,7 @@ export type Database = {
       }
       salary_records: {
         Row: {
+          advance_pending: number | null
           advances: number | null
           allowances: number | null
           basic_salary: number | null
@@ -974,9 +975,11 @@ export type Database = {
           payment_method: string | null
           status: string | null
           updated_at: string
+          working_days: number | null
           year: number
         }
         Insert: {
+          advance_pending?: number | null
           advances?: number | null
           allowances?: number | null
           basic_salary?: number | null
@@ -991,9 +994,11 @@ export type Database = {
           payment_method?: string | null
           status?: string | null
           updated_at?: string
+          working_days?: number | null
           year: number
         }
         Update: {
+          advance_pending?: number | null
           advances?: number | null
           allowances?: number | null
           basic_salary?: number | null
@@ -1008,6 +1013,7 @@ export type Database = {
           payment_method?: string | null
           status?: string | null
           updated_at?: string
+          working_days?: number | null
           year?: number
         }
         Relationships: [
