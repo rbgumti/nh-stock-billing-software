@@ -95,8 +95,8 @@ interface SalaryStore {
 const toEmployee = (row: any): Employee => ({
   id: row.id,
   name: row.name,
-  designation: row.status || '', // Using status field for designation
-  salaryFixed: Number(row.basic_salary || 0),
+  designation: row.designation || '',
+  salaryFixed: Number(row.salary || 0),
   createdAt: row.created_at,
 });
 
@@ -133,7 +133,7 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
     set({ loading: true });
     try {
       const [employeesRes, salaryRes, attendanceRes] = await Promise.all([
-        supabase.from('salary_employees').select('*').order('name'),
+        supabase.from('employees').select('*').order('name'),
         supabase.from('salary_records').select('*').order('month', { ascending: false }),
         supabase.from('attendance_records').select('*').order('date', { ascending: false }),
       ]);
@@ -162,11 +162,11 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
   addEmployee: async (employee) => {
     try {
       const { data, error } = await supabase
-        .from('salary_employees')
+        .from('employees')
         .insert({
           name: employee.name,
-          status: employee.designation, // Using status field for designation
-          basic_salary: employee.salaryFixed,
+          designation: employee.designation,
+          salary: employee.salaryFixed,
         })
         .select()
         .single();
@@ -188,11 +188,11 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
     try {
       const updateData: any = {};
       if (employee.name !== undefined) updateData.name = employee.name;
-      if (employee.designation !== undefined) updateData.status = employee.designation;
-      if (employee.salaryFixed !== undefined) updateData.basic_salary = employee.salaryFixed;
+      if (employee.designation !== undefined) updateData.designation = employee.designation;
+      if (employee.salaryFixed !== undefined) updateData.salary = employee.salaryFixed;
 
       const { error } = await supabase
-        .from('salary_employees')
+        .from('employees')
         .update(updateData)
         .eq('id', id);
 
@@ -214,7 +214,7 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
   deleteEmployee: async (id) => {
     try {
       const { error } = await supabase
-        .from('salary_employees')
+        .from('employees')
         .delete()
         .eq('id', id);
 
