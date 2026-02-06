@@ -206,6 +206,7 @@ export function usePurchaseOrderStore() {
           quantity: item.quantity,
           unit_price: item.unitPrice,
           total_price: item.totalPrice,
+          total: item.totalPrice,
           pack_size: item.packSize || null,
           qty_in_strips: item.qtyInStrips || null,
           qty_in_tabs: item.qtyInTabs || null
@@ -323,6 +324,7 @@ export function usePurchaseOrderStore() {
           quantity: item.quantity,
           unit_price: item.unitPrice,
           total_price: item.totalPrice,
+          total: item.totalPrice,
           pack_size: item.packSize || null,
           qty_in_strips: item.qtyInStrips || null,
           qty_in_tabs: item.qtyInTabs || null
