@@ -978,14 +978,15 @@ const SalaryContent = () => {
                         <TableHead className="font-bold text-foreground text-center">
                           <Tooltip>
                             <TooltipTrigger className="cursor-help underline decoration-dotted">
-                              Working Days ({monthlySalaryData[0]?.baseWorkingDays || getBaseWorkingDays(selectedMonth)} base)
+                              Working Days ({monthlySalaryData[0]?.calendarDays || getCalendarDaysInMonth(selectedMonth)} days)
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs text-left">
-                              <p className="font-medium mb-1">30-Day Salary Calculation:</p>
+                              <p className="font-medium mb-1">Calendar-Based Salary Calculation:</p>
                               <ul className="text-xs space-y-1">
-                                <li>• Base = 30 days − Sundays in month</li>
-                                <li>• Full month worked = 30 days salary</li>
+                                <li>• Base = {monthlySalaryData[0]?.calendarDays || getCalendarDaysInMonth(selectedMonth)} calendar days − {monthlySalaryData[0]?.sundaysInMonth || getSundaysInMonth(selectedMonth)} Sundays = {monthlySalaryData[0]?.baseWorkingDays || getBaseWorkingDays(selectedMonth)} working days</li>
+                                <li>• Full month worked = {monthlySalaryData[0]?.calendarDays || getCalendarDaysInMonth(selectedMonth)} days salary</li>
                                 <li>• Extra Sundays worked = bonus days</li>
+                                <li>• Editable: Enter days worked manually</li>
                               </ul>
                             </TooltipContent>
                           </Tooltip>
