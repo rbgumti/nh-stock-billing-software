@@ -95,8 +95,8 @@ interface SalaryStore {
 const toEmployee = (row: any): Employee => ({
   id: row.id,
   name: row.name,
-  designation: row.designation,
-  salaryFixed: Number(row.salary_fixed),
+  designation: row.status || '', // Using status field for designation
+  salaryFixed: Number(row.basic_salary || 0),
   createdAt: row.created_at,
 });
 
@@ -165,8 +165,8 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
         .from('salary_employees')
         .insert({
           name: employee.name,
-          designation: employee.designation,
-          salary_fixed: employee.salaryFixed,
+          status: employee.designation, // Using status field for designation
+          basic_salary: employee.salaryFixed,
         })
         .select()
         .single();
@@ -188,8 +188,8 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
     try {
       const updateData: any = {};
       if (employee.name !== undefined) updateData.name = employee.name;
-      if (employee.designation !== undefined) updateData.designation = employee.designation;
-      if (employee.salaryFixed !== undefined) updateData.salary_fixed = employee.salaryFixed;
+      if (employee.designation !== undefined) updateData.status = employee.designation;
+      if (employee.salaryFixed !== undefined) updateData.basic_salary = employee.salaryFixed;
 
       const { error } = await supabase
         .from('salary_employees')
