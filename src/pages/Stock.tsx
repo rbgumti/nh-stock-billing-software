@@ -395,6 +395,46 @@ export default function Stock() {
       }
     }
 
+    // Save GRN item details to purchase_order_items table
+    // First, get the existing PO items to update them with received quantities
+    const { data: existingPoItems } = await supabase
+      .from('purchase_order_items')
+      .select('*')
+      .eq('purchase_order_id', po.id);
+
+    if (existingPoItems) {
+      // Update each PO item with GRN data (received qty, batch, expiry, prices)
+      for (let i = 0; i < grnData.items.length; i++) {
+        const grnItem = grnData.items[i];
+        
+        // Skip additional batch rows - they don't correspond to original PO items
+        if (grnItem.isAdditionalBatch) continue;
+        
+        // Find matching PO item by index position (for original items)
+        const poItem = existingPoItems[i];
+        if (!poItem) continue;
+        
+        // Calculate total received for this line (including additional batches)
+        const totalReceived = grnData.items.reduce((sum: number, item: any, idx: number) => {
+          const belongsToLine =
+            (!item.isAdditionalBatch && idx === i) ||
+            (item.isAdditionalBatch && item.parentIndex === i);
+          return belongsToLine ? sum + (item.receivedQuantity || 0) : sum;
+        }, 0);
+        
+        await supabase
+          .from('purchase_order_items')
+          .update({
+            received_quantity: totalReceived,
+            batch_no: grnItem.batchNo || null,
+            expiry_date: grnItem.expiryDate || null,
+            unit_price: grnItem.costPrice || poItem.unit_price,
+            mrp: grnItem.mrp || poItem.mrp
+          })
+          .eq('id', poItem.id);
+      }
+    }
+
     // Update PO status with GRN number, invoice number and date
     updatePurchaseOrder(po.id, {
       ...po,
@@ -1003,18 +1043,28 @@ export default function Stock() {
     const root = createRoot(mount);
 
     try {
-      const grnItems: GRNItem[] = (po.items || []).map((item) => {
-        const stockItem = stockItems.find((s) => s.id === item.stockItemId);
-        const qty = item.qtyInTabs || item.quantity;
+      // Fetch the saved GRN data from purchase_order_items
+      const { data: savedPoItems } = await supabase
+        .from('purchase_order_items')
+        .select('*')
+        .eq('purchase_order_id', po.id);
+
+      const grnItems: GRNItem[] = (savedPoItems || po.items || []).map((item: any) => {
+        const stockItem = stockItems.find((s) => s.id === (item.stock_item_id || item.stockItemId));
+        const orderedQty = item.qty_in_tabs || item.qtyInTabs || item.quantity;
+        // Use saved received_quantity if available, otherwise fall back to ordered qty
+        const receivedQty = item.received_quantity !== null && item.received_quantity !== undefined 
+          ? item.received_quantity 
+          : orderedQty;
 
         return {
-          stockItemId: item.stockItemId,
-          orderedQuantity: qty,
-          receivedQuantity: qty,
-          batchNo: stockItem?.batchNo || "",
-          expiryDate: stockItem?.expiryDate || "",
-          costPrice: item.unitPrice || stockItem?.unitPrice || 0,
-          mrp: stockItem?.mrp || 0,
+          stockItemId: item.stock_item_id || item.stockItemId,
+          orderedQuantity: orderedQty,
+          receivedQuantity: receivedQty,
+          batchNo: item.batch_no || stockItem?.batchNo || "",
+          expiryDate: item.expiry_date || stockItem?.expiryDate || "",
+          costPrice: item.unit_price || item.unitPrice || stockItem?.unitPrice || 0,
+          mrp: item.mrp || stockItem?.mrp || 0,
           remarks: "",
         };
       });
