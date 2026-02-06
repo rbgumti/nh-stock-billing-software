@@ -1,7 +1,7 @@
 import * as React from "react";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
-import { Employee, getBaseWorkingDays } from "@/hooks/useSalaryStore";
+import { Employee, getBaseWorkingDays, getCalendarDaysInMonth } from "@/hooks/useSalaryStore";
 
 export interface SalarySlipProps {
   employee: Employee;
@@ -32,15 +32,16 @@ export const SalarySlipDocument = React.forwardRef<HTMLDivElement, SalarySlipPro
   ) => {
     const { doctorName } = useAppSettings();
     
-    // Use new 30-day base calculation
+    // Use calendar days of month as base (31 for Jan, 28 for Feb, etc.)
+    const calendarDays = getCalendarDaysInMonth(month);
     const baseWorkingDays = getBaseWorkingDays(month);
-    const perDayRate = employee.salaryFixed / 30;
+    const perDayRate = employee.salaryFixed / calendarDays;
     
     // Calculate effective days if not provided
     const effectiveDays = effectiveDaysForSalary ?? (
       workingDays <= baseWorkingDays
-        ? (workingDays / baseWorkingDays) * 30
-        : 30 + (workingDays - baseWorkingDays)
+        ? (workingDays / baseWorkingDays) * calendarDays
+        : calendarDays + (workingDays - baseWorkingDays)
     );
     
     const grossSalary = Math.round(perDayRate * effectiveDays);

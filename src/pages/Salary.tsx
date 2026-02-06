@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSalaryStore, Employee, SalaryRecord, AttendanceStatus, getSundaysInMonth, getBaseWorkingDays } from "@/hooks/useSalaryStore";
+import { useSalaryStore, Employee, SalaryRecord, AttendanceStatus, getSundaysInMonth, getBaseWorkingDays, getCalendarDaysInMonth } from "@/hooks/useSalaryStore";
 import { useAdvancesFromDayReports } from "@/hooks/useAdvancesFromDayReports";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { SalarySlipDocument } from "@/components/forms/SalarySlipDocument";
@@ -125,7 +125,8 @@ const SalaryContent = () => {
   const monthlySalaryData = useMemo(() => {
     const monthRecords = salaryRecords.filter(r => r.month === selectedMonth);
     const sundaysInMonth = getSundaysInMonth(selectedMonth);
-    const baseWorkingDays = getBaseWorkingDays(selectedMonth); // 30 - sundays (e.g., 26)
+    const calendarDays = getCalendarDaysInMonth(selectedMonth); // Actual days: 31 for Jan, 28/29 for Feb
+    const baseWorkingDays = getBaseWorkingDays(selectedMonth); // calendar days - sundays (e.g., 27 for Jan with 4 Sundays)
     
     return employees.map((employee, index) => {
       const record = monthRecords.find(r => r.employeeId === employee.id);
@@ -141,22 +142,23 @@ const SalaryContent = () => {
       const advancePending = record?.advancePending ?? 0;
       
       // NEW SALARY CALCULATION:
-      // Base = 30 days (fixed), Per day rate = Fixed Salary / 30
-      // If workingDays <= baseWorkingDays (e.g., 26), count as proportional of 30
+      // Base = calendar days of month (31 for Jan, 28 for Feb, etc.)
+      // Per day rate = Fixed Salary / calendar days
+      // If workingDays <= baseWorkingDays, count as proportional of calendar days
       // If workingDays > baseWorkingDays, extra days (Sundays worked) count as bonus days
-      const perDayRate = employee.salaryFixed / 30;
+      const perDayRate = employee.salaryFixed / calendarDays;
       
       // Calculate effective days for salary:
-      // If workingDays <= baseWorkingDays: scale up to 30-day equivalent
-      // If workingDays > baseWorkingDays: 30 + extra Sunday days
+      // If workingDays <= baseWorkingDays: scale up to calendar days equivalent
+      // If workingDays > baseWorkingDays: calendar days + extra Sunday days
       let effectiveDaysForSalary: number;
       if (workingDays <= baseWorkingDays) {
-        // Proportional: (workingDays / baseWorkingDays) * 30
-        effectiveDaysForSalary = (workingDays / baseWorkingDays) * 30;
+        // Proportional: (workingDays / baseWorkingDays) * calendarDays
+        effectiveDaysForSalary = (workingDays / baseWorkingDays) * calendarDays;
       } else {
-        // Full 30 + extra Sundays worked
+        // Full calendar days + extra Sundays worked
         const sundaysWorked = workingDays - baseWorkingDays;
-        effectiveDaysForSalary = 30 + sundaysWorked;
+        effectiveDaysForSalary = calendarDays + sundaysWorked;
       }
       
       const salaryPayable = Math.round((perDayRate * effectiveDaysForSalary) - advanceAdjusted);
@@ -168,6 +170,7 @@ const SalaryContent = () => {
         workingDays,
         attendanceWorkingDays,
         baseWorkingDays,
+        calendarDays,
         sundaysInMonth,
         effectiveDaysForSalary: Math.round(effectiveDaysForSalary * 10) / 10,
         advanceAdjusted,
@@ -237,6 +240,7 @@ const SalaryContent = () => {
 
     return months.map(monthData => {
       const monthRecords = salaryRecords.filter(r => r.month === monthData.month);
+      const calendarDays = getCalendarDaysInMonth(monthData.month);
       const baseWorkingDays = getBaseWorkingDays(monthData.month);
       
       let totalPayable = 0;
@@ -250,13 +254,13 @@ const SalaryContent = () => {
         const advanceAdjusted = record?.advanceAdjusted ?? 0;
         const advancePending = record?.advancePending ?? 0;
         
-        const perDayRate = employee.salaryFixed / 30;
+        const perDayRate = employee.salaryFixed / calendarDays;
         
         let effectiveDays: number;
         if (workingDays <= baseWorkingDays) {
-          effectiveDays = (workingDays / baseWorkingDays) * 30;
+          effectiveDays = (workingDays / baseWorkingDays) * calendarDays;
         } else {
-          effectiveDays = 30 + (workingDays - baseWorkingDays);
+          effectiveDays = calendarDays + (workingDays - baseWorkingDays);
         }
         
         const salaryPayable = Math.round((perDayRate * effectiveDays) - advanceAdjusted);
@@ -285,28 +289,31 @@ const SalaryContent = () => {
   const employeeComparison = useMemo(() => {
     const currentMonth = selectedMonth;
     const previousMonth = format(subMonths(new Date(selectedMonth + "-01"), 1), "yyyy-MM");
+    const currentCalendarDays = getCalendarDaysInMonth(currentMonth);
     const currentBaseWorkingDays = getBaseWorkingDays(currentMonth);
+    const previousCalendarDays = getCalendarDaysInMonth(previousMonth);
     const previousBaseWorkingDays = getBaseWorkingDays(previousMonth);
 
     return employees.map(employee => {
       const currentRecord = salaryRecords.find(r => r.employeeId === employee.id && r.month === currentMonth);
       const previousRecord = salaryRecords.find(r => r.employeeId === employee.id && r.month === previousMonth);
 
-      const perDayRate = employee.salaryFixed / 30;
+      const currentPerDayRate = employee.salaryFixed / currentCalendarDays;
+      const previousPerDayRate = employee.salaryFixed / previousCalendarDays;
       
       const currentWorkingDays = currentRecord?.workingDays ?? currentBaseWorkingDays;
       const currentAdvance = currentRecord?.advanceAdjusted ?? 0;
       const currentEffective = currentWorkingDays <= currentBaseWorkingDays 
-        ? (currentWorkingDays / currentBaseWorkingDays) * 30 
-        : 30 + (currentWorkingDays - currentBaseWorkingDays);
-      const currentPayable = Math.round((perDayRate * currentEffective) - currentAdvance);
+        ? (currentWorkingDays / currentBaseWorkingDays) * currentCalendarDays 
+        : currentCalendarDays + (currentWorkingDays - currentBaseWorkingDays);
+      const currentPayable = Math.round((currentPerDayRate * currentEffective) - currentAdvance);
 
       const previousWorkingDays = previousRecord?.workingDays ?? previousBaseWorkingDays;
       const previousAdvance = previousRecord?.advanceAdjusted ?? 0;
       const previousEffective = previousWorkingDays <= previousBaseWorkingDays
-        ? (previousWorkingDays / previousBaseWorkingDays) * 30
-        : 30 + (previousWorkingDays - previousBaseWorkingDays);
-      const previousPayable = Math.round((perDayRate * previousEffective) - previousAdvance);
+        ? (previousWorkingDays / previousBaseWorkingDays) * previousCalendarDays
+        : previousCalendarDays + (previousWorkingDays - previousBaseWorkingDays);
+      const previousPayable = Math.round((previousPerDayRate * previousEffective) - previousAdvance);
 
       const change = currentPayable - previousPayable;
       const changePercent = previousPayable !== 0 ? ((change / previousPayable) * 100).toFixed(1) : 0;

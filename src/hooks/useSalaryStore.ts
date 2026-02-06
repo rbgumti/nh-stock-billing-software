@@ -13,10 +13,19 @@ export function getSundaysInMonth(month: string): number {
   return days.filter(day => getDay(day) === 0).length;
 }
 
-// Get base working days for a month (30 - Sundays, treated as 30 days)
+// Get total calendar days in a month
+export function getCalendarDaysInMonth(month: string): number {
+  const [year, monthNum] = month.split('-').map(Number);
+  const startDate = new Date(year, monthNum - 1, 1);
+  const endDate = endOfMonth(startDate);
+  return endDate.getDate(); // Returns actual days: 31 for Jan, 28/29 for Feb, etc.
+}
+
+// Get base working days for a month (calendar days - Sundays)
 export function getBaseWorkingDays(month: string): number {
+  const calendarDays = getCalendarDaysInMonth(month);
   const sundaysCount = getSundaysInMonth(month);
-  return 30 - sundaysCount; // e.g., 30 - 4 = 26 days (counted as 30)
+  return calendarDays - sundaysCount; // e.g., 31 - 4 = 27 days for Jan
 }
 
 export interface Employee {
