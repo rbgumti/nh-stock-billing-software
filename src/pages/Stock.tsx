@@ -271,13 +271,19 @@ export default function Stock() {
     return { label: "In Stock", variant: "default" as const };
   };
 
-  const handleAddPurchaseOrder = (poData: any) => {
-    addPurchaseOrder(poData);
-    setShowPOForm(false);
-    toast({
-      title: "Success",
-      description: "Purchase order has been created successfully!"
-    });
+  const handleAddPurchaseOrder = async (poData: any) => {
+    try {
+      await addPurchaseOrder(poData);
+      setShowPOForm(false);
+      setShowServicePOForm(false);
+      toast({
+        title: "Success",
+        description: "Purchase order has been created successfully!"
+      });
+    } catch (error) {
+      console.error('Failed to save purchase order:', error);
+      // Error toast is already shown by the store
+    }
   };
 
   // Helper to check if expiry date is valid (not N/A, empty, or invalid format)

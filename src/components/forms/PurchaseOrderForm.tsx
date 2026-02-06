@@ -16,7 +16,7 @@ import { formatPrecision } from "@/lib/formatUtils";
 
 interface PurchaseOrderFormProps {
   onClose: () => void;
-  onSubmit: (po: PurchaseOrder) => void;
+  onSubmit: (po: PurchaseOrder) => Promise<void> | void;
   stockItems: StockItem[];
 }
 
@@ -127,7 +127,10 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
         notes: formData.notes
       };
 
-      onSubmit(purchaseOrder);
+      await onSubmit(purchaseOrder);
+    } catch (error) {
+      // Error is handled by parent
+      console.error('Error creating PO:', error);
     } finally {
       setIsSubmitting(false);
     }

@@ -12,7 +12,7 @@ import { useSupplierStore } from "@/hooks/useSupplierStore";
 
 interface ServicePOFormProps {
   onClose: () => void;
-  onSubmit: (po: PurchaseOrder) => void;
+  onSubmit: (po: PurchaseOrder) => Promise<void> | void;
 }
 
 export function ServicePOForm({ onClose, onSubmit }: ServicePOFormProps) {
@@ -73,7 +73,10 @@ export function ServicePOForm({ onClose, onSubmit }: ServicePOFormProps) {
         serviceAmount: parseFloat(formData.serviceAmount) || 0
       };
 
-      onSubmit(purchaseOrder);
+      await onSubmit(purchaseOrder);
+    } catch (error) {
+      // Error is handled by parent
+      console.error('Error creating Service PO:', error);
     } finally {
       setIsSubmitting(false);
     }
