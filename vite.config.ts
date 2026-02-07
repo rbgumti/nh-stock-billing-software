@@ -9,14 +9,20 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: [
+      // Force the Supabase client import to use env-based configuration
+      {
+        find: "@/integrations/supabase/client",
+        replacement: path.resolve(
+          __dirname,
+          "./src/integrations/supabase/client.env.ts"
+        ),
+      },
+      // Default @ -> src alias
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+    ],
   },
 }));
+
