@@ -93,8 +93,13 @@ export function usePatientForm(isEditing: boolean = false) {
       }
       
       navigate("/patients");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting patient form:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to add patient. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
