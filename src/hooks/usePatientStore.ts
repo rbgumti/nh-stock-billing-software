@@ -114,6 +114,7 @@ export function usePatientStore() {
         .insert([{
           first_name: patient.firstName || '',
           last_name: patient.lastName || '',
+          s_no: patient.patientId ? parseInt(patient.patientId) : undefined,
           file_no: patient.fileNo || '',
           patient_name: `${patient.firstName} ${patient.lastName}`.trim(),
           age: patient.dateOfBirth 
