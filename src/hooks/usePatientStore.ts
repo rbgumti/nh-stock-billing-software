@@ -129,6 +129,8 @@ export function usePatientStore() {
       };
 
       // Helper: get next s_no from existing patients
+      // IMPORTANT: Avoid NaN here because JSON.stringify({ s_no: NaN }) => {"s_no": null}
+      // which would keep triggering the NOT NULL constraint.
       const getNextSNo = async (): Promise<number> => {
         const { data: lastRows, error: lastErr } = await supabase
           .from("patients")
@@ -137,8 +139,20 @@ export function usePatientStore() {
           .limit(1);
 
         if (lastErr) throw lastErr;
-        const last = (lastRows?.[0] as any)?.s_no ?? 0;
-        return Number(last) + 1;
+
+        const lastVal = (lastRows?.[0] as any)?.s_no;
+        const parsed = Number.parseInt(String(lastVal ?? "0"), 10);
+        const lastSafe = Number.isFinite(parsed) ? parsed : 0;
+        const next = lastSafe + 1;
+
+        console.log("[patients] computed next s_no", {
+          lastVal,
+          lastSafe,
+          next,
+          rowCount: lastRows?.length ?? 0,
+        });
+
+        return next;
       };
 
       // Helper: check error type
@@ -147,7 +161,7 @@ export function usePatientStore() {
       const isFirstNameError = (msg: string) =>
         msg.includes("Could not find the 'first_name' column") ||
         msg.includes('Could not find the "first_name" column') ||
-        msg.includes("first_name") && msg.includes("schema cache");
+        (msg.includes("first_name") && msg.includes("schema cache"));
 
       // Helper: insert once
       const insertOnce = async (data: any) => {
@@ -170,23 +184,36 @@ export function usePatientStore() {
           if (useSNo) {
             dataToUse.s_no = await getNextSNo();
           }
+
+          console.log("[patients] add patient attempt", {
+            attempt,
+            useFirstName,
+            useSNo,
+            sNo: (dataToUse as any)?.s_no,
+          });
+
           await insertOnce(dataToUse);
           return; // Success!
         } catch (err: any) {
           const msg = String(err?.message || "");
 
+          console.log("[patients] add patient failed", {
+            attempt,
+            msg,
+            useFirstName,
+            useSNo,
+            sNo: (dataToUse as any)?.s_no,
+          });
+
           if (isFirstNameError(msg) && useFirstName) {
             // Remove first_name/last_name and retry
             useFirstName = false;
             dataToUse = { ...baseInsertData };
-            if (useSNo) {
-              dataToUse.s_no = await getNextSNo();
-            }
             continue;
           }
 
-          if (isSNoError(msg) && !useSNo) {
-            // Add s_no and retry
+          if (isSNoError(msg)) {
+            // Ensure we set s_no on the next attempt
             useSNo = true;
             continue;
           }
