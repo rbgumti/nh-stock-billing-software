@@ -128,60 +128,75 @@ export function usePatientStore() {
         category: patient.category || null,
       };
 
-      const insertWithFirstLast: any = {
-        ...baseInsertData,
-        first_name: patient.firstName || "",
-        last_name: patient.lastName || "",
+      // Helper: get next s_no from existing patients
+      const getNextSNo = async (): Promise<number> => {
+        const { data: lastRows, error: lastErr } = await supabase
+          .from("patients")
+          .select("s_no")
+          .order("s_no", { ascending: false })
+          .limit(1);
+
+        if (lastErr) throw lastErr;
+        const last = (lastRows?.[0] as any)?.s_no ?? 0;
+        return Number(last) + 1;
       };
 
+      // Helper: check error type
+      const isSNoError = (msg: string) =>
+        msg.includes('null value in column "s_no"') || msg.includes("null value in column 's_no'");
+      const isFirstNameError = (msg: string) =>
+        msg.includes("Could not find the 'first_name' column") ||
+        msg.includes('Could not find the "first_name" column') ||
+        msg.includes("first_name") && msg.includes("schema cache");
+
+      // Helper: insert once
       const insertOnce = async (data: any) => {
         const { error } = await supabase.from("patients").insert([data]);
         if (error) throw error;
       };
 
-      // 1) Prefer inserting first_name/last_name when supported
-      let dataToUse = insertWithFirstLast;
-      try {
-        await insertOnce(dataToUse);
-        return;
-      } catch (err: any) {
-        const msg = String(err?.message || "");
+      // Build insert data with first_name/last_name initially
+      let dataToUse: any = {
+        ...baseInsertData,
+        first_name: patient.firstName || "",
+        last_name: patient.lastName || "",
+      };
+      let useFirstName = true;
+      let useSNo = false;
 
-        // Backend doesn't recognize first_name in schema cache → retry without it
-        if (msg.includes("Could not find the 'first_name' column") || msg.includes('Could not find the "first_name" column')) {
-          dataToUse = baseInsertData;
-        } else {
-          // keep original error for now
+      // Retry loop - max 3 attempts to handle different schema configurations
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          if (useSNo) {
+            dataToUse.s_no = await getNextSNo();
+          }
+          await insertOnce(dataToUse);
+          return; // Success!
+        } catch (err: any) {
+          const msg = String(err?.message || "");
+
+          if (isFirstNameError(msg) && useFirstName) {
+            // Remove first_name/last_name and retry
+            useFirstName = false;
+            dataToUse = { ...baseInsertData };
+            if (useSNo) {
+              dataToUse.s_no = await getNextSNo();
+            }
+            continue;
+          }
+
+          if (isSNoError(msg) && !useSNo) {
+            // Add s_no and retry
+            useSNo = true;
+            continue;
+          }
+
+          // Unknown error - throw
           throw err;
         }
       }
 
-      // 2) Insert without first_name/last_name (legacy schema)
-      try {
-        await insertOnce(dataToUse);
-        return;
-      } catch (err: any) {
-        const msg = String(err?.message || "");
-
-        // If s_no is required (no DB default), generate it client-side and retry
-        if (msg.includes('null value in column "s_no"') || msg.includes("null value in column 's_no'")) {
-          const { data: lastRows, error: lastErr } = await supabase
-            .from("patients")
-            .select("s_no")
-            .order("s_no", { ascending: false })
-            .limit(1);
-
-          if (lastErr) throw lastErr;
-
-          const last = (lastRows?.[0] as any)?.s_no ?? 0;
-          const nextSNo = Number(last) + 1;
-
-          await insertOnce({ ...dataToUse, s_no: nextSNo });
-          return;
-        }
-
-        throw err;
-      }
+      throw new Error("Failed to add patient after multiple attempts");
     } catch (error) {
       console.error("Error adding patient:", error);
       toast({
