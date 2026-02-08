@@ -68,6 +68,25 @@ export default function DailyStockReport() {
   const loadReportData = async () => {
     setIsRefreshing(true);
     try {
+      // Aggregate stockItems by medicine NAME (combine all batches)
+      const aggregatedByName: Record<string, {
+        name: string;
+        category: string;
+        totalCurrentStock: number;
+      }> = {};
+
+      stockItems.forEach(item => {
+        const key = item.name.toLowerCase();
+        if (!aggregatedByName[key]) {
+          aggregatedByName[key] = {
+            name: item.name,
+            category: item.category || 'BNX',
+            totalCurrentStock: 0,
+          };
+        }
+        aggregatedByName[key].totalCurrentStock += item.currentStock;
+      });
+
       // Get invoice items for the selected date to calculate issued quantities
       const { data: invoiceData } = await supabase
         .from('invoices')
@@ -84,8 +103,10 @@ export default function DailyStockReport() {
           .select('medicine_name, quantity')
           .in('invoice_id', invoiceIds);
 
+        // Aggregate by medicine name (case-insensitive)
         issuedQuantities = (invoiceItems || []).reduce((acc: Record<string, number>, item) => {
-          acc[item.medicine_name] = (acc[item.medicine_name] || 0) + item.quantity;
+          const key = (item.medicine_name || '').toLowerCase();
+          acc[key] = (acc[key] || 0) + item.quantity;
           return acc;
         }, {});
       }
@@ -107,26 +128,27 @@ export default function DailyStockReport() {
           .select('stock_item_name, qty_in_tabs, quantity')
           .in('purchase_order_id', grnOrderIds);
 
+        // Aggregate by medicine name (case-insensitive)
         receivedQuantities = (poItems || []).reduce((acc: Record<string, number>, item) => {
-          // Use qty_in_tabs as primary (tab-based), fallback to quantity
           const tabQty = item.qty_in_tabs || item.quantity || 0;
-          acc[item.stock_item_name] = (acc[item.stock_item_name] || 0) + tabQty;
+          const key = (item.stock_item_name || '').toLowerCase();
+          acc[key] = (acc[key] || 0) + tabQty;
           return acc;
         }, {});
       }
 
-      // Calculate report data for each stock item (medicines)
-      // Filter out zero-stock items with no activity
-      const data: StockReportItem[] = stockItems
-        .map(item => {
-          const issued = issuedQuantities[item.name] || 0;
-          const received = receivedQuantities[item.name] || 0;
-          const stockOpening = item.currentStock;
+      // Build report data - one row per unique medicine name (aggregated across batches)
+      const data: StockReportItem[] = Object.values(aggregatedByName)
+        .map(agg => {
+          const key = agg.name.toLowerCase();
+          const issued = issuedQuantities[key] || 0;
+          const received = receivedQuantities[key] || 0;
+          const stockOpening = agg.totalCurrentStock;
           const stockClosing = stockOpening - issued + received;
 
           return {
-            name: item.name,
-            category: item.category || 'BNX',
+            name: agg.name,
+            category: agg.category,
             stockOpening,
             issuedToPatients: issued,
             stockReceived: received,

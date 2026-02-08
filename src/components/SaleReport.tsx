@@ -55,6 +55,35 @@ export default function SaleReport() {
 
       if (stockError) throw stockError;
 
+      // Aggregate stock items by medicine NAME (combine all batches)
+      const aggregatedByName: Record<string, {
+        name: string;
+        category: string;
+        totalCurrentStock: number;
+        avgRate: number;
+        itemIds: number[];
+      }> = {};
+
+      (stockItems || []).forEach(item => {
+        const key = item.name.toLowerCase();
+        if (!aggregatedByName[key]) {
+          aggregatedByName[key] = {
+            name: item.name,
+            category: item.category,
+            totalCurrentStock: 0,
+            avgRate: item.mrp || item.unit_price || 0,
+            itemIds: [],
+          };
+        }
+        aggregatedByName[key].totalCurrentStock += item.current_stock;
+        aggregatedByName[key].itemIds.push(item.item_id);
+        // Use the highest MRP/rate among batches
+        const rate = item.mrp || item.unit_price || 0;
+        if (rate > aggregatedByName[key].avgRate) {
+          aggregatedByName[key].avgRate = rate;
+        }
+      });
+
       // 2. Get day report's stock_snapshot for opening stock at 00:00 IST
       const { data: dayReportData } = await supabase
         .from('day_reports')
@@ -73,8 +102,8 @@ export default function SaleReport() {
 
       const invoiceIds = invoiceData?.map(inv => inv.id) || [];
 
+      // Aggregate sold quantities by medicine NAME (not ID)
       let soldQuantitiesByName: Record<string, number> = {};
-      let soldQuantitiesById: Record<number, number> = {};
 
       if (invoiceIds.length > 0) {
         const { data: invoiceItems } = await supabase
@@ -83,14 +112,13 @@ export default function SaleReport() {
           .in('invoice_id', invoiceIds);
 
         (invoiceItems || []).forEach((it) => {
-          // name-based (legacy)
-          soldQuantitiesByName[it.medicine_name] = (soldQuantitiesByName[it.medicine_name] || 0) + it.quantity;
-          // id-based (robust)
-          soldQuantitiesById[it.medicine_id] = (soldQuantitiesById[it.medicine_id] || 0) + it.quantity;
+          // Aggregate by medicine name (case-insensitive)
+          const key = (it.medicine_name || '').toLowerCase();
+          soldQuantitiesByName[key] = (soldQuantitiesByName[key] || 0) + it.quantity;
         });
       }
 
-      // 4. Get stock received from processed GRN
+      // 4. Get stock received from processed GRN (aggregate by medicine name)
       const { data: grnOrders } = await supabase
         .from('purchase_orders')
         .select('id')
@@ -100,7 +128,6 @@ export default function SaleReport() {
       const grnOrderIds = grnOrders?.map(po => po.id) || [];
 
       let receivedQuantitiesByName: Record<string, number> = {};
-      let receivedQuantitiesById: Record<number, number> = {};
 
       if (grnOrderIds.length > 0) {
         const { data: poItems } = await supabase
@@ -111,33 +138,33 @@ export default function SaleReport() {
         (poItems || []).forEach((it) => {
           // Use qty_in_tabs as primary (tab-based calculations), fallback to quantity
           const tabQty = it.qty_in_tabs || it.quantity || 0;
-          // name-based (legacy)
-          receivedQuantitiesByName[it.stock_item_name] = (receivedQuantitiesByName[it.stock_item_name] || 0) + tabQty;
-          // id-based (robust)
-          receivedQuantitiesById[it.stock_item_id] = (receivedQuantitiesById[it.stock_item_id] || 0) + tabQty;
+          // Aggregate by medicine name (case-insensitive)
+          const key = (it.stock_item_name || '').toLowerCase();
+          receivedQuantitiesByName[key] = (receivedQuantitiesByName[key] || 0) + tabQty;
         });
       }
 
-      // 5. Build report data
-      const items: SaleReportItem[] = (stockItems || []).map((item, index) => {
-        const snapshotData = stockSnapshot[item.name];
+      // 5. Build report data - one row per unique medicine name
+      const items: SaleReportItem[] = Object.values(aggregatedByName).map((agg, index) => {
+        const key = agg.name.toLowerCase();
+        const snapshotData = stockSnapshot[agg.name];
         const isFromSnapshot = snapshotData?.opening !== undefined;
         
-        // Opening stock: from snapshot (00:01 IST) or fallback to current
-        const openingStock = isFromSnapshot ? snapshotData.opening! : item.current_stock;
-        const currentStock = item.current_stock;
+        // Opening stock: from snapshot (00:01 IST) or fallback to current total
+        const openingStock = isFromSnapshot ? snapshotData.opening! : agg.totalCurrentStock;
+        const currentStock = agg.totalCurrentStock;
         
-        // Sales quantity from invoices
-        const saleQty = soldQuantitiesById[item.item_id] ?? soldQuantitiesByName[item.name] ?? 0;
+        // Sales quantity from invoices (aggregated by name)
+        const saleQty = soldQuantitiesByName[key] ?? 0;
         
-        // Rate from stock
-        const rate = item.mrp || item.unit_price || 0;
+        // Rate from aggregated data
+        const rate = agg.avgRate;
         
         // Value = saleQty * rate
         const value = saleQty * rate;
         
-        // Stock received from GRN
-        const stockReceived = receivedQuantitiesById[item.item_id] ?? receivedQuantitiesByName[item.name] ?? 0;
+        // Stock received from GRN (aggregated by name)
+        const stockReceived = receivedQuantitiesByName[key] ?? 0;
         
         // Closing stock = opening + received - sold
         const closingStock = openingStock + stockReceived - saleQty;
@@ -147,8 +174,8 @@ export default function SaleReport() {
 
         return {
           sNo: index + 1,
-          medicineName: item.name,
-          category: item.category,
+          medicineName: agg.name,
+          category: agg.category,
           openingStock,
           currentStock,
           saleQty,
