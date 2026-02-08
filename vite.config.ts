@@ -11,18 +11,9 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
-    alias: [
-      // Force the Supabase client import to use env-based configuration
-      {
-        find: "@/integrations/supabase/client",
-        replacement: path.resolve(
-          __dirname,
-          "./src/integrations/supabase/client.env.ts"
-        ),
-      },
-      // Default @ -> src alias
-      { find: "@", replacement: path.resolve(__dirname, "./src") },
-    ],
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
 }));
 
