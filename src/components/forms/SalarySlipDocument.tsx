@@ -1,7 +1,7 @@
 import * as React from "react";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
 import { useAppSettings } from "@/hooks/usePerformanceMode";
-import { Employee, getBaseWorkingDays, getCalendarDaysInMonth } from "@/hooks/useSalaryStore";
+import { Employee, getCalendarDaysInMonth } from "@/hooks/useSalaryStore";
 
 export interface SalarySlipProps {
   employee: Employee;
@@ -32,18 +32,16 @@ export const SalarySlipDocument = React.forwardRef<HTMLDivElement, SalarySlipPro
   ) => {
     const { doctorName } = useAppSettings();
     
-    // Use calendar days of month as base (31 for Jan, 28 for Feb, etc.)
+    // Use actual calendar days in the month (31 for Jan, 28 for Feb, etc.)
     const calendarDays = getCalendarDaysInMonth(month);
-    const baseWorkingDays = getBaseWorkingDays(month);
+    
+    // Salary per day = Fixed salary / no. of days in month
     const perDayRate = employee.salaryFixed / calendarDays;
     
-    // Calculate effective days if not provided
-    const effectiveDays = effectiveDaysForSalary ?? (
-      workingDays <= baseWorkingDays
-        ? (workingDays / baseWorkingDays) * calendarDays
-        : calendarDays + (workingDays - baseWorkingDays)
-    );
+    // Effective days = working days (since we now use actual calendar days)
+    const effectiveDays = effectiveDaysForSalary ?? workingDays;
     
+    // Gross salary = Salary per day * effective working days
     const grossSalary = Math.round(perDayRate * effectiveDays);
     const totalDeductions = advanceAdjusted;
     const netPayable = salaryPayable;
@@ -163,16 +161,16 @@ export const SalarySlipDocument = React.forwardRef<HTMLDivElement, SalarySlipPro
                 <span>₹{employee.salaryFixed.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between border-b border-gray-200 pb-2">
-                <span>Base Working Days</span>
-                <span>{baseWorkingDays} days</span>
+                <span>Days in Month</span>
+                <span>{calendarDays} days</span>
               </div>
               <div className="flex justify-between border-b border-gray-200 pb-2">
-                <span>Actual Working Days</span>
+                <span>Working Days</span>
                 <span>{workingDays} days</span>
               </div>
               <div className="flex justify-between border-b border-gray-200 pb-2">
-                <span>Effective Days (for calc)</span>
-                <span>{Math.round(effectiveDays * 10) / 10} days</span>
+                <span>Per Day Rate</span>
+                <span>₹{Math.round(perDayRate).toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between font-bold pt-2 border-t-2 border-gray-300">
                 <span>Gross Earnings</span>

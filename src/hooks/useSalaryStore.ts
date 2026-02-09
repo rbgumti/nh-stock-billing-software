@@ -78,7 +78,7 @@ interface SalaryStore {
   updateSalaryRecord: (id: string, record: Partial<Omit<SalaryRecord, 'id' | 'createdAt'>>) => Promise<void>;
   deleteSalaryRecord: (id: string) => Promise<void>;
   getSalaryRecordsByMonth: (month: string) => SalaryRecord[];
-  calculateSalary: (employeeId: string, workingDays: number, advanceAdjusted: number, advancePending: number) => number;
+  calculateSalary: (employeeId: string, workingDays: number, advanceAdjusted: number, advancePending: number, month?: string) => number;
   
   // Attendance methods
   markAttendance: (employeeId: string, date: string, status: AttendanceStatus, notes?: string) => Promise<void>;
@@ -317,15 +317,21 @@ export const useSalaryStore = create<SalaryStore>()((set, get) => ({
     return get().salaryRecords.filter((r) => r.month === month);
   },
   
-  calculateSalary: (employeeId, workingDays, advanceAdjusted, advancePending) => {
+  calculateSalary: (employeeId, workingDays, advanceAdjusted, advancePending, month?: string) => {
     const employee = get().employees.find((e) => e.id === employeeId);
     if (!employee) return 0;
     
-    // Standard month = 30 days (base), calculate per day rate
-    const perDayRate = employee.salaryFixed / 30;
+    // Use actual calendar days in the month (31 for Jan, 28/29 for Feb, etc.)
+    // If month not provided, default to current month
+    const currentMonth = month || new Date().toISOString().slice(0, 7);
+    const daysInMonth = getCalendarDaysInMonth(currentMonth);
+    
+    // Salary per day = Fixed salary / no. of days in month
+    const perDayRate = employee.salaryFixed / daysInMonth;
+    
+    // Salary payable = Salary per day * effective working days - advance adjusted
     const calculatedSalary = perDayRate * workingDays;
     
-    // Subtract advance adjusted
     return Math.round(calculatedSalary - advanceAdjusted);
   },
 
