@@ -317,10 +317,12 @@ export default function NewInvoice() {
     }
 
     try {
-      // Reduce stock for each item
-      items.forEach(item => {
-        reduceStock(item.medicineId, item.quantity);
-      });
+      // Reduce stock for each item sequentially to avoid race conditions
+      for (const item of items) {
+        if (item.medicineId && item.medicineId > 0) {
+          await reduceStock(item.medicineId, item.quantity);
+        }
+      }
 
       const invoiceNumber = await getNextInvoiceNumber();
       
