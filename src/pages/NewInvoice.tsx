@@ -322,13 +322,12 @@ export default function NewInvoice() {
         reduceStock(item.medicineId, item.quantity);
       });
 
-      const invoiceNumber = getNextInvoiceNumber();
+      const invoiceNumber = await getNextInvoiceNumber();
       
       // Insert invoice into database
       const { data: invoiceData, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
-          id: invoiceNumber,
           invoice_number: invoiceNumber,
           patient_id: selectedPatient,
           patient_name: foundPatient?.patient_name || selectedPatient,
@@ -348,7 +347,7 @@ export default function NewInvoice() {
 
       // Insert invoice items
       const itemsToInsert = items.map(item => ({
-        invoice_id: invoiceNumber,
+        invoice_id: invoiceData.id,
         medicine_id: item.medicineId,
         medicine_name: item.medicineName,
         batch_no: item.batchNo,

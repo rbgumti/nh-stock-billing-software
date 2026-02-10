@@ -98,22 +98,49 @@ export const useSequentialNumbers = () => {
     return `${prefix}${paddedNumber}`;
   };
 
-  const getNextInvoiceNumber = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const paddedNumber = sequentialStore.invoice.toString().padStart(3, '0');
-    const invoiceNumber = `INV${year}${month}${day}${paddedNumber}`;
+  const getNextInvoiceNumber = async (): Promise<string> => {
+    const prefix = 'NH/INV-';
     
-    // Increment for next use
-    const newNumbers = {
-      ...sequentialStore,
-      invoice: sequentialStore.invoice + 1
-    };
-    setNumbers(newNumbers);
+    // Query database for highest invoice number with this prefix
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('invoice_number')
+      .like('invoice_number', `${prefix}%`)
+      .order('invoice_number', { ascending: false })
+      .limit(1);
     
-    return invoiceNumber;
+    let nextNum = 1;
+    if (!error && data && data.length > 0 && data[0].invoice_number) {
+      const suffix = data[0].invoice_number.replace(prefix, '');
+      const parsed = parseInt(suffix, 10);
+      if (!isNaN(parsed)) {
+        nextNum = parsed + 1;
+      }
+    }
+    
+    // If no NH/INV- numbers exist yet, check legacy format to continue sequence
+    if (nextNum === 1) {
+      const { data: legacyData } = await supabase
+        .from('invoices')
+        .select('invoice_number')
+        .like('invoice_number', 'INV%')
+        .order('invoice_number', { ascending: false })
+        .limit(1);
+      
+      if (legacyData && legacyData.length > 0 && legacyData[0].invoice_number) {
+        // Extract trailing digits from legacy format like INV20260208288
+        const match = legacyData[0].invoice_number.match(/(\d+)$/);
+        if (match) {
+          const parsed = parseInt(match[1], 10);
+          if (!isNaN(parsed)) {
+            nextNum = parsed + 1;
+          }
+        }
+      }
+    }
+    
+    const paddedNumber = nextNum.toString().padStart(4, '0');
+    return `${prefix}${paddedNumber}`;
   };
 
   // Legacy function - kept for backward compatibility
