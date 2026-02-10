@@ -58,6 +58,7 @@ export default function Invoices() {
       // Transform data - no additional queries needed
       const invoicesWithItems = invoicesData.map((invoice: any) => ({
         id: invoice.id,
+        invoiceNumber: invoice.invoice_number || invoice.id,
         patientName: invoice.patient_name,
         patientId: invoice.patient_id,
         date: invoice.invoice_date,
@@ -90,7 +91,7 @@ export default function Invoices() {
   const statuses = ["all", "Paid", "Pending", "Overdue"];
 
   const filteredInvoices = invoices.filter((invoice: any) => {
-    const matchesSearch = invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = (invoice.invoiceNumber || invoice.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
                          invoice.patientName.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
@@ -199,7 +200,7 @@ export default function Invoices() {
     doc.text("Invoice Number:", margin + 3, y);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
-    doc.text(invoice.id, margin + 35, y);
+    doc.text(invoice.invoiceNumber || invoice.id, margin + 35, y);
     
     doc.setTextColor(0, 51, 102);
     doc.setFont("helvetica", "bold");
@@ -360,7 +361,7 @@ export default function Invoices() {
     doc.text("NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)", pageWidth / 2, footerY + 2, { align: "center" });
     
     // Save the PDF
-    doc.save(`invoice-${invoice.id}.pdf`);
+    doc.save(`invoice-${invoice.invoiceNumber || invoice.id}.pdf`);
     
     toast({
       title: "Success",
@@ -464,7 +465,7 @@ export default function Invoices() {
       `${index + 1}. ${item.name} - Qty: ${item.quantity} - ₹${formatNumber(item.price)}`
     ).join('\n');
     
-    alert(`INVOICE DETAILS\n\nInvoice ID: ${invoice.id}\nPatient: ${invoice.patientName}\nDate: ${invoice.date}\nStatus: ${invoice.status}\n\nITEMS:\n${itemsList}\n\nTotal Amount: ₹${formatNumber(invoice.amount)}`);
+    alert(`INVOICE DETAILS\n\nInvoice No: ${invoice.invoiceNumber || invoice.id}\nPatient: ${invoice.patientName}\nDate: ${invoice.date}\nStatus: ${invoice.status}\n\nITEMS:\n${itemsList}\n\nTotal Amount: ₹${formatNumber(invoice.amount)}`);
   };
 
   if (loading) {
@@ -647,7 +648,7 @@ export default function Invoices() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{invoice.id}</h3>
+                      <h3 className="text-lg font-semibold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{invoice.invoiceNumber || invoice.id}</h3>
                       <p className="text-muted-foreground">{invoice.patientName}</p>
                     </div>
                     <div className="text-right">
