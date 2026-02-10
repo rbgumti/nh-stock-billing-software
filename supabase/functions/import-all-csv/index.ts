@@ -44,6 +44,7 @@ function parseCsv(text: string): Record<string, string>[] {
   const rows: Record<string, string>[] = [];
   for (let i = 1; i < lines.length; i++) {
     const fields = parseCsvLine(lines[i]);
+    if (fields.length < 2) continue;
     const row: Record<string, string> = {};
     for (let j = 0; j < headers.length; j++) {
       row[headers[j].trim()] = (fields[j] || "").trim();
@@ -68,6 +69,15 @@ function boolVal(v: string | undefined): boolean {
   return v === "true" || v === "t";
 }
 
+function tryParseJson(v: string | undefined): any {
+  if (!v || v === "" || v === "null") return null;
+  try {
+    return JSON.parse(v);
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -78,11 +88,11 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    const { base_url } = await req.json();
+    const storageBase = `${supabaseUrl}/storage/v1/object/public/csv-imports`;
     const results: Record<string, any> = {};
 
-    // Fetch all CSVs
-    console.log("Fetching CSVs...");
+    // Fetch all CSVs from storage
+    console.log("Fetching CSVs from storage...");
     const csvNames = [
       "invoices_rows",
       "invoice_items_rows",
@@ -94,7 +104,7 @@ Deno.serve(async (req) => {
 
     const csvData: Record<string, Record<string, string>[]> = {};
     for (const name of csvNames) {
-      const url = `${base_url}/temp/${name}.csv`;
+      const url = `${storageBase}/${name}.csv`;
       console.log(`Fetching: ${url}`);
       const resp = await fetch(url);
       if (!resp.ok) throw new Error(`Failed to fetch ${name}: ${resp.status}`);
@@ -103,57 +113,48 @@ Deno.serve(async (req) => {
       console.log(`${name}: ${csvData[name].length} rows`);
     }
 
-    // Build patient s_no -> UUID mapping
+    // Build patient s_no -> UUID mapping (fetch ALL patients)
     console.log("Building patient mapping...");
-    const { data: patients, error: pErr } = await supabase
-      .from("patients")
-      .select("id, s_no");
-    if (pErr) throw new Error(`Patient fetch error: ${pErr.message}`);
-    
+    let allPatients: any[] = [];
+    let from = 0;
+    const pageSize = 1000;
+    while (true) {
+      const { data, error } = await supabase
+        .from("patients")
+        .select("id, s_no")
+        .range(from, from + pageSize - 1);
+      if (error) throw new Error(`Patient fetch error: ${error.message}`);
+      if (!data || data.length === 0) break;
+      allPatients = allPatients.concat(data);
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+
     const patientMap: Record<string, string> = {};
-    for (const p of patients || []) {
+    for (const p of allPatients) {
       patientMap[String(p.s_no)] = p.id;
     }
     console.log(`Patient map: ${Object.keys(patientMap).length} entries`);
 
     // Step 1: Delete existing data in correct FK order
     console.log("Deleting existing data...");
-    
-    // Delete invoice_items first (references invoices)
-    const { error: delInvItems } = await supabase.from("invoice_items").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    if (delInvItems) console.error("Delete invoice_items error:", delInvItems.message);
-    
-    // Delete invoices
-    const { error: delInv } = await supabase.from("invoices").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    if (delInv) console.error("Delete invoices error:", delInv.message);
-    
-    // Delete prescription_items (references prescriptions)
-    const { error: delPrescItems } = await supabase.from("prescription_items").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    if (delPrescItems) console.error("Delete prescription_items error:", delPrescItems.message);
-    
-    // Delete prescriptions (to recreate stubs)
-    const { error: delPresc } = await supabase.from("prescriptions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    if (delPresc) console.error("Delete prescriptions error:", delPresc.message);
-    
-    // Delete appointments
-    const { error: delAppt } = await supabase.from("appointments").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    if (delAppt) console.error("Delete appointments error:", delAppt.message);
-    
-    // Delete attendance_records
-    const { error: delAtt } = await supabase.from("attendance_records").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    if (delAtt) console.error("Delete attendance error:", delAtt.message);
-    
-    // Delete day_reports
-    const { error: delDay } = await supabase.from("day_reports").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-    if (delDay) console.error("Delete day_reports error:", delDay.message);
 
-    console.log("Existing data deleted.");
+    const deletes = [
+      "invoice_items", "invoices", "prescription_items", "prescriptions",
+      "appointments", "attendance_records", "day_reports"
+    ];
+    for (const table of deletes) {
+      const { error } = await supabase.from(table).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      if (error) console.error(`Delete ${table} error:`, error.message);
+      else console.log(`Deleted ${table}`);
+    }
 
-    // Step 2: Insert day_reports (no FK dependencies)
+    const batchSize = 50;
+
+    // Step 2: Insert day_reports
     console.log("Inserting day_reports...");
     const dayReports = csvData["day_reports_rows"];
     let dayInserted = 0;
-    const batchSize = 25;
     for (let i = 0; i < dayReports.length; i += batchSize) {
       const batch = dayReports.slice(i, i + batchSize).map((r) => ({
         id: r.id,
@@ -173,25 +174,22 @@ Deno.serve(async (req) => {
         fees: numVal(r.fees) ?? 0,
         lab_collection: numVal(r.lab_collection) ?? 0,
         psychiatry_collection: numVal(r.psychiatry_collection) ?? 0,
-        cash_denominations: r.cash_denominations ? JSON.parse(r.cash_denominations) : null,
-        expenses: r.expenses ? JSON.parse(r.expenses) : null,
+        cash_denominations: tryParseJson(r.cash_denominations),
+        expenses: tryParseJson(r.expenses),
         created_at: r.created_at || new Date().toISOString(),
         updated_at: r.updated_at || new Date().toISOString(),
         created_by: val(r.created_by),
-        stock_snapshot: r.stock_snapshot ? JSON.parse(r.stock_snapshot) : null,
-        advances: r.advances ? JSON.parse(r.advances) : null,
+        stock_snapshot: tryParseJson(r.stock_snapshot),
+        advances: tryParseJson(r.advances),
       }));
       const { error } = await supabase.from("day_reports").insert(batch);
-      if (error) {
-        console.error(`day_reports batch ${i} error:`, error.message);
-      } else {
-        dayInserted += batch.length;
-      }
+      if (error) console.error(`day_reports batch ${i}:`, error.message);
+      else dayInserted += batch.length;
     }
     results.day_reports = { inserted: dayInserted, total: dayReports.length };
     console.log(`day_reports: ${dayInserted}/${dayReports.length}`);
 
-    // Step 3: Insert attendance_records (references employees - assume they exist)
+    // Step 3: Insert attendance_records
     console.log("Inserting attendance_records...");
     const attRecords = csvData["attendance_records_rows"];
     let attInserted = 0;
@@ -205,16 +203,13 @@ Deno.serve(async (req) => {
         created_at: r.created_at || new Date().toISOString(),
       }));
       const { error } = await supabase.from("attendance_records").insert(batch);
-      if (error) {
-        console.error(`attendance batch ${i} error:`, error.message);
-      } else {
-        attInserted += batch.length;
-      }
+      if (error) console.error(`attendance batch ${i}:`, error.message);
+      else attInserted += batch.length;
     }
     results.attendance_records = { inserted: attInserted, total: attRecords.length };
     console.log(`attendance_records: ${attInserted}/${attRecords.length}`);
 
-    // Step 4: Insert appointments (patient_id is s_no, need UUID lookup)
+    // Step 4: Insert appointments
     console.log("Inserting appointments...");
     const appointments = csvData["appointments_rows"];
     let apptInserted = 0;
@@ -244,17 +239,14 @@ Deno.serve(async (req) => {
       }
       if (batch.length > 0) {
         const { error } = await supabase.from("appointments").insert(batch);
-        if (error) {
-          console.error(`appointments batch ${i} error:`, error.message);
-        } else {
-          apptInserted += batch.length;
-        }
+        if (error) console.error(`appointments batch ${i}:`, error.message);
+        else apptInserted += batch.length;
       }
     }
     results.appointments = { inserted: apptInserted, total: appointments.length, skipped: apptSkipped };
     console.log(`appointments: ${apptInserted}/${appointments.length} (skipped ${apptSkipped})`);
 
-    // Step 5: Create stub prescriptions for prescription_items
+    // Step 5: Create stub prescriptions
     console.log("Creating stub prescriptions...");
     const prescItems = csvData["prescription_items_rows"];
     const uniquePrescIds = [...new Set(prescItems.map((r) => r.prescription_id).filter(Boolean))];
@@ -267,11 +259,8 @@ Deno.serve(async (req) => {
         prescription_date: new Date().toISOString(),
       }));
       const { error } = await supabase.from("prescriptions").insert(batch);
-      if (error) {
-        console.error(`prescriptions stub batch ${i} error:`, error.message);
-      } else {
-        prescInserted += batch.length;
-      }
+      if (error) console.error(`prescriptions stub batch ${i}:`, error.message);
+      else prescInserted += batch.length;
     }
     console.log(`Created ${prescInserted} stub prescriptions`);
 
@@ -291,32 +280,38 @@ Deno.serve(async (req) => {
         created_at: r.created_at || new Date().toISOString(),
       }));
       const { error } = await supabase.from("prescription_items").insert(batch);
-      if (error) {
-        console.error(`prescription_items batch ${i} error:`, error.message);
-      } else {
-        prescItemsInserted += batch.length;
-      }
+      if (error) console.error(`prescription_items batch ${i}:`, error.message);
+      else prescItemsInserted += batch.length;
     }
     results.prescription_items = { inserted: prescItemsInserted, total: prescItems.length };
     console.log(`prescription_items: ${prescItemsInserted}/${prescItems.length}`);
 
-    // Step 7: Insert invoices (id is text like INV20251107001, need UUID; patient_id is s_no)
+    // Build valid stock item IDs set
+    const validMedicineIds = new Set<number>();
+    let sfrom = 0;
+    while (true) {
+      const { data: si } = await supabase.from("stock_items").select("item_id").range(sfrom, sfrom + 999);
+      if (!si || si.length === 0) break;
+      for (const s of si) validMedicineIds.add(s.item_id);
+      if (si.length < 1000) break;
+      sfrom += 1000;
+    }
+    console.log(`Valid medicine IDs: ${validMedicineIds.size}`);
+
+    // Step 7: Insert invoices
     console.log("Inserting invoices...");
     const invoices = csvData["invoices_rows"];
-    const invoiceIdMap: Record<string, string> = {}; // old text id -> new UUID
+    const invoiceIdMap: Record<string, string> = {};
     let invInserted = 0;
-    let invSkipped = 0;
-    
     for (let i = 0; i < invoices.length; i += batchSize) {
       const batch = [];
       for (const r of invoices.slice(i, i + batchSize)) {
         const newId = crypto.randomUUID();
         invoiceIdMap[r.id] = newId;
         const patientUuid = patientMap[r.patient_id];
-        
         batch.push({
           id: newId,
-          invoice_number: r.id, // old text ID becomes invoice_number
+          invoice_number: r.id,
           patient_id: patientUuid || null,
           patient_name: val(r.patient_name),
           patient_phone: val(r.patient_phone),
@@ -333,22 +328,18 @@ Deno.serve(async (req) => {
       }
       if (batch.length > 0) {
         const { error } = await supabase.from("invoices").insert(batch);
-        if (error) {
-          console.error(`invoices batch ${i} error:`, error.message);
-        } else {
-          invInserted += batch.length;
-        }
+        if (error) console.error(`invoices batch ${i}:`, error.message);
+        else invInserted += batch.length;
       }
     }
     results.invoices = { inserted: invInserted, total: invoices.length };
     console.log(`invoices: ${invInserted}/${invoices.length}`);
 
-    // Step 8: Insert invoice_items (invoice_id maps to old text ID)
+    // Step 8: Insert invoice_items
     console.log("Inserting invoice_items...");
     const invItems = csvData["invoice_items_rows"];
     let invItemsInserted = 0;
     let invItemsSkipped = 0;
-    
     for (let i = 0; i < invItems.length; i += batchSize) {
       const batch = [];
       for (const r of invItems.slice(i, i + batchSize)) {
@@ -357,10 +348,11 @@ Deno.serve(async (req) => {
           invItemsSkipped++;
           continue;
         }
+        const medId = numVal(r.medicine_id);
         batch.push({
           id: r.id,
           invoice_id: mappedInvoiceId,
-          medicine_id: numVal(r.medicine_id),
+          medicine_id: medId !== null && validMedicineIds.has(medId) ? medId : null,
           medicine_name: r.medicine_name || "Unknown",
           batch_no: val(r.batch_no),
           expiry_date: val(r.expiry_date),
@@ -375,11 +367,8 @@ Deno.serve(async (req) => {
       }
       if (batch.length > 0) {
         const { error } = await supabase.from("invoice_items").insert(batch);
-        if (error) {
-          console.error(`invoice_items batch ${i} error:`, error.message);
-        } else {
-          invItemsInserted += batch.length;
-        }
+        if (error) console.error(`invoice_items batch ${i}:`, error.message);
+        else invItemsInserted += batch.length;
       }
     }
     results.invoice_items = { inserted: invItemsInserted, total: invItems.length, skipped: invItemsSkipped };
