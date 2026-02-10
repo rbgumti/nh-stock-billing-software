@@ -98,7 +98,8 @@ export default function SaleReport() {
       const { data: invoiceData } = await supabase
         .from('invoices')
         .select('id, invoice_date')
-        .like('invoice_date', `${reportDate}%`);
+        .gte('invoice_date', `${reportDate}T00:00:00`)
+        .lt('invoice_date', `${reportDate}T23:59:59.999`);
 
       const invoiceIds = invoiceData?.map(inv => inv.id) || [];
 
@@ -122,7 +123,8 @@ export default function SaleReport() {
       const { data: grnOrders } = await supabase
         .from('purchase_orders')
         .select('id')
-        .like('grn_date', `${reportDate}%`)
+        .gte('grn_date', `${reportDate}T00:00:00`)
+        .lt('grn_date', `${reportDate}T23:59:59.999`)
         .eq('status', 'Received');
 
       const grnOrderIds = grnOrders?.map(po => po.id) || [];
