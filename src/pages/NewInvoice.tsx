@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,12 +50,15 @@ interface InvoiceItem {
 export default function NewInvoice() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { stockItems, loading: stockLoading, getMedicines, getStockItem, reduceStock } = useStockStore();
+  const { stockItems, loading: stockLoading, getStockItem, reduceStock } = useStockStore();
   const { getNextInvoiceNumber } = useSequentialNumbers();
   const { prescriptions, getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
   
   // Use cached patients for instant load
   const { patients, loading: patientsLoading } = usePatientCache();
+
+  // Memoize medicines list to prevent re-filtering on every render
+  const medicines = useMemo(() => stockItems, [stockItems]);
   
   const [selectedPatient, setSelectedPatient] = useState("");
   const [foundPatient, setFoundPatient] = useState<CachedPatient | null>(null);
@@ -81,8 +84,6 @@ export default function NewInvoice() {
   ]);
   const [newItemId, setNewItemId] = useState<string | null>(null);
   const selectRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
-
-  const medicines = getMedicines();
 
   // Helper to check if expiry date is valid
   const isValidExpiryDate = (date?: string): boolean => {
@@ -227,8 +228,8 @@ export default function NewInvoice() {
     }
   };
 
-  const updateItem = (id: string, field: keyof InvoiceItem, value: string | number) => {
-    setItems(items.map(item => {
+  const updateItem = useCallback((id: string, field: keyof InvoiceItem, value: string | number) => {
+    setItems(prev => prev.map(item => {
       if (item.id === id) {
         const updatedItem = { ...item, [field]: value };
         
@@ -269,7 +270,7 @@ export default function NewInvoice() {
       }
       return item;
     }));
-  };
+  }, [getStockItem]);
 
   // Calculate follow-up date based on max duration
   const maxDuration = Math.max(...items.map(item => item.durationDays || 0), 0);
