@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from '@supabase/supabase-js';
-import { preloadPatients } from "@/hooks/usePatientCache";
-import { preloadStockItems } from "@/hooks/useStockStore";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,11 +16,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
-      // Start preloading data caches immediately after auth confirmed
-      if (session?.user) {
-        preloadPatients();
-        preloadStockItems();
-      }
     });
 
     // Listen for auth changes

@@ -24,45 +24,28 @@ let loadPromise: Promise<CachedPatient[]> | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 async function fetchAllPatients(): Promise<CachedPatient[]> {
-  // Use a single large query with no row limit by requesting count
-  // Supabase default limit is 1000, so we set a high range
-  const { data, error, count } = await supabase
-    .from('patients')
-    .select('id, patient_name, phone, file_no, aadhar_card, govt_id, new_govt_id, address, age, father_name, category', { count: 'exact' })
-    .order('patient_name', { ascending: true })
-    .range(0, 9999);
+  let allPatients: CachedPatient[] = [];
+  let from = 0;
+  const batchSize = 1000;
+  let hasMore = true;
 
-  if (error) {
-    console.error('Error loading patients:', error);
-    throw error;
-  }
-
-  if (!data) return [];
-
-  const mapped: CachedPatient[] = data.map(p => ({
-    id: String(p.id),
-    patient_name: p.patient_name || '',
-    phone: p.phone || '',
-    file_no: p.file_no || '',
-    aadhar_card: p.aadhar_card || '',
-    govt_id: p.govt_id || '',
-    new_govt_id: p.new_govt_id || '',
-    address: p.address || '',
-    age: p.age || undefined,
-    father_name: p.father_name || undefined,
-    category: p.category || undefined,
-  }));
-
-  // If there are more records beyond 10000, fetch remaining
-  if (count && count > 10000) {
-    const { data: moreData } = await supabase
+  while (hasMore) {
+    const { data, error } = await supabase
       .from('patients')
       .select('id, patient_name, phone, file_no, aadhar_card, govt_id, new_govt_id, address, age, father_name, category')
-      .order('patient_name', { ascending: true })
-      .range(10000, count - 1);
-    
-    if (moreData) {
-      moreData.forEach(p => mapped.push({
+      .range(from, from + batchSize - 1)
+      .order('patient_name', { ascending: true });
+
+    if (error) {
+      console.error('Error loading patients:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      hasMore = false;
+    } else {
+      // Map data to ensure proper types
+      const mappedData: CachedPatient[] = data.map(p => ({
         id: String(p.id),
         patient_name: p.patient_name || '',
         phone: p.phone || '',
@@ -75,10 +58,15 @@ async function fetchAllPatients(): Promise<CachedPatient[]> {
         father_name: p.father_name || undefined,
         category: p.category || undefined,
       }));
+      allPatients = [...allPatients, ...mappedData];
+      from += batchSize;
+      if (data.length < batchSize) {
+        hasMore = false;
+      }
     }
   }
 
-  return mapped;
+  return allPatients;
 }
 
 export function usePatientCache() {

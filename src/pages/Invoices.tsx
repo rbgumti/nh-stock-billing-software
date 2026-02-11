@@ -46,8 +46,7 @@ export default function Invoices() {
           *,
           invoice_items (*)
         `)
-        .order('created_at', { ascending: false })
-        .limit(300);
+        .order('created_at', { ascending: false });
 
       if (invoicesError) throw invoicesError;
 
