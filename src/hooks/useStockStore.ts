@@ -411,6 +411,12 @@ export function useStockStore() {
 
   const subscribe = (listener: () => void) => () => {};
 
+  const forceRefresh = useCallback(() => {
+    globalStockCache = [];
+    stockCacheTimestamp = 0;
+    loadStockItems(true);
+  }, [loadStockItems]);
+
   return {
     stockItems,
     loading,
@@ -425,6 +431,7 @@ export function useStockStore() {
     getMedicines,
     getStockItem,
     subscribe,
-    invalidateCache
+    invalidateCache,
+    forceRefresh
   };
 }
