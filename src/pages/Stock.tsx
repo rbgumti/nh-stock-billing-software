@@ -204,9 +204,11 @@ export default function Stock() {
 
   const filteredItems = stockItems
     .filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           item.supplier.toLowerCase().includes(searchTerm.toLowerCase());
+      const search = searchTerm.toLowerCase();
+      const matchesSearch = item.name.toLowerCase().includes(search) ||
+                           item.category.toLowerCase().includes(search) ||
+                           (item.supplier || '').toLowerCase().includes(search) ||
+                           (item.batchNo || '').toLowerCase().includes(search);
       
       const matchesCategory = filterCategory === "all" || item.category === filterCategory;
       
