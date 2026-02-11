@@ -82,7 +82,7 @@ export default function Stock() {
   const [exportStartDate, setExportStartDate] = useState<Date | undefined>(undefined);
   const [exportEndDate, setExportEndDate] = useState<Date | undefined>(undefined);
   const [downloadingGrnId, setDownloadingGrnId] = useState<string | null>(null);
-  const { stockItems, addStockItem, updateStockItem, subscribe, findOrCreateBatch, getBatchesForMedicine, invalidateCache } = useStockStore();
+  const { stockItems, addStockItem, updateStockItem, subscribe, findOrCreateBatch, getBatchesForMedicine, invalidateCache, forceRefresh } = useStockStore();
   const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
   const { payments, addPayment, updatePayment, deletePayment, getOutstandingPayments, getUpcomingPayments } = useSupplierPaymentStore();
@@ -1789,7 +1789,7 @@ export default function Stock() {
                     onEdit={setEditingItem}
                     onReorder={() => setShowPOForm(true)}
                     isAdmin={isAdmin}
-                    onStockUpdated={invalidateCache}
+                    onStockUpdated={forceRefresh}
                   />
                 );
               });

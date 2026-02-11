@@ -118,7 +118,10 @@ export function StockItemCard({
 
       toast.success("Batch details updated successfully");
       setEditingState(null);
-      onStockUpdated?.();
+      // Force a small delay then trigger refresh to ensure realtime picks up changes
+      setTimeout(() => {
+        onStockUpdated?.();
+      }, 300);
     } catch (error) {
       console.error("Error updating batch details:", error);
       toast.error("Failed to update batch details");
