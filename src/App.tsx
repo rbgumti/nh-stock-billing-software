@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster"; 
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,24 +13,26 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import Patients from "./pages/Patients";
-import NewPatient from "./pages/NewPatient";
-import EditPatient from "./pages/EditPatient";
-import ViewPatient from "./pages/ViewPatient";
-import Stock from "./pages/Stock";
-import Invoices from "./pages/Invoices";
-import NewInvoice from "./pages/NewInvoice";
-import EditInvoice from "./pages/EditInvoice";
-import Reports from "./pages/Reports";
-import PatientAnalytics from "./pages/PatientAnalytics";
-import Appointments from "./pages/Appointments";
-import Prescriptions from "./pages/Prescriptions";
-import NewPrescription from "./pages/NewPrescription";
-import ViewPrescription from "./pages/ViewPrescription";
-import EditPrescription from "./pages/EditPrescription";
-import Salary from "./pages/Salary";
-import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
+
+// Lazy load heavy pages for faster initial load
+const Patients = lazy(() => import("./pages/Patients"));
+const NewPatient = lazy(() => import("./pages/NewPatient"));
+const EditPatient = lazy(() => import("./pages/EditPatient"));
+const ViewPatient = lazy(() => import("./pages/ViewPatient"));
+const Stock = lazy(() => import("./pages/Stock"));
+const Invoices = lazy(() => import("./pages/Invoices"));
+const NewInvoice = lazy(() => import("./pages/NewInvoice"));
+const EditInvoice = lazy(() => import("./pages/EditInvoice"));
+const Reports = lazy(() => import("./pages/Reports"));
+const PatientAnalytics = lazy(() => import("./pages/PatientAnalytics"));
+const Appointments = lazy(() => import("./pages/Appointments"));
+const Prescriptions = lazy(() => import("./pages/Prescriptions"));
+const NewPrescription = lazy(() => import("./pages/NewPrescription"));
+const ViewPrescription = lazy(() => import("./pages/ViewPrescription"));
+const EditPrescription = lazy(() => import("./pages/EditPrescription"));
+const Salary = lazy(() => import("./pages/Salary"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 const queryClient = new QueryClient();
 
@@ -53,6 +56,7 @@ const App = () => (
                     </div>
                   </header>
                   <main className="flex-1 overflow-auto">
+                    <Suspense fallback={<div className="flex items-center justify-center h-32"><div className="animate-pulse text-muted-foreground">Loading...</div></div>}>
                     <Routes>
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -75,6 +79,7 @@ const App = () => (
                       <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
+                    </Suspense>
                   </main>
                 </div>
               </div>
