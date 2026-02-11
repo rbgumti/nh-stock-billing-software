@@ -56,7 +56,7 @@ interface InvoiceItem {
 export default function EditInvoice() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { stockItems, getMedicines, getStockItem, reduceStock, increaseStock } = useStockStore();
+  const { stockItems, getMedicines, getStockItem, reduceStock, increaseStock, invalidateCache, forceRefresh } = useStockStore();
   
   const [loading, setLoading] = useState(true);
   const [patientName, setPatientName] = useState("");
@@ -284,6 +284,10 @@ export default function EditInvoice() {
 
       if (itemsError) throw itemsError;
 
+      // Invalidate stock cache so all pages show fresh data
+      invalidateCache();
+      setTimeout(() => forceRefresh(), 300);
+
       toast({
         title: "Success",
         description: "Invoice has been updated successfully!"
@@ -391,6 +395,10 @@ export default function EditInvoice() {
 
       setItems(updatedItems);
       setReturnDialogOpen(false);
+
+      // Invalidate stock cache after returns
+      invalidateCache();
+      setTimeout(() => forceRefresh(), 300);
 
       toast({
         title: "Return Processed",
