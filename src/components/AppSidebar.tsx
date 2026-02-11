@@ -1,4 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { preloadPatients } from "@/hooks/usePatientCache";
+import { preloadStockItems } from "@/hooks/useStockStore";
 import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Bell, Wallet, Shield } from "lucide-react";
 import {
   Sidebar,
@@ -281,6 +283,12 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
+                      onMouseEnter={() => {
+                        if (item.url === '/invoices' || item.url === '/stock') {
+                          preloadPatients();
+                          preloadStockItems();
+                        }
+                      }}
                       className={`relative rounded-xl transition-colors duration-150 flex items-center ${
                         isActive(item.url) 
                           ? "bg-white/10 border border-white/15" 
@@ -382,6 +390,12 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={action.url} 
+                      onMouseEnter={() => {
+                        if (action.url.includes('invoice')) {
+                          preloadPatients();
+                          preloadStockItems();
+                        }
+                      }}
                       className="relative rounded-xl border border-white/[0.1] bg-gradient-to-r from-white/[0.04] to-transparent backdrop-blur-sm hover:from-white/[0.1] hover:to-white/[0.02] hover:border-white/20 transition-all duration-500 group overflow-hidden hover:shadow-lg"
                     >
                       {/* Enhanced shimmer effect */}
