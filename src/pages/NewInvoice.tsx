@@ -50,7 +50,7 @@ interface InvoiceItem {
 export default function NewInvoice() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { stockItems, loading: stockLoading, getStockItem, reduceStock } = useStockStore();
+  const { stockItems, loading: stockLoading, getStockItem, reduceStock, invalidateCache, forceRefresh } = useStockStore();
   const { getNextInvoiceNumber } = useSequentialNumbers();
   const { prescriptions, getPrescription, updatePrescriptionStatus } = usePrescriptionStore();
   
@@ -370,6 +370,11 @@ export default function NewInvoice() {
       if (itemsError) throw itemsError;
 
       console.log("New invoice created:", invoiceData);
+      
+      // Invalidate stock cache so all pages show fresh data
+      invalidateCache();
+      // Small delay then force refresh to ensure DB writes are finalized
+      setTimeout(() => forceRefresh(), 300);
       
       toast({
         title: "Success",
