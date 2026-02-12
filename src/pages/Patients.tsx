@@ -423,6 +423,9 @@ export default function Patients() {
                       <span className="font-medium text-foreground">Address:</span> {patient.address}
                     </div>
                   )}
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Aadhar:</span> {patient.aadhar_card || 'N/A'}
+                  </div>
                   <div className="flex space-x-2 pt-2">
                     <Button variant="outline" size="sm" className="flex-1 glass-subtle border-cyan/20 hover:border-cyan/40 hover:bg-cyan/5" asChild>
                       <Link to={`/patients/view/${patient.id}`}>
