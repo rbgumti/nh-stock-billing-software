@@ -68,7 +68,7 @@ export function usePatientStore() {
       }
 
       const formattedPatients: PatientFormData[] = allPatients.map(p => ({
-        patientId: String(p.id || ''),
+        patientId: String(p.patient_id || p.s_no || p.id || ''),
         fileNo: String(p.file_no || ''),
         firstName: (p.patient_name || '').split(' ')[0] || '',
         lastName: (p.patient_name || '').split(' ').slice(1).join(' ') || '',
