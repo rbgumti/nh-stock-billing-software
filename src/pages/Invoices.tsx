@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Plus, Receipt, Download, Eye, CheckCircle, Pencil } from "lucide-react";
+import { Search, Plus, Receipt, Download, Eye, CheckCircle, Pencil, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import jsPDF from 'jspdf';
 import { toast } from "@/hooks/use-toast";
@@ -18,10 +18,14 @@ import { preloadStockItems } from "@/hooks/useStockStore";
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 20;
   const { doctorName } = useAppSettings();
 
   // Preload patients and stock cache when user is on invoices page
@@ -30,25 +34,52 @@ export default function Invoices() {
     preloadStockItems();
   }, []);
 
-  // Load invoices from Supabase
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Load invoices with server-side pagination
   useEffect(() => {
     loadInvoices();
-  }, []);
+  }, [currentPage, statusFilter, debouncedSearch]);
 
   const loadInvoices = async () => {
     try {
       setLoading(true);
+      const from = (currentPage - 1) * pageSize;
+      const to = from + pageSize - 1;
       
-      // Fetch invoices with their items in a SINGLE query using join
-      const { data: invoicesData, error: invoicesError } = await supabase
+      let query = supabase
         .from('invoices')
         .select(`
           *,
           invoice_items (*)
-        `)
-        .order('created_at', { ascending: false });
+        `, { count: 'exact' });
+
+      // Apply search filter
+      if (debouncedSearch.trim()) {
+        query = query.or(
+          `invoice_number.ilike.%${debouncedSearch.trim()}%,patient_name.ilike.%${debouncedSearch.trim()}%`
+        );
+      }
+
+      // Apply status filter
+      if (statusFilter !== "all") {
+        query = query.eq('status', statusFilter);
+      }
+
+      const { data: invoicesData, error: invoicesError, count } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (invoicesError) throw invoicesError;
+
+      setTotalCount(count || 0);
 
       if (!invoicesData) {
         setInvoices([]);
@@ -90,17 +121,8 @@ export default function Invoices() {
 
   const statuses = ["all", "Paid", "Pending", "Overdue"];
 
-  const filteredInvoices = invoices.filter((invoice: any) => {
-    const matchesSearch = (invoice.invoiceNumber || invoice.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.patientName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  }).sort((a: any, b: any) => {
-    // Sort by date descending (latest first)
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
+  // No client-side filtering needed - server handles it
+  const filteredInvoices = invoices;
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -489,7 +511,7 @@ export default function Invoices() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
             Invoices
           </h1>
-          <p className="text-muted-foreground mt-2">Manage billing and payments</p>
+          <p className="text-muted-foreground mt-2">{loading ? 'Loading...' : `${totalCount} invoices total`}</p>
         </div>
         <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
           <Link to="/invoices/new">
@@ -510,7 +532,7 @@ export default function Invoices() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{filteredInvoices.length}</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-purple to-cyan bg-clip-text text-transparent">{totalCount}</p>
               </div>
             </div>
           </CardContent>
@@ -709,6 +731,40 @@ export default function Invoices() {
           </Card>
         ))}
       </div>
+
+      {/* Pagination */}
+      {totalCount > pageSize && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Showing {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalCount)} of {totalCount}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage(p => p - 1)}
+              className="glass-subtle"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground px-2">
+              Page {currentPage} of {Math.ceil(totalCount / pageSize)}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= Math.ceil(totalCount / pageSize)}
+              onClick={() => setCurrentPage(p => p + 1)}
+              className="glass-subtle"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {filteredInvoices.length === 0 && (
         <Card className="glass-strong border-0 overflow-hidden relative">

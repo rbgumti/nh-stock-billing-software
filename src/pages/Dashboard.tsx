@@ -81,25 +81,41 @@ export default function Dashboard() {
 
   const loadAllData = useCallback(async () => {
     try {
-      const [invoiceRes, stockRes, patientRes, prescriptionRes] = await Promise.all([
-        supabase.from('invoices').select('*').order('created_at', { ascending: false }),
-        supabase.from('stock_items').select('*').order('name'),
-        supabase.from('patients').select('*').order('id', { ascending: false }).limit(100),
-        supabase.from('prescriptions').select('id, patient_name, created_at').order('created_at', { ascending: false }).limit(10)
+      // Use lightweight queries - fetch only what's needed, use counts where possible
+      const currentDate = new Date().toISOString().split('T')[0];
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      const [invoiceRes, stockRes, patientCountRes, prescriptionRes, todayInvoiceRes] = await Promise.all([
+        // Only fetch recent invoices for charts (last 6 months), limited fields
+        supabase.from('invoices').select('id, invoice_number, patient_name, total, status, invoice_date, created_at')
+          .gte('invoice_date', sixMonthsAgo.toISOString().split('T')[0])
+          .order('created_at', { ascending: false })
+          .limit(500),
+        // Only fetch stock items needed for low-stock check
+        supabase.from('stock_items').select('item_id, name, current_stock, minimum_stock, category').order('name'),
+        // Use count instead of fetching all patients
+        supabase.from('patients').select('id', { count: 'exact', head: true }),
+        supabase.from('prescriptions').select('id, patient_name, created_at').order('created_at', { ascending: false }).limit(5),
+        // Separate query for today's invoices
+        supabase.from('invoices').select('id, invoice_number, patient_name, total, status, invoice_date, created_at')
+          .gte('invoice_date', currentDate)
+          .order('created_at', { ascending: false }),
       ]);
 
       if (invoiceRes.data) setInvoices(invoiceRes.data);
       if (stockRes.data) setStockItems(stockRes.data);
-      if (patientRes.data) setPatients(patientRes.data);
+      // Store count instead of full patient array
+      if (patientCountRes.count !== null) setPatients(Array(patientCountRes.count).fill({ id: '', patient_name: '' }));
       
       // Populate initial activity from recent data
       const initialUpdates: RealtimeUpdate[] = [];
-      const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const nowTs = new Date();
+      const todayDate = nowTs.toISOString().split('T')[0];
       
       // Add recent invoices from today
       invoiceRes.data?.slice(0, 3).forEach(inv => {
-        if (inv.created_at?.startsWith(today)) {
+        if (inv.created_at?.startsWith(todayDate)) {
           initialUpdates.push({
             id: `inv-${inv.id}`,
             type: 'invoice',
@@ -111,7 +127,7 @@ export default function Dashboard() {
       
       // Add recent prescriptions from today
       prescriptionRes.data?.slice(0, 2).forEach(pres => {
-        if (pres.created_at?.startsWith(today)) {
+        if (pres.created_at?.startsWith(todayDate)) {
           initialUpdates.push({
             id: `pres-${pres.id}`,
             type: 'prescription',
@@ -243,8 +259,8 @@ export default function Dashboard() {
   const pendingAmount = pendingInvoices.reduce((sum, inv) => sum + Number(inv.total), 0);
 
   // Today's stats
-  const today = new Date().toISOString().split('T')[0];
-  const todayInvoices = invoices.filter(inv => inv.invoice_date?.startsWith(today) || inv.created_at?.startsWith(today));
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayInvoices = invoices.filter(inv => inv.invoice_date?.startsWith(todayStr) || inv.created_at?.startsWith(todayStr));
   const todayRevenue = todayInvoices.reduce((sum, inv) => sum + Number(inv.total), 0);
 
   // Low stock items
