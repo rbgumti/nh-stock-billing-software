@@ -34,7 +34,16 @@ const EditPrescription = lazy(() => import("./pages/EditPrescription"));
 const Salary = lazy(() => import("./pages/Salary"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes - avoid refetching on every mount
+      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+      refetchOnWindowFocus: false, // prevent refetch on tab switch
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
