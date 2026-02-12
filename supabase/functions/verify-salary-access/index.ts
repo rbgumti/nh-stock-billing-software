@@ -6,7 +6,10 @@ const corsHeaders = {
 }
 
 // Password stored securely in environment (not in client code)
-const SALARY_PASSWORD = Deno.env.get('SALARY_ACCESS_PASSWORD') || 'Roop@58925658'
+const SALARY_PASSWORD = Deno.env.get('SALARY_ACCESS_PASSWORD')
+if (!SALARY_PASSWORD) {
+  console.error('SALARY_ACCESS_PASSWORD environment variable is not set')
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -58,6 +61,12 @@ Deno.serve(async (req) => {
     }
 
     // Verify password
+    if (!SALARY_PASSWORD) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Service configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
     const isValid = password === SALARY_PASSWORD
     
     if (!isValid) {
