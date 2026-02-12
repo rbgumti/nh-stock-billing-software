@@ -215,12 +215,15 @@ export function usePurchaseOrderStore() {
           .from('purchase_order_items')
           .insert(itemsToInsert);
 
-        if (itemsError) {
+      if (itemsError) {
           // Roll back header insert to avoid creating an empty PO
           await supabase.from('purchase_orders').delete().eq('id', poData.id);
           throw itemsError;
         }
       }
+
+      // Immediately refetch to update UI without waiting for realtime
+      await loadPurchaseOrders();
     } catch (error: any) {
       console.error('Error adding purchase order:', error);
       toast({
@@ -340,6 +343,9 @@ export function usePurchaseOrderStore() {
           throw itemsError;
         }
       }
+
+      // Immediately refetch to update UI without waiting for realtime
+      await loadPurchaseOrders();
     } catch (error: any) {
       console.error('Error updating purchase order:', error);
       toast({
@@ -366,6 +372,7 @@ export function usePurchaseOrderStore() {
     addPurchaseOrder,
     updatePurchaseOrder,
     getPurchaseOrder,
-    subscribe
+    subscribe,
+    refreshPurchaseOrders: loadPurchaseOrders
   };
 }
