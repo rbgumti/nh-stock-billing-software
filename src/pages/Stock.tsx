@@ -83,7 +83,7 @@ export default function Stock() {
   const [exportEndDate, setExportEndDate] = useState<Date | undefined>(undefined);
   const [downloadingGrnId, setDownloadingGrnId] = useState<string | null>(null);
   const { stockItems, addStockItem, updateStockItem, subscribe, findOrCreateBatch, getBatchesForMedicine, invalidateCache, forceRefresh } = useStockStore();
-  const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO } = usePurchaseOrderStore();
+  const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO, refreshPurchaseOrders } = usePurchaseOrderStore();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
   const { payments, addPayment, updatePayment, deletePayment, getOutstandingPayments, getUpcomingPayments } = useSupplierPaymentStore();
   const { isAdmin } = useUserRole();
@@ -466,6 +466,9 @@ export default function Stock() {
 
       // Invalidate stock cache to reflect changes
       invalidateCache();
+      
+      // Immediately refetch POs so UI updates without page refresh
+      await refreshPurchaseOrders();
       
       setShowGRNForm(false);
       setSelectedPO(null);
