@@ -111,6 +111,9 @@ export function useSupplierPaymentStore() {
       throw error;
     }
 
+    // Immediately refetch to update UI without waiting for realtime
+    await loadPayments();
+
     return data;
   };
 
@@ -135,6 +138,9 @@ export function useSupplierPaymentStore() {
       console.error('Error updating payment:', error);
       throw error;
     }
+
+    // Immediately refetch to update UI without waiting for realtime
+    await loadPayments();
   };
 
   const deletePayment = async (id: string) => {
@@ -147,6 +153,9 @@ export function useSupplierPaymentStore() {
       console.error('Error deleting payment:', error);
       throw error;
     }
+
+    // Immediately refetch to update UI without waiting for realtime
+    await loadPayments();
   };
 
   const getPaymentsBySupplier = (supplierId: string) => {
