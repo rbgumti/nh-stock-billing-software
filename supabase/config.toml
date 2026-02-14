@@ -2,3 +2,9 @@ project_id = "ijtirilynpixcdjajwmx"
 
 [functions.import-all-csv]
 verify_jwt = false
+
+[functions.export-data-storage]
+verify_jwt = false
+
+[functions.import-data-storage]
+verify_jwt = false
