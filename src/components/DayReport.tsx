@@ -132,11 +132,13 @@ export default function DayReport() {
     const labAmt = Number(report.lab_collection) || 0;
     const expensesArr = (report.expenses as ExpenseItem[]) || [];
     const totalExp = expensesArr.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+    const advancesArr = ((report as any).advances as AdvanceItem[]) || [];
+    const totalAdv = advancesArr.reduce((sum, a) => sum + (Number(a.amount) || 0), 0);
     
     const totalSaleAmt = bnxAmt + tpnAmt + pshyAmt + feesAmt + labAmt;
     const todaysColl = totalSaleAmt;
     
-    return prevDayCash + todaysColl - totalExp - depositBank - paytm - handoverA - handoverM - handoverS + adj;
+    return prevDayCash + todaysColl - totalExp - totalAdv - depositBank - paytm - handoverA - handoverM - handoverS + adj;
   };
 
   const fetchPreviousDayCashLeftInHand = async (currentDate: string): Promise<number> => {
@@ -702,7 +704,7 @@ export default function DayReport() {
   
   const totalSale = bnxTotal + tpnTotal + pshyTotal + fees + labCollection + psychiatryCollection;
   const todaysCollection = totalSale;
-  const cashLeftInHand = cashPreviousDay + todaysCollection - totalExpenses - depositInBank - paytmGpay - cashHandoverAmarjeet - cashHandoverMandeep - cashHandoverSir + adjustments;
+  const cashLeftInHand = cashPreviousDay + todaysCollection - totalExpenses - totalAdvances - depositInBank - paytmGpay - cashHandoverAmarjeet - cashHandoverMandeep - cashHandoverSir + adjustments;
   
   const totalAsPerSheet = totalSale;
   const difference = totalAsPerSheet - totalCash - paytmGpay;
