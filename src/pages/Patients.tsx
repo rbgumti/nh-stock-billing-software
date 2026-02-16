@@ -404,28 +404,31 @@ export default function Patients() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="space-y-3">
-                  {patient.father_name && (
-                    <div className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Father:</span> {patient.father_name}
-                    </div>
-                  )}
                   {patient.file_no && (
                     <div className="text-sm text-muted-foreground">
                       <span className="font-medium text-foreground">File No.:</span> {patient.file_no}
+                    </div>
+                  )}
+                  {patient.father_name && (
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">Father:</span> {patient.father_name}
                     </div>
                   )}
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Phone className="h-4 w-4 mr-2 text-cyan" />
                     {formatPhone(patient.phone) || 'N/A'}
                   </div>
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">New Govt ID:</span> {patient.new_govt_id || 'N/A'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Aadhar:</span> {patient.aadhar_card || 'N/A'}
+                  </div>
                   {patient.address && (
                     <div className="text-sm text-muted-foreground">
                       <span className="font-medium text-foreground">Address:</span> {patient.address}
                     </div>
                   )}
-                  <div className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Aadhar:</span> {patient.aadhar_card || 'N/A'}
-                  </div>
                   <div className="flex space-x-2 pt-2">
                     <Button variant="outline" size="sm" className="flex-1 glass-subtle border-cyan/20 hover:border-cyan/40 hover:bg-cyan/5" asChild>
                       <Link to={`/patients/view/${patient.id}`}>
