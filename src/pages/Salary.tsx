@@ -992,6 +992,14 @@ const SalaryContent = () => {
                             </TooltipContent>
                           </Tooltip>
                         </TableHead>
+                        <TableHead className="font-bold text-foreground text-right bg-orange-100 dark:bg-orange-900/30">
+                          <Tooltip>
+                            <TooltipTrigger className="cursor-help underline decoration-dotted">
+                              Advance Taken
+                            </TooltipTrigger>
+                            <TooltipContent>Total advances taken from Day Reports this month (read-only)</TooltipContent>
+                          </Tooltip>
+                        </TableHead>
                         <TableHead className="font-bold text-foreground text-right">Advance (Adjusted)</TableHead>
                         <TableHead className="font-bold text-foreground text-right">Advance Pending</TableHead>
                         <TableHead className="font-bold text-foreground text-right bg-green-200 dark:bg-green-800/50">Salary Payable</TableHead>
@@ -1001,7 +1009,7 @@ const SalaryContent = () => {
                     <TableBody>
                       {monthlySalaryData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                          <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                             No employees found. Add employees first to calculate salaries.
                           </TableCell>
                         </TableRow>
@@ -1030,6 +1038,16 @@ const SalaryContent = () => {
                                     = {item.effectiveDaysForSalary} eff
                                   </span>
                                 </div>
+                              </TableCell>
+                              <TableCell className="text-right bg-orange-50 dark:bg-orange-900/10">
+                                {(() => {
+                                  const adv = getEmployeeTotalAdvances(item.employee.id);
+                                  return adv > 0 ? (
+                                    <span className="font-medium text-orange-600 dark:text-orange-400">₹{adv.toLocaleString('en-IN')}</span>
+                                  ) : (
+                                    <span className="text-muted-foreground">—</span>
+                                  );
+                                })()}
                               </TableCell>
                               <TableCell>
                                 <Input
@@ -1083,6 +1101,9 @@ const SalaryContent = () => {
                               ₹{totals.salaryFixed.toLocaleString('en-IN')}
                             </TableCell>
                             <TableCell></TableCell>
+                            <TableCell className="text-right bg-orange-100 dark:bg-orange-900/30 font-bold text-orange-600 dark:text-orange-400">
+                              ₹{advancesSummary.reduce((s, a) => s + a.totalAdvances, 0).toLocaleString('en-IN')}
+                            </TableCell>
                             <TableCell className="text-right">₹{totals.advanceAdjusted.toLocaleString('en-IN')}</TableCell>
                             <TableCell className="text-right">₹{totals.advancePending.toLocaleString('en-IN')}</TableCell>
                             <TableCell className="text-right text-primary bg-green-200 dark:bg-green-800/50">
