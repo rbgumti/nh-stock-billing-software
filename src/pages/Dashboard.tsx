@@ -264,20 +264,20 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent animate-pulse-subtle">
             Dashboard
           </h1>
           <p className="text-muted-foreground mt-1">Real-time business insights and analytics</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full border border-border/50">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
             Live
           </div>
-          <div className="text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
+          <div className="text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full border border-border/50">
             <Clock className="h-3.5 w-3.5 inline-block mr-1.5 opacity-60" />
             {lastUpdated.toLocaleTimeString()}
           </div>
@@ -293,35 +293,36 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-3">
+      <Card className="border-0 shadow-sm overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+        <CardHeader className="pb-3 relative">
           <CardTitle className="text-lg flex items-center gap-2">
             <Plus className="h-5 w-5 text-primary" />
             Quick Actions
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <button className="group h-auto py-5 flex flex-col items-center gap-3 rounded-xl border border-border/50 bg-card hover:bg-accent hover:border-primary/30 transition-all duration-200" onClick={() => navigate('/invoices/new')}>
-              <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+            <button className="group h-auto py-5 flex flex-col items-center gap-3 rounded-xl border border-border/50 bg-card hover:bg-emerald-500/10 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 transition-all duration-300" onClick={() => navigate('/invoices/new')}>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 group-hover:scale-110 transition-transform duration-300">
                 <FileText className="h-5 w-5" />
               </div>
               <span className="font-medium text-sm">New Invoice</span>
             </button>
-            <button className="group h-auto py-5 flex flex-col items-center gap-3 rounded-xl border border-border/50 bg-card hover:bg-accent hover:border-primary/30 transition-all duration-200" onClick={() => navigate('/patients/new')}>
-              <div className="p-3 rounded-xl bg-blue-500/10 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+            <button className="group h-auto py-5 flex flex-col items-center gap-3 rounded-xl border border-border/50 bg-card hover:bg-blue-500/10 hover:border-blue-500/40 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300" onClick={() => navigate('/patients/new')}>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-300">
                 <UserPlus className="h-5 w-5" />
               </div>
               <span className="font-medium text-sm">New Patient</span>
             </button>
-            <button className="group h-auto py-5 flex flex-col items-center gap-3 rounded-xl border border-border/50 bg-card hover:bg-accent hover:border-primary/30 transition-all duration-200" onClick={() => navigate('/prescriptions/new')}>
-              <div className="p-3 rounded-xl bg-purple-500/10 text-purple-600 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+            <button className="group h-auto py-5 flex flex-col items-center gap-3 rounded-xl border border-border/50 bg-card hover:bg-purple-500/10 hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-300" onClick={() => navigate('/prescriptions/new')}>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-lg shadow-purple-500/25 group-hover:scale-110 transition-transform duration-300">
                 <Stethoscope className="h-5 w-5" />
               </div>
               <span className="font-medium text-sm">New Prescription</span>
             </button>
-            <button className="group h-auto py-5 flex flex-col items-center gap-3 rounded-xl border border-border/50 bg-card hover:bg-accent hover:border-primary/30 transition-all duration-200" onClick={() => navigate('/stock')}>
-              <div className="p-3 rounded-xl bg-amber-500/10 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+            <button className="group h-auto py-5 flex flex-col items-center gap-3 rounded-xl border border-border/50 bg-card hover:bg-amber-500/10 hover:border-amber-500/40 hover:shadow-lg hover:shadow-amber-500/10 hover:-translate-y-1 transition-all duration-300" onClick={() => navigate('/stock')}>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-lg shadow-amber-500/25 group-hover:scale-110 transition-transform duration-300">
                 <Package className="h-5 w-5" />
               </div>
               <span className="font-medium text-sm">Manage Stock</span>
@@ -330,62 +331,80 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Vibrant Gradient Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-5">
+        <Card className="border-0 shadow-md overflow-hidden relative group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer" onClick={() => navigate('/invoices')}>
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/15 to-emerald-600/5 group-hover:from-emerald-500/25 group-hover:to-emerald-600/10 transition-colors duration-300" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+          <CardContent className="p-5 relative">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">Today's Revenue</span>
-              <div className="p-2 rounded-lg bg-emerald-500/10"><ArrowUpRight className="h-4 w-4 text-emerald-600" /></div>
+              <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-md shadow-emerald-500/25">
+                <ArrowUpRight className="h-4 w-4" />
+              </div>
             </div>
             <div className="text-2xl font-bold text-foreground">Rs.{todayRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">{todayInvoices.length} invoices today</p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">{todayInvoices.length} invoices today</p>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-5">
+        <Card className="border-0 shadow-md overflow-hidden relative group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer" onClick={() => navigate('/invoices')}>
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/15 to-orange-600/5 group-hover:from-amber-500/25 group-hover:to-orange-600/10 transition-colors duration-300" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+          <CardContent className="p-5 relative">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">Total Revenue</span>
-              <div className="p-2 rounded-lg bg-amber-500/10"><DollarSign className="h-4 w-4 text-amber-600" /></div>
+              <div className="p-2 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 text-white shadow-md shadow-amber-500/25">
+                <DollarSign className="h-4 w-4" />
+              </div>
             </div>
             <div className="text-2xl font-bold text-foreground">Rs.{totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Last 6 months</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">Last 6 months</p>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-5">
+        <Card className="border-0 shadow-md overflow-hidden relative group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer" onClick={() => navigate('/patients')}>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/15 to-indigo-600/5 group-hover:from-blue-500/25 group-hover:to-indigo-600/10 transition-colors duration-300" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+          <CardContent className="p-5 relative">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">Total Patients</span>
-              <div className="p-2 rounded-lg bg-blue-500/10"><Users className="h-4 w-4 text-blue-600" /></div>
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-600 text-white shadow-md shadow-blue-500/25">
+                <Users className="h-4 w-4" />
+              </div>
             </div>
             <div className="text-2xl font-bold text-foreground">{patientCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">Registered patients</p>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">Registered patients</p>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-5">
+        <Card className="border-0 shadow-md overflow-hidden relative group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer" onClick={() => navigate('/stock')}>
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/15 to-violet-600/5 group-hover:from-purple-500/25 group-hover:to-violet-600/10 transition-colors duration-300" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500" />
+          <CardContent className="p-5 relative">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">Stock Items</span>
-              <div className="p-2 rounded-lg bg-purple-500/10"><Package className="h-4 w-4 text-purple-600" /></div>
+              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-400 to-violet-600 text-white shadow-md shadow-purple-500/25">
+                <Package className="h-4 w-4" />
+              </div>
             </div>
             <div className="text-2xl font-bold text-foreground">{stockItems.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">In inventory</p>
+            <p className="text-xs text-purple-600 dark:text-purple-400 mt-1 font-medium">In inventory</p>
           </CardContent>
         </Card>
 
-        <Card className={`border-0 shadow-sm ${lowStockItems.length > 0 ? 'border-l-4 border-l-destructive' : ''}`}>
-          <CardContent className="p-5">
+        <Card className={`border-0 shadow-md overflow-hidden relative group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer ${lowStockItems.length > 0 ? 'ring-2 ring-destructive/30' : ''}`} onClick={() => navigate('/stock')}>
+          <div className={`absolute inset-0 ${lowStockItems.length > 0 ? 'bg-gradient-to-br from-red-500/15 to-rose-600/5 group-hover:from-red-500/25 group-hover:to-rose-600/10' : 'bg-gradient-to-br from-teal-500/15 to-cyan-600/5 group-hover:from-teal-500/25 group-hover:to-cyan-600/10'} transition-colors duration-300`} />
+          <div className={`absolute top-0 right-0 w-20 h-20 ${lowStockItems.length > 0 ? 'bg-red-500/10' : 'bg-teal-500/10'} rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-500`} />
+          <CardContent className="p-5 relative">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">Low Stock</span>
-              <div className={`p-2 rounded-lg ${lowStockItems.length > 0 ? 'bg-destructive/10' : 'bg-emerald-500/10'}`}>
-                <AlertCircle className={`h-4 w-4 ${lowStockItems.length > 0 ? 'text-destructive' : 'text-emerald-600'}`} />
+              <div className={`p-2 rounded-xl ${lowStockItems.length > 0 ? 'bg-gradient-to-br from-red-400 to-rose-600' : 'bg-gradient-to-br from-teal-400 to-cyan-600'} text-white shadow-md`}>
+                <AlertCircle className="h-4 w-4" />
               </div>
             </div>
             <div className={`text-2xl font-bold ${lowStockItems.length > 0 ? 'text-destructive' : 'text-foreground'}`}>{lowStockItems.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">{lowStockItems.length > 0 ? 'Need reorder' : 'All stocked'}</p>
+            <p className={`text-xs mt-1 font-medium ${lowStockItems.length > 0 ? 'text-red-600 dark:text-red-400' : 'text-teal-600 dark:text-teal-400'}`}>{lowStockItems.length > 0 ? 'Need reorder' : 'All stocked'}</p>
           </CardContent>
         </Card>
       </div>
@@ -393,17 +412,20 @@ export default function Dashboard() {
       {/* Activity Feed & Payment Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Live Activity Feed */}
-        <Card className="border-0 shadow-sm lg:col-span-1">
-          <CardHeader className="pb-3">
+        <Card className="border-0 shadow-md lg:col-span-1 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+          <CardHeader className="pb-3 relative">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Activity className="h-4 w-4 text-primary" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary to-accent text-white">
+                  <Activity className="h-3.5 w-3.5" />
+                </div>
                 Live Activity
               </CardTitle>
-              <Badge variant="secondary" className="text-xs">{realtimeUpdates.length}</Badge>
+              <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">{realtimeUpdates.length}</Badge>
             </div>
           </CardHeader>
-          <CardContent className="max-h-[300px] overflow-y-auto">
+          <CardContent className="max-h-[300px] overflow-y-auto relative">
             {realtimeUpdates.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -412,8 +434,8 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-2">
                 {realtimeUpdates.map((update, index) => (
-                  <div key={update.id} className={`flex items-start gap-3 p-3 rounded-lg ${index === 0 ? 'bg-primary/5 border border-primary/10' : 'bg-muted/30'}`}>
-                    <div className="p-1.5 rounded-md bg-background">{getUpdateIcon(update.type)}</div>
+                  <div key={update.id} className={`flex items-start gap-3 p-3 rounded-xl transition-all duration-200 hover:scale-[1.02] ${index === 0 ? 'bg-gradient-to-r from-primary/10 to-accent/5 border border-primary/15 shadow-sm' : 'bg-muted/30 hover:bg-muted/50'}`}>
+                    <div className="p-1.5 rounded-lg bg-background shadow-sm">{getUpdateIcon(update.type)}</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{update.message}</p>
                       <p className="text-xs text-muted-foreground">{update.timestamp.toLocaleTimeString()}</p>
@@ -426,53 +448,60 @@ export default function Dashboard() {
         </Card>
 
         {/* Payment Summary */}
-        <Card className="border-0 shadow-sm lg:col-span-2">
-          <CardHeader>
+        <Card className="border-0 shadow-md lg:col-span-2 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-accent/3 pointer-events-none" />
+          <CardHeader className="relative">
             <CardTitle className="text-xl">Payment Overview</CardTitle>
             <p className="text-sm text-muted-foreground">Revenue breakdown and pending amounts</p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-emerald-600" />
-                  <span className="font-semibold text-emerald-600 text-sm">Paid</span>
+                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 text-white">
+                    <TrendingUp className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">Paid</span>
                 </div>
                 <p className="text-2xl font-bold text-foreground">Rs.{paidAmount.toLocaleString()}</p>
                 <p className="text-sm text-muted-foreground mt-1">{paidInvoices.length} invoices</p>
               </div>
-              <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/10 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
                 <div className="flex items-center gap-2 mb-2">
-                  <Clock className="h-4 w-4 text-amber-600" />
-                  <span className="font-semibold text-amber-600 text-sm">Pending</span>
+                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-white">
+                    <Clock className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="font-semibold text-amber-600 dark:text-amber-400 text-sm">Pending</span>
                 </div>
                 <p className="text-2xl font-bold text-foreground">Rs.{pendingAmount.toLocaleString()}</p>
                 <p className="text-sm text-muted-foreground mt-1">{pendingInvoices.length} invoices</p>
               </div>
-              <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
                 <div className="flex items-center gap-2 mb-2">
-                  <Receipt className="h-4 w-4 text-blue-600" />
-                  <span className="font-semibold text-blue-600 text-sm">Total</span>
+                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 text-white">
+                    <Receipt className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="font-semibold text-blue-600 dark:text-blue-400 text-sm">Total</span>
                 </div>
                 <p className="text-2xl font-bold text-foreground">Rs.{totalRevenue.toLocaleString()}</p>
                 <p className="text-sm text-muted-foreground mt-1">{invoices.length} invoices</p>
               </div>
             </div>
-            <div className="rounded-xl bg-muted/30 p-4">
+            <div className="rounded-xl bg-gradient-to-br from-muted/40 to-muted/20 p-4 border border-border/50">
               <ChartContainer config={chartConfig} className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={monthlyData}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
                         <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                     <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={2} />
+                    <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={2.5} />
                   </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -501,22 +530,25 @@ export default function Dashboard() {
 
       {/* Low Stock Alerts */}
       {lowStockItems.length > 0 && (
-        <Card className="border-destructive/30 bg-destructive/5">
-          <CardHeader className="pb-3">
+        <Card className="border-0 shadow-md overflow-hidden relative ring-1 ring-destructive/20">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/8 via-transparent to-rose-500/5 pointer-events-none" />
+          <CardHeader className="pb-3 relative">
             <CardTitle className="text-lg flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-5 w-5" />
+              <div className="p-1.5 rounded-lg bg-gradient-to-br from-red-400 to-rose-600 text-white animate-pulse">
+                <AlertCircle className="h-4 w-4" />
+              </div>
               Low Stock Alerts ({lowStockItems.length})
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {lowStockItems.slice(0, 6).map((item) => (
-                <div key={item.item_id} className="flex items-center justify-between p-3 rounded-lg bg-background border border-destructive/20">
+                <div key={item.item_id} className="flex items-center justify-between p-3 rounded-xl bg-background border border-destructive/20 hover:border-destructive/40 hover:shadow-md hover:shadow-red-500/10 transition-all duration-200 cursor-pointer" onClick={() => navigate('/stock')}>
                   <div>
                     <p className="font-medium text-sm">{item.name}</p>
                     <p className="text-xs text-muted-foreground">{item.category}</p>
                   </div>
-                  <Badge variant="destructive">{item.current_stock} left</Badge>
+                  <Badge variant="destructive" className="shadow-sm shadow-red-500/20">{item.current_stock} left</Badge>
                 </div>
               ))}
             </div>
@@ -529,37 +561,51 @@ export default function Dashboard() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-0 shadow-sm">
-          <CardHeader>
-            <CardTitle>Revenue Trend</CardTitle>
+        <Card className="border-0 shadow-md overflow-hidden relative group">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 pointer-events-none" />
+          <CardHeader className="relative">
+            <CardTitle className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-gradient-to-br from-primary to-secondary" />
+              Revenue Trend
+            </CardTitle>
             <p className="text-sm text-muted-foreground">Monthly revenue over the last 6 months</p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <defs>
+                    <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" />
+                      <stop offset="100%" stopColor="hsl(var(--accent))" />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                   <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                   <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Legend />
-                  <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} name="Revenue (Rs.)" dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2 }} />
+                  <Line type="monotone" dataKey="revenue" stroke="url(#lineGradient)" strokeWidth={3} name="Revenue (Rs.)" dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }} activeDot={{ r: 7, fill: 'hsl(var(--accent))' }} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm">
-          <CardHeader>
-            <CardTitle>Stock by Category</CardTitle>
+        <Card className="border-0 shadow-md overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 pointer-events-none" />
+          <CardHeader className="relative">
+            <CardTitle className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+              Stock by Category
+            </CardTitle>
             <p className="text-sm text-muted-foreground">Distribution of inventory items</p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <ChartContainer config={chartConfig} className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={categoryData} cx="50%" cy="50%" labelLine={false} label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`} outerRadius={80} dataKey="value">
+                  <Pie data={categoryData} cx="50%" cy="50%" labelLine={false} label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`} outerRadius={80} dataKey="value" strokeWidth={2} stroke="hsl(var(--background))">
                     {categoryData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
                     ))}
@@ -573,23 +619,37 @@ export default function Dashboard() {
       </div>
 
       {/* Monthly Comparison Chart */}
-      <Card className="border-0 shadow-sm">
-        <CardHeader>
-          <CardTitle>Monthly Comparison</CardTitle>
+      <Card className="border-0 shadow-md overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-transparent to-secondary/3 pointer-events-none" />
+        <CardHeader className="relative">
+          <CardTitle className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-gradient-to-br from-primary to-secondary" />
+            Monthly Comparison
+          </CardTitle>
           <p className="text-sm text-muted-foreground">Invoice count and revenue comparison</p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           <ChartContainer config={chartConfig} className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
+                  </linearGradient>
+                  <linearGradient id="barGradient2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--secondary))" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity={0.5} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                 <YAxis yAxisId="left" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                 <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Legend />
-                <Bar yAxisId="left" dataKey="revenue" fill="hsl(var(--primary))" name="Revenue (Rs.)" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="right" dataKey="invoices" fill="hsl(var(--muted-foreground))" name="Invoice Count" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="left" dataKey="revenue" fill="url(#barGradient)" name="Revenue (Rs.)" radius={[6, 6, 0, 0]} />
+                <Bar yAxisId="right" dataKey="invoices" fill="url(#barGradient2)" name="Invoice Count" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
@@ -597,24 +657,39 @@ export default function Dashboard() {
       </Card>
 
       {/* Recent Invoices */}
-      <Card className="border-0 shadow-sm">
-        <CardHeader>
+      <Card className="border-0 shadow-md overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/3 to-transparent pointer-events-none" />
+        <CardHeader className="relative">
           <div className="flex items-center justify-between">
-            <CardTitle>Recent Invoices</CardTitle>
-            <Badge variant="secondary">{invoices.length} total</Badge>
+            <CardTitle className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500" />
+              Recent Invoices
+            </CardTitle>
+            <Badge className="bg-primary/10 text-primary border-primary/20">{invoices.length} total</Badge>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {invoices.slice(0, 5).map((invoice) => (
-              <div key={invoice.id} className="flex items-center justify-between border-b border-border/50 pb-3 last:border-b-0 hover:bg-muted/30 p-2 rounded-lg transition-colors">
-                <div>
-                  <p className="font-medium text-foreground">{invoice.invoice_number}</p>
-                  <p className="text-sm text-muted-foreground">{invoice.patient_name}</p>
+        <CardContent className="relative">
+          <div className="space-y-2">
+            {invoices.slice(0, 5).map((invoice, index) => (
+              <div key={invoice.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 hover:shadow-sm transition-all duration-200 cursor-pointer group border border-transparent hover:border-border/50" onClick={() => navigate(`/invoices/edit/${invoice.id}`)}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white bg-gradient-to-br ${
+                    index === 0 ? 'from-emerald-400 to-emerald-600' :
+                    index === 1 ? 'from-blue-400 to-blue-600' :
+                    index === 2 ? 'from-purple-400 to-purple-600' :
+                    index === 3 ? 'from-amber-400 to-amber-600' :
+                    'from-pink-400 to-pink-600'
+                  }`}>
+                    {index + 1}
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground group-hover:text-primary transition-colors">{invoice.invoice_number}</p>
+                    <p className="text-sm text-muted-foreground">{invoice.patient_name}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-medium">Rs.{Number(invoice.total).toLocaleString()}</p>
-                  <Badge variant={invoice.status === 'Paid' ? 'default' : 'secondary'} className={invoice.status === 'Paid' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}>
+                <div className="text-right flex items-center gap-3">
+                  <p className="font-semibold">Rs.{Number(invoice.total).toLocaleString()}</p>
+                  <Badge className={`shadow-sm ${invoice.status === 'Paid' ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 shadow-emerald-500/20' : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-amber-500/20'}`}>
                     {invoice.status}
                   </Badge>
                 </div>
