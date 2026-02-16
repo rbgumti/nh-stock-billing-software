@@ -83,6 +83,8 @@ export default function NewInvoice() {
     }
   ]);
   const [newItemId, setNewItemId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
   const selectRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   // Helper to check if expiry date is valid
@@ -283,6 +285,11 @@ export default function NewInvoice() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Prevent double-click / duplicate submissions
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+    
     // Mark prescription as dispensed if this invoice is from a prescription
     if (prescriptionId) {
       await updatePrescriptionStatus(prescriptionId, 'Dispensed');
@@ -294,6 +301,8 @@ export default function NewInvoice() {
         description: "Please select a patient.",
         variant: "destructive"
       });
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       return;
     }
 
@@ -303,6 +312,8 @@ export default function NewInvoice() {
         description: "Please select medicines for all items.",
         variant: "destructive"
       });
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       return;
     }
 
@@ -314,6 +325,8 @@ export default function NewInvoice() {
         description: `Not enough stock for: ${stockIssues.map(item => item.medicineName).join(", ")}`,
         variant: "destructive"
       });
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       return;
     }
 
@@ -389,6 +402,9 @@ export default function NewInvoice() {
         description: error.message || "Failed to create invoice. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
@@ -668,8 +684,8 @@ export default function NewInvoice() {
 
         {/* Actions */}
         <div className="flex space-x-4">
-          <Button type="submit" className="flex-1">
-            Create Invoice
+          <Button type="submit" className="flex-1" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create Invoice"}
           </Button>
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>
             Cancel
