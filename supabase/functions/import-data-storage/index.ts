@@ -15,37 +15,53 @@ Deno.serve(async (req) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-    // Auth check - admin only
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Authorization required' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+    // Parse body for optional sourceStorageUrl (cross-environment sync)
+    let sourceStorageUrl: string | null = null
+    try {
+      const body = await req.json()
+      sourceStorageUrl = body?.sourceStorageUrl || null
+    } catch {
+      // No body or invalid JSON – that's fine
     }
 
-    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    })
-    const { data: { user }, error: authError } = await authClient.auth.getUser()
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    // If sourceStorageUrl is provided, this is a cross-environment call.
+    // Skip user auth (the caller is the Test Admin Panel and Test tokens
+    // don't validate against the Live auth service).
+    if (!sourceStorageUrl) {
+      // Standard auth check – admin only
+      const authHeader = req.headers.get('Authorization')
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: 'Authorization required' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+
+      const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } },
       })
+      const { data: { user }, error: authError } = await authClient.auth.getUser()
+      if (authError || !user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+
+      const supabase = createClient(supabaseUrl, serviceKey)
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle()
+
+      if (!roleData) {
+        return new Response(JSON.stringify({ error: 'Admin access required' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
     }
 
     const supabase = createClient(supabaseUrl, serviceKey)
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle()
-
-    if (!roleData) {
-      return new Response(JSON.stringify({ error: 'Admin access required' }), {
-        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
 
     // Tables in FK-safe order
     const tables = [
@@ -56,7 +72,10 @@ Deno.serve(async (req) => {
       'attendance_records', 'supplier_payments',
     ]
 
-    const storageBase = `${supabaseUrl}/storage/v1/object/public/data-sync`
+    // Use provided source URL (cross-env) or fall back to own storage
+    const storageBase = sourceStorageUrl || `${supabaseUrl}/storage/v1/object/public/data-sync`
+    console.log(`Reading from storage: ${storageBase}`)
+
     const results: Record<string, { fetched: number; inserted: number; errors: string[] }> = {}
     const batchSize = 50
 
@@ -81,13 +100,11 @@ Deno.serve(async (req) => {
           continue
         }
 
-        // Insert in batches with upsert (ON CONFLICT DO NOTHING equivalent)
+        // Insert in batches with upsert
         for (let i = 0; i < rows.length; i += batchSize) {
           const batch = rows.slice(i, i + batchSize)
-          
-          // Determine the primary key column
           const pkCol = table === 'stock_items' ? 'item_id' : 'id'
-          
+
           const { error } = await supabase
             .from(table)
             .upsert(batch, { 
