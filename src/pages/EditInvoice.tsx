@@ -600,9 +600,6 @@ export default function EditInvoice() {
                         <ExpiryWarningBadge expiryDate={item.expiryDate} />
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Cost/Tab:</span> ₹{item.unitPrice.toFixed(2)}
-                      </div>
-                      <div>
                         <span className="text-muted-foreground font-semibold">Total:</span>{" "}
                         <span className="font-bold text-emerald">₹{item.total.toFixed(2)}</span>
                       </div>

@@ -609,10 +609,6 @@ export default function NewInvoice() {
                             className="h-9"
                           />
                         </div>
-                        <div className="col-span-1">
-                          <Label className="text-xs">Cost/Tab</Label>
-                          <div className="h-9 flex items-center text-sm font-semibold">₹{item.unitPrice.toFixed(2)}</div>
-                        </div>
                       </div>
                       <div className="flex flex-wrap gap-4 p-2 bg-muted/50 rounded-md text-xs">
                         <div className="flex gap-1.5">
