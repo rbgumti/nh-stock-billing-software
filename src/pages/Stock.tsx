@@ -46,7 +46,7 @@ import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
 import { BatchGroupedTable } from "@/components/BatchGroupedTable";
 import { StockItemCard } from "@/components/StockItemCard";
 import { supabase } from "@/integrations/supabase/client";
-import { BnxMonthlySalesAnalytics } from "@/components/BnxMonthlySalesAnalytics";
+
 import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Stock() {
@@ -1442,8 +1442,6 @@ export default function Stock() {
         </div>
       </div>
 
-      {/* BNX Monthly Sales Analytics */}
-      <BnxMonthlySalesAnalytics />
 
       {/* Tabs for different sections */}
       <Tabs defaultValue="item-master" className="w-full">

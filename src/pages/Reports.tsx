@@ -38,6 +38,7 @@ import * as XLSX from "xlsx";
 import DailyStockReport from "@/components/DailyStockReport";
 import DayReport from "@/components/DayReport";
 import SaleReport from "@/components/SaleReport";
+import { BnxMonthlySalesAnalytics } from "@/components/BnxMonthlySalesAnalytics";
 import FollowUpReport from "@/components/FollowUpReport";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -536,6 +537,7 @@ export default function Reports() {
         </TabsList>
 
         <TabsContent value="salereport" className="space-y-6">
+          <BnxMonthlySalesAnalytics />
           <SaleReport />
         </TabsContent>
 
