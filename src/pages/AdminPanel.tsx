@@ -11,7 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Users, UserPlus, Shield, Trash2, Pencil, KeyRound, Loader2, Lock } from 'lucide-react';
+import { Users, UserPlus, Shield, Trash2, Pencil, KeyRound, Loader2, Lock, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { FloatingOrbs } from '@/components/ui/floating-orbs';
 import { Navigate } from 'react-router-dom';
 
@@ -29,6 +30,11 @@ export default function AdminPanel() {
   const [editUsername, setEditUsername] = useState('');
   const [updatingUser, setUpdatingUser] = useState(false);
   
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'exporting' | 'importing' | 'done' | 'error'>('idle');
+  const [syncProgress, setSyncProgress] = useState(0);
+  const [syncMessage, setSyncMessage] = useState('');
+  const [syncResults, setSyncResults] = useState<Record<string, number> | null>(null);
+
   const [newUserForm, setNewUserForm] = useState({
     email: '',
     password: '',
@@ -36,6 +42,36 @@ export default function AdminPanel() {
     username: '',
     role: 'reception' as AppRole,
   });
+
+  const handleSyncToLive = async () => {
+    if (syncStatus === 'exporting' || syncStatus === 'importing') return;
+    setSyncStatus('exporting');
+    setSyncProgress(20);
+    setSyncMessage('Exporting data from Test...');
+    setSyncResults(null);
+
+    try {
+      const { data: exportData, error: exportError } = await invokeWithAuth('export-data-storage');
+      if (exportError) throw exportError;
+
+      setSyncStatus('importing');
+      setSyncProgress(60);
+      setSyncMessage('Importing data to Live...');
+
+      const { data: importData, error: importError } = await invokeWithAuth('import-data-storage');
+      if (importError) throw importError;
+
+      setSyncProgress(100);
+      setSyncStatus('done');
+      setSyncMessage('Sync completed successfully!');
+      setSyncResults((exportData as any)?.exported || null);
+      toast.success('Data synced to Live successfully');
+    } catch (err: any) {
+      setSyncStatus('error');
+      setSyncMessage(err.message || 'Sync failed');
+      toast.error(err.message || 'Sync failed');
+    }
+  };
 
   // Fetch all users with their roles
   const fetchUsers = async () => {
@@ -409,8 +445,58 @@ export default function AdminPanel() {
             </div>
           </CardContent>
         </Card>
-      </div>
 
+        {/* Sync Data to Live */}
+        <Card className="glass-card border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5" />
+              Sync Data to Live
+            </CardTitle>
+            <CardDescription>Export data from Test and import it into the Live environment</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {syncStatus !== 'idle' && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  {syncStatus === 'exporting' || syncStatus === 'importing' ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  ) : syncStatus === 'done' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-destructive" />
+                  )}
+                  <span>{syncMessage}</span>
+                </div>
+                <Progress value={syncProgress} className="h-2" />
+                {syncResults && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                    {Object.entries(syncResults).map(([table, count]) => (
+                      <div key={table} className="flex justify-between p-2 rounded bg-muted/50">
+                        <span className="font-medium">{table}</span>
+                        <span className="text-muted-foreground">{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            <Button
+              onClick={handleSyncToLive}
+              disabled={syncStatus === 'exporting' || syncStatus === 'importing'}
+              className="gap-2"
+              variant="gold"
+            >
+              {syncStatus === 'exporting' || syncStatus === 'importing' ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              {syncStatus === 'exporting' ? 'Exporting...' : syncStatus === 'importing' ? 'Importing...' : 'Sync Data to Live'}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
       {/* Add User Dialog */}
       <Dialog open={isAddUserDialogOpen} onOpenChange={setIsAddUserDialogOpen}>
         <DialogContent>
