@@ -74,6 +74,7 @@ export default function AdminPanel() {
           headers: {
             'Content-Type': 'application/json',
             'apikey': LIVE_ANON_KEY,
+            'Authorization': `Bearer ${LIVE_ANON_KEY}`,
           },
           body: JSON.stringify({ sourceStorageUrl: TEST_STORAGE_URL }),
         }
