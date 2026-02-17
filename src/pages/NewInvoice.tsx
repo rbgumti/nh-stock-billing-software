@@ -553,6 +553,12 @@ export default function NewInvoice() {
                         onWheel={(e) => e.currentTarget.blur()}
                         style={{ MozAppearance: 'textfield' }}
                         placeholder="Qty"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Tab' && !e.shiftKey) {
+                            e.preventDefault();
+                            addItem();
+                          }
+                        }}
                       />
                     </div>
                   </div>
