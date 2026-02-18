@@ -1,0 +1,120 @@
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+
+export type AppRole = 'admin' | 'manager' | 'billing' | 'reception' | 'pharma';
+
+interface AuthContextValue {
+  user: User | null;
+  loading: boolean;
+  roles: AppRole[];
+  rolesLoading: boolean;
+  hasAccess: (section: string) => boolean;
+  isAdmin: boolean;
+  primaryRole: AppRole | null;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+const ROLE_PERMISSIONS: Record<AppRole, string[]> = {
+  admin: ['*'],
+  manager: ['dashboard', 'patients', 'prescriptions', 'invoices', 'stock', 'reports', 'appointments', 'salary', 'analytics'],
+  billing: ['dashboard', 'invoices', 'patients', 'reports'],
+  reception: ['dashboard', 'patients', 'appointments', 'prescriptions'],
+  pharma: ['dashboard', 'invoices', 'patients', 'reports', 'stock'],
+};
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [roles, setRoles] = useState<AppRole[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchRoles = async (userId: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId);
+
+        if (!mounted) return;
+        if (error) {
+          setRoles([]);
+        } else {
+          setRoles((data || []).map(r => r.role as AppRole));
+        }
+      } catch {
+        if (mounted) setRoles([]);
+      } finally {
+        if (mounted) setRolesLoading(false);
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      const u = session?.user ?? null;
+      setUser(u);
+      setLoading(false);
+      if (u) {
+        fetchRoles(u.id);
+      } else {
+        setRoles([]);
+        setRolesLoading(false);
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      const u = session?.user ?? null;
+      setUser(u);
+      setLoading(false);
+      if (u) {
+        fetchRoles(u.id);
+      } else {
+        setRolesLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const hasAccess = useCallback((section: string): boolean => {
+    if (roles.length === 0) return false;
+    return roles.some(role => {
+      const permissions = ROLE_PERMISSIONS[role];
+      return permissions.includes('*') || permissions.includes(section);
+    });
+  }, [roles]);
+
+  const isAdmin = roles.includes('admin');
+
+  const primaryRole: AppRole | null = roles.includes('admin')
+    ? 'admin'
+    : roles.includes('manager')
+      ? 'manager'
+      : roles.includes('billing')
+        ? 'billing'
+        : roles.includes('reception')
+          ? 'reception'
+          : roles.includes('pharma')
+            ? 'pharma'
+            : null;
+
+  return (
+    <AuthContext.Provider value={{ user, loading, roles, rolesLoading, hasAccess, isAdmin, primaryRole }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+}
