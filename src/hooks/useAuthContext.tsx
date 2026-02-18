@@ -32,8 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    let lastFetchedUserId: string | null = null;
 
     const fetchRoles = async (userId: string) => {
+      // Deduplicate: don't re-fetch if we already fetched for this user
+      if (lastFetchedUserId === userId) return;
+      lastFetchedUserId = userId;
+      
       try {
         const { data, error } = await supabase
           .from('user_roles')
@@ -53,10 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const handleSession = (session: { user: { id: string } } | null) => {
       if (!mounted) return;
       const u = session?.user ?? null;
-      setUser(u);
+      setUser(u as any);
       setLoading(false);
       if (u) {
         fetchRoles(u.id);
@@ -64,18 +69,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRoles([]);
         setRolesLoading(false);
       }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      const u = session?.user ?? null;
-      setUser(u);
-      setLoading(false);
-      if (u) {
-        fetchRoles(u.id);
-      } else {
-        setRolesLoading(false);
-      }
+      handleSession(session);
     });
 
     return () => {

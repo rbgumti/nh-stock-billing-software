@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
+import { useAuth } from "@/hooks/useAuthContext";
 
 const loginSchema = z.object({
   identifier: z.string().trim().min(1, 'Username or email is required'),
@@ -15,46 +16,26 @@ const loginSchema = z.object({
 });
 
 export default function Auth() {
-  const [identifier, setIdentifier] = useState(""); // Can be username or email
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
+  // Redirect if already logged in - uses shared context (no duplicate getSession)
   useEffect(() => {
-    const ensureProfile = async (user: { id: string; email?: string | null }) => {
-      try {
-        // Keep profiles in sync even if a user was created before profile/roles were fixed.
-        await supabase
-          .from('profiles')
-          .upsert(
-            {
-              user_id: user.id,
-              email: user.email ?? null,
-            },
-            { onConflict: 'user_id' }
-          );
-      } catch (err) {
-        console.error('ensureProfile failed', err);
-      }
-    };
-
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        ensureProfile(session.user);
-        navigate("/");
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        ensureProfile(session.user);
-        navigate("/");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    if (!authLoading && user) {
+      // Ensure profile in background (non-blocking)
+      supabase
+        .from('profiles')
+        .upsert(
+          { user_id: user.id, email: user.email ?? null },
+          { onConflict: 'user_id' }
+        )
+        .then(() => {});
+      navigate("/");
+    }
+  }, [user, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
