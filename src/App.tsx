@@ -10,10 +10,13 @@ import { PerformanceModeProvider } from "@/hooks/usePerformanceMode";
 import { ThemeProvider } from "next-themes";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { AuthProvider } from "@/hooks/useAuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+
+// Lazy load Dashboard too - it pulls in recharts which is heavy
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 // Lazy load heavy pages for faster initial load
 const Patients = lazy(() => import("./pages/Patients"));
@@ -48,6 +51,7 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <AuthProvider>
       <PerformanceModeProvider>
         <TooltipProvider>
           <Toaster />
@@ -96,6 +100,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </PerformanceModeProvider>
+      </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );

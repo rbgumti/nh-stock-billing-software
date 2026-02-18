@@ -1,10 +1,6 @@
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
 
-// Preload caches eagerly on Dashboard so Invoices/Stock pages load instantly
-preloadPatients();
-preloadStockItems();
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Package, Receipt, TrendingUp, DollarSign, Clock, RefreshCw, Activity, AlertCircle, Bell, ArrowUpRight, Plus, FileText, UserPlus, Stethoscope } from "lucide-react";
@@ -138,6 +134,9 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    // Defer preloads to after dashboard mounts (not at module import time)
+    preloadPatients();
+    preloadStockItems();
     loadAllData();
 
     // Single consolidated realtime channel instead of 4 separate ones
