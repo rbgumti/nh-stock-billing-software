@@ -1209,7 +1209,9 @@ export function MonthlyComparativeAnalysis() {
                 <tr className="border-b hover:bg-muted/50 bg-blue-50/50 dark:bg-blue-900/10">
                   <td className="p-2 font-medium">New Patients (BNX)</td>
                   {displayMetrics.slice(-4).map(m => {
-                    const isBest = viewMode === 'monthly' && bestWorst?.patientsMax.monthKey === m.monthKey;
+                    const slice = displayMetrics.slice(-4);
+                    const maxNewPatients = Math.max(...slice.map(s => s.newPatientsBnx));
+                    const isBest = viewMode === 'monthly' && m.newPatientsBnx === maxNewPatients && m.monthKey === slice.filter(s => s.newPatientsBnx === maxNewPatients).pop()!.monthKey;
                     return (
                       <td key={m.monthKey} className={`text-right p-2 ${isBest ? 'bg-blue-100 dark:bg-blue-900/40' : ''}`}>
                         {m.newPatientsBnx}
