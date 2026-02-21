@@ -465,8 +465,9 @@ export default function Stock() {
         throw poUpdateError;
       }
 
-      // Invalidate stock cache to reflect changes
+      // Invalidate stock cache and force refresh to reflect changes
       invalidateCache();
+      setTimeout(() => forceRefresh(), 300);
       
       // Immediately refetch POs so UI updates without page refresh
       await refreshPurchaseOrders();
@@ -530,6 +531,8 @@ export default function Stock() {
   const handleEditGRN = async (updatedPO: PurchaseOrder) => {
     try {
       await updatePurchaseOrder(updatedPO.id, updatedPO);
+      invalidateCache();
+      setTimeout(() => forceRefresh(), 300);
       setEditingGRN(null);
       toast({
         title: "Success",
