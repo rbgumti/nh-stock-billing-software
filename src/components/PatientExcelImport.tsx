@@ -7,7 +7,7 @@ import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePatientStore } from "@/hooks/usePatientStore";
 import { PatientFormData } from "@/hooks/usePatientForm";
-import * as XLSX from 'xlsx';
+import { createWorkbook, addJsonSheet, writeFile, readFileAsJson } from '@/lib/excelUtils';
 
 interface ImportResult {
   success: number;
@@ -87,10 +87,7 @@ export function PatientExcelImport() {
     setImportResult(null);
 
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData = await readFileAsJson(file);
 
       const result: ImportResult = {
         success: 0,
@@ -158,10 +155,9 @@ export function PatientExcelImport() {
       }
     ];
 
-    const ws = XLSX.utils.json_to_sheet(template);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Patients Template");
-    XLSX.writeFile(wb, "patient_import_template.xlsx");
+    const wb = createWorkbook();
+    addJsonSheet(wb, template, "Patients Template");
+    writeFile(wb, "patient_import_template.xlsx");
   };
 
   return (

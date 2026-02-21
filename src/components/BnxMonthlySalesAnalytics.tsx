@@ -7,7 +7,7 @@ import { TrendingUp, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNumber } from "@/lib/formatUtils";
-import * as XLSX from "xlsx";
+import { createWorkbook, addAoaSheet, writeFile } from "@/lib/excelUtils";
 import { toast } from "sonner";
 
 interface MonthlyBrandData {
@@ -161,8 +161,8 @@ export function BnxMonthlySalesAnalytics() {
   const grandTotalQty = monthlyData.reduce((s, m) => s + m.totalQty, 0);
   const grandTotalValue = monthlyData.reduce((s, m) => s + m.totalValue, 0);
 
-  const exportToExcel = () => {
-    const wb = XLSX.utils.book_new();
+  const exportToExcel = async () => {
+    const wb = createWorkbook();
     const headers = ["Month", ...medicineNames.map((n) => `${n} (Qty)`), ...medicineNames.map((n) => `${n} (₹)`), "Total Qty", "Total Value"];
     const rows = monthlyData.map((m) => [
       m.month,
@@ -173,9 +173,8 @@ export function BnxMonthlySalesAnalytics() {
     ]);
     rows.push(["TOTAL", ...medicineNames.map((n) => monthlyData.reduce((s, m) => s + (m.medicines[n]?.qty || 0), 0)), ...medicineNames.map((n) => Math.round(monthlyData.reduce((s, m) => s + (m.medicines[n]?.value || 0), 0) * 100) / 100), grandTotalQty, Math.round(grandTotalValue * 100) / 100]);
 
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    XLSX.utils.book_append_sheet(wb, ws, "BNX Monthly Sales");
-    XLSX.writeFile(wb, `BNX_Monthly_Sales_${year}.xlsx`);
+    addAoaSheet(wb, [headers, ...rows], "BNX Monthly Sales");
+    await writeFile(wb, `BNX_Monthly_Sales_${year}.xlsx`);
     toast.success("Exported successfully");
   };
 

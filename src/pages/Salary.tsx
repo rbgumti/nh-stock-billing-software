@@ -23,7 +23,7 @@ import { useSalaryAccess } from "@/hooks/useSalaryAccess";
 // Backup now handled via Supabase - useSalaryBackup removed
 import { toast } from "sonner";
 import { format, startOfMonth, subMonths, addMonths, getDaysInMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay } from "date-fns";
-import * as XLSX from "xlsx";
+import { createWorkbook, addJsonSheet, addAoaSheet, writeFile as writeExcelFile } from "@/lib/excelUtils";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { createRoot } from "react-dom/client";
@@ -512,7 +512,7 @@ const SalaryContent = () => {
   };
 
   // Export to Excel
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     const data = monthlySalaryData.map(item => ({
       "S.No": item.sNo,
       "Name of Employee": item.employee.name,
@@ -524,7 +524,6 @@ const SalaryContent = () => {
       "Salary Payable": item.salaryPayable,
     }));
 
-    // Add totals row
     data.push({
       "S.No": "" as any,
       "Name of Employee": "TOTAL",
@@ -536,12 +535,11 @@ const SalaryContent = () => {
       "Salary Payable": totals.salaryPayable,
     });
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Salary Report");
+    const wb = createWorkbook();
+    addJsonSheet(wb, data, "Salary Report");
     
     const monthLabel = format(new Date(selectedMonth + "-01"), "MMMM-yyyy");
-    XLSX.writeFile(wb, `Salary-Report-${monthLabel}.xlsx`);
+    await writeExcelFile(wb, `Salary-Report-${monthLabel}.xlsx`);
     toast.success("Salary report exported successfully");
   };
 
@@ -569,12 +567,12 @@ const SalaryContent = () => {
   };
 
   // Export attendance to Excel
-  const exportAttendanceToExcel = () => {
+  const exportAttendanceToExcel = async () => {
     const monthStr = format(attendanceMonth, "yyyy-MM");
     const monthLabel = format(attendanceMonth, "MMMM yyyy");
     const daysInMonth = getDaysInMonth(attendanceMonth);
     
-    const workbook = XLSX.utils.book_new();
+    const workbook = createWorkbook();
     
     // Sheet 1: Monthly Summary
     const summaryData = monthlyAttendanceSummary.map((item, index) => ({
@@ -590,7 +588,6 @@ const SalaryContent = () => {
       "Attendance %": daysInMonth > 0 ? `${((item.workingDays / daysInMonth) * 100).toFixed(1)}%` : "0%",
     }));
     
-    // Add totals row
     const totalPresent = monthlyAttendanceSummary.reduce((sum, i) => sum + i.present, 0);
     const totalAbsent = monthlyAttendanceSummary.reduce((sum, i) => sum + i.absent, 0);
     const totalHalfDay = monthlyAttendanceSummary.reduce((sum, i) => sum + i.halfDay, 0);
@@ -611,20 +608,10 @@ const SalaryContent = () => {
       "Attendance %": "",
     });
     
-    const summarySheet = XLSX.utils.json_to_sheet(summaryData);
-    summarySheet['!cols'] = [
-      { wch: 6 },  // S.No
-      { wch: 25 }, // Employee Name
-      { wch: 20 }, // Designation
-      { wch: 12 }, // Present
-      { wch: 12 }, // Absent
-      { wch: 10 }, // Half Days
-      { wch: 10 }, // Leaves
-      { wch: 10 }, // Holidays
-      { wch: 18 }, // Total Working Days
-      { wch: 14 }, // Attendance %
-    ];
-    XLSX.utils.book_append_sheet(workbook, summarySheet, "Monthly Summary");
+    addJsonSheet(workbook, summaryData, "Monthly Summary", [
+      { wch: 6 }, { wch: 25 }, { wch: 20 }, { wch: 12 }, { wch: 12 },
+      { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 18 }, { wch: 14 },
+    ]);
     
     // Sheet 2: Daily Records
     const dailyData: any[][] = [
@@ -632,7 +619,6 @@ const SalaryContent = () => {
       [],
     ];
     
-    // Header row with dates
     const headerRow = ["S.No", "Employee Name", "Designation"];
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth(), day);
@@ -641,8 +627,7 @@ const SalaryContent = () => {
     headerRow.push("Working Days");
     dailyData.push(headerRow);
     
-    // Day names row
-    const dayNamesRow = ["", "", ""];
+    const dayNamesRow: any[] = ["", "", ""];
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth(), day);
       dayNamesRow.push(format(date, "EEE").charAt(0));
@@ -650,7 +635,6 @@ const SalaryContent = () => {
     dayNamesRow.push("");
     dailyData.push(dayNamesRow);
     
-    // Employee rows
     employees.forEach((employee, index) => {
       const row: any[] = [index + 1, employee.name, employee.designation];
       let workingDays = 0;
@@ -672,19 +656,15 @@ const SalaryContent = () => {
       dailyData.push(row);
     });
     
-    const dailySheet = XLSX.utils.aoa_to_sheet(dailyData);
-    
-    // Set column widths
     const colWidths = [{ wch: 6 }, { wch: 25 }, { wch: 20 }];
     for (let i = 0; i < daysInMonth; i++) {
       colWidths.push({ wch: 4 });
     }
     colWidths.push({ wch: 14 });
-    dailySheet['!cols'] = colWidths;
     
-    XLSX.utils.book_append_sheet(workbook, dailySheet, "Daily Records");
+    addAoaSheet(workbook, dailyData, "Daily Records", colWidths);
     
-    XLSX.writeFile(workbook, `Attendance-Report-${format(attendanceMonth, "MMMM-yyyy")}.xlsx`);
+    await writeExcelFile(workbook, `Attendance-Report-${format(attendanceMonth, "MMMM-yyyy")}.xlsx`);
     toast.success("Attendance report exported successfully");
   };
 

@@ -28,7 +28,7 @@ import {
 import { Supplier } from '@/hooks/useSupplierStore';
 import { SupplierPayment } from '@/hooks/useSupplierPaymentStore';
 import { PurchaseOrder } from '@/hooks/usePurchaseOrderStore';
-import * as XLSX from 'xlsx';
+import { createWorkbook, addJsonSheet, writeFile } from '@/lib/excelUtils';
 import jsPDF from 'jspdf';
 
 interface SupplierLedgerProps {
@@ -215,7 +215,7 @@ export function SupplierLedger({
     }).format(amount);
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     if (!selectedSupplier || ledgerEntries.length === 0) return;
 
     const data = ledgerEntries.map(entry => ({
@@ -239,10 +239,9 @@ export function SupplierLedger({
       'Status': ''
     });
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Account Statement');
-    XLSX.writeFile(wb, `${selectedSupplier.name}_Ledger_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    const wb = createWorkbook();
+    addJsonSheet(wb, data, 'Account Statement');
+    await writeFile(wb, `${selectedSupplier.name}_Ledger_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
   };
 
   const exportToPDF = () => {

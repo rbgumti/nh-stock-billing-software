@@ -28,7 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatNumber } from "@/lib/formatUtils";
 import { StockLedger } from "@/components/StockLedger";
 import { StockItem } from "@/hooks/useStockStore";
-import * as XLSX from "xlsx";
+import { createWorkbook, addJsonSheet, writeFile } from "@/lib/excelUtils";
 
 interface StockMovementSummary {
   itemId: number;
@@ -168,7 +168,7 @@ export default function StockLedgerReport() {
     (m) => m.totalIn > 0 || m.totalOut > 0
   ).length;
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     const data = activeItems.map((m) => ({
       "Medicine Name": m.name,
       Category: m.category,
@@ -180,24 +180,12 @@ export default function StockLedgerReport() {
       "MRP (₹)": m.mrp || m.unitPrice,
       "Stock Value (₹)": m.currentStock * (m.mrp || m.unitPrice),
     }));
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(data);
-    ws["!cols"] = [
-      { wch: 30 },
-      { wch: 10 },
-      { wch: 12 },
-      { wch: 20 },
-      { wch: 12 },
-      { wch: 14 },
-      { wch: 12 },
-      { wch: 10 },
-      { wch: 14 },
-    ];
-    XLSX.utils.book_append_sheet(wb, ws, "Stock Ledger");
-    XLSX.writeFile(
-      wb,
-      `Stock_Ledger_${dateFrom}_to_${dateTo}.xlsx`
-    );
+    const wb = createWorkbook();
+    addJsonSheet(wb, data, "Stock Ledger", [
+      { wch: 30 }, { wch: 10 }, { wch: 12 }, { wch: 20 },
+      { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 10 }, { wch: 14 },
+    ]);
+    await writeFile(wb, `Stock_Ledger_${dateFrom}_to_${dateTo}.xlsx`);
   };
 
   const getCategoryColor = (cat: string) => {

@@ -15,7 +15,7 @@ import { DateRangeExportDialog } from "./DateRangeExportDialog";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
+import { createWorkbook, addAoaSheet, writeFile } from "@/lib/excelUtils";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 
@@ -253,8 +253,8 @@ export default function SaleReport() {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
   };
 
-  const exportToExcel = () => {
-    const workbook = XLSX.utils.book_new();
+  const exportToExcel = async () => {
+    const workbook = createWorkbook();
 
     // Prepare all items sorted by category
     const allSorted = [...bnxItems, ...tpnItems, ...pshyItems];
@@ -289,25 +289,12 @@ export default function SaleReport() {
     data.push(['TOTAL SALE (PSHY)', '', 'PSHY', '', '', pshyTotalQty, '', roundTo2(pshyTotalValue), '', '', '']);
     data.push(['GRAND TOTAL', '', 'BNX+TPN+PSHY', '', '', '', '', roundTo2(grandTotalValue), '', '', '']);
 
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    
-    // Set column widths
-    worksheet['!cols'] = [
-      { wch: 8 },   // S.No
-      { wch: 25 },  // Medicine Name
-      { wch: 18 },  // Category
-      { wch: 14 },  // Opening
-      { wch: 14 },  // Current
-      { wch: 10 },  // Sale Qty
-      { wch: 8 },   // Rate
-      { wch: 12 },  // Value
-      { wch: 14 },  // Stock Received
-      { wch: 14 },  // Closing
-      { wch: 12 },  // Discrepancy
-    ];
+    addAoaSheet(workbook, data, 'Sale Report', [
+      { wch: 8 }, { wch: 25 }, { wch: 18 }, { wch: 14 }, { wch: 14 },
+      { wch: 10 }, { wch: 8 }, { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 12 },
+    ]);
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sale Report');
-    XLSX.writeFile(workbook, `sale-report-${reportDate}.xlsx`);
+    await writeFile(workbook, `sale-report-${reportDate}.xlsx`);
     toast.success('Report exported successfully');
   };
 
@@ -394,7 +381,7 @@ export default function SaleReport() {
     const tpn = items.filter(i => i.category === 'TPN');
     const pshy = items.filter(i => i.category === 'PSHY');
 
-    const workbook = XLSX.utils.book_new();
+    const workbook = createWorkbook();
     const data: any[][] = [
       [`Sale Report - ${format(startDate, 'dd MMM yyyy')} to ${format(endDate, 'dd MMM yyyy')}`],
       [],
@@ -412,10 +399,10 @@ export default function SaleReport() {
     data.push(['TOTAL PSHY', '', 'PSHY', pshy.reduce((s, i) => s + i.saleQty, 0), '', roundTo2(pshy.reduce((s, i) => s + i.value, 0)), '']);
     data.push(['GRAND TOTAL', '', '', items.reduce((s, i) => s + i.saleQty, 0), '', roundTo2(items.reduce((s, i) => s + i.value, 0)), '']);
 
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    worksheet['!cols'] = [{ wch: 8 }, { wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 14 }];
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sale Report');
-    XLSX.writeFile(workbook, `sale-report-${startDateStr}-to-${endDateStr}.xlsx`);
+    addAoaSheet(workbook, data, 'Sale Report', [
+      { wch: 8 }, { wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 14 },
+    ]);
+    await writeFile(workbook, `sale-report-${startDateStr}-to-${endDateStr}.xlsx`);
     toast.success('Report exported successfully');
   };
 

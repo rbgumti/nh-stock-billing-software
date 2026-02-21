@@ -40,7 +40,7 @@ import {
   UserCheck
 } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
-import * as XLSX from "xlsx";
+import { createWorkbook, addJsonSheet, writeFile as writeExcelFile } from "@/lib/excelUtils";
 import DailyStockReport from "@/components/DailyStockReport";
 import StockLedgerReport from "@/components/StockLedgerReport";
 import DayReport from "@/components/DayReport";
@@ -328,16 +328,9 @@ export default function Reports() {
       return;
     }
 
-    // Create workbook and worksheet
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    
-    // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, reportType.charAt(0).toUpperCase() + reportType.slice(1));
-    
-    // Save file
-    XLSX.writeFile(workbook, filename);
-  };
+    const workbook = createWorkbook();
+    addJsonSheet(workbook, data, reportType.charAt(0).toUpperCase() + reportType.slice(1));
+    await writeExcelFile(workbook, filename);
 
   const openExportDialog = (type: 'patients' | 'stock' | 'invoices') => {
     setExportType(type);
@@ -528,10 +521,9 @@ export default function Reports() {
       }
 
       // Create workbook and export
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(data);
-      XLSX.utils.book_append_sheet(workbook, worksheet, exportType.charAt(0).toUpperCase() + exportType.slice(1));
-      XLSX.writeFile(workbook, filename);
+          const workbook = createWorkbook();
+          addJsonSheet(workbook, data, exportType.charAt(0).toUpperCase() + exportType.slice(1));
+          await writeExcelFile(workbook, filename);
 
       toast({
         title: "Export successful",

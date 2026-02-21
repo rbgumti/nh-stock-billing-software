@@ -36,7 +36,7 @@ import { Download, Calendar as CalendarIcon, Search, AlertCircle, CheckCircle, C
 import { supabase } from "@/integrations/supabase/client";
 import { loadAllPatients, Patient, formatPhone } from "@/lib/patientUtils";
 import { formatLocalISODate } from "@/lib/dateUtils";
-import * as XLSX from "xlsx";
+import { createWorkbook, addJsonSheet, writeFile } from "@/lib/excelUtils";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format, addDays, parseISO } from "date-fns";
@@ -353,7 +353,7 @@ export default function FollowUpReport() {
     return matchesSearch && matchesDateFrom && matchesDateTo;
   });
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     if (filteredData.length === 0) {
       alert("No data available to export");
       return;
@@ -375,10 +375,9 @@ export default function FollowUpReport() {
       "Remarks": item.remarks,
     }));
 
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Follow Up Report");
-    XLSX.writeFile(workbook, `follow-up-report-${formatLocalISODate()}.xlsx`);
+    const workbook = createWorkbook();
+    addJsonSheet(workbook, exportData, "Follow Up Report");
+    await writeFile(workbook, `follow-up-report-${formatLocalISODate()}.xlsx`);
   };
 
   const getDaysBadge = (days: number) => {
