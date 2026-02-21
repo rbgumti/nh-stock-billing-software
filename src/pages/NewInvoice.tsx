@@ -331,14 +331,13 @@ export default function NewInvoice() {
     }
 
     try {
-      // Reduce stock for each item sequentially to avoid race conditions
-      for (const item of items) {
-        if (item.medicineId && item.medicineId > 0) {
-          await reduceStock(item.medicineId, item.quantity);
-        }
-      }
-
-      const invoiceNumber = await getNextInvoiceNumber();
+      // Run stock reduction and invoice number generation in parallel
+      const [invoiceNumber] = await Promise.all([
+        getNextInvoiceNumber(),
+        ...items
+          .filter(item => item.medicineId && item.medicineId > 0)
+          .map(item => reduceStock(item.medicineId, item.quantity))
+      ]);
       
       // Insert invoice into database
       const { data: invoiceData, error: invoiceError } = await supabase
@@ -356,12 +355,12 @@ export default function NewInvoice() {
           status: 'Pending',
           follow_up_date: followUpDate || null
         })
-        .select()
+        .select('id')
         .single();
 
       if (invoiceError) throw invoiceError;
 
-      // Insert invoice items
+      // Insert invoice items (fire and don't block navigation)
       const itemsToInsert = items.map(item => ({
         invoice_id: invoiceData.id,
         medicine_id: item.medicineId,
@@ -376,17 +375,13 @@ export default function NewInvoice() {
         duration_days: item.durationDays || null
       }));
 
-      const { error: itemsError } = await supabase
-        .from('invoice_items')
-        .insert(itemsToInsert);
+      // Insert items in background - don't await before navigating
+      supabase.from('invoice_items').insert(itemsToInsert).then(({ error }) => {
+        if (error) console.error("Error inserting invoice items:", error);
+      });
 
-      if (itemsError) throw itemsError;
-
-      console.log("New invoice created:", invoiceData);
-      
-      // Invalidate stock cache so all pages show fresh data
+      // Invalidate stock cache in background
       invalidateCache();
-      // Small delay then force refresh to ensure DB writes are finalized
       setTimeout(() => forceRefresh(), 300);
       
       toast({
