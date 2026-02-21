@@ -19,7 +19,7 @@ import { useStockStore } from "@/hooks/useStockStore";
 import { useSalaryStore } from "@/hooks/useSalaryStore";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
+import { createWorkbook, addAoaSheet, writeFile as writeExcelFile } from "@/lib/excelUtils";
 import jsPDF from "jspdf";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { formatNumber, roundTo2 } from "@/lib/formatUtils";
@@ -717,8 +717,8 @@ export default function DayReport() {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
   };
 
-  const exportToExcel = (withColors: boolean = false) => {
-    const workbook = XLSX.utils.book_new();
+  const exportToExcel = async (withColors: boolean = false) => {
+    const workbook = createWorkbook();
     
     // Helper to format numbers to 2 decimal places
     const fmt = (n: number) => Number(n.toFixed(2));
@@ -791,18 +791,11 @@ export default function DayReport() {
     reportData.push(['PAYTM', '', fmt(paytmGpay)]);
     reportData.push(['DIFFERENCE', '', fmt(difference)]);
 
-    const sheet = XLSX.utils.aoa_to_sheet(reportData);
+    addAoaSheet(workbook, reportData, 'Day Report', [
+      { wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 18 }, { wch: 15 }
+    ]);
     
-    // Apply colors if requested
-    if (withColors) {
-      // Set column widths
-      sheet['!cols'] = [
-        { wch: 25 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 18 }, { wch: 15 }
-      ];
-    }
-    
-    XLSX.utils.book_append_sheet(workbook, sheet, 'Day Report');
-    XLSX.writeFile(workbook, `Day_Report_${reportDate}${withColors ? '_Color' : ''}.xlsx`);
+    await writeExcelFile(workbook, `Day_Report_${reportDate}${withColors ? '_Color' : ''}.xlsx`);
     toast.success(`Excel exported ${withColors ? 'with colors' : 'successfully'}`);
   };
 
@@ -863,7 +856,7 @@ export default function DayReport() {
       });
     }
 
-    const workbook = XLSX.utils.book_new();
+    const workbook = createWorkbook();
 
     // Summary sheet with all day reports
     const summaryData: any[][] = [
@@ -969,22 +962,18 @@ export default function DayReport() {
     summaryData.push(['PSHY', fmt(salesByCategory['PSHY'])]);
     summaryData.push(['GRAND TOTAL', fmt(salesByCategory['BNX'] + salesByCategory['TPN'] + salesByCategory['PSHY'])]);
 
-    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-    summarySheet['!cols'] = [
+    const summarySheet = addAoaSheet(workbook, summaryData, 'Summary', [
       { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 18 }, { wch: 18 }, { wch: 14 }, { wch: 14 }
-    ];
-    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+    ]);
 
     // Add expense details sheet if there are expenses
     if (expenseDetails.length > 3) {
       expenseDetails.push([]);
       expenseDetails.push(['TOTAL', '', fmt(totalExpenses)]);
-      const expenseSheet = XLSX.utils.aoa_to_sheet(expenseDetails);
-      expenseSheet['!cols'] = [{ wch: 12 }, { wch: 40 }, { wch: 12 }];
-      XLSX.utils.book_append_sheet(workbook, expenseSheet, 'Expenses');
+      addAoaSheet(workbook, expenseDetails, 'Expenses', [{ wch: 12 }, { wch: 40 }, { wch: 12 }]);
     }
 
-    XLSX.writeFile(workbook, `Day_Reports_${startDateStr}_to_${endDateStr}.xlsx`);
+    await writeExcelFile(workbook, `Day_Reports_${startDateStr}_to_${endDateStr}.xlsx`);
     toast.success('Day reports exported successfully');
   };
 

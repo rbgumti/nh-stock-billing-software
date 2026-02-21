@@ -11,7 +11,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { motion } from "framer-motion";
 import { formatNumber, roundTo2 } from "@/lib/formatUtils";
 import { Json } from "@/integrations/supabase/types";
-import * as XLSX from "xlsx";
+import { createWorkbook, addJsonSheet, writeFile as writeExcelFile } from "@/lib/excelUtils";
 import { toast } from "sonner";
 
 interface MonthlyMetrics {

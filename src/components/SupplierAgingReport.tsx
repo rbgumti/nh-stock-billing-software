@@ -19,7 +19,7 @@ import { Supplier } from '@/hooks/useSupplierStore';
 import { SupplierPayment } from '@/hooks/useSupplierPaymentStore';
 import { PurchaseOrder } from '@/hooks/usePurchaseOrderStore';
 import { format, differenceInDays } from 'date-fns';
-import * as XLSX from 'xlsx';
+import { createWorkbook, addJsonSheet, writeFile as writeExcel } from '@/lib/excelUtils';
 import jsPDF from 'jspdf';
 
 interface SupplierAgingReportProps {
@@ -192,7 +192,7 @@ export function SupplierAgingReport({
   };
 
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     // Summary sheet
     const summaryData = agingData.map(data => ({
       'Supplier': data.supplier.name,
@@ -234,15 +234,10 @@ export function SupplierAgingReport({
       }))
     );
 
-    const wb = XLSX.utils.book_new();
-    
-    const summaryWs = XLSX.utils.json_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(wb, summaryWs, 'Aging Summary');
-    
-    const detailsWs = XLSX.utils.json_to_sheet(detailsData);
-    XLSX.utils.book_append_sheet(wb, detailsWs, 'Aging Details');
-    
-    XLSX.writeFile(wb, `Supplier_Aging_Report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    const wb = createWorkbook();
+    addJsonSheet(wb, summaryData, 'Aging Summary');
+    addJsonSheet(wb, detailsData, 'Aging Details');
+    await writeExcel(wb, `Supplier_Aging_Report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
   };
 
   const exportToPDF = () => {

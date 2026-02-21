@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import * as XLSX from "xlsx";
+import { createWorkbook, addJsonSheet, addAoaSheet, writeFile } from "@/lib/excelUtils";
 
 interface StockReportItem {
   name: string;
@@ -269,64 +269,32 @@ export default function DailyStockReport() {
     );
   };
 
-  const exportToExcel = () => {
-    const workbook = XLSX.utils.book_new();
+  const exportToExcel = async () => {
+    const workbook = createWorkbook();
     
-    // BNX Sheet
-    const bnxData = bnxItems.map(item => ({
-      'Medicine Name': item.name,
-      'Stock Opening': item.stockOpening,
-      'Issued to Patients': item.issuedToPatients,
-      'Stock Received': item.stockReceived,
-      'Stock Closing': item.stockClosing,
-    }));
-    bnxData.push({
-      'Medicine Name': 'TOTAL',
-      'Stock Opening': bnxItems.reduce((sum, item) => sum + item.stockOpening, 0),
-      'Issued to Patients': bnxItems.reduce((sum, item) => sum + item.issuedToPatients, 0),
-      'Stock Received': bnxItems.reduce((sum, item) => sum + item.stockReceived, 0),
-      'Stock Closing': bnxItems.reduce((sum, item) => sum + item.stockClosing, 0),
-    });
-    const bnxSheet = XLSX.utils.json_to_sheet(bnxData);
-    XLSX.utils.book_append_sheet(workbook, bnxSheet, 'BNX Stock');
-    
-    // TPN Sheet
-    const tpnData = tpnItems.map(item => ({
-      'Medicine Name': item.name,
-      'Stock Opening': item.stockOpening,
-      'Issued to Patients': item.issuedToPatients,
-      'Stock Received': item.stockReceived,
-      'Stock Closing': item.stockClosing,
-    }));
-    tpnData.push({
-      'Medicine Name': 'TOTAL',
-      'Stock Opening': tpnItems.reduce((sum, item) => sum + item.stockOpening, 0),
-      'Issued to Patients': tpnItems.reduce((sum, item) => sum + item.issuedToPatients, 0),
-      'Stock Received': tpnItems.reduce((sum, item) => sum + item.stockReceived, 0),
-      'Stock Closing': tpnItems.reduce((sum, item) => sum + item.stockClosing, 0),
-    });
-    const tpnSheet = XLSX.utils.json_to_sheet(tpnData);
-    XLSX.utils.book_append_sheet(workbook, tpnSheet, 'TPN Stock');
-    
-    // PSHY Sheet
-    const pshyData = pshyItems.map(item => ({
-      'Medicine Name': item.name,
-      'Stock Opening': item.stockOpening,
-      'Issued to Patients': item.issuedToPatients,
-      'Stock Received': item.stockReceived,
-      'Stock Closing': item.stockClosing,
-    }));
-    pshyData.push({
-      'Medicine Name': 'TOTAL',
-      'Stock Opening': pshyItems.reduce((sum, item) => sum + item.stockOpening, 0),
-      'Issued to Patients': pshyItems.reduce((sum, item) => sum + item.issuedToPatients, 0),
-      'Stock Received': pshyItems.reduce((sum, item) => sum + item.stockReceived, 0),
-      'Stock Closing': pshyItems.reduce((sum, item) => sum + item.stockClosing, 0),
-    });
-    const pshySheet = XLSX.utils.json_to_sheet(pshyData);
-    XLSX.utils.book_append_sheet(workbook, pshySheet, 'PSHY Stock');
+    const makeSheetData = (items: StockReportItem[]) => {
+      const data = items.map(item => ({
+        'Medicine Name': item.name,
+        'Stock Opening': item.stockOpening,
+        'Issued to Patients': item.issuedToPatients,
+        'Stock Received': item.stockReceived,
+        'Stock Closing': item.stockClosing,
+      }));
+      data.push({
+        'Medicine Name': 'TOTAL',
+        'Stock Opening': items.reduce((sum, item) => sum + item.stockOpening, 0),
+        'Issued to Patients': items.reduce((sum, item) => sum + item.issuedToPatients, 0),
+        'Stock Received': items.reduce((sum, item) => sum + item.stockReceived, 0),
+        'Stock Closing': items.reduce((sum, item) => sum + item.stockClosing, 0),
+      });
+      return data;
+    };
 
-    XLSX.writeFile(workbook, `Daily_Stock_Report_${reportDate}.xlsx`);
+    addJsonSheet(workbook, makeSheetData(bnxItems), 'BNX Stock');
+    addJsonSheet(workbook, makeSheetData(tpnItems), 'TPN Stock');
+    addJsonSheet(workbook, makeSheetData(pshyItems), 'PSHY Stock');
+
+    await writeFile(workbook, `Daily_Stock_Report_${reportDate}.xlsx`);
   };
 
   const exportDateRangeToExcel = async (startDate: Date, endDate: Date) => {
@@ -399,9 +367,9 @@ export default function DailyStockReport() {
     const tpn = items.filter(i => i.category === 'TPN');
     const pshy = items.filter(i => i.category === 'PSHY');
 
-    const workbook = XLSX.utils.book_new();
+    const workbook = createWorkbook();
 
-    const createSheet = (data: typeof items, sheetName: string) => {
+    const addCategorySheet = (data: typeof items, sheetName: string) => {
       const sheetData = data.map(item => ({
         'Medicine Name': item.name,
         'Issued to Patients': item.issuedToPatients,
@@ -412,14 +380,14 @@ export default function DailyStockReport() {
         'Issued to Patients': data.reduce((sum, item) => sum + item.issuedToPatients, 0),
         'Stock Received': data.reduce((sum, item) => sum + item.stockReceived, 0),
       });
-      return XLSX.utils.json_to_sheet(sheetData);
+      addJsonSheet(workbook, sheetData, sheetName);
     };
 
-    XLSX.utils.book_append_sheet(workbook, createSheet(bnx, 'BNX Stock'), 'BNX Stock');
-    XLSX.utils.book_append_sheet(workbook, createSheet(tpn, 'TPN Stock'), 'TPN Stock');
-    XLSX.utils.book_append_sheet(workbook, createSheet(pshy, 'PSHY Stock'), 'PSHY Stock');
+    addCategorySheet(bnx, 'BNX Stock');
+    addCategorySheet(tpn, 'TPN Stock');
+    addCategorySheet(pshy, 'PSHY Stock');
 
-    XLSX.writeFile(workbook, `Daily_Stock_Report_${startDateStr}_to_${endDateStr}.xlsx`);
+    await writeFile(workbook, `Daily_Stock_Report_${startDateStr}_to_${endDateStr}.xlsx`);
   };
 
   const handlePrint = () => {

@@ -27,7 +27,7 @@ import {
   Filter
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import * as XLSX from "xlsx";
+import { createWorkbook, addJsonSheet, writeFile } from "@/lib/excelUtils";
 import { StockItem } from "@/hooks/useStockStore";
 
 interface StockLedgerProps {
@@ -248,7 +248,7 @@ export function StockLedger({ stockItem, onClose }: StockLedgerProps) {
     }
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     const exportData = filteredEntries.map(entry => ({
       'Date': formatDate(entry.date),
       'Type': entry.referenceType === 'Opening' ? 'Opening' : entry.type,
@@ -263,28 +263,14 @@ export function StockLedger({ stockItem, onClose }: StockLedgerProps) {
       'Balance': entry.balance
     }));
 
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(exportData);
-
-    // Set column widths
-    ws['!cols'] = [
-      { wch: 12 }, // Date
-      { wch: 8 },  // Type
-      { wch: 15 }, // Reference
-      { wch: 12 }, // Reference Type
-      { wch: 25 }, // Patient/Supplier
-      { wch: 12 }, // Phone
-      { wch: 12 }, // PO Number
-      { wch: 12 }, // GRN Number
-      { wch: 8 },  // In Qty
-      { wch: 8 },  // Out Qty
-      { wch: 10 }, // Balance
-    ];
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Stock Ledger');
+    const wb = createWorkbook();
+    addJsonSheet(wb, exportData, 'Stock Ledger', [
+      { wch: 12 }, { wch: 8 }, { wch: 15 }, { wch: 12 }, { wch: 25 },
+      { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 8 }, { wch: 8 }, { wch: 10 },
+    ]);
 
     const fileName = `Stock_Ledger_${stockItem.name.replace(/\s+/g, '_')}_${dateFrom}_to_${dateTo}.xlsx`;
-    XLSX.writeFile(wb, fileName);
+    await writeFile(wb, fileName);
   };
 
   const exportFullLedgerToExcel = () => {

@@ -38,7 +38,7 @@ import { useSupplierPaymentStore, SupplierPayment } from "@/hooks/useSupplierPay
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { createRoot } from "react-dom/client";
-import * as XLSX from "xlsx";
+import { createWorkbook, addJsonSheet, addAoaSheet, writeFile as writeExcelFile } from "@/lib/excelUtils";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { GRNDocument, type GRNItem } from "@/components/forms/GRNDocument";
@@ -827,34 +827,15 @@ export default function Stock() {
     }));
 
     // Create workbook
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = createWorkbook();
+    addJsonSheet(wb, exportData, 'Purchase Orders', [
+      { wch: 15 }, { wch: 10 }, { wch: 20 }, { wch: 12 }, { wch: 15 },
+      { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 15 },
+      { wch: 12 }, { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 30 }, { wch: 25 }
+    ]);
 
-    // Set column widths
-    ws['!cols'] = [
-      { wch: 15 }, // PO Number
-      { wch: 10 }, // Type
-      { wch: 20 }, // Supplier
-      { wch: 12 }, // Order Date
-      { wch: 15 }, // Expected Delivery
-      { wch: 10 }, // Status
-      { wch: 12 }, // Total Amount
-      { wch: 12 }, // Payment Status
-      { wch: 15 }, // Payment Due Date
-      { wch: 15 }, // GRN Number
-      { wch: 12 }, // GRN Date
-      { wch: 15 }, // Invoice Number
-      { wch: 12 }, // Invoice Date
-      { wch: 10 }, // Items Count
-      { wch: 30 }, // Service Description
-      { wch: 25 }  // Notes
-    ];
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Purchase Orders');
-
-    // Generate filename with date range
     const filename = `PurchaseOrders_${startDateStr}_to_${endDateStr}.xlsx`;
-    XLSX.writeFile(wb, filename);
+    await writeExcelFile(wb, filename);
 
     toast({
       title: "Success",
@@ -1209,8 +1190,8 @@ export default function Stock() {
   };
 
   // Stock Export Functions
-  const exportStockToExcel = () => {
-    const workbook = XLSX.utils.book_new();
+  const exportStockToExcel = async () => {
+    const workbook = createWorkbook();
     
     const reportData: any[][] = [
       ['STOCK INVENTORY REPORT'],
@@ -1223,28 +1204,19 @@ export default function Stock() {
       const status = item.currentStock <= item.minimumStock * 0.5 ? 'Critical' : 
                      item.currentStock <= item.minimumStock ? 'Low Stock' : 'In Stock';
       reportData.push([
-        item.name,
-        item.category,
-        item.currentStock,
-        item.minimumStock,
-        item.unitPrice,
-        item.mrp || item.unitPrice,
+        item.name, item.category, item.currentStock, item.minimumStock,
+        item.unitPrice, item.mrp || item.unitPrice,
         (item.currentStock * item.unitPrice).toFixed(2),
-        item.supplier,
-        item.batchNo,
-        item.expiryDate,
-        status
+        item.supplier, item.batchNo, item.expiryDate, status
       ]);
     });
 
-    // Add summary
     reportData.push([]);
     reportData.push(['SUMMARY']);
     reportData.push(['Total Items', stockItems.length]);
     reportData.push(['Low Stock Items', stockItems.filter(i => i.currentStock <= i.minimumStock).length]);
     reportData.push(['Total Inventory Value', `₹${stockItems.reduce((t, i) => t + (i.currentStock * i.unitPrice), 0).toFixed(2)}`]);
 
-    // Category breakdown
     reportData.push([]);
     reportData.push(['CATEGORY BREAKDOWN']);
     ['BNX', 'TPN', 'PSHY'].forEach(cat => {
@@ -1253,13 +1225,11 @@ export default function Stock() {
       reportData.push([cat, `${catItems.length} items`, `₹${catValue.toFixed(2)}`]);
     });
 
-    const sheet = XLSX.utils.aoa_to_sheet(reportData);
-    sheet['!cols'] = [
+    addAoaSheet(workbook, reportData, 'Stock Report', [
       { wch: 30 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 20 }, { wch: 15 }, { wch: 12 }, { wch: 10 }
-    ];
+    ]);
     
-    XLSX.utils.book_append_sheet(workbook, sheet, 'Stock Report');
-    XLSX.writeFile(workbook, `Stock_Report_${formatLocalISODate()}.xlsx`);
+    await writeExcelFile(workbook, `Stock_Report_${formatLocalISODate()}.xlsx`);
     toast({ title: "Exported", description: "Stock report exported to Excel" });
   };
 
