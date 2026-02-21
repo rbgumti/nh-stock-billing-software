@@ -31,7 +31,13 @@ import {
   AlertTriangle,
   Clock,
   ShoppingCart,
-  CalendarIcon
+  CalendarIcon,
+  Truck,
+  BookOpen,
+  ClipboardList,
+  ArrowRight,
+  Pill,
+  UserCheck
 } from "lucide-react";
 import { useStockStore } from "@/hooks/useStockStore";
 import * as XLSX from "xlsx";
@@ -55,6 +61,21 @@ export default function Reports() {
   const [patients, setPatients] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
+  const [activeTab, setActiveTab] = useState("overview");
+  
+  // Overview stats from DB
+  const [overviewStats, setOverviewStats] = useState({
+    totalPatients: 0,
+    totalInvoices: 0,
+    totalRevenue: 0,
+    lowStockCount: 0,
+    todayInvoices: 0,
+    todayRevenue: 0,
+    monthInvoices: 0,
+    monthRevenue: 0,
+    pendingFollowUps: 0,
+    expiringItems: 0,
+  });
   
   // Export dialog state
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -78,7 +99,47 @@ export default function Reports() {
       from: thirtyDaysAgo.toISOString().split('T')[0],
       to: today.toISOString().split('T')[0]
     });
-  }, []);
+
+    // Fetch overview stats from Supabase
+    const fetchOverviewStats = async () => {
+      try {
+        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        const monthStart = format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd');
+        const threeMonthsLater = format(new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+
+        const [patientsRes, invoicesRes, todayInvRes, monthInvRes, followUpRes] = await Promise.all([
+          supabase.from('patients').select('id', { count: 'exact', head: true }),
+          supabase.from('invoices').select('id, total', { count: 'exact' }),
+          supabase.from('invoices').select('id, total').eq('invoice_date', todayStr),
+          supabase.from('invoices').select('id, total').gte('invoice_date', monthStart).lte('invoice_date', todayStr),
+          supabase.from('invoices').select('id').gte('follow_up_date', todayStr).not('follow_up_date', 'is', null),
+        ]);
+
+        const totalRevenue = (invoicesRes.data || []).reduce((s, i) => s + (i.total || 0), 0);
+        const todayRevenue = (todayInvRes.data || []).reduce((s, i) => s + (i.total || 0), 0);
+        const monthRevenue = (monthInvRes.data || []).reduce((s, i) => s + (i.total || 0), 0);
+
+        setOverviewStats({
+          totalPatients: patientsRes.count || 0,
+          totalInvoices: invoicesRes.count || 0,
+          totalRevenue,
+          lowStockCount: stockItems.filter(i => i.currentStock <= i.minimumStock).length,
+          todayInvoices: todayInvRes.data?.length || 0,
+          todayRevenue,
+          monthInvoices: monthInvRes.data?.length || 0,
+          monthRevenue,
+          pendingFollowUps: followUpRes.data?.length || 0,
+          expiringItems: stockItems.filter(i => {
+            if (!i.expiryDate || i.expiryDate === 'N/A') return false;
+            return new Date(i.expiryDate) <= new Date(threeMonthsLater);
+          }).length,
+        });
+      } catch (err) {
+        console.error('Failed to fetch overview stats:', err);
+      }
+    };
+    fetchOverviewStats();
+  }, [stockItems]);
 
   // Patient Reports Data
   const patientStats = {
@@ -523,7 +584,7 @@ export default function Reports() {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="glass-strong border-0 p-1 grid w-full grid-cols-9">
           <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple data-[state=active]:to-cyan data-[state=active]:text-white">Overview</TabsTrigger>
           <TabsTrigger value="salereport" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan data-[state=active]:to-teal data-[state=active]:text-white">Sale Report</TabsTrigger>
@@ -546,6 +607,7 @@ export default function Reports() {
         </TabsContent>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* Summary Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 via-transparent to-purple/10 opacity-50 group-hover:opacity-100 transition-opacity" />
@@ -556,12 +618,11 @@ export default function Reports() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-muted-foreground">Total Patients</p>
-                    <p className="text-2xl font-bold">{patientStats.total}</p>
+                    <p className="text-2xl font-bold">{overviewStats.totalPatients}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            
             <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald/10 via-transparent to-teal/10 opacity-50 group-hover:opacity-100 transition-opacity" />
               <CardContent className="pt-6 relative">
@@ -576,22 +637,6 @@ export default function Reports() {
                 </div>
               </CardContent>
             </Card>
-
-            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-              <CardContent className="pt-6 relative">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-purple to-pink shadow-lg">
-                    <Receipt className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
-                    <p className="text-2xl font-bold">{invoiceStats.total}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-orange/10 opacity-50 group-hover:opacity-100 transition-opacity" />
               <CardContent className="pt-6 relative">
@@ -600,9 +645,273 @@ export default function Reports() {
                     <DollarSign className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-                    <p className="text-2xl font-bold">₹{formatNumber(invoiceStats.totalRevenue)}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Today's Revenue</p>
+                    <p className="text-2xl font-bold">₹{formatNumber(overviewStats.todayRevenue)}</p>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-pink/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 relative">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-purple to-pink shadow-lg">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">This Month Revenue</p>
+                    <p className="text-2xl font-bold">₹{formatNumber(overviewStats.monthRevenue)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Report Dashboard Cards */}
+          <h2 className="text-xl font-bold text-foreground mt-2">Quick Access Reports</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+            {/* Sale Report */}
+            <Card 
+              className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveTab("salereport")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan to-teal rounded-t-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/8 via-transparent to-teal/8 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 pb-5 relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-cyan/20 to-teal/20 shadow-inner">
+                    <ShoppingCart className="h-6 w-6 text-cyan" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Sale Report</h3>
+                    <p className="text-xs text-muted-foreground">Medicine sales & analytics</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Today Sales</p>
+                    <p className="font-semibold text-sm">{overviewStats.todayInvoices}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Month Sales</p>
+                    <p className="font-semibold text-sm">{overviewStats.monthInvoices}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-3 text-xs text-cyan font-medium group-hover:gap-2 transition-all">
+                  View Report <ArrowRight className="h-3 w-3" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Day's Report */}
+            <Card 
+              className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveTab("dayreport")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold to-orange rounded-t-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-gold/8 via-transparent to-orange/8 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 pb-5 relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-gold/20 to-orange/20 shadow-inner">
+                    <CalendarIcon className="h-6 w-6 text-gold" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Day's Report</h3>
+                    <p className="text-xs text-muted-foreground">Daily cash & collection</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Today Revenue</p>
+                    <p className="font-semibold text-sm">₹{formatNumber(overviewStats.todayRevenue)}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Invoices</p>
+                    <p className="font-semibold text-sm">{overviewStats.todayInvoices}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-3 text-xs text-gold font-medium group-hover:gap-2 transition-all">
+                  View Report <ArrowRight className="h-3 w-3" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Patient Reports */}
+            <Card 
+              className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveTab("patients")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-pink to-purple rounded-t-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-pink/8 via-transparent to-purple/8 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 pb-5 relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-pink/20 to-purple/20 shadow-inner">
+                    <Users className="h-6 w-6 text-pink" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Patient Reports</h3>
+                    <p className="text-xs text-muted-foreground">Demographics & analytics</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Total</p>
+                    <p className="font-semibold text-sm">{overviewStats.totalPatients}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Follow-Ups</p>
+                    <p className="font-semibold text-sm">{overviewStats.pendingFollowUps}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-3 text-xs text-pink font-medium group-hover:gap-2 transition-all">
+                  View Report <ArrowRight className="h-3 w-3" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Stock Reports */}
+            <Card 
+              className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveTab("stock")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald to-teal rounded-t-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald/8 via-transparent to-teal/8 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 pb-5 relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-emerald/20 to-teal/20 shadow-inner">
+                    <Package className="h-6 w-6 text-emerald" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Stock Reports</h3>
+                    <p className="text-xs text-muted-foreground">Inventory & valuation</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Low Stock</p>
+                    <p className="font-semibold text-sm text-destructive">{overviewStats.lowStockCount}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Expiring</p>
+                    <p className="font-semibold text-sm text-orange">{overviewStats.expiringItems}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-3 text-xs text-emerald font-medium group-hover:gap-2 transition-all">
+                  View Report <ArrowRight className="h-3 w-3" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Invoice Reports */}
+            <Card 
+              className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveTab("invoices")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple to-pink rounded-t-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-purple/8 via-transparent to-pink/8 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 pb-5 relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-purple/20 to-pink/20 shadow-inner">
+                    <Receipt className="h-6 w-6 text-purple" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Invoice Reports</h3>
+                    <p className="text-xs text-muted-foreground">Billing & revenue</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Total</p>
+                    <p className="font-semibold text-sm">{overviewStats.totalInvoices}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xs text-muted-foreground">Revenue</p>
+                    <p className="font-semibold text-sm">₹{formatNumber(overviewStats.totalRevenue)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-3 text-xs text-purple font-medium group-hover:gap-2 transition-all">
+                  View Report <ArrowRight className="h-3 w-3" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Stock Ledger */}
+            <Card 
+              className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveTab("stockledger")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan to-purple rounded-t-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan/8 via-transparent to-purple/8 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 pb-5 relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-cyan/20 to-purple/20 shadow-inner">
+                    <BookOpen className="h-6 w-6 text-cyan" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Stock Ledger</h3>
+                    <p className="text-xs text-muted-foreground">Movement tracking</p>
+                  </div>
+                </div>
+                <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                  <p className="text-xs text-muted-foreground">Total Stock Value</p>
+                  <p className="font-semibold text-sm">₹{formatNumber(stockStats.totalValue)}</p>
+                </div>
+                <div className="flex items-center gap-1 mt-3 text-xs text-cyan font-medium group-hover:gap-2 transition-all">
+                  View Ledger <ArrowRight className="h-3 w-3" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Daily Stock Report */}
+            <Card 
+              className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveTab("dailystock")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal to-emerald rounded-t-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-teal/8 via-transparent to-emerald/8 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 pb-5 relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-teal/20 to-emerald/20 shadow-inner">
+                    <ClipboardList className="h-6 w-6 text-teal" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Daily Stock</h3>
+                    <p className="text-xs text-muted-foreground">Opening & closing stock</p>
+                  </div>
+                </div>
+                <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                  <p className="text-xs text-muted-foreground">Total Items</p>
+                  <p className="font-semibold text-sm">{stockStats.totalItems}</p>
+                </div>
+                <div className="flex items-center gap-1 mt-3 text-xs text-teal font-medium group-hover:gap-2 transition-all">
+                  View Report <ArrowRight className="h-3 w-3" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Follow-Up Report */}
+            <Card 
+              className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveTab("followup")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange to-gold rounded-t-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-orange/8 via-transparent to-gold/8 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="pt-6 pb-5 relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-orange/20 to-gold/20 shadow-inner">
+                    <UserCheck className="h-6 w-6 text-orange" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Follow-Up</h3>
+                    <p className="text-xs text-muted-foreground">Patient follow-ups</p>
+                  </div>
+                </div>
+                <div className="p-2 rounded-lg bg-muted/30 border border-border/30">
+                  <p className="text-xs text-muted-foreground">Pending</p>
+                  <p className="font-semibold text-sm">{overviewStats.pendingFollowUps}</p>
+                </div>
+                <div className="flex items-center gap-1 mt-3 text-xs text-orange font-medium group-hover:gap-2 transition-all">
+                  View Report <ArrowRight className="h-3 w-3" />
                 </div>
               </CardContent>
             </Card>
