@@ -2089,20 +2089,16 @@ export default function Stock() {
                     </div>
                     <div className="text-sm">
                       <p className="text-muted-foreground">GRN Date</p>
-                      <p className="font-medium">{po.grnDate}</p>
+                      <p className="font-medium">{po.grnDate ? new Date(po.grnDate).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).replace(',', ';') + ' IST' : '-'}</p>
                     </div>
-                    {po.invoiceNumber && (
-                      <div className="text-sm">
-                        <p className="text-muted-foreground">Invoice No.</p>
-                        <p className="font-medium">{po.invoiceNumber}</p>
-                      </div>
-                    )}
-                    {po.invoiceDate && (
-                      <div className="text-sm">
-                        <p className="text-muted-foreground">Invoice Date</p>
-                        <p className="font-medium">{po.invoiceDate}</p>
-                      </div>
-                    )}
+                    <div className="text-sm">
+                      <p className="text-muted-foreground">Invoice No.</p>
+                      <p className="font-medium">{po.invoiceNumber || 'N/A'}</p>
+                    </div>
+                    <div className="text-sm">
+                      <p className="text-muted-foreground">Invoice Date</p>
+                      <p className="font-medium">{po.invoiceDate || 'N/A'}</p>
+                    </div>
                     <div className="text-sm">
                       <p className="text-muted-foreground">Total Amount</p>
                       <p className="font-semibold text-lg bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{po.totalAmount.toFixed(2)}</p>
