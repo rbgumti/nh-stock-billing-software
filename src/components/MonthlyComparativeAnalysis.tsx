@@ -531,19 +531,19 @@ export function MonthlyComparativeAnalysis() {
   const getBestWorstMonths = () => {
     if (metrics.length < 2) return null;
 
-    const revenueMax = metrics.reduce((max, m) => m.revenue > max.revenue ? m : max, metrics[0]);
+    const revenueMax = metrics.reduce((max, m) => m.revenue >= max.revenue ? m : max, metrics[0]);
     const revenueMin = metrics.reduce((min, m) => m.revenue < min.revenue ? m : min, metrics[0]);
     
     const patientsMax = metrics.reduce((max, m) => {
       const total = m.newPatientsBnx + m.followUpPatientsBnx + m.tpnPatients + m.pshyPatients;
       const maxTotal = max.newPatientsBnx + max.followUpPatientsBnx + max.tpnPatients + max.pshyPatients;
-      return total > maxTotal ? m : max;
+      return total >= maxTotal ? m : max;
     }, metrics[0]);
 
     const qtyMax = metrics.reduce((max, m) => {
       const total = m.bnxQtySold + m.tpnQtySold;
       const maxTotal = max.bnxQtySold + max.tpnQtySold;
-      return total > maxTotal ? m : max;
+      return total >= maxTotal ? m : max;
     }, metrics[0]);
 
     return { revenueMax, revenueMin, patientsMax, qtyMax };
