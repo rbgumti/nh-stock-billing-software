@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -14,6 +14,7 @@ export interface PurchaseOrderItem {
 }
 
 export interface PurchaseOrder {
+// ... keep existing code (PurchaseOrder interface fields lines 17-41)
   id: string;
   poNumber: string;
   supplier: string;
@@ -40,90 +41,118 @@ export interface PurchaseOrder {
   serviceAmount?: number;
 }
 
-export function usePurchaseOrderStore() {
-  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
-  const [loading, setLoading] = useState(true);
+// Global cache for purchase orders
+let globalPOCache: PurchaseOrder[] = [];
+let poCacheTimestamp: number = 0;
+let isPOLoading = false;
+let poLoadPromise: Promise<PurchaseOrder[]> | null = null;
+const PO_CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
 
-  useEffect(() => {
-    loadPurchaseOrders();
-    
-    // Subscribe to real-time changes
-    const channel = supabase
-      .channel('po-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'purchase_orders'
-        },
-        () => {
-          loadPurchaseOrders();
-        }
-      )
-      .subscribe();
+async function fetchAllPurchaseOrders(): Promise<PurchaseOrder[]> {
+  const [ordersRes, itemsRes] = await Promise.all([
+    supabase.from('purchase_orders').select('*').order('created_at', { ascending: false }),
+    supabase.from('purchase_order_items').select('*')
+  ]);
 
-    return () => {
-      supabase.removeChannel(channel);
+  if (ordersRes.error) throw ordersRes.error;
+  if (itemsRes.error) throw itemsRes.error;
+
+  const orders = ordersRes.data || [];
+  const allItems = itemsRes.data || [];
+
+  return orders.map(po => {
+    const poItems = allItems
+      .filter(item => item.purchase_order_id === po.id)
+      .map(item => ({
+        stockItemId: item.stock_item_id,
+        stockItemName: item.stock_item_name || item.item_name || '',
+        quantity: item.quantity,
+        unitPrice: Number(item.unit_price),
+        totalPrice: Number(item.total_price),
+        packSize: item.pack_size || undefined,
+        qtyInStrips: item.qty_in_strips || undefined,
+        qtyInTabs: item.qty_in_tabs || undefined
+      }));
+
+    return {
+      id: po.id,
+      poNumber: po.po_number,
+      supplier: po.supplier,
+      orderDate: po.order_date,
+      expectedDelivery: po.expected_delivery,
+      status: po.status as 'Pending' | 'Received' | 'Cancelled',
+      items: poItems,
+      totalAmount: Number(po.total_amount),
+      grnDate: po.grn_date || undefined,
+      grnNumber: po.grn_number || undefined,
+      invoiceNumber: po.invoice_number || undefined,
+      invoiceDate: po.invoice_date || undefined,
+      invoiceUrl: po.invoice_url || undefined,
+      notes: po.notes || undefined,
+      paymentStatus: (po.payment_status as 'Pending' | 'Partial' | 'Paid' | 'Overdue') || 'Pending',
+      paymentDueDate: po.payment_due_date || undefined,
+      paymentDate: po.payment_date || undefined,
+      paymentAmount: po.payment_amount ? Number(po.payment_amount) : undefined,
+      paymentNotes: po.payment_notes || undefined,
+      poType: (po.po_type as 'Stock' | 'Service') || 'Stock',
+      serviceDescription: po.service_description || undefined,
+      serviceAmount: po.service_amount ? Number(po.service_amount) : undefined
     };
-  }, []);
+  });
+}
 
-  const loadPurchaseOrders = async () => {
+// Preload function - call early to warm cache
+export function preloadPurchaseOrders() {
+  if (globalPOCache.length === 0 && !isPOLoading) {
+    isPOLoading = true;
+    poLoadPromise = fetchAllPurchaseOrders().then(data => {
+      globalPOCache = data;
+      poCacheTimestamp = Date.now();
+      isPOLoading = false;
+      poLoadPromise = null;
+      return data;
+    }).catch(err => {
+      isPOLoading = false;
+      poLoadPromise = null;
+      throw err;
+    });
+  }
+  return poLoadPromise;
+}
+
+export function usePurchaseOrderStore() {
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(globalPOCache);
+  const [loading, setLoading] = useState(globalPOCache.length === 0);
+
+  const loadPurchaseOrders = useCallback(async (force = false) => {
+    const now = Date.now();
+    const cacheValid = globalPOCache.length > 0 && (now - poCacheTimestamp) < PO_CACHE_DURATION;
+
+    if (cacheValid && !force) {
+      setPurchaseOrders(globalPOCache);
+      setLoading(false);
+      return;
+    }
+
+    if (isPOLoading && poLoadPromise) {
+      try {
+        const data = await poLoadPromise;
+        setPurchaseOrders(data);
+        setLoading(false);
+        return;
+      } catch {
+        setLoading(false);
+        return;
+      }
+    }
+
+    isPOLoading = true;
+    setLoading(true);
     try {
-      const { data: orders, error: ordersError } = await supabase
-        .from('purchase_orders')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (ordersError) throw ordersError;
-
-      const { data: allItems, error: itemsError } = await supabase
-        .from('purchase_order_items')
-        .select('*');
-
-      if (itemsError) throw itemsError;
-
-      const formattedOrders: PurchaseOrder[] = (orders || []).map(po => {
-        const poItems = (allItems || [])
-          .filter(item => item.purchase_order_id === po.id)
-          .map(item => ({
-            stockItemId: item.stock_item_id,
-            stockItemName: item.stock_item_name || item.item_name || '',
-            quantity: item.quantity,
-            unitPrice: Number(item.unit_price),
-            totalPrice: Number(item.total_price),
-            packSize: item.pack_size || undefined,
-            qtyInStrips: item.qty_in_strips || undefined,
-            qtyInTabs: item.qty_in_tabs || undefined
-          }));
-
-        return {
-          id: po.id,
-          poNumber: po.po_number,
-          supplier: po.supplier,
-          orderDate: po.order_date,
-          expectedDelivery: po.expected_delivery,
-          status: po.status as 'Pending' | 'Received' | 'Cancelled',
-          items: poItems,
-          totalAmount: Number(po.total_amount),
-          grnDate: po.grn_date || undefined,
-          grnNumber: po.grn_number || undefined,
-          invoiceNumber: po.invoice_number || undefined,
-          invoiceDate: po.invoice_date || undefined,
-          invoiceUrl: po.invoice_url || undefined,
-          notes: po.notes || undefined,
-          paymentStatus: (po.payment_status as 'Pending' | 'Partial' | 'Paid' | 'Overdue') || 'Pending',
-          paymentDueDate: po.payment_due_date || undefined,
-          paymentDate: po.payment_date || undefined,
-          paymentAmount: po.payment_amount ? Number(po.payment_amount) : undefined,
-          paymentNotes: po.payment_notes || undefined,
-          poType: (po.po_type as 'Stock' | 'Service') || 'Stock',
-          serviceDescription: po.service_description || undefined,
-          serviceAmount: po.service_amount ? Number(po.service_amount) : undefined
-        };
-      });
-
-      setPurchaseOrders(formattedOrders);
+      const data = await fetchAllPurchaseOrders();
+      globalPOCache = data;
+      poCacheTimestamp = Date.now();
+      setPurchaseOrders(data);
     } catch (error) {
       console.error('Error loading purchase orders:', error);
       toast({
@@ -132,9 +161,37 @@ export function usePurchaseOrderStore() {
         variant: "destructive"
       });
     } finally {
+      isPOLoading = false;
+      poLoadPromise = null;
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (globalPOCache.length > 0) {
+      setPurchaseOrders(globalPOCache);
+      setLoading(false);
+      const now = Date.now();
+      if ((now - poCacheTimestamp) >= PO_CACHE_DURATION) {
+        loadPurchaseOrders(true);
+      }
+    } else {
+      loadPurchaseOrders();
+    }
+
+    const channel = supabase
+      .channel('po-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchase_orders' }, () => {
+        globalPOCache = [];
+        poCacheTimestamp = 0;
+        loadPurchaseOrders(true);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadPurchaseOrders]);
 
   const addPurchaseOrder = async (po: PurchaseOrder) => {
     const toDbDate = (label: string, value?: string, required = false) => {
@@ -373,6 +430,6 @@ export function usePurchaseOrderStore() {
     updatePurchaseOrder,
     getPurchaseOrder,
     subscribe,
-    refreshPurchaseOrders: loadPurchaseOrders
+    refreshPurchaseOrders: () => loadPurchaseOrders(true)
   };
 }
