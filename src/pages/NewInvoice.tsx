@@ -348,7 +348,7 @@ export default function NewInvoice() {
           patient_id: selectedPatient,
           patient_name: foundPatient?.patient_name || selectedPatient,
           patient_phone: foundPatient?.phone || '',
-          invoice_date: invoiceDate,
+          invoice_date: new Date().toISOString(),
           subtotal: subtotal,
           tax: 0,
           total: total,
