@@ -1898,28 +1898,26 @@ export default function Stock() {
             {purchaseOrders
               .filter(po => poTypeFilter === "all" || (po.poType || "Stock") === poTypeFilter)
               .map((po, index) => (
-              <Card key={po.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <Card key={po.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className={`absolute inset-0 bg-gradient-to-br ${
-                  index % 4 === 0 ? 'from-cyan/5 via-transparent to-teal/5' :
-                  index % 4 === 1 ? 'from-purple/5 via-transparent to-cyan/5' :
-                  index % 4 === 2 ? 'from-gold/5 via-transparent to-orange/5' :
-                  'from-pink/5 via-transparent to-purple/5'
-                } opacity-50 group-hover:opacity-100 transition-opacity`} />
-                <CardHeader className="relative">
+                  index % 4 === 0 ? 'from-cyan/8 via-transparent to-teal/8' :
+                  index % 4 === 1 ? 'from-purple/8 via-transparent to-cyan/8' :
+                  index % 4 === 2 ? 'from-gold/8 via-transparent to-orange/8' :
+                  'from-pink/8 via-transparent to-purple/8'
+                } opacity-60 group-hover:opacity-100 transition-opacity`} />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan via-teal to-emerald rounded-t-2xl" />
+                <CardHeader className="relative pb-3">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">PO #{po.poNumber}</CardTitle>
-                        {po.poType === 'Service' && (
-                          <Badge variant="outline" className="text-xs border-purple/40 text-purple">
-                            <Wrench className="h-3 w-3 mr-1" />
-                            Service
-                          </Badge>
-                        )}
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl bg-gradient-to-br ${po.poType === 'Service' ? 'from-purple/20 to-pink/20' : 'from-cyan/20 to-teal/20'} shadow-inner`}>
+                        {po.poType === 'Service' ? <Wrench className="h-5 w-5 text-purple" /> : <FileText className="h-5 w-5 text-cyan" />}
                       </div>
-                      <p className="text-sm text-muted-foreground">{po.supplier}</p>
+                      <div>
+                        <CardTitle className="text-lg bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">PO #{po.poNumber}</CardTitle>
+                        <p className="text-sm text-muted-foreground font-medium">{po.supplier}</p>
+                      </div>
                     </div>
-                    <Badge className={`${
+                    <Badge className={`shadow-sm ${
                       po.status === 'Pending' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
                       po.status === 'Received' ? 'bg-gradient-to-r from-emerald to-teal text-white border-0' :
                       'glass-subtle border-purple/20'
@@ -1928,27 +1926,29 @@ export default function Stock() {
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="relative">
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Order Date</p>
-                      <p className="font-medium">{po.orderDate}</p>
+                <CardContent className="relative pt-0">
+                  <div className="space-y-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-r from-gold/10 to-orange/10 border border-gold/10">
+                      <p className="text-xs text-muted-foreground mb-0.5">Total Amount</p>
+                      <p className="font-bold text-xl bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{po.totalAmount.toFixed(2)}</p>
                     </div>
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Total Amount</p>
-                      <p className="font-semibold text-lg bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{po.totalAmount.toFixed(2)}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-2.5 rounded-lg bg-muted/30 border border-border/30">
+                        <p className="text-xs text-muted-foreground mb-0.5">Order Date</p>
+                        <p className="font-medium text-sm">{po.orderDate}</p>
+                      </div>
+                      {po.poType === 'Service' ? (
+                        <div className="p-2.5 rounded-lg bg-muted/30 border border-border/30">
+                          <p className="text-xs text-muted-foreground mb-0.5">Service</p>
+                          <p className="font-medium text-sm line-clamp-1">{po.serviceDescription || 'N/A'}</p>
+                        </div>
+                      ) : (
+                        <div className="p-2.5 rounded-lg bg-muted/30 border border-border/30">
+                          <p className="text-xs text-muted-foreground mb-0.5">Items</p>
+                          <p className="font-medium text-sm">{po.items.length} item(s)</p>
+                        </div>
+                      )}
                     </div>
-                    {po.poType === 'Service' ? (
-                      <div className="text-sm">
-                        <p className="text-muted-foreground">Service Description</p>
-                        <p className="font-medium line-clamp-2">{po.serviceDescription || 'N/A'}</p>
-                      </div>
-                    ) : (
-                      <div className="text-sm">
-                        <p className="text-muted-foreground">Items</p>
-                        <p className="font-medium">{po.items.length} item(s)</p>
-                      </div>
-                    )}
                     <div className="flex gap-2 mt-4">
                       {po.status === 'Pending' && (
                         <>
@@ -2066,46 +2066,54 @@ export default function Stock() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {purchaseOrders.filter(po => po.status === 'Received').map((po, index) => (
-              <Card key={po.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
+              <Card key={po.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className={`absolute inset-0 bg-gradient-to-br ${
-                  index % 3 === 0 ? 'from-teal/5 via-transparent to-emerald/5' :
-                  index % 3 === 1 ? 'from-emerald/5 via-transparent to-cyan/5' :
-                  'from-cyan/5 via-transparent to-teal/5'
-                } opacity-50 group-hover:opacity-100 transition-opacity`} />
-                <CardHeader className="relative">
+                  index % 3 === 0 ? 'from-teal/8 via-transparent to-emerald/8' :
+                  index % 3 === 1 ? 'from-emerald/8 via-transparent to-cyan/8' :
+                  'from-cyan/8 via-transparent to-teal/8'
+                } opacity-60 group-hover:opacity-100 transition-opacity`} />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald via-teal to-cyan rounded-t-2xl" />
+                <CardHeader className="relative pb-3">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg bg-gradient-to-r from-teal to-emerald bg-clip-text text-transparent">GRN - PO #{po.poNumber}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{po.supplier}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald/20 to-teal/20 shadow-inner">
+                        <Truck className="h-5 w-5 text-emerald" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg bg-gradient-to-r from-teal to-emerald bg-clip-text text-transparent">GRN - PO #{po.poNumber}</CardTitle>
+                        <p className="text-sm text-muted-foreground font-medium">{po.supplier}</p>
+                      </div>
                     </div>
-                    <Badge className="bg-gradient-to-r from-emerald to-teal text-white border-0">Received</Badge>
+                    <Badge className="bg-gradient-to-r from-emerald to-teal text-white border-0 shadow-sm">Received</Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="relative">
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Order Date</p>
-                      <p className="font-medium">{po.orderDate}</p>
+                <CardContent className="relative pt-0">
+                  <div className="space-y-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-r from-gold/10 to-orange/10 border border-gold/10">
+                      <p className="text-xs text-muted-foreground mb-0.5">Total Amount</p>
+                      <p className="font-bold text-xl bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{po.totalAmount.toFixed(2)}</p>
                     </div>
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">GRN Date</p>
-                      <p className="font-medium">{po.grnDate ? new Date(po.grnDate).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).replace(',', ';') + ' IST' : '-'}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-2.5 rounded-lg bg-muted/30 border border-border/30">
+                        <p className="text-xs text-muted-foreground mb-0.5">Order Date</p>
+                        <p className="font-medium text-sm">{po.orderDate}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-muted/30 border border-border/30">
+                        <p className="text-xs text-muted-foreground mb-0.5">GRN Date</p>
+                        <p className="font-medium text-sm">{po.grnDate ? new Date(po.grnDate).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).replace(',', ';') + ' IST' : '-'}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-muted/30 border border-border/30">
+                        <p className="text-xs text-muted-foreground mb-0.5">Invoice No.</p>
+                        <p className="font-medium text-sm">{po.invoiceNumber || 'N/A'}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-muted/30 border border-border/30">
+                        <p className="text-xs text-muted-foreground mb-0.5">Invoice Date</p>
+                        <p className="font-medium text-sm">{po.invoiceDate || 'N/A'}</p>
+                      </div>
                     </div>
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Invoice No.</p>
-                      <p className="font-medium">{po.invoiceNumber || 'N/A'}</p>
-                    </div>
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Invoice Date</p>
-                      <p className="font-medium">{po.invoiceDate || 'N/A'}</p>
-                    </div>
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Total Amount</p>
-                      <p className="font-semibold text-lg bg-gradient-to-r from-gold to-orange bg-clip-text text-transparent">₹{po.totalAmount.toFixed(2)}</p>
-                    </div>
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Items Received</p>
-                      <p className="font-medium">{po.items.length} item(s)</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Package className="h-4 w-4" />
+                      <span className="font-medium text-foreground">{po.items.length}</span> item(s) received
                     </div>
                     <div className="flex gap-2 mt-4 flex-wrap">
                       <Button 
