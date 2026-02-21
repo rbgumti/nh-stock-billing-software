@@ -1,5 +1,6 @@
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
+import { preloadPurchaseOrders } from "@/hooks/usePurchaseOrderStore";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -137,6 +138,7 @@ export default function Dashboard() {
     // Defer preloads to after dashboard mounts (not at module import time)
     preloadPatients();
     preloadStockItems();
+    preloadPurchaseOrders();
     loadAllData();
 
     // Single consolidated realtime channel instead of 4 separate ones

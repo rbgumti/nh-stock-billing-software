@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
+import { preloadPurchaseOrders } from "@/hooks/usePurchaseOrderStore";
 import { Users, Package, Receipt, LayoutDashboard, Plus, BarChart3, Activity, Calendar, FileText, ChevronRight, PanelLeftClose, PanelLeft, Menu, Bell, Wallet, Shield } from "lucide-react";
 import {
   Sidebar,
@@ -287,6 +288,7 @@ export function AppSidebar() {
                         if (item.url === '/invoices' || item.url === '/stock') {
                           preloadPatients();
                           preloadStockItems();
+                          preloadPurchaseOrders();
                         }
                       }}
                       className={`relative rounded-xl transition-colors duration-150 flex items-center ${
