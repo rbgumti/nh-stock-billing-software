@@ -296,7 +296,7 @@ export default function Stock() {
     return !isNaN(parsed.getTime());
   };
 
-  const handleGRN = async (grnData: { grnNumber: string; purchaseOrderId: string; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
+  const handleGRN = async (grnData: { grnNumber: string; grnDate?: string; purchaseOrderId: string; items: any[]; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (!po) {
       toast({
@@ -452,7 +452,7 @@ export default function Stock() {
         .from('purchase_orders')
         .update({
           status: 'Received',
-          grn_date: new Date().toISOString(),
+          grn_date: grnData.grnDate ? new Date(grnData.grnDate + 'T00:00:00').toISOString() : new Date().toISOString(),
           grn_number: grnData.grnNumber,
           invoice_number: grnData.invoiceNumber || null,
           invoice_date: grnData.invoiceDate || null,
@@ -488,14 +488,14 @@ export default function Stock() {
     }
   };
 
-  const handleServiceGRN = (grnData: { grnNumber: string; purchaseOrderId: string; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
+  const handleServiceGRN = (grnData: { grnNumber: string; grnDate?: string; purchaseOrderId: string; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => {
     const po = purchaseOrders.find(p => p.id === grnData.purchaseOrderId);
     if (po) {
       // Update PO status with GRN number, invoice number and date (no stock update for service)
       updatePurchaseOrder(po.id, {
         ...po,
         status: 'Received',
-        grnDate: formatLocalISODate(),
+        grnDate: grnData.grnDate || formatLocalISODate(),
         grnNumber: grnData.grnNumber,
         invoiceNumber: grnData.invoiceNumber,
         invoiceDate: grnData.invoiceDate,

@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface ServiceGRNFormProps {
   onClose: () => void;
-  onSubmit: (grnData: { grnNumber: string; purchaseOrderId: string; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => void;
+  onSubmit: (grnData: { grnNumber: string; grnDate?: string; purchaseOrderId: string; notes?: string; invoiceNumber?: string; invoiceDate?: string; invoiceUrl?: string }) => void;
   purchaseOrder: PurchaseOrder;
 }
 
@@ -122,6 +122,7 @@ export function ServiceGRNForm({ onClose, onSubmit, purchaseOrder }: ServiceGRNF
 
       onSubmit({
         grnNumber,
+        grnDate,
         purchaseOrderId: purchaseOrder.id,
         notes,
         invoiceNumber,

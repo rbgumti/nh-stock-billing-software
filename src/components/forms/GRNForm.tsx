@@ -31,6 +31,7 @@ interface GRNFormProps {
   onClose: () => void;
   onSubmit: (grnData: { 
     grnNumber: string; 
+    grnDate?: string;
     purchaseOrderId: string; 
     items: GRNItem[]; 
     notes?: string;
@@ -289,6 +290,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
     
     onSubmit({
       grnNumber,
+      grnDate,
       purchaseOrderId: purchaseOrder.id,
       items: grnItems,
       notes,
