@@ -16,6 +16,24 @@ import hospitalLogo from "@/assets/NH_LOGO.png";
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
 
+const formatInvoiceDate = (dateStr: string) => {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    let hours = d.getHours();
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${day}-${month}-${year}; ${hours}:${mins} ${ampm} IST`;
+  } catch {
+    return dateStr;
+  }
+};
+
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -229,7 +247,7 @@ export default function Invoices() {
     doc.text("Date:", pageWidth / 2 + 10, y);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
-    doc.text(invoice.date, pageWidth / 2 + 25, y);
+    doc.text(formatInvoiceDate(invoice.date), pageWidth / 2 + 25, y);
     y += 6;
 
     doc.setTextColor(0, 51, 102);
@@ -487,7 +505,7 @@ export default function Invoices() {
       `${index + 1}. ${item.name} - Qty: ${item.quantity} - ₹${formatNumber(item.price)}`
     ).join('\n');
     
-    alert(`INVOICE DETAILS\n\nInvoice No: ${invoice.invoiceNumber || invoice.id}\nPatient: ${invoice.patientName}\nDate: ${invoice.date}\nStatus: ${invoice.status}\n\nITEMS:\n${itemsList}\n\nTotal Amount: ₹${formatNumber(invoice.amount)}`);
+    alert(`INVOICE DETAILS\n\nInvoice No: ${invoice.invoiceNumber || invoice.id}\nPatient: ${invoice.patientName}\nDate: ${formatInvoiceDate(invoice.date)}\nStatus: ${invoice.status}\n\nITEMS:\n${itemsList}\n\nTotal Amount: ₹${formatNumber(invoice.amount)}`);
   };
 
   if (loading) {
@@ -688,7 +706,7 @@ export default function Invoices() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Date</p>
-                      <p className="font-medium">{invoice.date}</p>
+                      <p className="font-medium">{formatInvoiceDate(invoice.date)}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Items</p>
