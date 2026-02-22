@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { FloatingOrbs } from "@/components/ui/floating-orbs";
+
 import { motion } from "framer-motion";
 
 interface Patient {
@@ -164,11 +164,8 @@ export default function PatientAnalytics() {
 
   return (
     <div className="p-6 space-y-6 relative min-h-screen">
-      <FloatingOrbs />
-      
-      {/* Ambient liquid blobs */}
-      <div className="fixed top-20 left-20 w-96 h-96 bg-gradient-to-br from-gold/8 via-purple/5 to-cyan/8 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-cyan/8 via-pink/5 to-gold/8 rounded-full blur-3xl pointer-events-none" />
+
+
 
       <motion.div 
         initial={{ opacity: 0, y: -20 }}

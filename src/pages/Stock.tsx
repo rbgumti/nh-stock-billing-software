@@ -42,7 +42,7 @@ import { useSupplierPaymentStore, SupplierPayment } from "@/hooks/useSupplierPay
 // import jsPDF from "jspdf";
 // import html2canvas from "html2canvas";
 import { createRoot } from "react-dom/client";
-import { FloatingOrbs } from "@/components/ui/floating-orbs";
+
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { GRNDocument, type GRNItem } from "@/components/forms/GRNDocument";
 import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
@@ -1391,7 +1391,7 @@ export default function Stock() {
 
   return (
     <div className="p-6 space-y-6 relative">
-      <FloatingOrbs />
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">

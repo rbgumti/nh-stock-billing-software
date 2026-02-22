@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSalaryStore, Employee, SalaryRecord, AttendanceStatus, getSundaysInMonth, getBaseWorkingDays, getCalendarDaysInMonth } from "@/hooks/useSalaryStore";
 import { useAdvancesFromDayReports } from "@/hooks/useAdvancesFromDayReports";
-import { FloatingOrbs } from "@/components/ui/floating-orbs";
+
 import { SalarySlipDocument } from "@/components/forms/SalarySlipDocument";
 import { SalaryPasswordGate } from "@/components/SalaryPasswordGate";
 import { useSalaryAccess } from "@/hooks/useSalaryAccess";
@@ -772,7 +772,6 @@ const SalaryContent = () => {
   if (loading && !initialized) {
     return (
       <div className="relative p-4 sm:p-6 min-h-screen flex items-center justify-center">
-        <FloatingOrbs />
         <div className="relative z-10 flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-muted-foreground">Loading salary data...</p>
@@ -783,7 +782,7 @@ const SalaryContent = () => {
 
   return (
     <div className="relative p-4 sm:p-6 min-h-screen">
-      <FloatingOrbs />
+      
       
       <div className="relative z-10 space-y-6">
         {/* Header */}
