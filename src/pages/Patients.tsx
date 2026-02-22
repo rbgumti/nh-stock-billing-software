@@ -77,7 +77,7 @@ export default function Patients() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [sortColumn, setSortColumn] = useState<SortColumnType>('file_no');
+  const [sortColumn, setSortColumn] = useState<SortColumnType>('id');
   const [sortDirection, setSortDirection] = useState<SortDirectionType>('desc');
 
   // Debounce search term
