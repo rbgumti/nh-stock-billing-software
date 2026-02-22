@@ -46,52 +46,36 @@ export default function AdminPanel() {
   // Live environment config (production Supabase project)
   const LIVE_SUPABASE_URL = 'https://bzbiehprbvbkgfrcktvk.supabase.co';
   const LIVE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6YmllaHByYnZia2dmcmNrdHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMTA1NDYsImV4cCI6MjA4NTY4NjU0Nn0.dv4lTia7qsUDJDPZ4Ex0KPHH8AjjxinjjULzv2N2JKw';
-  // Test environment storage URL (where export uploads JSON files)
-  const TEST_STORAGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/data-sync`;
+  // Live credentials are passed to the sync-to-live edge function server-side
 
   const handleSyncToLive = async () => {
     if (syncStatus === 'exporting' || syncStatus === 'importing') return;
     setSyncStatus('exporting');
     setSyncProgress(20);
-    setSyncMessage('Exporting data from Test environment...');
+    setSyncMessage('Syncing data to Live environment...');
     setSyncResults(null);
 
     try {
-      // Step 1: Export data from Test DB → Test storage bucket
-      const { data: exportData, error: exportError } = await invokeWithAuth('export-data-storage');
-      if (exportError) throw exportError;
-
       setSyncStatus('importing');
-      setSyncProgress(60);
-      setSyncMessage('Importing data into Live environment...');
+      setSyncProgress(40);
+      setSyncMessage('Exporting & importing via secure server-side sync...');
 
-      // Step 2: Call the LIVE import function directly, telling it to
-      // read JSON files from the TEST storage bucket.
-      const importResp = await fetch(
-        `${LIVE_SUPABASE_URL}/functions/v1/import-data-storage`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': LIVE_ANON_KEY,
-            'Authorization': `Bearer ${LIVE_ANON_KEY}`,
-          },
-          body: JSON.stringify({ sourceStorageUrl: TEST_STORAGE_URL }),
-        }
-      );
+      // Use the sync-to-live edge function which handles export, secret auth,
+      // and calling the Live import function server-side.
+      const { data: syncData, error: syncError } = await invokeWithAuth('sync-to-live', {
+        body: {
+          liveUrl: LIVE_SUPABASE_URL,
+          liveAnonKey: LIVE_ANON_KEY,
+        },
+      });
 
-      if (!importResp.ok) {
-        const errBody = await importResp.text();
-        throw new Error(`Live import failed (${importResp.status}): ${errBody}`);
-      }
-
-      const importData = await importResp.json();
-      if (importData?.error) throw new Error(importData.error);
+      if (syncError) throw syncError;
+      if ((syncData as any)?.error) throw new Error((syncData as any).error);
 
       setSyncProgress(100);
       setSyncStatus('done');
       setSyncMessage('Sync completed successfully!');
-      setSyncResults((exportData as any)?.exported || null);
+      setSyncResults((syncData as any)?.exported || null);
       toast.success('Data synced to Live successfully');
     } catch (err: any) {
       setSyncStatus('error');
