@@ -62,7 +62,7 @@ export default function ViewPatient() {
           </div>
         </div>
         <Button asChild>
-          <Link to={`/patients/edit/${patient.patientId}`}>
+          <Link to={`/patients/edit/${id}`}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Patient
           </Link>
