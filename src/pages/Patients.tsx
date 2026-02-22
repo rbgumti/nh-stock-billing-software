@@ -32,7 +32,7 @@ interface Patient {
 }
 
 type ViewMode = 'grid' | 'table';
-type SortColumnType = 'id' | 'file_no' | 'patient_name' | 'phone' | 'aadhar_card' | 'govt_id' | 'category';
+type SortColumnType = 'id' | 'file_no' | 'created_at' | 'patient_name' | 'phone' | 'aadhar_card' | 'govt_id' | 'category';
 type SortDirectionType = 'asc' | 'desc';
 
 interface SortableHeaderProps {
@@ -359,15 +359,19 @@ export default function Patients() {
           </ToggleGroup>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-muted-foreground">Sort by File No:</span>
+          <span className="text-sm font-medium text-muted-foreground">Sort:</span>
           <ToggleGroup 
             type="single" 
-            value={sortColumn === 'file_no' ? sortDirection : ''} 
+            value={sortColumn === 'created_at' ? sortDirection : sortColumn === 'file_no' ? `file_${sortDirection}` : ''} 
             onValueChange={(v) => { 
-              if (v) { 
-                setSortColumn('file_no'); 
+              if (v === 'desc' || v === 'asc') { 
+                setSortColumn('created_at'); 
                 setSortDirection(v as SortDirectionType); 
                 setCurrentPage(1); 
+              } else if (v === 'file_desc' || v === 'file_asc') {
+                setSortColumn('file_no');
+                setSortDirection(v.replace('file_', '') as SortDirectionType);
+                setCurrentPage(1);
               } else {
                 setSortColumn('id');
                 setSortDirection('desc');
@@ -378,11 +382,19 @@ export default function Patients() {
           >
             <ToggleGroupItem value="desc" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-emerald data-[state=on]:to-teal data-[state=on]:text-white px-4 gap-1">
               <ArrowDown className="h-3 w-3" />
-              Newest First
+              Newest Added
             </ToggleGroupItem>
             <ToggleGroupItem value="asc" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-emerald data-[state=on]:to-teal data-[state=on]:text-white px-4 gap-1">
               <ArrowUp className="h-3 w-3" />
-              Oldest First
+              Oldest Added
+            </ToggleGroupItem>
+            <ToggleGroupItem value="file_desc" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-blue-500 data-[state=on]:to-cyan data-[state=on]:text-white px-4 gap-1">
+              <ArrowDown className="h-3 w-3" />
+              File No ↓
+            </ToggleGroupItem>
+            <ToggleGroupItem value="file_asc" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-blue-500 data-[state=on]:to-cyan data-[state=on]:text-white px-4 gap-1">
+              <ArrowUp className="h-3 w-3" />
+              File No ↑
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
