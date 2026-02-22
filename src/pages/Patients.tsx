@@ -79,6 +79,7 @@ export default function Patients() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortColumn, setSortColumn] = useState<SortColumnType>('id');
   const [sortDirection, setSortDirection] = useState<SortDirectionType>('desc');
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   // Debounce search term
   useEffect(() => {
@@ -109,6 +110,11 @@ export default function Patients() {
         .from('patients')
         .select('*', { count: 'exact' });
 
+      // Apply category filter
+      if (categoryFilter !== "all") {
+        query = query.ilike('category', `%${categoryFilter}%`);
+      }
+
       // Apply search filter based on active tab
       if (searchTab === "general" && debouncedSearch.trim()) {
         const search = debouncedSearch.trim();
@@ -137,7 +143,7 @@ export default function Patients() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, debouncedSearch, debouncedFileNo, searchTab, sortColumn, sortDirection]);
+  }, [currentPage, pageSize, debouncedSearch, debouncedFileNo, searchTab, sortColumn, sortDirection, categoryFilter]);
 
   useEffect(() => {
     loadPatients();
@@ -329,6 +335,29 @@ export default function Patients() {
         </CardContent>
       </Card>
 
+      {/* Category Filter Toggle */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-muted-foreground">Type:</span>
+        <ToggleGroup 
+          type="single" 
+          value={categoryFilter} 
+          onValueChange={(v) => { if (v) { setCategoryFilter(v); setCurrentPage(1); } }}
+          className="gap-1"
+        >
+          <ToggleGroupItem value="all" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-foreground/10 data-[state=on]:to-foreground/5 px-4">
+            All
+          </ToggleGroupItem>
+          <ToggleGroupItem value="BNX" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-orange data-[state=on]:to-gold data-[state=on]:text-white px-4">
+            BNX
+          </ToggleGroupItem>
+          <ToggleGroupItem value="TPN" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-cyan data-[state=on]:to-teal data-[state=on]:text-white px-4">
+            TPN
+          </ToggleGroupItem>
+          <ToggleGroupItem value="PSHY" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-purple data-[state=on]:to-pink data-[state=on]:text-white px-4">
+            PSHY
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
       {/* Loading State */}
       {loading && viewMode === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
