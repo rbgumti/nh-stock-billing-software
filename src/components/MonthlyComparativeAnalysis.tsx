@@ -322,10 +322,12 @@ export function MonthlyComparativeAnalysis() {
     );
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     setExporting(true);
     try {
-      // Prepare data for Excel
+      const colW = (w: number) => ({ wch: w });
+
+      // Main summary sheet
       const exportData = metrics.map(m => ({
         'Month': m.month,
         'Revenue (₹)': roundTo2(m.revenue),
@@ -346,34 +348,12 @@ export function MonthlyComparativeAnalysis() {
         'TPN Qty Sold': m.tpnQtySold,
       }));
 
-      // Create workbook with multiple sheets
-      const wb = XLSX.utils.book_new();
-
-      // Main summary sheet
-      const ws = XLSX.utils.json_to_sheet(exportData);
-      
-      // Set column widths
-      ws['!cols'] = [
-        { wch: 12 }, // Month
-        { wch: 14 }, // Revenue
-        { wch: 14 }, // Expenses
-        { wch: 14 }, // Net Profit
-        { wch: 14 }, // Bank Deposit
-        { wch: 14 }, // Paytm/GPay
-        { wch: 14 }, // BNX Revenue
-        { wch: 14 }, // TPN Revenue
-        { wch: 14 }, // PSHY Revenue
-        { wch: 12 }, // Fees
-        { wch: 14 }, // Lab Collection
-        { wch: 16 }, // New Patients
-        { wch: 14 }, // Follow-up
-        { wch: 12 }, // TPN Patients
-        { wch: 12 }, // PSHY Patients
-        { wch: 14 }, // BNX Qty
-        { wch: 14 }, // TPN Qty
-      ];
-
-      XLSX.utils.book_append_sheet(wb, ws, 'Monthly Summary');
+      const wb = createWorkbook();
+      addJsonSheet(wb, exportData, 'Monthly Summary', [
+        colW(12), colW(14), colW(14), colW(14), colW(14), colW(14), colW(14),
+        colW(14), colW(14), colW(12), colW(14), colW(16), colW(14), colW(12),
+        colW(12), colW(14), colW(14),
+      ]);
 
       // Revenue Breakup sheet
       const revenueData = metrics.map(m => ({
@@ -385,9 +365,7 @@ export function MonthlyComparativeAnalysis() {
         'Lab Collection (₹)': roundTo2(m.labCollection),
         'Total Revenue (₹)': roundTo2(m.revenue),
       }));
-      const wsRevenue = XLSX.utils.json_to_sheet(revenueData);
-      wsRevenue['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 14 }];
-      XLSX.utils.book_append_sheet(wb, wsRevenue, 'Revenue Breakup');
+      addJsonSheet(wb, revenueData, 'Revenue Breakup', [colW(12), colW(14), colW(14), colW(14), colW(12), colW(14), colW(14)]);
 
       // Patient Statistics sheet
       const patientData = metrics.map(m => ({
@@ -399,9 +377,7 @@ export function MonthlyComparativeAnalysis() {
         'PSHY Patients': m.pshyPatients,
         'Total Patients': m.newPatientsBnx + m.followUpPatientsBnx + m.tpnPatients + m.pshyPatients,
       }));
-      const wsPatients = XLSX.utils.json_to_sheet(patientData);
-      wsPatients['!cols'] = [{ wch: 12 }, { wch: 18 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 14 }];
-      XLSX.utils.book_append_sheet(wb, wsPatients, 'Patient Statistics');
+      addJsonSheet(wb, patientData, 'Patient Statistics', [colW(12), colW(18), colW(14), colW(12), colW(12), colW(12), colW(14)]);
 
       // Quantity Sold sheet
       const qtyData = metrics.map(m => ({
@@ -410,9 +386,7 @@ export function MonthlyComparativeAnalysis() {
         'TPN Qty Sold': m.tpnQtySold,
         'Total Qty Sold': m.bnxQtySold + m.tpnQtySold,
       }));
-      const wsQty = XLSX.utils.json_to_sheet(qtyData);
-      wsQty['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
-      XLSX.utils.book_append_sheet(wb, wsQty, 'Quantity Sold');
+      addJsonSheet(wb, qtyData, 'Quantity Sold', [colW(12), colW(14), colW(14), colW(14)]);
 
       // Financial Summary sheet
       const financialData = metrics.map(m => ({
@@ -424,9 +398,7 @@ export function MonthlyComparativeAnalysis() {
         'Paytm/GPay (₹)': roundTo2(m.paytmGpay),
         'Cash Revenue (₹)': roundTo2(m.revenue - m.paytmGpay),
       }));
-      const wsFinancial = XLSX.utils.json_to_sheet(financialData);
-      wsFinancial['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
-      XLSX.utils.book_append_sheet(wb, wsFinancial, 'Financial Summary');
+      addJsonSheet(wb, financialData, 'Financial Summary', [colW(12), colW(14), colW(14), colW(14), colW(14), colW(14), colW(14)]);
 
       // Growth Analysis sheet
       const growthData = metrics.map((m, idx) => {
@@ -438,7 +410,6 @@ export function MonthlyComparativeAnalysis() {
         const prevQty = prev ? prev.bnxQtySold + prev.tpnQtySold : 0;
         const currQty = m.bnxQtySold + m.tpnQtySold;
         const qtyGrowth = prevQty > 0 ? ((currQty - prevQty) / prevQty) * 100 : 0;
-        
         return {
           'Month': m.month,
           'Revenue (₹)': roundTo2(m.revenue),
@@ -449,25 +420,18 @@ export function MonthlyComparativeAnalysis() {
           'Qty Growth (%)': idx === 0 ? 'N/A' : roundTo2(qtyGrowth),
         };
       });
-      const wsGrowth = XLSX.utils.json_to_sheet(growthData);
-      wsGrowth['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 14 }];
-      XLSX.utils.book_append_sheet(wb, wsGrowth, 'Growth Analysis');
+      addJsonSheet(wb, growthData, 'Growth Analysis', [colW(12), colW(14), colW(18), colW(14), colW(18), colW(14), colW(14)]);
 
       // Brand-wise BNX Breakdown sheet
       const bnxBrands = brandBreakdown.filter(b => b.category === 'BNX');
       if (bnxBrands.length > 0) {
         const bnxBrandData = bnxBrands.map(brand => {
           const row: Record<string, string | number> = { 'Medicine Name': brand.brandName };
-          metrics.forEach(m => {
-            row[m.month] = brand.monthlyQty[m.monthKey] || 0;
-          });
+          metrics.forEach(m => { row[m.month] = brand.monthlyQty[m.monthKey] || 0; });
           row['Total'] = brand.totalQty;
           return row;
         });
-        const wsBnxBrands = XLSX.utils.json_to_sheet(bnxBrandData);
-        const colWidths = [{ wch: 30 }, ...metrics.map(() => ({ wch: 12 })), { wch: 12 }];
-        wsBnxBrands['!cols'] = colWidths;
-        XLSX.utils.book_append_sheet(wb, wsBnxBrands, 'BNX Brand Breakdown');
+        addJsonSheet(wb, bnxBrandData, 'BNX Brand Breakdown', [colW(30), ...metrics.map(() => colW(12)), colW(12)]);
       }
 
       // Brand-wise TPN Breakdown sheet
@@ -475,24 +439,18 @@ export function MonthlyComparativeAnalysis() {
       if (tpnBrands.length > 0) {
         const tpnBrandData = tpnBrands.map(brand => {
           const row: Record<string, string | number> = { 'Medicine Name': brand.brandName };
-          metrics.forEach(m => {
-            row[m.month] = brand.monthlyQty[m.monthKey] || 0;
-          });
+          metrics.forEach(m => { row[m.month] = brand.monthlyQty[m.monthKey] || 0; });
           row['Total'] = brand.totalQty;
           return row;
         });
-        const wsTpnBrands = XLSX.utils.json_to_sheet(tpnBrandData);
-        const colWidths = [{ wch: 30 }, ...metrics.map(() => ({ wch: 12 })), { wch: 12 }];
-        wsTpnBrands['!cols'] = colWidths;
-        XLSX.utils.book_append_sheet(wb, wsTpnBrands, 'TPN Brand Breakdown');
+        addJsonSheet(wb, tpnBrandData, 'TPN Brand Breakdown', [colW(30), ...metrics.map(() => colW(12)), colW(12)]);
       }
 
-      // Generate filename with date range
       const startMonth = metrics[0]?.month || 'Start';
       const endMonth = metrics[metrics.length - 1]?.month || 'End';
       const filename = `Monthly_Analysis_${startMonth}_to_${endMonth}.xlsx`.replace(/\s/g, '_');
 
-      XLSX.writeFile(wb, filename);
+      await writeExcelFile(wb, filename);
       toast.success('Excel exported successfully!', {
         description: `${metrics.length} months of data exported with brand breakdown`
       });
