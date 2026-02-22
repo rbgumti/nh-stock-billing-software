@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-import-secret',
 }
 
 Deno.serve(async (req) => {
@@ -26,10 +26,67 @@ Deno.serve(async (req) => {
 
     console.log('sourceStorageUrl:', sourceStorageUrl)
 
-    // When sourceStorageUrl is provided this is a cross-environment call from
-    // the Test Admin Panel – skip user auth because Test tokens are invalid
-    // against the Live auth service.  The function still uses the service role
-    // internally so it can write to the DB.
+    if (sourceStorageUrl) {
+      // Cross-environment call: require shared secret
+      const importSecret = req.headers.get('x-import-secret')
+      const expectedSecret = Deno.env.get('IMPORT_SECRET')
+
+      if (!expectedSecret || importSecret !== expectedSecret) {
+        console.error('Cross-environment import rejected: invalid or missing IMPORT_SECRET')
+        return new Response(JSON.stringify({ error: 'Unauthorized: invalid import secret' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Validate sourceStorageUrl matches expected Supabase storage pattern
+      const urlPattern = /^https:\/\/[a-z0-9]+\.supabase\.co\/storage\/v1\/object\/public\/data-sync$/
+      if (!urlPattern.test(sourceStorageUrl)) {
+        console.error('Cross-environment import rejected: invalid sourceStorageUrl:', sourceStorageUrl)
+        return new Response(JSON.stringify({ error: 'Invalid source storage URL' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    } else {
+      // Standard call: require user auth with admin role
+      const authHeader = req.headers.get('Authorization')
+      if (!authHeader?.startsWith('Bearer ')) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+        global: { headers: { Authorization: authHeader } },
+      })
+
+      const token = authHeader.replace('Bearer ', '')
+      const { data: claims, error: claimsError } = await userClient.auth.getUser(token)
+      if (claimsError || !claims?.user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Verify admin role
+      const adminClient = createClient(supabaseUrl, serviceKey)
+      const { data: roleData } = await adminClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', claims.user.id)
+        .eq('role', 'admin')
+        .maybeSingle()
+
+      if (!roleData) {
+        return new Response(JSON.stringify({ error: 'Only admins can import data' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
 
     const supabase = createClient(supabaseUrl, serviceKey)
 
