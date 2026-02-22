@@ -335,28 +335,57 @@ export default function Patients() {
         </CardContent>
       </Card>
 
-      {/* Category Filter Toggle */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-muted-foreground">Type:</span>
-        <ToggleGroup 
-          type="single" 
-          value={categoryFilter} 
-          onValueChange={(v) => { if (v) { setCategoryFilter(v); setCurrentPage(1); } }}
-          className="gap-1"
-        >
-          <ToggleGroupItem value="all" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-foreground/10 data-[state=on]:to-foreground/5 px-4">
-            All
-          </ToggleGroupItem>
-          <ToggleGroupItem value="BNX" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-orange data-[state=on]:to-gold data-[state=on]:text-white px-4">
-            BNX
-          </ToggleGroupItem>
-          <ToggleGroupItem value="TPN" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-cyan data-[state=on]:to-teal data-[state=on]:text-white px-4">
-            TPN
-          </ToggleGroupItem>
-          <ToggleGroupItem value="PSHY" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-purple data-[state=on]:to-pink data-[state=on]:text-white px-4">
-            PSHY
-          </ToggleGroupItem>
-        </ToggleGroup>
+      <div className="flex flex-wrap items-center gap-6">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground">Type:</span>
+          <ToggleGroup 
+            type="single" 
+            value={categoryFilter} 
+            onValueChange={(v) => { if (v) { setCategoryFilter(v); setCurrentPage(1); } }}
+            className="gap-1"
+          >
+            <ToggleGroupItem value="all" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-foreground/10 data-[state=on]:to-foreground/5 px-4">
+              All
+            </ToggleGroupItem>
+            <ToggleGroupItem value="BNX" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-orange data-[state=on]:to-gold data-[state=on]:text-white px-4">
+              BNX
+            </ToggleGroupItem>
+            <ToggleGroupItem value="TPN" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-cyan data-[state=on]:to-teal data-[state=on]:text-white px-4">
+              TPN
+            </ToggleGroupItem>
+            <ToggleGroupItem value="PSHY" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-purple data-[state=on]:to-pink data-[state=on]:text-white px-4">
+              PSHY
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground">Sort by File No:</span>
+          <ToggleGroup 
+            type="single" 
+            value={sortColumn === 'file_no' ? sortDirection : ''} 
+            onValueChange={(v) => { 
+              if (v) { 
+                setSortColumn('file_no'); 
+                setSortDirection(v as SortDirectionType); 
+                setCurrentPage(1); 
+              } else {
+                setSortColumn('id');
+                setSortDirection('desc');
+                setCurrentPage(1);
+              }
+            }}
+            className="gap-1"
+          >
+            <ToggleGroupItem value="desc" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-emerald data-[state=on]:to-teal data-[state=on]:text-white px-4 gap-1">
+              <ArrowDown className="h-3 w-3" />
+              Newest First
+            </ToggleGroupItem>
+            <ToggleGroupItem value="asc" className="data-[state=on]:bg-gradient-to-r data-[state=on]:from-emerald data-[state=on]:to-teal data-[state=on]:text-white px-4 gap-1">
+              <ArrowUp className="h-3 w-3" />
+              Oldest First
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
       {/* Loading State */}
       {loading && viewMode === 'grid' && (
