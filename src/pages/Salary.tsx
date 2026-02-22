@@ -23,9 +23,10 @@ import { useSalaryAccess } from "@/hooks/useSalaryAccess";
 // Backup now handled via Supabase - useSalaryBackup removed
 import { toast } from "sonner";
 import { format, startOfMonth, subMonths, addMonths, getDaysInMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isToday, parseISO, isSameDay } from "date-fns";
-import { createWorkbook, addJsonSheet, addAoaSheet, writeFile as writeExcelFile } from "@/lib/excelUtils";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+// Heavy libraries loaded dynamically when needed
+// import { createWorkbook, addJsonSheet, addAoaSheet, writeFile as writeExcelFile } from "@/lib/excelUtils";
+// import html2canvas from "html2canvas";
+// import jsPDF from "jspdf";
 import { createRoot } from "react-dom/client";
 import { AppSettingsProvider } from "@/hooks/usePerformanceMode";
 import { 
@@ -535,6 +536,7 @@ const SalaryContent = () => {
       "Salary Payable": totals.salaryPayable,
     });
 
+    const { createWorkbook, addJsonSheet, writeFile: writeExcelFile } = await import("@/lib/excelUtils");
     const wb = createWorkbook();
     addJsonSheet(wb, data, "Salary Report");
     
@@ -572,6 +574,7 @@ const SalaryContent = () => {
     const monthLabel = format(attendanceMonth, "MMMM yyyy");
     const daysInMonth = getDaysInMonth(attendanceMonth);
     
+    const { createWorkbook, addJsonSheet, addAoaSheet, writeFile: writeExcelFile } = await import("@/lib/excelUtils");
     const workbook = createWorkbook();
     
     // Sheet 1: Monthly Summary
@@ -709,6 +712,7 @@ const SalaryContent = () => {
       });
 
       // Generate canvas from the rendered component
+      const html2canvas = (await import("html2canvas")).default;
       const canvas = await html2canvas(container.firstChild as HTMLElement, {
         scale: 3,
         useCORS: true,
@@ -719,6 +723,7 @@ const SalaryContent = () => {
 
       // Create PDF
       const imgData = canvas.toDataURL("image/png", 1.0);
+      const jsPDF = (await import("jspdf")).default;
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
