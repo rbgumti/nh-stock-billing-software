@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, FileText, Calendar, User, Search, Pencil, Download, XCircle, CheckSquare } from "lucide-react";
 import { usePrescriptionStore, Prescription } from "@/hooks/usePrescriptionStore";
 import { format } from "date-fns";
-import { FloatingOrbs } from "@/components/ui/floating-orbs";
+
 import { toast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 
@@ -178,11 +178,8 @@ export default function Prescriptions() {
 
   return (
     <div className="container mx-auto p-6 relative min-h-screen">
-      <FloatingOrbs />
-      
-      {/* Ambient liquid blobs */}
-      <div className="fixed top-20 left-20 w-96 h-96 bg-gradient-to-br from-gold/8 via-purple/5 to-cyan/8 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-cyan/8 via-pink/5 to-gold/8 rounded-full blur-3xl pointer-events-none" />
+
+
       
       <div className="flex justify-between items-center mb-6 relative z-10">
         <div>

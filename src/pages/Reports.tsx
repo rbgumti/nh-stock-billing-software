@@ -47,7 +47,7 @@ import DayReport from "@/components/DayReport";
 import SaleReport from "@/components/SaleReport";
 import { BnxMonthlySalesAnalytics } from "@/components/BnxMonthlySalesAnalytics";
 import FollowUpReport from "@/components/FollowUpReport";
-import { FloatingOrbs } from "@/components/ui/floating-orbs";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -546,14 +546,8 @@ export default function Reports() {
 
   return (
     <div className="p-6 space-y-6 relative">
-      <FloatingOrbs />
-      
-      {/* Ambient liquid blobs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-gradient-radial from-purple/20 via-purple/5 to-transparent rounded-full blur-3xl liquid-blob" />
-        <div className="absolute top-1/3 -right-20 w-80 h-80 bg-gradient-radial from-cyan/20 via-cyan/5 to-transparent rounded-full blur-3xl liquid-blob" style={{ animationDelay: '-5s' }} />
-        <div className="absolute -bottom-20 left-1/3 w-72 h-72 bg-gradient-radial from-gold/15 via-gold/5 to-transparent rounded-full blur-3xl liquid-blob" style={{ animationDelay: '-10s' }} />
-      </div>
+
+
 
       <div className="flex justify-between items-center">
         <div>

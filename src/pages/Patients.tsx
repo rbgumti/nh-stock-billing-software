@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { FloatingOrbs } from "@/components/ui/floating-orbs";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPhone } from "@/lib/patientUtils";
 
@@ -229,7 +229,7 @@ export default function Patients() {
 
   return (
     <div className="p-6 space-y-6 relative">
-      <FloatingOrbs />
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">

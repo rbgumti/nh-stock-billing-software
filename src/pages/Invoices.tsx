@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import jsPDF from 'jspdf';
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FloatingOrbs } from "@/components/ui/floating-orbs";
+
 import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
@@ -523,7 +523,7 @@ export default function Invoices() {
 
   return (
     <div className="p-6 space-y-6 relative">
-      <FloatingOrbs />
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple via-cyan to-pink bg-clip-text text-transparent">
