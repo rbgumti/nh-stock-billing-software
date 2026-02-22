@@ -8,6 +8,7 @@ interface ContactInformationFormProps {
   formData: {
     phone: string;
     email: string;
+    fatherName?: string;
     address: string;
   };
   onInputChange: (field: string, value: string) => void;
@@ -41,6 +42,18 @@ export function ContactInformationForm({ formData, onInputChange }: ContactInfor
             />
           </div>
         </div>
+
+        {formData.fatherName !== undefined && (
+          <div>
+            <Label htmlFor="fatherName">Father Name</Label>
+            <Input
+              id="fatherName"
+              value={formData.fatherName}
+              onChange={(e) => onInputChange("fatherName", e.target.value)}
+              placeholder="Enter father's name"
+            />
+          </div>
+        )}
 
         <div>
           <Label htmlFor="address">Address</Label>
