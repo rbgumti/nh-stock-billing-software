@@ -3,9 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { PersonalInformationForm } from "@/components/forms/PersonalInformationForm";
 import { ContactInformationForm } from "@/components/forms/ContactInformationForm";
-import { EmergencyContactForm } from "@/components/forms/EmergencyContactForm";
-import { MedicalInformationForm } from "@/components/forms/MedicalInformationForm";
-import { VisitDetailsForm } from "@/components/forms/VisitDetailsForm";
 import { usePatientForm } from "@/hooks/usePatientForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -99,22 +96,12 @@ export default function EditPatient() {
         />
 
         <ContactInformationForm
-          formData={formData}
-          onInputChange={handleInputChange}
-        />
-
-        <EmergencyContactForm
-          formData={formData}
-          onInputChange={handleInputChange}
-        />
-
-        <MedicalInformationForm
-          formData={formData}
-          onInputChange={handleInputChange}
-        />
-
-        <VisitDetailsForm
-          formData={formData}
+          formData={{
+            phone: formData.phone,
+            email: formData.email,
+            fatherName: formData.fatherName,
+            address: formData.address
+          }}
           onInputChange={handleInputChange}
         />
 

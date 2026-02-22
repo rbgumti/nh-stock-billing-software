@@ -4,9 +4,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { PersonalInformationForm } from "@/components/forms/PersonalInformationForm";
 import { ContactInformationForm } from "@/components/forms/ContactInformationForm";
-import { EmergencyContactForm } from "@/components/forms/EmergencyContactForm";
-import { MedicalInformationForm } from "@/components/forms/MedicalInformationForm";
-import { VisitDetailsForm } from "@/components/forms/VisitDetailsForm";
 import { usePatientForm } from "@/hooks/usePatientForm";
 
 export default function NewPatient() {
@@ -47,34 +44,8 @@ export default function NewPatient() {
           formData={{
             phone: formData.phone,
             email: formData.email,
-            address: formData.address
-          }}
-          onInputChange={handleInputChange}
-        />
-
-        <EmergencyContactForm
-          formData={{
-            emergencyContact: formData.emergencyContact,
-            emergencyPhone: formData.emergencyPhone
-          }}
-          onInputChange={handleInputChange}
-        />
-
-        <MedicalInformationForm
-          formData={{
-            medicalHistory: formData.medicalHistory,
-            allergies: formData.allergies,
-            currentMedications: formData.currentMedications
-          }}
-          onInputChange={handleInputChange}
-        />
-
-        <VisitDetailsForm
-          formData={{
             fatherName: formData.fatherName,
-            visitDate: formData.visitDate,
-            medicinePrescribedDays: formData.medicinePrescribedDays,
-            nextFollowUpDate: formData.nextFollowUpDate
+            address: formData.address
           }}
           onInputChange={handleInputChange}
         />
