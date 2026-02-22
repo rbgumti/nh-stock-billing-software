@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,34 +11,37 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { AddStockItemForm } from "@/components/forms/AddStockItemForm";
-import { PurchaseOrderForm } from "@/components/forms/PurchaseOrderForm";
-import { EditPurchaseOrderForm } from "@/components/forms/EditPurchaseOrderForm";
-import { GRNForm } from "@/components/forms/GRNForm";
-import { EditGRNForm } from "@/components/forms/EditGRNForm";
-import { ServicePOForm } from "@/components/forms/ServicePOForm";
-import { EditServicePOForm } from "@/components/forms/EditServicePOForm";
-import { ServiceGRNForm } from "@/components/forms/ServiceGRNForm";
-import { SupplierForm } from "@/components/forms/SupplierForm";
-import { SupplierPaymentForm } from "@/components/forms/SupplierPaymentForm";
-import { StockLedger } from "@/components/StockLedger";
-import { SupplierLedger } from "@/components/SupplierLedger";
-import { SupplierAgingReport } from "@/components/SupplierAgingReport";
-import { ParbPharmaPO } from "@/components/forms/ParbPharmaPO";
-import { RusanPharmaPO } from "@/components/forms/RusanPharmaPO";
-import { NeuroglamPO } from "@/components/forms/NeuroglamPO";
-import { VyadoHealthcarePO } from "@/components/forms/VyadoHealthcarePO";
-import { VeeEssPharmaPO } from "@/components/forms/VeeEssPharmaPO";
+
+// Lazy-load form components (only needed when dialogs open)
+const AddStockItemForm = lazy(() => import("@/components/forms/AddStockItemForm").then(m => ({ default: m.AddStockItemForm })));
+const PurchaseOrderForm = lazy(() => import("@/components/forms/PurchaseOrderForm").then(m => ({ default: m.PurchaseOrderForm })));
+const EditPurchaseOrderForm = lazy(() => import("@/components/forms/EditPurchaseOrderForm").then(m => ({ default: m.EditPurchaseOrderForm })));
+const GRNForm = lazy(() => import("@/components/forms/GRNForm").then(m => ({ default: m.GRNForm })));
+const EditGRNForm = lazy(() => import("@/components/forms/EditGRNForm").then(m => ({ default: m.EditGRNForm })));
+const ServicePOForm = lazy(() => import("@/components/forms/ServicePOForm").then(m => ({ default: m.ServicePOForm })));
+const EditServicePOForm = lazy(() => import("@/components/forms/EditServicePOForm").then(m => ({ default: m.EditServicePOForm })));
+const ServiceGRNForm = lazy(() => import("@/components/forms/ServiceGRNForm").then(m => ({ default: m.ServiceGRNForm })));
+const SupplierForm = lazy(() => import("@/components/forms/SupplierForm").then(m => ({ default: m.SupplierForm })));
+const SupplierPaymentForm = lazy(() => import("@/components/forms/SupplierPaymentForm").then(m => ({ default: m.SupplierPaymentForm })));
+const StockLedger = lazy(() => import("@/components/StockLedger").then(m => ({ default: m.StockLedger })));
+const SupplierLedger = lazy(() => import("@/components/SupplierLedger").then(m => ({ default: m.SupplierLedger })));
+const SupplierAgingReport = lazy(() => import("@/components/SupplierAgingReport").then(m => ({ default: m.SupplierAgingReport })));
+const ParbPharmaPO = lazy(() => import("@/components/forms/ParbPharmaPO").then(m => ({ default: m.ParbPharmaPO })));
+const RusanPharmaPO = lazy(() => import("@/components/forms/RusanPharmaPO").then(m => ({ default: m.RusanPharmaPO })));
+const NeuroglamPO = lazy(() => import("@/components/forms/NeuroglamPO").then(m => ({ default: m.NeuroglamPO })));
+const VyadoHealthcarePO = lazy(() => import("@/components/forms/VyadoHealthcarePO").then(m => ({ default: m.VyadoHealthcarePO })));
+const VeeEssPharmaPO = lazy(() => import("@/components/forms/VeeEssPharmaPO").then(m => ({ default: m.VeeEssPharmaPO })));
+
 import { PurchaseOrder } from "@/hooks/usePurchaseOrderStore";
 import { toast } from "@/hooks/use-toast";
 import { useStockStore } from "@/hooks/useStockStore";
 import { usePurchaseOrderStore } from "@/hooks/usePurchaseOrderStore";
 import { useSupplierStore, Supplier } from "@/hooks/useSupplierStore";
 import { useSupplierPaymentStore, SupplierPayment } from "@/hooks/useSupplierPaymentStore";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+// Heavy libraries loaded dynamically only when export/download functions are called
+// import jsPDF from "jspdf";
+// import html2canvas from "html2canvas";
 import { createRoot } from "react-dom/client";
-import { createWorkbook, addJsonSheet, addAoaSheet, writeFile as writeExcelFile } from "@/lib/excelUtils";
 import { FloatingOrbs } from "@/components/ui/floating-orbs";
 import { formatLocalISODate } from "@/lib/dateUtils";
 import { GRNDocument, type GRNItem } from "@/components/forms/GRNDocument";
@@ -48,6 +51,12 @@ import { StockItemCard } from "@/components/StockItemCard";
 import { supabase } from "@/integrations/supabase/client";
 
 import { useUserRole } from "@/hooks/useUserRole";
+
+const FormFallback = () => (
+  <div className="flex items-center justify-center h-32">
+    <div className="animate-pulse text-muted-foreground text-sm">Loading form...</div>
+  </div>
+);
 
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -826,7 +835,8 @@ export default function Stock() {
       'Notes': po.notes || '-'
     }));
 
-    // Create workbook
+    // Dynamic import for Excel export
+    const { createWorkbook, addJsonSheet, writeFile: writeExcelFile } = await import("@/lib/excelUtils");
     const wb = createWorkbook();
     addJsonSheet(wb, exportData, 'Purchase Orders', [
       { wch: 15 }, { wch: 10 }, { wch: 20 }, { wch: 12 }, { wch: 15 },
@@ -847,7 +857,8 @@ export default function Stock() {
     setExportEndDate(undefined);
   };
 
-  const downloadPurchaseOrder = (po: any) => {
+  const downloadPurchaseOrder = async (po: any) => {
+    const jsPDF = (await import("jspdf")).default;
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
@@ -1129,6 +1140,7 @@ export default function Stock() {
       const target = mount.querySelector('div[style*="font-family"]') as HTMLElement || mount.firstElementChild as HTMLElement | null;
       if (!target) throw new Error("Failed to render GRN document");
 
+      const html2canvas = (await import("html2canvas")).default;
       const canvas = await html2canvas(target, {
         scale: 3, // Higher scale for better quality - matches PrintableGRN
         useCORS: true,
@@ -1140,6 +1152,7 @@ export default function Stock() {
       });
 
       const imgData = canvas.toDataURL("image/png");
+      const jsPDF = (await import("jspdf")).default;
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -1191,6 +1204,7 @@ export default function Stock() {
 
   // Stock Export Functions
   const exportStockToExcel = async () => {
+    const { createWorkbook, addAoaSheet, writeFile: writeExcelFile } = await import("@/lib/excelUtils");
     const workbook = createWorkbook();
     
     const reportData: any[][] = [
@@ -1233,7 +1247,8 @@ export default function Stock() {
     toast({ title: "Exported", description: "Stock report exported to Excel" });
   };
 
-  const exportStockToPDF = () => {
+  const exportStockToPDF = async () => {
+    const jsPDF = (await import("jspdf")).default;
     const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape for more columns
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -2554,6 +2569,7 @@ export default function Stock() {
         </TabsContent>
       </Tabs>
 
+      <Suspense fallback={<FormFallback />}>
       {showAddForm && (
         <AddStockItemForm
           onClose={() => setShowAddForm(false)}
@@ -2740,97 +2756,6 @@ export default function Stock() {
         />
       )}
 
-      {/* Export POs Dialog */}
-      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-        <DialogContent className="glass-strong border-0 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl bg-gradient-to-r from-cyan to-teal bg-clip-text text-transparent">
-              Export Purchase Orders
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Start Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal glass-subtle border-purple/20",
-                      !exportStartDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {exportStartDate ? format(exportStartDate, "PPP") : <span>Select start date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={exportStartDate}
-                    onSelect={setExportStartDate}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">End Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal glass-subtle border-purple/20",
-                      !exportEndDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {exportEndDate ? format(exportEndDate, "PPP") : <span>Select end date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={exportEndDate}
-                    onSelect={setExportEndDate}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            {poTypeFilter !== "all" && (
-              <p className="text-sm text-muted-foreground">
-                Exporting only <strong>{poTypeFilter}</strong> POs based on current filter.
-              </p>
-            )}
-          </div>
-          <DialogFooter className="gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowExportDialog(false);
-                setExportStartDate(undefined);
-                setExportEndDate(undefined);
-              }}
-              className="glass-subtle border-purple/20"
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={exportPOsToExcel}
-              disabled={!exportStartDate || !exportEndDate}
-              className="bg-gradient-to-r from-emerald to-teal hover:shadow-glow text-white"
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Export to Excel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Supplier A/C Ledger */}
       {showSupplierLedger && (
         <SupplierLedger
@@ -2851,6 +2776,7 @@ export default function Stock() {
           onClose={() => setShowAgingReport(false)}
         />
       )}
+      </Suspense>
     </div>
   );
 }
