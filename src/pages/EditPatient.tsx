@@ -7,31 +7,74 @@ import { EmergencyContactForm } from "@/components/forms/EmergencyContactForm";
 import { MedicalInformationForm } from "@/components/forms/MedicalInformationForm";
 import { VisitDetailsForm } from "@/components/forms/VisitDetailsForm";
 import { usePatientForm } from "@/hooks/usePatientForm";
-import { usePatientStore } from "@/hooks/usePatientStore";
-import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 export default function EditPatient() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { formData, handleInputChange, handleSubmit, loadPatientData } = usePatientForm(true);
-  const { getPatient, patients, loading } = usePatientStore();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id && !loading && patients.length > 0) {
-      const patient = getPatient(id);
-      if (patient) {
-        loadPatientData(patient);
-      } else {
+    if (!id) return;
+    
+    const fetchPatient = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('patients')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          loadPatientData({
+            patientId: data.id,
+            fileNo: String(data.file_no || ''),
+            firstName: data.first_name || (data.patient_name || '').split(' ')[0] || '',
+            lastName: data.last_name || (data.patient_name || '').split(' ').slice(1).join(' ') || '',
+            dateOfBirth: data.date_of_birth || '',
+            gender: data.gender || '',
+            phone: String(data.phone || ''),
+            email: String(data.email || ''),
+            address: String(data.address || ''),
+            aadhar: String(data.aadhar_card || ''),
+            govtIdOld: String(data.govt_id || ''),
+            govtIdNew: String(data.new_govt_id || ''),
+            emergencyContact: String(data.emergency_contact_name || ''),
+            emergencyPhone: String(data.emergency_contact_phone || ''),
+            medicalHistory: String(data.medical_notes || ''),
+            allergies: String(data.allergies || ''),
+            currentMedications: String(data.current_medications || ''),
+            fatherName: String(data.father_name || ''),
+            visitDate: '',
+            medicinePrescribedDays: '',
+            nextFollowUpDate: '',
+            category: String(data.category || '')
+          });
+        } else {
+          navigate("/patients");
+        }
+      } catch (error) {
+        console.error('Error fetching patient:', error);
+        toast({ title: "Error", description: "Failed to load patient data", variant: "destructive" });
         navigate("/patients");
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    fetchPatient();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, loading, patients]);
+  }, [id]);
 
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <p className="text-lg text-gray-600">Loading patient data...</p>
+        <p className="text-lg text-muted-foreground">Loading patient data...</p>
       </div>
     );
   }
@@ -43,8 +86,8 @@ export default function EditPatient() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Patient</h1>
-          <p className="text-gray-600 mt-2">Update patient information below</p>
+          <h1 className="text-3xl font-bold">Edit Patient</h1>
+          <p className="text-muted-foreground mt-2">Update patient information below</p>
         </div>
       </div>
 
