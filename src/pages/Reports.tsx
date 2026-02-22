@@ -220,7 +220,7 @@ export default function Reports() {
     }));
   };
 
-  const exportReport = (reportType: string) => {
+  const exportReport = async (reportType: string) => {
     let data: any[] = [];
     let filename = "";
 
@@ -331,6 +331,7 @@ export default function Reports() {
     const workbook = createWorkbook();
     addJsonSheet(workbook, data, reportType.charAt(0).toUpperCase() + reportType.slice(1));
     await writeExcelFile(workbook, filename);
+  };
 
   const openExportDialog = (type: 'patients' | 'stock' | 'invoices') => {
     setExportType(type);

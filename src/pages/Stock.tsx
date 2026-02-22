@@ -776,7 +776,7 @@ export default function Stock() {
   const totalOutstanding = payments.filter(p => p.status !== 'Completed').reduce((sum, p) => sum + p.amount, 0);
   const unpaidPOs = purchaseOrders.filter(po => po.paymentStatus !== 'Paid');
 
-  const exportPOsToExcel = () => {
+  const exportPOsToExcel = async () => {
     if (!exportStartDate || !exportEndDate) {
       toast({
         title: "Error",
