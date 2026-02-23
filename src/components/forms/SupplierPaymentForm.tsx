@@ -58,7 +58,7 @@ export function SupplierPaymentForm({ onClose, onSubmit, suppliers, purchaseOrde
     
     return purchaseOrders.filter(po => 
       po.supplier === supplier.name && 
-      po.status === 'Received' &&
+      (po.status === 'Received' || po.status === 'Pending') &&
       po.paymentStatus !== 'Paid'
     );
   }, [formData.supplier_id, suppliers, purchaseOrders]);
