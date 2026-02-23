@@ -88,10 +88,7 @@ export default function Reports() {
   useEffect(() => {
     // Load data from localStorage
     const savedPatients = JSON.parse(localStorage.getItem("patients") || "[]");
-    const savedInvoices = JSON.parse(localStorage.getItem("invoices") || "[]");
-    
     setPatients(savedPatients);
-    setInvoices(savedInvoices);
     
     // Set default date range (last 30 days)
     const today = new Date();
@@ -101,24 +98,36 @@ export default function Reports() {
       to: today.toISOString().split('T')[0]
     });
 
-    // Fetch overview stats from Supabase
-    const fetchOverviewStats = async () => {
+    // Fetch invoices and overview stats from Supabase
+    const fetchData = async () => {
       try {
         const todayStr = format(new Date(), 'yyyy-MM-dd');
         const monthStart = format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd');
         const threeMonthsLater = format(new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
 
-        const [patientsRes, invoicesRes, todayInvRes, monthInvRes, followUpRes] = await Promise.all([
+        const [patientsRes, invoicesRes, todayInvRes, monthInvRes, followUpRes, allInvoicesRes] = await Promise.all([
           supabase.from('patients').select('id', { count: 'exact', head: true }),
           supabase.from('invoices').select('id, total', { count: 'exact' }),
           supabase.from('invoices').select('id, total').gte('invoice_date', `${todayStr}T00:00:00`).lt('invoice_date', `${todayStr}T23:59:59.999`),
           supabase.from('invoices').select('id, total').gte('invoice_date', `${monthStart}T00:00:00`).lt('invoice_date', `${todayStr}T23:59:59.999`),
           supabase.from('invoices').select('id').gte('follow_up_date', todayStr).not('follow_up_date', 'is', null),
+          supabase.from('invoices').select('id, invoice_number, invoice_date, patient_name, total, payment_status, status, payment_method').order('invoice_date', { ascending: false }).limit(500),
         ]);
 
         const totalRevenue = (invoicesRes.data || []).reduce((s, i) => s + (i.total || 0), 0);
         const todayRevenue = (todayInvRes.data || []).reduce((s, i) => s + (i.total || 0), 0);
         const monthRevenue = (monthInvRes.data || []).reduce((s, i) => s + (i.total || 0), 0);
+
+        // Set invoices from Supabase for Invoice Reports tab
+        setInvoices((allInvoicesRes.data || []).map(inv => ({
+          id: inv.id,
+          invoiceNumber: inv.invoice_number,
+          invoiceDate: inv.invoice_date,
+          patient: inv.patient_name,
+          total: inv.total,
+          status: inv.payment_status || inv.status || 'Pending',
+          paymentMethod: inv.payment_method,
+        })));
 
         setOverviewStats({
           totalPatients: patientsRes.count || 0,
@@ -139,7 +148,7 @@ export default function Reports() {
         console.error('Failed to fetch overview stats:', err);
       }
     };
-    fetchOverviewStats();
+    fetchData();
   }, [stockItems]);
 
   // Patient Reports Data
@@ -1275,13 +1284,11 @@ export default function Reports() {
                     <div key={invoice.id} className="border rounded-lg p-4 space-y-3">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-semibold">Invoice #{invoice.id}</h4>
-                          <p className="text-sm text-gray-600">
-                            Patient: {invoice.patientDetails?.firstName || invoice.patient} 
-                            {invoice.patientDetails?.lastName ? ` ${invoice.patientDetails.lastName}` : ''}
+                          <h4 className="font-semibold">Invoice #{invoice.invoiceNumber || invoice.id?.slice(0, 8)}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Patient: {invoice.patient || 'N/A'}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            ID: {invoice.patientDetails?.patientId || 'N/A'} | 
+                          <p className="text-xs text-muted-foreground">
                             Date: {new Date(invoice.invoiceDate || Date.now()).toLocaleDateString()}
                           </p>
                         </div>
@@ -1292,18 +1299,6 @@ export default function Reports() {
                           <p className="font-semibold mt-1">₹{formatNumber(invoice.total || 0)}</p>
                         </div>
                       </div>
-                      
-                      {invoice.items && invoice.items.length > 0 && (
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium text-gray-700">Medicines:</p>
-                          {invoice.items.map((item: any, index: number) => (
-                            <div key={index} className="flex justify-between text-sm bg-gray-50 p-2 rounded">
-                              <span>{item.medicineName || item.name}</span>
-                              <span>Qty: {item.quantity} | ₹{formatNumber((item.unitPrice || 0) * (item.quantity || 0))}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   ))}
                   {!invoices.length && (
