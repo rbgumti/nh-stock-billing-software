@@ -112,7 +112,7 @@ export default function Reports() {
           supabase.from('patients').select('id', { count: 'exact', head: true }),
           supabase.from('invoices').select('id, total', { count: 'exact' }),
           supabase.from('invoices').select('id, total').gte('invoice_date', `${todayStr}T00:00:00`).lt('invoice_date', `${todayStr}T23:59:59.999`),
-          supabase.from('invoices').select('id, total').gte('invoice_date', monthStart).lte('invoice_date', todayStr),
+          supabase.from('invoices').select('id, total').gte('invoice_date', `${monthStart}T00:00:00`).lt('invoice_date', `${todayStr}T23:59:59.999`),
           supabase.from('invoices').select('id').gte('follow_up_date', todayStr).not('follow_up_date', 'is', null),
         ]);
 
