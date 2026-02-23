@@ -135,9 +135,9 @@ const SalaryContent = () => {
       // Get attendance-based working days
       const attendanceWorkingDays = calculateWorkingDaysFromAttendance(employee.id, selectedMonth);
       
-      // Use record working days if set, otherwise attendance-based, otherwise base working days
-      // Working days now represents actual days worked including any Sundays
-      const workingDays = record?.workingDays ?? (attendanceWorkingDays > 0 ? attendanceWorkingDays : baseWorkingDays);
+      // Attendance-based working days ALWAYS take priority when attendance is marked
+      // Only fall back to record or base working days when no attendance exists
+      const workingDays = attendanceWorkingDays > 0 ? attendanceWorkingDays : (record?.workingDays ?? baseWorkingDays);
       
       const advanceAdjusted = record?.advanceAdjusted ?? 0;
       const advancePending = record?.advancePending ?? 0;
