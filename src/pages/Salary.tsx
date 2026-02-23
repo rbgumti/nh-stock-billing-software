@@ -376,38 +376,46 @@ const SalaryContent = () => {
 
   // Handle salary record update
   const handleSalaryUpdate = (employeeId: string, field: string, value: number) => {
+    const employee = employees.find(e => e.id === employeeId);
+    if (!employee) return;
+
     const existingRecord = salaryRecords.find(
       r => r.employeeId === employeeId && r.month === selectedMonth
     );
 
-    if (existingRecord) {
-      updateSalaryRecord(existingRecord.id, { [field]: value });
+    const calDays = getCalendarDaysInMonth(selectedMonth);
+    const baseWD = getBaseWorkingDays(selectedMonth);
+    const perDayRate = employee.salaryFixed / calDays;
+
+    // Determine all field values (use existing record or defaults)
+    const workingDays = field === 'workingDays' ? value : (existingRecord?.workingDays ?? baseWD);
+    const advanceAdjusted = field === 'advanceAdjusted' ? value : (existingRecord?.advanceAdjusted ?? 0);
+    const advancePending = field === 'advancePending' ? value : (existingRecord?.advancePending ?? 0);
+
+    // Calculate effective days
+    let effectiveDays: number;
+    if (workingDays <= baseWD) {
+      effectiveDays = (workingDays / baseWD) * calDays;
     } else {
-      const employee = employees.find(e => e.id === employeeId);
-      if (!employee) return;
-      
-      const calendarDays = getCalendarDaysInMonth(selectedMonth);
-      const baseWorkingDays = getBaseWorkingDays(selectedMonth);
-      const perDayRate = employee.salaryFixed / calendarDays;
-      const workingDays = field === 'workingDays' ? value : baseWorkingDays;
-      const advanceAdjusted = field === 'advanceAdjusted' ? value : 0;
-      const advancePending = field === 'advancePending' ? value : 0;
-      
-      // Calculate effective days using calendar days
-      let effectiveDays: number;
-      if (workingDays <= baseWorkingDays) {
-        effectiveDays = (workingDays / baseWorkingDays) * calendarDays;
-      } else {
-        effectiveDays = calendarDays + (workingDays - baseWorkingDays);
-      }
-      
+      effectiveDays = calDays + (workingDays - baseWD);
+    }
+    const salaryPayable = Math.round((perDayRate * effectiveDays) - advanceAdjusted);
+
+    if (existingRecord) {
+      updateSalaryRecord(existingRecord.id, { 
+        workingDays,
+        advanceAdjusted,
+        advancePending,
+        salaryPayable,
+      });
+    } else {
       addSalaryRecord({
         employeeId,
         month: selectedMonth,
         workingDays,
         advanceAdjusted,
         advancePending,
-        salaryPayable: Math.round((perDayRate * effectiveDays) - advanceAdjusted),
+        salaryPayable,
       });
     }
   };
