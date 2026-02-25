@@ -333,8 +333,42 @@ export default function Stock() {
       for (const grnItem of grnData.items) {
         if (grnItem.receivedQuantity <= 0) continue;
 
-        const stockItem = stockItems.find(s => s.id === grnItem.stockItemId);
-        if (!stockItem) continue;
+        // Try local cache first, then fetch from DB if not found
+        let stockItem = stockItems.find(s => s.id === grnItem.stockItemId);
+        if (!stockItem && grnItem.stockItemId) {
+          // Cache might be stale - fetch directly from DB
+          const { data: freshItem } = await supabase
+            .from('stock_items')
+            .select('*')
+            .eq('item_id', grnItem.stockItemId)
+            .single();
+          if (freshItem) {
+            stockItem = {
+              id: freshItem.item_id,
+              name: freshItem.name,
+              category: freshItem.category,
+              currentStock: freshItem.current_stock,
+              minimumStock: freshItem.minimum_stock,
+              unitPrice: freshItem.unit_price,
+              mrp: freshItem.mrp || undefined,
+              supplier: freshItem.supplier || '',
+              expiryDate: freshItem.expiry_date || '',
+              batchNo: freshItem.batch_no || '',
+              status: freshItem.status || undefined,
+              composition: freshItem.composition || undefined,
+              packing: freshItem.packing || undefined,
+            };
+          }
+        }
+        if (!stockItem) {
+          console.error(`GRN: Stock item not found for ID ${grnItem.stockItemId}, skipping`);
+          toast({
+            title: "Warning",
+            description: `Stock item ID ${grnItem.stockItemId} not found. This item's stock was not updated.`,
+            variant: "destructive"
+          });
+          continue;
+        }
 
         // Use GRN values, only fallback to stock item if GRN values are meaningful
         const batchNo = grnItem.batchNo && grnItem.batchNo.trim() !== '' 
