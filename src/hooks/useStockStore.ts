@@ -16,6 +16,7 @@ export interface StockItem {
   status?: string;
   composition?: string;
   packing?: string;
+  isActive?: boolean;
 }
 
 // Global cache - persists across component mounts
@@ -47,7 +48,8 @@ async function fetchAllStockItems(): Promise<StockItem[]> {
     batchNo: item.batch_no,
     status: item.status || undefined,
     composition: item.composition || undefined,
-    packing: item.packing || undefined
+    packing: item.packing || undefined,
+    isActive: item.is_active !== false
   }));
 }
 
@@ -185,7 +187,8 @@ export function useStockStore() {
           batch_no: item.batchNo,
           status: item.status || null,
           composition: item.composition || null,
-          packing: item.packing || null
+          packing: item.packing || null,
+          is_active: item.isActive !== false
         });
 
       if (error) throw error;
@@ -217,7 +220,8 @@ export function useStockStore() {
           batch_no: updatedItem.batchNo,
           status: updatedItem.status || null,
           composition: updatedItem.composition || null,
-          packing: updatedItem.packing || null
+          packing: updatedItem.packing || null,
+          is_active: updatedItem.isActive !== false
         })
         .eq('item_id', id);
 

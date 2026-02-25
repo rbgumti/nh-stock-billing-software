@@ -142,7 +142,7 @@ export function StockItemCard({
   return (
     <Card className={`glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300 ${
       criticalBatch ? 'ring-1 ring-destructive/30' : ''
-    }`}>
+    } ${item.isActive === false ? 'opacity-60' : ''}`}>
       {/* Warning Banner */}
       {criticalBatch && (
         <div className="absolute top-0 left-0 right-0 px-3 py-1 flex items-center gap-2 text-xs font-medium bg-gradient-to-r from-destructive to-pink text-white">
@@ -176,6 +176,11 @@ export function StockItemCard({
                 }`}>
                   {item.category}
                 </Badge>
+                {item.isActive === false && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-destructive text-destructive">
+                    Inactive
+                  </Badge>
+                )}
               </div>
               {/* Stock Summary */}
               <div className="mt-1 flex items-center gap-3">

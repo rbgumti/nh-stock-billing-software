@@ -57,7 +57,7 @@ export function MedicineSearchSelect({
   // Filter out zero-stock items and sort: by name, then BATCH-prefixed items first (FIFO), then by expiry
   const filteredMedicines = medicines
     .filter((medicine) =>
-      medicine.currentStock > 0 && (
+      medicine.currentStock > 0 && (medicine as any).isActive !== false && (
         medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         medicine.batchNo.toLowerCase().includes(searchQuery.toLowerCase())
       )
