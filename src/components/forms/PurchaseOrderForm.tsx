@@ -270,13 +270,14 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                     </SelectTrigger>
                     <SelectContent>
                       {stockItems
+                        .filter(item => item.isActive !== false)
                         .filter(item => !formData.supplier || item.supplier === formData.supplier)
                         .map((item) => (
                           <SelectItem key={item.id} value={item.id.toString()}>
                             {item.name} - {item.category}
                           </SelectItem>
                         ))}
-                      {formData.supplier && stockItems.filter(item => item.supplier === formData.supplier).length === 0 && (
+                      {formData.supplier && stockItems.filter(item => item.isActive !== false && item.supplier === formData.supplier).length === 0 && (
                         <SelectItem value="no-items" disabled>
                           No items found for this supplier
                         </SelectItem>

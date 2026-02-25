@@ -1058,6 +1058,7 @@ export type Database = {
           created_at: string
           current_stock: number
           expiry_date: string | null
+          is_active: boolean
           item_id: number
           minimum_stock: number
           mrp: number | null
@@ -1075,6 +1076,7 @@ export type Database = {
           created_at?: string
           current_stock?: number
           expiry_date?: string | null
+          is_active?: boolean
           item_id?: number
           minimum_stock?: number
           mrp?: number | null
@@ -1092,6 +1094,7 @@ export type Database = {
           created_at?: string
           current_stock?: number
           expiry_date?: string | null
+          is_active?: boolean
           item_id?: number
           minimum_stock?: number
           mrp?: number | null

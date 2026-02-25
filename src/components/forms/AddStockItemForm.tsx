@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
 import { X, Package, Unlock } from "lucide-react";
 import { useSupplierStore } from "@/hooks/useSupplierStore";
 
@@ -30,7 +31,8 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
     supplier: "",
     description: "",
     composition: "",
-    packing: ""
+    packing: "",
+    isActive: true
   });
 
   // Populate form when editing
@@ -46,7 +48,8 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
         supplier: initialData.supplier || "",
         description: initialData.description || "",
         composition: initialData.composition || "",
-        packing: initialData.packing || ""
+        packing: initialData.packing || "",
+        isActive: initialData.isActive !== false
       });
     }
   }, [isEditing, initialData]);
@@ -56,7 +59,7 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: field === "isActive" ? value === "true" : value
     }));
   };
 
@@ -77,7 +80,8 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
       batchNo: isEditing ? initialData.batchNo : `BATCH${Date.now()}`,
       status: "In Stock",
       composition: formData.composition || undefined,
-      packing: formData.packing || undefined
+      packing: formData.packing || undefined,
+      isActive: formData.isActive
     };
 
     onSubmit(stockItem);
@@ -293,11 +297,24 @@ export function AddStockItemForm({ onClose, onSubmit, initialData, isEditing = f
               </p>
             </div>
 
-            {/* Description Section */}
+            {/* Status & Description Section */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider border-b pb-2">
-                Additional Information
+                Status & Additional Information
               </h3>
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="isActive" className="text-base">Active Item</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Inactive items won't appear in Purchase Orders or invoicing
+                  </p>
+                </div>
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) => handleInputChange("isActive", checked.toString())}
+                />
+              </div>
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Textarea
