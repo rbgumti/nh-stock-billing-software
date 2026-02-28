@@ -87,6 +87,22 @@ export default function DailyStockReport() {
         aggregatedByName[key].totalCurrentStock += item.currentStock;
       });
 
+      // Get the day report's stock_snapshot for opening stock at 00:01 IST
+      const { data: dayReportData } = await supabase
+        .from('day_reports')
+        .select('stock_snapshot')
+        .eq('report_date', reportDate)
+        .maybeSingle();
+
+      const stockSnapshot: Record<string, { opening?: number }> = 
+        (dayReportData?.stock_snapshot as Record<string, { opening?: number }>) || {};
+
+      // Normalize snapshot keys for case-insensitive lookup
+      const normalizedSnapshot: Record<string, { opening?: number }> = {};
+      Object.entries(stockSnapshot).forEach(([name, val]) => {
+        normalizedSnapshot[name.toLowerCase().trim()] = val;
+      });
+
       // Get invoice items for the selected date to calculate issued quantities
       const { data: invoiceData } = await supabase
         .from('invoices')
@@ -145,7 +161,11 @@ export default function DailyStockReport() {
           const key = agg.name.toLowerCase();
           const issued = issuedQuantities[key] || 0;
           const received = receivedQuantities[key] || 0;
-          const stockOpening = agg.totalCurrentStock;
+          
+          // Use opening from stock_snapshot (captured at 00:01 IST), fallback to current stock only if no snapshot
+          const snapshotData = normalizedSnapshot[key];
+          const isFromSnapshot = snapshotData?.opening !== undefined;
+          const stockOpening = isFromSnapshot ? snapshotData.opening! : agg.totalCurrentStock;
           const stockClosing = stockOpening - issued + received;
 
           return {
