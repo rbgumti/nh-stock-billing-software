@@ -162,10 +162,11 @@ export default function DailyStockReport() {
           const issued = issuedQuantities[key] || 0;
           const received = receivedQuantities[key] || 0;
           
-          // Use opening from stock_snapshot (captured at 00:01 IST), fallback to current stock only if no snapshot
+          // Use opening from stock_snapshot (captured at 00:01 IST)
+          // Fallback: currentStock is CLOSING (after sales), so reverse-calculate opening
           const snapshotData = normalizedSnapshot[key];
           const isFromSnapshot = snapshotData?.opening !== undefined;
-          const stockOpening = isFromSnapshot ? snapshotData.opening! : agg.totalCurrentStock;
+          const stockOpening = isFromSnapshot ? snapshotData.opening! : (agg.totalCurrentStock + issued - received);
           const stockClosing = stockOpening - issued + received;
 
           return {
