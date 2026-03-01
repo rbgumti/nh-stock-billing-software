@@ -11,13 +11,9 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
-    // IMPORTANT: Always use env-based backend so the app points at the active Lovable Cloud project.
-    // This avoids schema mismatches / “missing data” issues caused by stale hard-coded URLs.
+    // IMPORTANT: Use the auto-managed backend client so preview/live always target
+    // the active Lovable Cloud project.
     alias: {
-      "@/integrations/supabase/client": path.resolve(
-        __dirname,
-        "./src/integrations/supabase/client.env.ts"
-      ),
       "@": path.resolve(__dirname, "./src"),
     },
   },
