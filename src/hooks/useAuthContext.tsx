@@ -77,6 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       handleSession(session);
+    }).catch(() => {
+      // Network error or backend unreachable — stop loading so user sees login
+      if (mounted) {
+        setUser(null);
+        setLoading(false);
+        setRoles([]);
+        setRolesLoading(false);
+      }
     });
 
     return () => {
