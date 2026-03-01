@@ -86,9 +86,13 @@ export default function Auth() {
         description: "Logged in successfully",
       });
     } catch (error: any) {
+      const msg = error?.message || "";
+      const isNetworkError = msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("fetch");
       toast({
-        title: "Error",
-        description: error.message || "Invalid username or password",
+        title: isNetworkError ? "Connection Error" : "Error",
+        description: isNetworkError
+          ? "Unable to reach the server. Please check your internet connection and try again."
+          : msg || "Invalid username or password",
         variant: "destructive",
       });
     } finally {
