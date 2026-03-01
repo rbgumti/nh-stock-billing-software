@@ -33,9 +33,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
     let lastFetchedUserId: string | null = null;
+    let networkFailures = 0;
 
     const fetchRoles = async (userId: string) => {
-      // Deduplicate: don't re-fetch if we already fetched for this user
       if (lastFetchedUserId === userId) return;
       lastFetchedUserId = userId;
       
@@ -60,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const handleSession = (session: { user: { id: string } } | null) => {
       if (!mounted) return;
+      networkFailures = 0; // reset on successful session fetch
       const u = session?.user ?? null;
       setUser(u as any);
       setLoading(false);
@@ -71,15 +72,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    const clearStaleSession = () => {
+      if (!mounted) return;
+      console.warn("Clearing stale auth session after repeated network failures");
+      supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      setUser(null);
+      setLoading(false);
+      setRoles([]);
+      setRolesLoading(false);
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session && _event === 'TOKEN_REFRESHED') return;
       handleSession(session);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       handleSession(session);
     }).catch(() => {
-      // Network error or backend unreachable — stop loading so user sees login
-      if (mounted) {
+      networkFailures++;
+      if (networkFailures >= 2) {
+        clearStaleSession();
+      } else if (mounted) {
         setUser(null);
         setLoading(false);
         setRoles([]);
@@ -87,9 +101,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
+    // Listen for unhandled auth fetch failures and clear stale tokens
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      const msg = String(event.reason?.message || event.reason || "");
+      if (msg.includes("Failed to fetch") || msg.includes("AuthRetryableFetchError")) {
+        networkFailures++;
+        if (networkFailures >= 3) {
+          clearStaleSession();
+          event.preventDefault();
+        }
+      }
+    };
+    window.addEventListener("unhandledrejection", handleRejection);
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      window.removeEventListener("unhandledrejection", handleRejection);
     };
   }, []);
 
