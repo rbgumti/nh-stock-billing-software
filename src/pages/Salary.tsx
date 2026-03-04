@@ -135,12 +135,16 @@ const SalaryContent = () => {
       // Get attendance-based working days
       const attendanceWorkingDays = calculateWorkingDaysFromAttendance(employee.id, selectedMonth);
       
-      // Attendance-based working days ALWAYS take priority when attendance is marked
-      // Only fall back to record or base working days when no attendance exists
-      const workingDays = attendanceWorkingDays > 0 ? attendanceWorkingDays : (record?.workingDays ?? baseWorkingDays);
+      // If a salary record exists, its working days value takes priority (user may have manually edited it)
+      // Otherwise, use attendance-based if available, then fall back to base working days
+      const workingDays = record?.workingDays != null 
+        ? record.workingDays 
+        : (attendanceWorkingDays > 0 ? attendanceWorkingDays : baseWorkingDays);
       
       const advanceAdjusted = record?.advanceAdjusted ?? 0;
-      const advancePending = record?.advancePending ?? 0;
+      // Auto-calculate advance pending = advance taken (from day reports) - advance adjusted
+      const advanceTaken = getEmployeeTotalAdvances(employee.id);
+      const advancePending = Math.max(0, advanceTaken - advanceAdjusted);
       
       // NEW SALARY CALCULATION:
       // Base = calendar days of month (31 for Jan, 28 for Feb, etc.)
@@ -179,7 +183,7 @@ const SalaryContent = () => {
         salaryPayable,
       };
     });
-  }, [employees, salaryRecords, selectedMonth, attendanceRecords, calculateWorkingDaysFromAttendance]);
+  }, [employees, salaryRecords, selectedMonth, attendanceRecords, calculateWorkingDaysFromAttendance, getEmployeeTotalAdvances]);
 
   // Calculate totals - use attendance-based working days if available
   const totals = useMemo(() => {
@@ -390,7 +394,9 @@ const SalaryContent = () => {
     // Determine all field values (use existing record or defaults)
     const workingDays = field === 'workingDays' ? value : (existingRecord?.workingDays ?? baseWD);
     const advanceAdjusted = field === 'advanceAdjusted' ? value : (existingRecord?.advanceAdjusted ?? 0);
-    const advancePending = field === 'advancePending' ? value : (existingRecord?.advancePending ?? 0);
+    // Auto-calculate advance pending = advance taken - advance adjusted
+    const advanceTaken = getEmployeeTotalAdvances(employeeId);
+    const advancePending = Math.max(0, advanceTaken - advanceAdjusted);
 
     // Calculate effective days
     let effectiveDays: number;
@@ -1050,14 +1056,10 @@ const SalaryContent = () => {
                                   min={0}
                                 />
                               </TableCell>
-                              <TableCell>
-                                <Input
-                                  type="number"
-                                  value={item.advancePending}
-                                  onChange={(e) => handleSalaryUpdate(item.employee.id, 'advancePending', Number(e.target.value))}
-                                  className="w-24 text-right"
-                                  min={0}
-                                />
+                              <TableCell className="text-right">
+                                <span className="font-medium">
+                                  ₹{item.advancePending.toLocaleString('en-IN')}
+                                </span>
                               </TableCell>
                               <TableCell className="text-right font-bold bg-green-50 dark:bg-green-900/10 text-primary">
                                 ₹{item.salaryPayable.toLocaleString('en-IN')}
