@@ -797,21 +797,25 @@ const SalaryContent = () => {
   return (
     <div className="relative p-4 sm:p-6 min-h-screen">
       
-      
       <div className="relative z-10 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Salary Management
-            </h1>
-            <p className="text-muted-foreground">Manage employee salaries and calculations</p>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/20">
+              <Calculator className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Salary Management
+              </h1>
+              <p className="text-sm text-muted-foreground">Payroll • Attendance • Analytics</p>
+            </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-48 bg-card/50 backdrop-blur-sm">
-                <Calendar className="w-4 h-4 mr-2" />
+              <SelectTrigger className="w-48 bg-card border-border/60 shadow-sm">
+                <Calendar className="w-4 h-4 mr-2 text-primary" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -823,28 +827,28 @@ const SalaryContent = () => {
               </SelectContent>
             </Select>
             
-            <Button onClick={exportToExcel} variant="outline" className="gap-2">
-              <Download className="w-4 h-4" />
+            <Button onClick={exportToExcel} variant="outline" size="sm" className="gap-1.5 shadow-sm">
+              <Download className="w-3.5 h-3.5" />
               Export
             </Button>
             
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={backupToJSON} variant="outline" className="gap-2">
-                  <HardDrive className="w-4 h-4" />
+                <Button onClick={backupToJSON} variant="outline" size="sm" className="gap-1.5 shadow-sm">
+                  <HardDrive className="w-3.5 h-3.5" />
                   Backup
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Export all salary data as JSON backup</TooltipContent>
             </Tooltip>
-
             
             <Button 
               onClick={revokeAccess} 
               variant="outline" 
-              className="gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              size="sm"
+              className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground shadow-sm"
             >
-              <LockKeyhole className="w-4 h-4" />
+              <LockKeyhole className="w-3.5 h-3.5" />
               Lock
             </Button>
           </div>
@@ -852,50 +856,66 @@ const SalaryContent = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-primary/5 via-card to-card shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full -translate-y-6 translate-x-6" />
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between relative z-10">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Employees</p>
-                  <p className="text-2xl font-bold">{employees.length}</p>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Employees</p>
+                  <p className="text-3xl font-bold mt-1 text-foreground">{employees.length}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Active staff</p>
                 </div>
-                <Users className="w-8 h-8 text-primary/60" />
+                <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-emerald-500/5 via-card to-card shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full -translate-y-6 translate-x-6" />
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between relative z-10">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Fixed Salary</p>
-                  <p className="text-2xl font-bold">₹{totals.salaryFixed.toLocaleString('en-IN')}</p>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fixed Salary</p>
+                  <p className="text-3xl font-bold mt-1 text-foreground">₹{totals.salaryFixed.toLocaleString('en-IN')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Monthly total</p>
                 </div>
-                <DollarSign className="w-8 h-8 text-green-500/60" />
+                <div className="p-3 rounded-xl bg-emerald-500/10 group-hover:bg-emerald-500/15 transition-colors">
+                  <DollarSign className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-amber-500/5 via-card to-card shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full -translate-y-6 translate-x-6" />
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between relative z-10">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Advance Adjusted</p>
-                  <p className="text-2xl font-bold">₹{totals.advanceAdjusted.toLocaleString('en-IN')}</p>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Advances</p>
+                  <p className="text-3xl font-bold mt-1 text-foreground">₹{totals.advanceAdjusted.toLocaleString('en-IN')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Adjusted this month</p>
                 </div>
-                <Calculator className="w-8 h-8 text-amber-500/60" />
+                <div className="p-3 rounded-xl bg-amber-500/10 group-hover:bg-amber-500/15 transition-colors">
+                  <Wallet className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-primary/10 via-primary/5 to-card shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 ring-1 ring-primary/10">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full -translate-y-6 translate-x-6" />
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between relative z-10">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Payable</p>
-                  <p className="text-2xl font-bold text-primary">₹{totals.salaryPayable.toLocaleString('en-IN')}</p>
+                  <p className="text-xs font-medium uppercase tracking-wider text-primary/70">Net Payable</p>
+                  <p className="text-3xl font-bold mt-1 text-primary">₹{totals.salaryPayable.toLocaleString('en-IN')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">After deductions</p>
                 </div>
-                <FileSpreadsheet className="w-8 h-8 text-primary/60" />
+                <div className="p-3 rounded-xl bg-primary/15 group-hover:bg-primary/20 transition-colors">
+                  <FileSpreadsheet className="w-6 h-6 text-primary" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -903,31 +923,36 @@ const SalaryContent = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-card/50 backdrop-blur-sm flex-wrap">
-            <TabsTrigger value="salary" className="gap-2">
+          <TabsList className="bg-card border border-border/50 shadow-sm p-1 h-auto flex-wrap gap-1">
+            <TabsTrigger value="salary" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg px-4 py-2 text-sm">
               <Calculator className="w-4 h-4" />
-              Salary Calculation
+              Salary Sheet
             </TabsTrigger>
-            <TabsTrigger value="attendance" className="gap-2">
+            <TabsTrigger value="attendance" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg px-4 py-2 text-sm">
               <CalendarDays className="w-4 h-4" />
               Attendance
             </TabsTrigger>
-            <TabsTrigger value="employees" className="gap-2">
+            <TabsTrigger value="employees" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg px-4 py-2 text-sm">
               <Users className="w-4 h-4" />
               Employees
             </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
+            <TabsTrigger value="history" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg px-4 py-2 text-sm">
               <TrendingUp className="w-4 h-4" />
-              History & Analytics
+              Analytics
             </TabsTrigger>
           </TabsList>
 
           {/* Salary Calculation Tab */}
           <TabsContent value="salary" className="mt-4">
-            <Card className="glass-card">
-              <CardHeader className="pb-3">
+            <Card className="border border-border/50 shadow-lg overflow-hidden">
+              <CardHeader className="pb-3 bg-gradient-to-r from-card to-muted/30 border-b border-border/30">
                 <CardTitle className="flex items-center justify-between flex-wrap gap-2">
-                  <span>Monthly Salary Sheet - {format(new Date(selectedMonth + "-01"), "MMMM yyyy")}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <FileSpreadsheet className="w-4 h-4 text-primary" />
+                    </div>
+                    <span className="text-base">Salary Sheet — {format(new Date(selectedMonth + "-01"), "MMMM yyyy")}</span>
+                  </div>
                   <div className="flex items-center gap-2">
                     {advancesSummary.length > 0 && (
                       <Tooltip>
@@ -935,30 +960,27 @@ const SalaryContent = () => {
                           <Button 
                             size="sm" 
                             variant="outline"
-                            className="gap-2"
+                            className="gap-1.5 text-xs shadow-sm border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
                             disabled={advancesLoading}
                             onClick={() => {
                               let synced = 0;
                               advancesSummary.forEach((summary) => {
-                                const currentRecord = salaryRecords.find(
-                                  r => r.employeeId === summary.employeeId && r.month === selectedMonth
-                                );
                                 handleSalaryUpdate(summary.employeeId, 'advanceAdjusted', summary.totalAdvances);
                                 synced++;
                               });
-                              toast.success(`Synced advances for ${synced} employee(s) from Day Reports`);
+                              toast.success(`Synced advances for ${synced} employee(s)`);
                             }}
                           >
-                            <Wallet className="w-4 h-4" />
+                            <Wallet className="w-3.5 h-3.5" />
                             Sync Advances (₹{advancesSummary.reduce((s, a) => s + a.totalAdvances, 0).toLocaleString('en-IN')})
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Sync advances recorded in Day Reports to salary sheet</TooltipContent>
+                        <TooltipContent>Sync advances from Day Reports</TooltipContent>
                       </Tooltip>
                     )}
                     {employees.length === 0 && (
-                      <Button size="sm" onClick={() => setActiveTab("employees")} className="gap-2">
-                        <UserPlus className="w-4 h-4" />
+                      <Button size="sm" onClick={() => setActiveTab("employees")} className="gap-1.5 text-xs">
+                        <UserPlus className="w-3.5 h-3.5" />
                         Add Employees First
                       </Button>
                     )}
@@ -969,81 +991,86 @@ const SalaryContent = () => {
                 <div className="overflow-x-auto max-w-full">
                   <Table className="relative">
                     <TableHeader>
-                      <TableRow className="bg-green-100 dark:bg-green-900/30">
-                        <TableHead className="font-bold text-foreground w-14 sticky left-0 z-20 bg-green-100 dark:bg-green-900/80">S.No</TableHead>
-                        <TableHead className="font-bold text-foreground min-w-[180px] sticky left-14 z-20 bg-green-100 dark:bg-green-900/80 border-r border-border/50">Name of Employee</TableHead>
-                        <TableHead className="font-bold text-foreground min-w-[120px]">Designation</TableHead>
-                        <TableHead className="font-bold text-foreground text-right bg-yellow-100 dark:bg-yellow-900/30">Salary (Fixed)</TableHead>
-                        <TableHead className="font-bold text-foreground text-center">
+                      <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-b-2 border-primary/20">
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-foreground/80 w-14 sticky left-0 z-20 bg-primary/10">#</TableHead>
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-foreground/80 min-w-[180px] sticky left-14 z-20 bg-primary/10 border-r border-primary/10">Employee</TableHead>
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-foreground/80 min-w-[100px]">Role</TableHead>
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-foreground/80 text-right">Fixed Salary</TableHead>
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-foreground/80 text-center">
                           <Tooltip>
-                            <TooltipTrigger className="cursor-help underline decoration-dotted">
-                              Working Days ({monthlySalaryData[0]?.calendarDays || getCalendarDaysInMonth(selectedMonth)} days)
+                            <TooltipTrigger className="cursor-help underline decoration-dotted decoration-muted-foreground/50">
+                              Days Worked
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs text-left">
-                              <p className="font-medium mb-1">Calendar-Based Salary Calculation:</p>
-                              <ul className="text-xs space-y-1">
-                                <li>• Base = {monthlySalaryData[0]?.calendarDays || getCalendarDaysInMonth(selectedMonth)} calendar days − {monthlySalaryData[0]?.sundaysInMonth || getSundaysInMonth(selectedMonth)} Sundays = {monthlySalaryData[0]?.baseWorkingDays || getBaseWorkingDays(selectedMonth)} working days</li>
-                                <li>• Full month worked = {monthlySalaryData[0]?.calendarDays || getCalendarDaysInMonth(selectedMonth)} days salary</li>
-                                <li>• Extra Sundays worked = bonus days</li>
-                                <li>• Editable: Enter days worked manually</li>
+                              <p className="font-medium mb-1">Calendar-Based Calculation:</p>
+                              <ul className="text-xs space-y-1 text-muted-foreground">
+                                <li>• {monthlySalaryData[0]?.calendarDays || getCalendarDaysInMonth(selectedMonth)} cal. days − {monthlySalaryData[0]?.sundaysInMonth || getSundaysInMonth(selectedMonth)} Sundays = {monthlySalaryData[0]?.baseWorkingDays || getBaseWorkingDays(selectedMonth)} base days</li>
+                                <li>• Editable: override with actual days worked</li>
                               </ul>
                             </TooltipContent>
                           </Tooltip>
                         </TableHead>
-                        <TableHead className="font-bold text-foreground text-right bg-orange-100 dark:bg-orange-900/30">
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-amber-700 dark:text-amber-400 text-right">
                           <Tooltip>
-                            <TooltipTrigger className="cursor-help underline decoration-dotted">
-                              Advance Taken
+                            <TooltipTrigger className="cursor-help underline decoration-dotted decoration-amber-400/50">
+                              Adv. Taken
                             </TooltipTrigger>
-                            <TooltipContent>Total advances taken from Day Reports this month (read-only)</TooltipContent>
+                            <TooltipContent>From Day Reports (read-only)</TooltipContent>
                           </Tooltip>
                         </TableHead>
-                        <TableHead className="font-bold text-foreground text-right">Advance (Adjusted)</TableHead>
-                        <TableHead className="font-bold text-foreground text-right">Advance Pending</TableHead>
-                        <TableHead className="font-bold text-foreground text-right bg-green-200 dark:bg-green-800/50">Salary Payable</TableHead>
-                        <TableHead className="font-bold text-foreground text-center w-20">Slip</TableHead>
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-foreground/80 text-right">Adjusted</TableHead>
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-foreground/80 text-right">Pending</TableHead>
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-primary text-right">Net Payable</TableHead>
+                        <TableHead className="font-semibold text-xs uppercase tracking-wider text-foreground/80 text-center w-14">Slip</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {monthlySalaryData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
-                            No employees found. Add employees first to calculate salaries.
+                          <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
+                            <div className="flex flex-col items-center gap-2">
+                              <Users className="w-8 h-8 text-muted-foreground/40" />
+                              <p>No employees found. Add employees first.</p>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ) : (
                         <>
-                          {monthlySalaryData.map((item) => (
-                            <TableRow key={item.employee.id} className="hover:bg-muted/50">
-                              <TableCell className="sticky left-0 z-10 bg-background">{item.sNo}</TableCell>
-                              <TableCell className="font-medium sticky left-14 z-10 bg-background border-r border-border/50">{item.employee.name}</TableCell>
-                              <TableCell>{item.employee.designation}</TableCell>
-                              <TableCell className="text-right bg-yellow-50 dark:bg-yellow-900/10">
+                          {monthlySalaryData.map((item, idx) => (
+                            <TableRow key={item.employee.id} className={`hover:bg-primary/[0.03] transition-colors ${idx % 2 === 0 ? 'bg-background' : 'bg-muted/15'}`}>
+                              <TableCell className={`sticky left-0 z-10 text-muted-foreground text-sm ${idx % 2 === 0 ? 'bg-background' : 'bg-muted/15'}`}>{item.sNo}</TableCell>
+                              <TableCell className={`font-medium sticky left-14 z-10 border-r border-border/20 text-sm ${idx % 2 === 0 ? 'bg-background' : 'bg-muted/15'}`}>
+                                {item.employee.name}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-[11px] font-normal border-border/30 px-2 py-0">{item.employee.designation}</Badge>
+                              </TableCell>
+                              <TableCell className="text-right font-medium text-sm tabular-nums">
                                 ₹{item.employee.salaryFixed.toLocaleString('en-IN')}
                               </TableCell>
                               <TableCell>
-                                <div className="flex flex-col items-center gap-1">
+                                <div className="flex flex-col items-center gap-0.5">
                                   <Input
                                     type="number"
                                     value={item.workingDays}
                                     onChange={(e) => handleSalaryUpdate(item.employee.id, 'workingDays', Number(e.target.value))}
-                                    className="w-20 text-center mx-auto"
+                                    className="w-16 h-7 text-center text-sm border-border/30 bg-background shadow-sm rounded-lg"
                                     min={0}
                                     max={35}
                                     step={0.5}
                                   />
-                                  <span className="text-xs text-muted-foreground">
-                                    = {item.effectiveDaysForSalary} eff
+                                  <span className="text-[10px] text-muted-foreground/60">
+                                    {item.effectiveDaysForSalary} eff
                                   </span>
                                 </div>
                               </TableCell>
-                              <TableCell className="text-right bg-orange-50 dark:bg-orange-900/10">
+                              <TableCell className="text-right">
                                 {(() => {
                                   const adv = getEmployeeTotalAdvances(item.employee.id);
                                   return adv > 0 ? (
-                                    <span className="font-medium text-orange-600 dark:text-orange-400">₹{adv.toLocaleString('en-IN')}</span>
+                                    <span className="text-sm font-medium text-amber-600 dark:text-amber-400 tabular-nums">₹{adv.toLocaleString('en-IN')}</span>
                                   ) : (
-                                    <span className="text-muted-foreground">—</span>
+                                    <span className="text-muted-foreground/30">—</span>
                                   );
                                 })()}
                               </TableCell>
@@ -1052,17 +1079,23 @@ const SalaryContent = () => {
                                   type="number"
                                   value={item.advanceAdjusted}
                                   onChange={(e) => handleSalaryUpdate(item.employee.id, 'advanceAdjusted', Number(e.target.value))}
-                                  className="w-24 text-right"
+                                  className="w-20 h-7 text-right text-sm border-border/30 bg-background shadow-sm rounded-lg"
                                   min={0}
                                 />
                               </TableCell>
                               <TableCell className="text-right">
-                                <span className="font-medium">
-                                  ₹{item.advancePending.toLocaleString('en-IN')}
-                                </span>
+                                {item.advancePending > 0 ? (
+                                  <span className="text-sm font-medium text-amber-600 dark:text-amber-400 tabular-nums">
+                                    ₹{item.advancePending.toLocaleString('en-IN')}
+                                  </span>
+                                ) : (
+                                  <span className="text-sm text-muted-foreground/40 tabular-nums">₹0</span>
+                                )}
                               </TableCell>
-                              <TableCell className="text-right font-bold bg-green-50 dark:bg-green-900/10 text-primary">
-                                ₹{item.salaryPayable.toLocaleString('en-IN')}
+                              <TableCell className="text-right">
+                                <span className="text-sm font-bold text-primary tabular-nums">
+                                  ₹{item.salaryPayable.toLocaleString('en-IN')}
+                                </span>
                               </TableCell>
                               <TableCell className="text-center">
                                 <Tooltip>
@@ -1070,14 +1103,14 @@ const SalaryContent = () => {
                                     <Button
                                       size="icon"
                                       variant="ghost"
-                                      className="h-8 w-8"
+                                      className="h-7 w-7 rounded-lg hover:bg-primary/10 hover:text-primary"
                                       onClick={() => generateSalarySlip(item.employee.id)}
                                       disabled={generatingSlipId === item.employee.id}
                                     >
                                       {generatingSlipId === item.employee.id ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                       ) : (
-                                        <FileDown className="w-4 h-4" />
+                                        <FileDown className="w-3.5 h-3.5" />
                                       )}
                                     </Button>
                                   </TooltipTrigger>
@@ -1087,20 +1120,20 @@ const SalaryContent = () => {
                             </TableRow>
                           ))}
                           {/* Totals Row */}
-                          <TableRow className="bg-muted/50 font-bold border-t-2">
-                            <TableCell className="sticky left-0 z-10 bg-muted/80"></TableCell>
-                            <TableCell className="sticky left-14 z-10 bg-muted/80 border-r border-border/50 text-right" colSpan={1}>TOTAL</TableCell>
+                          <TableRow className="border-t-2 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 font-bold">
+                            <TableCell className="sticky left-0 z-10 bg-primary/5"></TableCell>
+                            <TableCell className="sticky left-14 z-10 bg-primary/5 border-r border-primary/10 text-right text-xs uppercase tracking-widest text-foreground/60" colSpan={1}>Total</TableCell>
                             <TableCell></TableCell>
-                            <TableCell className="text-right bg-yellow-100 dark:bg-yellow-900/30">
+                            <TableCell className="text-right text-sm tabular-nums">
                               ₹{totals.salaryFixed.toLocaleString('en-IN')}
                             </TableCell>
                             <TableCell></TableCell>
-                            <TableCell className="text-right bg-orange-100 dark:bg-orange-900/30 font-bold text-orange-600 dark:text-orange-400">
+                            <TableCell className="text-right text-sm tabular-nums text-amber-600 dark:text-amber-400">
                               ₹{advancesSummary.reduce((s, a) => s + a.totalAdvances, 0).toLocaleString('en-IN')}
                             </TableCell>
-                            <TableCell className="text-right">₹{totals.advanceAdjusted.toLocaleString('en-IN')}</TableCell>
-                            <TableCell className="text-right">₹{totals.advancePending.toLocaleString('en-IN')}</TableCell>
-                            <TableCell className="text-right text-primary bg-green-200 dark:bg-green-800/50">
+                            <TableCell className="text-right text-sm tabular-nums">₹{totals.advanceAdjusted.toLocaleString('en-IN')}</TableCell>
+                            <TableCell className="text-right text-sm tabular-nums">₹{totals.advancePending.toLocaleString('en-IN')}</TableCell>
+                            <TableCell className="text-right text-sm tabular-nums text-primary font-extrabold">
                               ₹{totals.salaryPayable.toLocaleString('en-IN')}
                             </TableCell>
                             <TableCell></TableCell>
@@ -1426,73 +1459,84 @@ const SalaryContent = () => {
 
           {/* Employees Tab */}
           <TabsContent value="employees" className="mt-4">
-            <Card className="glass-card">
-              <CardHeader className="pb-3">
+            <Card className="border border-border/50 shadow-lg overflow-hidden">
+              <CardHeader className="pb-3 bg-gradient-to-r from-card to-muted/30 border-b border-border/30">
                 <CardTitle className="flex items-center justify-between">
-                  <span>Employee Master</span>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <Users className="w-4 h-4 text-primary" />
+                    </div>
+                    <span className="text-base">Employee Directory</span>
+                    <Badge variant="secondary" className="ml-1 text-xs">{employees.length}</Badge>
+                  </div>
                   <Button 
                     onClick={() => {
                       setEditingEmployee(null);
                       setEmployeeForm({ name: "", designation: "", salaryFixed: 0 });
                       setIsEmployeeDialogOpen(true);
                     }}
-                    className="gap-2"
+                    size="sm"
+                    className="gap-1.5 shadow-md"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-3.5 h-3.5" />
                     Add Employee
                   </Button>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-14">S.No</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Designation</TableHead>
-                        <TableHead className="text-right">Fixed Salary</TableHead>
-                        <TableHead className="text-right">Per Day Rate</TableHead>
-                        <TableHead className="w-24">Actions</TableHead>
+                      <TableRow className="bg-muted/30">
+                        <TableHead className="w-14 text-xs uppercase tracking-wider font-semibold">#</TableHead>
+                        <TableHead className="text-xs uppercase tracking-wider font-semibold">Name</TableHead>
+                        <TableHead className="text-xs uppercase tracking-wider font-semibold">Designation</TableHead>
+                        <TableHead className="text-right text-xs uppercase tracking-wider font-semibold">Fixed Salary</TableHead>
+                        <TableHead className="text-right text-xs uppercase tracking-wider font-semibold">Per Day Rate</TableHead>
+                        <TableHead className="w-24 text-xs uppercase tracking-wider font-semibold">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {employees.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                            No employees found. Click "Add Employee" to get started.
+                          <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                            <div className="flex flex-col items-center gap-2">
+                              <UserPlus className="w-8 h-8 text-muted-foreground/40" />
+                              <p>No employees yet. Click "Add Employee" to get started.</p>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ) : (
                         employees.map((employee, index) => (
-                          <TableRow key={employee.id}>
-                            <TableCell>{index + 1}</TableCell>
-                            <TableCell className="font-medium">{employee.name}</TableCell>
+                          <TableRow key={employee.id} className={`hover:bg-primary/[0.03] transition-colors ${index % 2 === 0 ? '' : 'bg-muted/15'}`}>
+                            <TableCell className="text-muted-foreground text-sm">{index + 1}</TableCell>
+                            <TableCell className="font-medium text-sm">{employee.name}</TableCell>
                             <TableCell>
-                              <Badge variant="outline">{employee.designation}</Badge>
+                              <Badge variant="outline" className="text-[11px] font-normal border-border/30">{employee.designation}</Badge>
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right text-sm font-medium tabular-nums">
                               ₹{employee.salaryFixed.toLocaleString('en-IN')}
                             </TableCell>
-                            <TableCell className="text-right text-muted-foreground">
+                            <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
                               ₹{Math.round(employee.salaryFixed / 31).toLocaleString('en-IN')}
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-0.5">
                                 <Button
                                   size="icon"
                                   variant="ghost"
+                                  className="h-7 w-7 rounded-lg hover:bg-primary/10 hover:text-primary"
                                   onClick={() => handleEditEmployee(employee)}
                                 >
-                                  <Pencil className="w-4 h-4" />
+                                  <Pencil className="w-3.5 h-3.5" />
                                 </Button>
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  className="text-destructive hover:text-destructive"
+                                  className="h-7 w-7 rounded-lg text-destructive/60 hover:text-destructive hover:bg-destructive/10"
                                   onClick={() => handleDeleteEmployee(employee.id)}
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </Button>
                               </div>
                             </TableCell>
