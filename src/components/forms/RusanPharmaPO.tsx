@@ -183,13 +183,10 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </tbody>
         </table>
 
-        {/* Flex spacer */}
-        <div className="flex-grow"></div>
-
         {/* Undertaking & Signature - Only on last page */}
         {isLastPage && (
           <>
-            <div style={{ marginTop: '4px' }}>
+            <div style={{ marginTop: '2px' }}>
               <p className="font-black" style={{ color: '#003366', fontSize: '11pt', marginBottom: '2px' }}>UNDERTAKING:</p>
               <p className="font-semibold text-justify" style={{ fontSize: '8.5pt', lineHeight: '1.2', color: '#333' }}>
                 We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN, SELAQUI, DEHRADUN, UTTARAKHAND-248197 Our <span className="font-black">P.O. No: {getPONumberSuffix()}/A ({formatDate(poDate)})</span>. These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our <span className="font-black">License No. PSMHC/Punjab/2024/863</span> we are fully aware These product containing controlled substances as per Narcotic Drugs & Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6 (Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation & for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any non-compliance of statutory provisions committed by us intentionally or un-intentionally.
