@@ -107,7 +107,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         {/* PO Info Grid */}
         {isFirstPage && (
           <>
-            <div className="grid grid-cols-2 font-bold" style={{ backgroundColor: '#f0f7ff', border: '1.5px solid #003366', borderRadius: '6px', padding: '4px 8px', marginBottom: '4px', fontSize: '11pt' }}>
+            <div className="grid grid-cols-2 font-bold" style={{ backgroundColor: '#f0f7ff', border: '1.5px solid #003366', borderRadius: '6px', padding: '4px 8px', marginBottom: '8px', fontSize: '11pt' }}>
               <div className="flex">
                 <span className="font-black" style={{ color: '#003366', minWidth: '90px' }}>PO Number:</span>
                 <span className="font-black" style={{ color: '#111' }}>NH-25-26-{getPONumberSuffix()}</span>
@@ -119,16 +119,16 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </div>
 
             {/* Supplier Box */}
-            <div style={{ backgroundColor: '#e8f4fd', border: '1.5px solid #0066cc', borderRadius: '6px', padding: '4px 8px', marginBottom: '4px', fontSize: '11pt' }}>
+            <div style={{ backgroundColor: '#e8f4fd', border: '1.5px solid #0066cc', borderRadius: '6px', padding: '4px 8px', marginBottom: '8px', fontSize: '11pt' }}>
               <span className="font-black" style={{ color: '#003366' }}>TO: </span>
               <span className="font-black" style={{ color: '#111' }}>RUSAN PHARMA LTD.</span>
               <span className="font-bold" style={{ color: '#333', marginLeft: '6px' }}>Khasra No. 122MI, Central Hope Town, Selaqui, Dehradun, Uttarakhand - 248197</span>
             </div>
 
             {/* Subject & Salutation */}
-            <p className="font-bold" style={{ fontSize: '11pt', marginBottom: '2px' }}><span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span style={{ color: '#111' }}>Purchase Order</span></p>
-            <p className="font-bold" style={{ fontSize: '11pt', marginBottom: '2px', color: '#111' }}>Dear Sir/Madam,</p>
-            <p className="font-semibold text-justify" style={{ fontSize: '10pt', marginBottom: '4px', color: '#333', lineHeight: '1.25' }}>
+            <p className="font-bold" style={{ fontSize: '11pt', marginBottom: '4px' }}><span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span style={{ color: '#111' }}>Purchase Order</span></p>
+            <p className="font-bold" style={{ fontSize: '11pt', marginBottom: '4px', color: '#111' }}>Dear Sir/Madam,</p>
+            <p className="font-semibold text-justify" style={{ fontSize: '11pt', marginBottom: '6px', color: '#333', lineHeight: '1.4' }}>
               We hereby placing a purchase order with Stamp and Sign of our current working doctor's. Terms and Conditions will remain same as our discussion on phonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
             </p>
           </>
@@ -215,11 +215,8 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
           </>
         )}
 
-        {/* Spacer to push footer to bottom */}
-        <div className="flex-grow"></div>
-
         {/* Footer - using inline styles for html2canvas compatibility */}
-        <div style={{ textAlign: 'center', fontSize: '10pt', fontWeight: '900', padding: '6px 0', backgroundColor: '#003366', color: '#ffffff', borderRadius: '4px' }}>
+        <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '10pt', fontWeight: '900', padding: '6px 0', backgroundColor: '#003366', color: '#ffffff', borderRadius: '4px' }}>
           <p style={{ margin: '0' }}>
             NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
           </p>
