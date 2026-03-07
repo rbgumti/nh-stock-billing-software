@@ -193,21 +193,26 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
               </p>
             </div>
 
-            {/* Signature Section */}
-            <div className="flex justify-between" style={{ marginTop: '10px', fontSize: '11pt', padding: '0 4px' }}>
-              <div className="text-left">
-                <p className="font-black" style={{ color: '#003366', fontSize: '12pt', margin: '0' }}>For Navjeevan Hospital,</p>
-                <p className="font-bold" style={{ color: '#333', fontSize: '10pt', margin: '0' }}>Opp. New Bus Stand, G.T. Road, Sirhind</p>
-                <div style={{ minHeight: '50px' }}></div>
+            {/* For Navjeevan Hospital line */}
+            <div style={{ marginTop: '10px', fontSize: '11pt', padding: '0 4px' }}>
+              <p className="font-black" style={{ color: '#003366', fontSize: '12pt', margin: '0' }}>For Navjeevan Hospital,</p>
+              <p className="font-bold" style={{ color: '#333', fontSize: '10pt', margin: '0' }}>Opp. New Bus Stand, G.T. Road, Sirhind</p>
+            </div>
+
+            {/* Spacer for stamp and signature */}
+            <div className="flex-grow" style={{ minHeight: '80px' }}></div>
+
+            {/* Doctor name and Date - pushed just above footer */}
+            <div className="flex justify-between items-end" style={{ fontSize: '11pt', padding: '0 4px', marginBottom: '8px' }}>
+              <div>
                 <div style={{ paddingTop: '2px', borderTop: '2px solid #555', minWidth: '200px' }}>
                   <span className="font-black" style={{ color: '#111', fontSize: '14pt' }}>{doctorName}</span>
                   <p className="font-bold" style={{ color: '#555', fontSize: '10pt', margin: '0' }}>Navjeevan Hospital, Sirhind</p>
                   <p className="font-semibold italic" style={{ color: '#777', fontSize: '9pt', margin: '0' }}>(Signature & Stamp)</p>
                 </div>
               </div>
-              <div className="text-center" style={{ minWidth: '130px' }}>
-                <div style={{ minHeight: '50px' }}></div>
-                <div style={{ paddingTop: '2px', borderTop: '2px solid #555' }}>
+              <div className="text-right">
+                <div style={{ paddingTop: '2px', borderTop: '2px solid #555', minWidth: '180px' }}>
                   <span className="font-black" style={{ color: '#111', fontSize: '14pt' }}>Date: {formatDate(poDate)}</span>
                 </div>
               </div>
