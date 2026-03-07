@@ -170,14 +170,14 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
               const stockItem = getStockItemDetails(item.stockItemId);
               const itemNumber = startIndex + index + 1;
               const qtyInStrips = item.qtyInStrips || item.quantity;
-              const amount = item.totalPrice || item.total || (qtyInStrips * (item.unitPrice || 0));
+              const amount = item.totalPrice || (qtyInStrips * (item.unitPrice || 0));
 
               return (
                 <tr key={index}>
                   <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '600', color: '#000' }}>{itemNumber}.</td>
                   <td style={{ border: '1px solid #999', padding: '4px', fontWeight: '700', color: '#000' }}>{item.stockItemName}</td>
                   <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '600', color: '#000' }}>{stockItem?.composition || '-'}</td>
-                  <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '600', color: '#000' }}>{stockItem?.batch_no || '-'}</td>
+                  <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '600', color: '#000' }}>{stockItem?.batchNo || '-'}</td>
                   <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '700', color: '#000' }}>{qtyInStrips.toLocaleString()}</td>
                   <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '700', color: '#000' }}>{amount.toLocaleString()}</td>
                 </tr>
