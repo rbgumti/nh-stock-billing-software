@@ -79,27 +79,27 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
       <div
         key={pageIndex}
         ref={(el) => { pageRefs.current[pageIndex] = el; }}
-        className="p-6 bg-white text-black flex flex-col mb-4"
-        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '14pt', lineHeight: '1.5', fontWeight: '600', height: '1123px' }}
+        className="bg-white text-black flex flex-col mb-4"
+        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '12pt', lineHeight: '1.3', fontWeight: '600', padding: '14px 20px', height: '1123px' }}
       >
         {/* Header with Logo */}
-        <div className="text-center mb-3 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
-          <div className="flex justify-center mb-2">
-            <img src={navjeevanLogo} alt="Logo" className="w-16 h-16 object-contain" />
+        <div className="text-center pb-2 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366', marginBottom: '6px' }}>
+          <div className="flex justify-center" style={{ marginBottom: '4px' }}>
+            <img src={navjeevanLogo} alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
           </div>
-          <h1 className="text-3xl font-black tracking-wide" style={{ color: '#003366', letterSpacing: '1px' }}>
+          <h1 className="font-black tracking-wide" style={{ color: '#003366', letterSpacing: '1px', fontSize: '20pt', marginBottom: '0' }}>
             NAVJEEVAN HOSPITAL
           </h1>
-          <p className="text-sm font-bold italic text-gray-700">Healthcare with Compassion</p>
-          <p className="text-sm font-bold text-gray-800">
+          <p className="font-bold italic" style={{ fontSize: '10pt', color: '#555', margin: '0' }}>Healthcare with Compassion</p>
+          <p className="font-bold" style={{ fontSize: '10pt', color: '#333', margin: '0' }}>
             Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
           </p>
-          <p className="text-sm font-bold text-gray-700">Phone: 6284942412 | {doctorName} | Licence No: PSMHC/Pb./2024/863</p>
+          <p className="font-bold" style={{ fontSize: '10pt', color: '#555', margin: '0' }}>Phone: 6284942412 | {doctorName} | Licence No: PSMHC/Pb./2024/863</p>
         </div>
 
         {/* PO Title Badge */}
-        <div className="flex justify-center mb-3">
-          <div className="px-8 py-2 rounded-lg text-white font-black text-lg tracking-widest shadow-md" style={{ backgroundColor: '#003366' }}>
+        <div className="flex justify-center" style={{ margin: '6px 0' }}>
+          <div className="text-white font-black tracking-widest" style={{ backgroundColor: '#003366', padding: '4px 24px', borderRadius: '6px', fontSize: '13pt' }}>
             PURCHASE ORDER {totalPages > 1 && `(Page ${pageIndex + 1}/${totalPages})`}
           </div>
         </div>
@@ -107,28 +107,28 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         {/* PO Info Grid */}
         {isFirstPage && (
           <>
-            <div className="grid grid-cols-2 gap-3 mb-3 p-3 rounded-lg text-base font-bold" style={{ backgroundColor: '#f0f7ff', border: '2px solid #003366' }}>
+            <div className="grid grid-cols-2 font-bold" style={{ backgroundColor: '#f0f7ff', border: '1.5px solid #003366', borderRadius: '6px', padding: '4px 8px', marginBottom: '4px', fontSize: '11pt' }}>
               <div className="flex">
-                <span className="font-black min-w-[110px]" style={{ color: '#003366' }}>PO Number:</span>
-                <span className="font-black text-gray-900">NH-25-26-{getPONumberSuffix()}</span>
+                <span className="font-black" style={{ color: '#003366', minWidth: '90px' }}>PO Number:</span>
+                <span className="font-black" style={{ color: '#111' }}>NH-25-26-{getPONumberSuffix()}</span>
               </div>
               <div className="flex">
-                <span className="font-black min-w-[110px]" style={{ color: '#003366' }}>PO Date:</span>
-                <span className="font-bold text-gray-900">{formatDate(poDate)}</span>
+                <span className="font-black" style={{ color: '#003366', minWidth: '90px' }}>PO Date:</span>
+                <span className="font-bold" style={{ color: '#111' }}>{formatDate(poDate)}</span>
               </div>
             </div>
 
             {/* Supplier Box */}
-            <div className="p-3 mb-3 rounded-lg text-base" style={{ backgroundColor: '#e8f4fd', border: '2px solid #0066cc' }}>
+            <div style={{ backgroundColor: '#e8f4fd', border: '1.5px solid #0066cc', borderRadius: '6px', padding: '4px 8px', marginBottom: '4px', fontSize: '11pt' }}>
               <span className="font-black" style={{ color: '#003366' }}>TO: </span>
-              <span className="font-black text-gray-900">RUSAN PHARMA LTD.</span>
-              <span className="text-gray-800 font-bold ml-2">Khasra No. 122MI, Central Hope Town, Selaqui, Dehradun, Uttarakhand - 248197</span>
+              <span className="font-black" style={{ color: '#111' }}>RUSAN PHARMA LTD.</span>
+              <span className="font-bold" style={{ color: '#333', marginLeft: '6px' }}>Khasra No. 122MI, Central Hope Town, Selaqui, Dehradun, Uttarakhand - 248197</span>
             </div>
 
             {/* Subject & Salutation */}
-            <p className="text-base font-bold mb-1"><span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span className="text-gray-900">Purchase Order</span></p>
-            <p className="text-base font-bold mb-2 text-gray-900">Dear Sir/Madam,</p>
-            <p className="text-base font-semibold text-justify mb-3 text-gray-800">
+            <p className="font-bold" style={{ fontSize: '11pt', marginBottom: '2px' }}><span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span style={{ color: '#111' }}>Purchase Order</span></p>
+            <p className="font-bold" style={{ fontSize: '11pt', marginBottom: '2px', color: '#111' }}>Dear Sir/Madam,</p>
+            <p className="font-semibold text-justify" style={{ fontSize: '10pt', marginBottom: '4px', color: '#333', lineHeight: '1.25' }}>
               We hereby placing a purchase order with Stamp and Sign of our current working doctor's. Terms and Conditions will remain same as our discussion on phonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
             </p>
           </>
@@ -136,25 +136,25 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
 
         {/* Continuation header for non-first pages */}
         {!isFirstPage && (
-          <div className="mb-3 p-3 rounded-lg text-base font-bold" style={{ backgroundColor: '#f0f7ff', border: '2px solid #003366' }}>
+          <div className="font-bold" style={{ backgroundColor: '#f0f7ff', border: '1.5px solid #003366', borderRadius: '6px', padding: '4px 8px', marginBottom: '4px', fontSize: '11pt' }}>
             <span className="font-black" style={{ color: '#003366' }}>PO Number: </span>
-            <span className="font-black text-gray-900">NH-25-26-{getPONumberSuffix()}</span>
-            <span className="ml-6 font-black" style={{ color: '#003366' }}>Date: </span>
-            <span className="font-bold text-gray-900">{formatDate(poDate)}</span>
-            <span className="ml-6 text-gray-600">(Continued)</span>
+            <span className="font-black" style={{ color: '#111' }}>NH-25-26-{getPONumberSuffix()}</span>
+            <span className="font-black" style={{ color: '#003366', marginLeft: '16px' }}>Date: </span>
+            <span className="font-bold" style={{ color: '#111' }}>{formatDate(poDate)}</span>
+            <span style={{ color: '#777', marginLeft: '16px' }}>(Continued)</span>
           </div>
         )}
 
         {/* Items Table */}
-        <table className="w-full border-collapse mb-3 text-base" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+        <table className="w-full border-collapse" style={{ marginBottom: '4px', fontSize: '10pt' }}>
           <thead>
             <tr style={{ backgroundColor: '#003366' }}>
-              <th className="p-2.5 text-center text-white font-black border border-gray-400 w-[6%]">Sr.</th>
-              <th className="p-2.5 text-left text-white font-black border border-gray-400 w-[18%]">Product</th>
-              <th className="p-2.5 text-left text-white font-black border border-gray-400 w-[36%]">Compositions</th>
-              <th className="p-2.5 text-center text-white font-black border border-gray-400 w-[12%]">Pack</th>
-              <th className="p-2.5 text-center text-white font-black border border-gray-400 w-[14%]">Strips</th>
-              <th className="p-2.5 text-center text-white font-black border border-gray-400 w-[14%]">Tablets</th>
+              <th style={{ padding: '4px 3px', textAlign: 'center', color: '#ffffff', fontWeight: '900', border: '1px solid #999', width: '5%' }}>Sr.</th>
+              <th style={{ padding: '4px 3px', textAlign: 'left', color: '#ffffff', fontWeight: '900', border: '1px solid #999', width: '18%' }}>Product</th>
+              <th style={{ padding: '4px 3px', textAlign: 'left', color: '#ffffff', fontWeight: '900', border: '1px solid #999', width: '37%' }}>Compositions</th>
+              <th style={{ padding: '4px 3px', textAlign: 'center', color: '#ffffff', fontWeight: '900', border: '1px solid #999', width: '12%' }}>Pack</th>
+              <th style={{ padding: '4px 3px', textAlign: 'center', color: '#ffffff', fontWeight: '900', border: '1px solid #999', width: '14%' }}>Strips</th>
+              <th style={{ padding: '4px 3px', textAlign: 'center', color: '#ffffff', fontWeight: '900', border: '1px solid #999', width: '14%' }}>Tablets</th>
             </tr>
           </thead>
           <tbody>
@@ -171,12 +171,12 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
               
               return (
                 <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f0f7ff' }}>
-                  <td className="border border-gray-400 p-2.5 text-center font-bold text-gray-900">{itemNumber}</td>
-                  <td className="border border-gray-400 p-2.5 font-black text-gray-900">{item.stockItemName}</td>
-                  <td className="border border-gray-400 p-2.5 font-bold text-gray-800">{stockItem?.composition || '-'}</td>
-                  <td className="border border-gray-400 p-2.5 text-center font-bold text-gray-800">{packing.replace('*', '×')}</td>
-                  <td className="border border-gray-400 p-2.5 text-center font-black text-gray-900">{qtyInStrips.toLocaleString()}</td>
-                  <td className="border border-gray-400 p-2.5 text-center font-black text-gray-900">{qtyInTabs.toLocaleString()}</td>
+                  <td style={{ border: '1px solid #bbb', padding: '3px', textAlign: 'center', fontWeight: '700', color: '#111' }}>{itemNumber}</td>
+                  <td style={{ border: '1px solid #bbb', padding: '3px', fontWeight: '900', color: '#111' }}>{item.stockItemName}</td>
+                  <td style={{ border: '1px solid #bbb', padding: '3px', fontWeight: '700', color: '#333' }}>{stockItem?.composition || '-'}</td>
+                  <td style={{ border: '1px solid #bbb', padding: '3px', textAlign: 'center', fontWeight: '700', color: '#333' }}>{packing.replace('*', '×')}</td>
+                  <td style={{ border: '1px solid #bbb', padding: '3px', textAlign: 'center', fontWeight: '900', color: '#111' }}>{qtyInStrips.toLocaleString()}</td>
+                  <td style={{ border: '1px solid #bbb', padding: '3px', textAlign: 'center', fontWeight: '900', color: '#111' }}>{qtyInTabs.toLocaleString()}</td>
                 </tr>
               );
             })}
@@ -189,38 +189,38 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         {/* Undertaking & Signature - Only on last page */}
         {isLastPage && (
           <>
-            <div className="mt-2">
-              <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
-              <p className="text-sm font-semibold text-justify leading-snug text-gray-800">
+            <div style={{ marginTop: '4px' }}>
+              <p className="font-black" style={{ color: '#003366', fontSize: '11pt', marginBottom: '2px' }}>UNDERTAKING:</p>
+              <p className="font-semibold text-justify" style={{ fontSize: '8.5pt', lineHeight: '1.2', color: '#333' }}>
                 We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN, SELAQUI, DEHRADUN, UTTARAKHAND-248197 Our <span className="font-black">P.O. No: {getPONumberSuffix()}/A ({formatDate(poDate)})</span>. These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our <span className="font-black">License No. PSMHC/Punjab/2024/863</span> we are fully aware These product containing controlled substances as per Narcotic Drugs & Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6 (Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation & for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any non-compliance of statutory provisions committed by us intentionally or un-intentionally.
               </p>
             </div>
 
             {/* Signature Section */}
-            <div className="mt-3 flex justify-between text-base px-2">
+            <div className="flex justify-between" style={{ marginTop: '6px', fontSize: '11pt', padding: '0 4px' }}>
               <div className="text-left">
-                <p className="font-black text-base" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
-                <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-                <div className="min-h-[60px]"></div>
-                <div className="pt-1 border-t-2 border-gray-600 min-w-[220px]">
-                  <span className="font-black text-gray-900 text-lg">{doctorName}</span>
-                  <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
-                  <p className="text-gray-600 text-xs font-semibold italic">(Signature & Stamp)</p>
+                <p className="font-black" style={{ color: '#003366', fontSize: '11pt', margin: '0' }}>For Navjeevan Hospital,</p>
+                <p className="font-bold" style={{ color: '#333', fontSize: '9pt', margin: '0' }}>Opp. New Bus Stand, G.T. Road, Sirhind</p>
+                <div style={{ minHeight: '40px' }}></div>
+                <div style={{ paddingTop: '2px', borderTop: '2px solid #555', minWidth: '200px' }}>
+                  <span className="font-black" style={{ color: '#111', fontSize: '13pt' }}>{doctorName}</span>
+                  <p className="font-bold" style={{ color: '#555', fontSize: '9pt', margin: '0' }}>Navjeevan Hospital, Sirhind</p>
+                  <p className="font-semibold italic" style={{ color: '#777', fontSize: '8pt', margin: '0' }}>(Signature & Stamp)</p>
                 </div>
               </div>
-              <div className="text-center min-w-[150px]">
-                <div className="min-h-[60px]"></div>
-                <div className="pt-1 border-t-2 border-gray-600 mt-auto">
-                  <span className="font-black text-gray-900 text-lg">Date: {formatDate(poDate)}</span>
+              <div className="text-center" style={{ minWidth: '130px' }}>
+                <div style={{ minHeight: '40px' }}></div>
+                <div style={{ paddingTop: '2px', borderTop: '2px solid #555' }}>
+                  <span className="font-black" style={{ color: '#111', fontSize: '13pt' }}>Date: {formatDate(poDate)}</span>
                 </div>
               </div>
             </div>
           </>
         )}
 
-        {/* Footer */}
-        <div className="mt-3 text-center text-sm font-black pt-2" style={{ borderTop: '3px solid #003366' }}>
-          <p style={{ color: '#003366' }}>
+        {/* Footer - using inline styles for html2canvas compatibility */}
+        <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10pt', fontWeight: '900', padding: '6px 0', backgroundColor: '#003366', color: '#ffffff', borderRadius: '4px' }}>
+          <p style={{ margin: '0' }}>
             NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
           </p>
         </div>
