@@ -206,15 +206,15 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </div>
 
             {/* Stamp & Signature Box - matching PDF exactly */}
-            <div className="flex-grow" style={{ border: '1.5px solid #999', display: 'flex', minHeight: '180px', marginBottom: '6px' }}>
+            <div className="flex-grow" style={{ display: 'flex', minHeight: '180px', marginBottom: '6px' }}>
               {/* Left side - Stamp area */}
-              <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '8px', borderRight: '1px solid #ccc' }}>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '8px' }}>
                 <p className="font-semibold" style={{ color: '#555', fontSize: '10pt', textAlign: 'center' }}>Stamp</p>
               </div>
               {/* Right side - Signature area */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', padding: '8px' }}>
                 <p className="font-semibold" style={{ color: '#555', fontSize: '10pt', textAlign: 'center', margin: '0' }}>Doctor's Signature</p>
-                <p className="font-semibold" style={{ color: '#555', fontSize: '9pt', textAlign: 'center', margin: '0' }}>(Authorised Signatory)</p>
+                <p className="font-bold" style={{ color: '#000', fontSize: '10pt', textAlign: 'center', margin: '0' }}>({doctorName || 'Dr. Metali Bhatti'})</p>
               </div>
             </div>
           </>
