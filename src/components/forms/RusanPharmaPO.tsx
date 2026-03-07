@@ -186,37 +186,40 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         {/* Undertaking & Signature - Only on last page */}
         {isLastPage && (
           <>
-            <div style={{ marginTop: '2px' }}>
-              <p className="font-black" style={{ color: '#003366', fontSize: '11pt', marginBottom: '2px' }}>UNDERTAKING:</p>
-              <p className="font-semibold text-justify" style={{ fontSize: '8.5pt', lineHeight: '1.2', color: '#333' }}>
+            <div style={{ marginTop: '4px' }}>
+              <p className="font-black" style={{ color: '#003366', fontSize: '12pt', marginBottom: '3px' }}>UNDERTAKING:</p>
+              <p className="font-semibold text-justify" style={{ fontSize: '11pt', lineHeight: '1.45', color: '#333' }}>
                 We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN, SELAQUI, DEHRADUN, UTTARAKHAND-248197 Our <span className="font-black">P.O. No: {getPONumberSuffix()}/A ({formatDate(poDate)})</span>. These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our <span className="font-black">License No. PSMHC/Punjab/2024/863</span> we are fully aware These product containing controlled substances as per Narcotic Drugs & Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6 (Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation & for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any non-compliance of statutory provisions committed by us intentionally or un-intentionally.
               </p>
             </div>
 
             {/* Signature Section */}
-            <div className="flex justify-between" style={{ marginTop: '6px', fontSize: '11pt', padding: '0 4px' }}>
+            <div className="flex justify-between" style={{ marginTop: '10px', fontSize: '11pt', padding: '0 4px' }}>
               <div className="text-left">
-                <p className="font-black" style={{ color: '#003366', fontSize: '11pt', margin: '0' }}>For Navjeevan Hospital,</p>
-                <p className="font-bold" style={{ color: '#333', fontSize: '9pt', margin: '0' }}>Opp. New Bus Stand, G.T. Road, Sirhind</p>
-                <div style={{ minHeight: '40px' }}></div>
+                <p className="font-black" style={{ color: '#003366', fontSize: '12pt', margin: '0' }}>For Navjeevan Hospital,</p>
+                <p className="font-bold" style={{ color: '#333', fontSize: '10pt', margin: '0' }}>Opp. New Bus Stand, G.T. Road, Sirhind</p>
+                <div style={{ minHeight: '50px' }}></div>
                 <div style={{ paddingTop: '2px', borderTop: '2px solid #555', minWidth: '200px' }}>
-                  <span className="font-black" style={{ color: '#111', fontSize: '13pt' }}>{doctorName}</span>
-                  <p className="font-bold" style={{ color: '#555', fontSize: '9pt', margin: '0' }}>Navjeevan Hospital, Sirhind</p>
-                  <p className="font-semibold italic" style={{ color: '#777', fontSize: '8pt', margin: '0' }}>(Signature & Stamp)</p>
+                  <span className="font-black" style={{ color: '#111', fontSize: '14pt' }}>{doctorName}</span>
+                  <p className="font-bold" style={{ color: '#555', fontSize: '10pt', margin: '0' }}>Navjeevan Hospital, Sirhind</p>
+                  <p className="font-semibold italic" style={{ color: '#777', fontSize: '9pt', margin: '0' }}>(Signature & Stamp)</p>
                 </div>
               </div>
               <div className="text-center" style={{ minWidth: '130px' }}>
-                <div style={{ minHeight: '40px' }}></div>
+                <div style={{ minHeight: '50px' }}></div>
                 <div style={{ paddingTop: '2px', borderTop: '2px solid #555' }}>
-                  <span className="font-black" style={{ color: '#111', fontSize: '13pt' }}>Date: {formatDate(poDate)}</span>
+                  <span className="font-black" style={{ color: '#111', fontSize: '14pt' }}>Date: {formatDate(poDate)}</span>
                 </div>
               </div>
             </div>
           </>
         )}
 
+        {/* Spacer to push footer to bottom */}
+        <div className="flex-grow"></div>
+
         {/* Footer - using inline styles for html2canvas compatibility */}
-        <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10pt', fontWeight: '900', padding: '6px 0', backgroundColor: '#003366', color: '#ffffff', borderRadius: '4px' }}>
+        <div style={{ textAlign: 'center', fontSize: '10pt', fontWeight: '900', padding: '6px 0', backgroundColor: '#003366', color: '#ffffff', borderRadius: '4px' }}>
           <p style={{ margin: '0' }}>
             NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
           </p>
