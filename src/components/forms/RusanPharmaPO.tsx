@@ -83,14 +83,14 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         {isFirstPage && (
           <>
             <div className="text-center" style={{ marginBottom: '4px' }}>
-              <h1 className="font-black" style={{ fontSize: '26pt', color: '#000', letterSpacing: '2px', marginBottom: '0' }}>
+              <h1 className="font-black" style={{ fontSize: '26.5pt', color: '#000', letterSpacing: '2px', marginBottom: '0' }}>
                 NAVJEEVAN HOSPITAL
               </h1>
-              <p className="font-bold italic" style={{ fontSize: '11pt', color: '#333', margin: '0' }}>Healthcare with Compassion</p>
-              <p className="font-semibold" style={{ fontSize: '10pt', color: '#333', margin: '2px 0 0 0' }}>
+              <p className="font-bold italic" style={{ fontSize: '11.5pt', color: '#333', margin: '0' }}>Healthcare with Compassion</p>
+              <p className="font-semibold" style={{ fontSize: '10.5pt', color: '#333', margin: '2px 0 0 0' }}>
                 Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
               </p>
-              <p className="font-semibold" style={{ fontSize: '10pt', color: '#333', margin: '0' }}>
+              <p className="font-semibold" style={{ fontSize: '10.5pt', color: '#333', margin: '0' }}>
                 Phone: 6284942412 | {doctorName || 'Dr. Metali Bhatti'} | Licence No: PSMHC/Pb./2024/863
               </p>
             </div>
@@ -100,7 +100,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
 
             {/* PURCHASE ORDER title */}
             <div className="text-center" style={{ marginBottom: '10px' }}>
-              <h2 className="font-black" style={{ fontSize: '18pt', color: '#003366', letterSpacing: '1px' }}>
+              <h2 className="font-black" style={{ fontSize: '18.5pt', color: '#003366', letterSpacing: '1px' }}>
                 PURCHASE ORDER {totalPages > 1 && `(Page ${pageIndex + 1}/${totalPages})`}
               </h2>
             </div>
@@ -118,14 +118,14 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </div>
 
             {/* Supplier - inline text */}
-            <p className="font-semibold" style={{ fontSize: '11pt', marginBottom: '4px', color: '#000' }}>
+            <p className="font-semibold" style={{ fontSize: '11.5pt', marginBottom: '4px', color: '#000' }}>
               <span className="font-black">To:</span> RUSAN PHARMA LTD., Khasra No. 122/8, Central Hope Town, Selaqui, Dehradun, Uttarakhand - 248197
             </p>
 
             {/* Subject & Salutation */}
-            <p className="font-black" style={{ fontSize: '11pt', marginBottom: '0', color: '#000' }}>Subject: Purchase Order</p>
-            <p className="font-black" style={{ fontSize: '11pt', marginBottom: '4px', color: '#000' }}>Dear Sir/Madam,</p>
-            <p className="font-semibold text-justify" style={{ fontSize: '10.5pt', marginBottom: '8px', color: '#000', lineHeight: '1.45' }}>
+            <p className="font-black" style={{ fontSize: '11.5pt', marginBottom: '0', color: '#000' }}>Subject: Purchase Order</p>
+            <p className="font-black" style={{ fontSize: '11.5pt', marginBottom: '4px', color: '#000' }}>Dear Sir/Madam,</p>
+            <p className="font-semibold text-justify" style={{ fontSize: '11pt', marginBottom: '8px', color: '#000', lineHeight: '1.45' }}>
               We hereby placing a purchase order with Stamp and Sign of our current working doctor's. Terms and Conditions will remain same as our discussion on physically, payment of product shall be done through cheque to your bank account. the name and composition of product is given below. please do the supply earlier as possible.
             </p>
           </>
@@ -135,8 +135,8 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         {!isFirstPage && (
           <>
             <div className="text-center" style={{ marginBottom: '4px' }}>
-              <h1 className="font-black" style={{ fontSize: '22pt', color: '#000', letterSpacing: '2px' }}>NAVJEEVAN HOSPITAL</h1>
-              <p className="font-bold italic" style={{ fontSize: '10pt', color: '#333' }}>Healthcare with Compassion</p>
+              <h1 className="font-black" style={{ fontSize: '22.5pt', color: '#000', letterSpacing: '2px' }}>NAVJEEVAN HOSPITAL</h1>
+              <p className="font-bold italic" style={{ fontSize: '10.5pt', color: '#333' }}>Healthcare with Compassion</p>
             </div>
             <div style={{ borderBottom: '3px solid #003366', marginBottom: '8px' }}></div>
             <div style={{ border: '1.5px solid #333', padding: '6px 10px', marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
@@ -154,7 +154,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         )}
 
         {/* Items Table - matching PDF columns: S.No., Product Name, Composition, HSN Code, Qty., Amount */}
-        <table className="w-full border-collapse" style={{ marginBottom: '6px', fontSize: '10pt' }}>
+        <table className="w-full border-collapse" style={{ marginBottom: '6px', fontSize: '10.5pt' }}>
           <thead>
             <tr style={{ backgroundColor: '#003366' }}>
               <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '6%' }}>S.No.</th>
@@ -193,37 +193,37 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         {isLastPage && (
           <>
             <div style={{ marginBottom: '6px' }}>
-              <p className="font-black" style={{ color: '#000', fontSize: '11pt', marginBottom: '4px' }}>UNDERTAKING:</p>
-              <p className="font-semibold text-justify" style={{ fontSize: '10.5pt', lineHeight: '1.5', color: '#000' }}>
+              <p className="font-black" style={{ color: '#000', fontSize: '11.5pt', marginBottom: '4px' }}>UNDERTAKING:</p>
+              <p className="font-semibold text-justify" style={{ fontSize: '11pt', lineHeight: '1.5', color: '#000' }}>
                 We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN, SELAQUI, DEHRADUN, UTTARAKHAND-248197 Our P.O. No: {getPONumberSuffix()}/A ({formatDate(poDate)}). These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our License No. PSMHC/Punjab/2024/863 we are fully aware These product containing controlled substances as per Narcotic Drugs & Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6 (Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation & for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any non-compliance of statutory provisions committed by us intentionally or un-intentionally.
               </p>
             </div>
 
             {/* For Navjeevan Hospital */}
             <div style={{ marginBottom: '4px' }}>
-              <p className="font-black" style={{ color: '#000', fontSize: '11pt', margin: '0' }}>For Navjeevan Hospital,</p>
-              <p className="font-semibold" style={{ color: '#333', fontSize: '10pt', margin: '0' }}>Opp. New Bus Stand, G.T. Road, Sirhind</p>
+              <p className="font-black" style={{ color: '#000', fontSize: '11.5pt', margin: '0' }}>For Navjeevan Hospital,</p>
+              <p className="font-semibold" style={{ color: '#333', fontSize: '10.5pt', margin: '0' }}>Opp. New Bus Stand, G.T. Road, Sirhind</p>
             </div>
 
             {/* Stamp & Signature Box - matching PDF exactly */}
             <div className="flex-grow" style={{ display: 'flex', minHeight: '180px', marginBottom: '6px' }}>
               {/* Left side - Stamp area */}
               <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '8px' }}>
-                <p className="font-semibold" style={{ color: '#555', fontSize: '10pt', textAlign: 'center' }}>Stamp</p>
+                <p className="font-semibold" style={{ color: '#555', fontSize: '10.5pt', textAlign: 'center' }}>Stamp</p>
               </div>
               {/* Right side - Signature area */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', padding: '8px' }}>
-                <p className="font-semibold" style={{ color: '#555', fontSize: '10pt', textAlign: 'center', margin: '0' }}>Doctor's Signature</p>
-                <p className="font-bold" style={{ color: '#000', fontSize: '10pt', textAlign: 'center', margin: '0' }}>({doctorName || 'Dr. Metali Bhatti'})</p>
+                <p className="font-semibold" style={{ color: '#555', fontSize: '10.5pt', textAlign: 'center', margin: '0' }}>Doctor's Signature</p>
+                <p className="font-bold" style={{ color: '#000', fontSize: '10.5pt', textAlign: 'center', margin: '0' }}>({doctorName || 'Dr. Metali Bhatti'})</p>
               </div>
             </div>
           </>
         )}
 
         {/* Footer - 3 column layout matching PDF */}
-        <div style={{ marginTop: 'auto', display: 'flex', border: '1.5px solid #003366', fontSize: '9pt', fontWeight: '700', backgroundColor: '#003366', color: '#ffffff', borderRadius: '2px' }}>
+        <div style={{ marginTop: 'auto', display: 'flex', border: '1.5px solid #003366', fontSize: '9.5pt', fontWeight: '700', backgroundColor: '#003366', color: '#ffffff', borderRadius: '2px' }}>
           <div style={{ flex: '0 0 28%', padding: '6px 8px', borderRight: '1px solid #ffffff44', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span className="font-black" style={{ fontSize: '10pt' }}>NAVJEEVAN HOSPITAL</span>
+            <span className="font-black" style={{ fontSize: '10.5pt' }}>NAVJEEVAN HOSPITAL</span>
           </div>
           <div style={{ flex: '1', padding: '6px 8px', borderRight: '1px solid #ffffff44', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span>Opp. Bus Stand, Vill Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)</span>
