@@ -157,12 +157,12 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         <table className="w-full border-collapse" style={{ marginBottom: '6px', fontSize: '11pt' }}>
           <thead>
             <tr style={{ backgroundColor: '#003366' }}>
-              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '6%' }}>S.No.</th>
-              <th style={{ padding: '5px 4px', textAlign: 'left', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '18%' }}>Product Name</th>
-              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '36%' }}>Composition</th>
-              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '14%' }}>HSN Code</th>
-              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '10%' }}>Qty.</th>
-              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '12%' }}>Amount</th>
+              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '7%' }}>Sr. No.</th>
+              <th style={{ padding: '5px 4px', textAlign: 'left', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '20%' }}>Product Name</th>
+              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '38%' }}>Compositions</th>
+              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '10%' }}>Packing</th>
+              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '12%' }}>Qty.In Strips</th>
+              <th style={{ padding: '5px 4px', textAlign: 'center', color: '#ffffff', fontWeight: '800', border: '1px solid #003366', width: '13%' }}>Qty.In Tablets</th>
             </tr>
           </thead>
           <tbody>
@@ -170,16 +170,16 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
               const stockItem = getStockItemDetails(item.stockItemId);
               const itemNumber = startIndex + index + 1;
               const qtyInStrips = item.qtyInStrips || item.quantity;
-              const amount = item.totalPrice || (qtyInStrips * (item.unitPrice || 0));
+              const qtyInTabs = item.qtyInTabs || (qtyInStrips * 10);
 
               return (
                 <tr key={index}>
                   <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '600', color: '#000' }}>{itemNumber}.</td>
                   <td style={{ border: '1px solid #999', padding: '4px', fontWeight: '700', color: '#000' }}>{item.stockItemName}</td>
                   <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '600', color: '#000' }}>{stockItem?.composition || '-'}</td>
-                  <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '600', color: '#000' }}>{stockItem?.batchNo || '-'}</td>
+                  <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '600', color: '#000' }}>{stockItem?.packing || '-'}</td>
                   <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '700', color: '#000' }}>{qtyInStrips.toLocaleString()}</td>
-                  <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '700', color: '#000' }}>{amount.toLocaleString()}</td>
+                  <td style={{ border: '1px solid #999', padding: '4px', textAlign: 'center', fontWeight: '700', color: '#000' }}>{qtyInTabs.toLocaleString()}</td>
                 </tr>
               );
             })}
