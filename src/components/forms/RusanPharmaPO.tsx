@@ -193,14 +193,14 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
               </p>
             </div>
 
-            {/* For Navjeevan Hospital line */}
-            <div style={{ marginTop: '10px', fontSize: '11pt', padding: '0 4px' }}>
+            {/* Spacer for stamp and signature */}
+            <div className="flex-grow" style={{ minHeight: '40px' }}></div>
+
+            {/* For Navjeevan Hospital line - shifted down */}
+            <div style={{ fontSize: '11pt', padding: '0 4px', marginBottom: '4px' }}>
               <p className="font-black" style={{ color: '#003366', fontSize: '12pt', margin: '0' }}>For Navjeevan Hospital,</p>
               <p className="font-bold" style={{ color: '#333', fontSize: '10pt', margin: '0' }}>Opp. New Bus Stand, G.T. Road, Sirhind</p>
             </div>
-
-            {/* Spacer for stamp and signature */}
-            <div className="flex-grow" style={{ minHeight: '80px' }}></div>
 
             {/* Doctor name and Date - pushed just above footer */}
             <div className="flex justify-between items-end" style={{ fontSize: '11pt', padding: '0 4px', marginBottom: '8px' }}>
