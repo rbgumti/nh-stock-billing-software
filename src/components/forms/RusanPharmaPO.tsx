@@ -194,7 +194,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </div>
 
             {/* Spacer for stamp and signature */}
-            <div className="flex-grow" style={{ minHeight: '100px' }}></div>
+            <div className="flex-grow" style={{ minHeight: '190px' }}></div>
 
             {/* For Navjeevan Hospital line - shifted down */}
             <div style={{ fontSize: '11pt', padding: '0 4px', marginBottom: '4px' }}>
