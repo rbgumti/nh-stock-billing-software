@@ -129,7 +129,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             <p className="text-base font-bold mb-1"><span className="font-black" style={{ color: '#003366' }}>Subject:</span> <span className="text-gray-900">Purchase Order</span></p>
             <p className="text-base font-bold mb-2 text-gray-900">Dear Sir/Madam,</p>
             <p className="text-base font-semibold text-justify mb-3 text-gray-800">
-              We place a purchase order with authorized doctor's stamp and signature. Terms per telephone discussion. Payment by cheque to your bank account.
+              We hereby placing a purchase order with Stamp and Sign of our current working doctor's. Terms and Conditions will remain same as our discussion on phonically, payment of product shall be done through cheque to your Bank account, the name and composition of product is given below, please do the supply earlier as possible.
             </p>
           </>
         )}
