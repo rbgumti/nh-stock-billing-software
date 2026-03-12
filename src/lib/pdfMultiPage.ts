@@ -137,9 +137,11 @@ export function getItemsPerPage(documentType: 'neuroglam' | 'rusan' | 'parb' | '
   // Different PO formats have different content densities
   switch (documentType) {
     case 'neuroglam':
-    case 'rusan':
-      // These have undertaking text which takes more space
+      // This format has undertaking text which takes more space
       return { firstPage: 8, subsequentPages: 18 };
+    case 'rusan':
+      // Increased font sizes + undertaking/signature/footer need extra space
+      return { firstPage: 6, subsequentPages: 14 };
     case 'parb':
       return { firstPage: 8, subsequentPages: 18 };
     case 'vyado':
