@@ -77,7 +77,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         key={pageIndex}
         ref={(el) => { pageRefs.current[pageIndex] = el; }}
         className="bg-white text-black flex flex-col mb-4"
-        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '12pt', lineHeight: '1.35', padding: '20px 28px', height: '1123px' }}
+        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '12pt', lineHeight: '1.35', padding: '20px 28px', minHeight: '1123px' }}
       >
         {/* Header - No logo, text only */}
         {isFirstPage && (
@@ -206,7 +206,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </div>
 
             {/* Stamp & Signature Box - matching PDF exactly */}
-            <div className="flex-grow" style={{ display: 'flex', minHeight: '180px', marginBottom: '6px' }}>
+            <div style={{ display: 'flex', minHeight: '180px', marginBottom: '6px' }}>
               {/* Left side - Stamp area */}
               <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '8px' }}>
                 <p className="font-semibold" style={{ color: '#555', fontSize: '11pt', textAlign: 'center' }}>Stamp</p>
