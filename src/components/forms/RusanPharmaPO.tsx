@@ -206,7 +206,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             </div>
 
             {/* Stamp & Signature Box - matching PDF exactly */}
-            <div className="flex-grow" style={{ display: 'flex', minHeight: '180px', marginBottom: '6px' }}>
+            <div style={{ display: 'flex', minHeight: '180px', marginBottom: '6px' }}>
               {/* Left side - Stamp area */}
               <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '8px' }}>
                 <p className="font-semibold" style={{ color: '#555', fontSize: '11pt', textAlign: 'center' }}>Stamp</p>
