@@ -221,7 +221,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         )}
 
         {/* Footer - 3 column layout matching PDF */}
-        <div style={{ marginTop: 'auto', display: 'flex', border: '1.5px solid #003366', fontSize: '10pt', fontWeight: '700', backgroundColor: '#003366', color: '#ffffff', borderRadius: '2px' }}>
+        <div style={{ marginTop: 'auto', flexShrink: 0, display: 'flex', border: '1.5px solid #003366', fontSize: '10pt', fontWeight: '700', backgroundColor: '#003366', color: '#ffffff', borderRadius: '2px' }}>
           <div style={{ flex: '0 0 28%', padding: '6px 8px', borderRight: '1px solid #ffffff44', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span className="font-black" style={{ fontSize: '11pt' }}>NAVJEEVAN HOSPITAL</span>
           </div>
