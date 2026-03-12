@@ -142,7 +142,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             <div style={{ border: '1.5px solid #333', padding: '6px 10px', marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
               <div>
                 <span className="font-black">PO Number: </span>
-                <span className="font-bold">NH-38-26-{getPONumberSuffix()}</span>
+                <span className="font-bold">{poNumber}</span>
               </div>
               <div>
                 <span className="font-black">Date: </span>
