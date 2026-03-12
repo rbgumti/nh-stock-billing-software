@@ -77,7 +77,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         key={pageIndex}
         ref={(el) => { pageRefs.current[pageIndex] = el; }}
         className="bg-white text-black flex flex-col mb-4"
-        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '12pt', lineHeight: '1.35', padding: '20px 28px', height: '1123px' }}
+        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '12pt', lineHeight: '1.35', padding: '20px 28px', minHeight: '1123px' }}
       >
         {/* Header - No logo, text only */}
         {isFirstPage && (
