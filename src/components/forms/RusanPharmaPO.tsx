@@ -77,7 +77,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         key={pageIndex}
         ref={(el) => { pageRefs.current[pageIndex] = el; }}
         className="bg-white text-black flex flex-col mb-4"
-        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '12pt', lineHeight: '1.35', padding: '20px 28px', height: '1123px' }}
+        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '12pt', lineHeight: '1.35', padding: '20px 28px', height: '1123px', overflow: 'hidden' }}
       >
         {/* Header - No logo, text only */}
         {isFirstPage && (
@@ -109,7 +109,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             <div style={{ border: '1.5px solid #333', padding: '6px 10px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
               <div>
                 <span className="font-black" style={{ color: '#000' }}>PO Number: </span>
-                <span className="font-bold" style={{ color: '#000' }}>NH-38-26-{getPONumberSuffix()}</span>
+                <span className="font-bold" style={{ color: '#000' }}>{poNumber}</span>
               </div>
               <div>
                 <span className="font-black" style={{ color: '#000' }}>PO Date: </span>
@@ -142,7 +142,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             <div style={{ border: '1.5px solid #333', padding: '6px 10px', marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
               <div>
                 <span className="font-black">PO Number: </span>
-                <span className="font-bold">NH-38-26-{getPONumberSuffix()}</span>
+                <span className="font-bold">{poNumber}</span>
               </div>
               <div>
                 <span className="font-black">Date: </span>
@@ -195,7 +195,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
             <div style={{ marginBottom: '6px' }}>
               <p className="font-black" style={{ color: '#000', fontSize: '12pt', marginBottom: '4px' }}>UNDERTAKING:</p>
               <p className="font-semibold text-justify" style={{ fontSize: '11.5pt', lineHeight: '1.5', color: '#000' }}>
-                We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN, SELAQUI, DEHRADUN, UTTARAKHAND-248197 Our P.O. No: {getPONumberSuffix()}/A ({formatDate(poDate)}). These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our License No. PSMHC/Punjab/2024/863 we are fully aware These product containing controlled substances as per Narcotic Drugs & Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6 (Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation & for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any non-compliance of statutory provisions committed by us intentionally or un-intentionally.
+                We hereby confirm that the product which we intend to buy from RUSAN PHARMA LTD. KHASRA NO. 122MI, CENTRAL HOPE TOWN, SELAQUI, DEHRADUN, UTTARAKHAND-248197 Our P.O. No: {poNumber} ({formatDate(poDate)}). These products purchased by us will be exclusively sold by De Addiction centre and qualified Doctors only, on our License No. PSMHC/Punjab/2024/863 we are fully aware These product containing controlled substances as per Narcotic Drugs & Psychotropic Substances Act 1985. And we will keep the relevant records of sale and purchase to us. Also we assure our Acknowledgement in form-6 (Consignment Note) for the receipt of above purchase item to supplier Immediately on receipt of above controlled substance, Further we undertake that we are taking The products for sale below mentioned formulation & for its sale within India only and not meant for any retailer counter or Export purposes. Rusan Pharma Ltd shall not be liable for any non-compliance of statutory provisions committed by us intentionally or un-intentionally.
               </p>
             </div>
 
@@ -221,7 +221,7 @@ export function RusanPharmaPO({ poNumber, poDate, items, stockItems, onClose }: 
         )}
 
         {/* Footer - 3 column layout matching PDF */}
-        <div style={{ marginTop: 'auto', display: 'flex', border: '1.5px solid #003366', fontSize: '10pt', fontWeight: '700', backgroundColor: '#003366', color: '#ffffff', borderRadius: '2px' }}>
+        <div style={{ marginTop: 'auto', flexShrink: 0, display: 'flex', border: '1.5px solid #003366', fontSize: '10pt', fontWeight: '700', backgroundColor: '#003366', color: '#ffffff', borderRadius: '2px' }}>
           <div style={{ flex: '0 0 28%', padding: '6px 8px', borderRight: '1px solid #ffffff44', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span className="font-black" style={{ fontSize: '11pt' }}>NAVJEEVAN HOSPITAL</span>
           </div>
