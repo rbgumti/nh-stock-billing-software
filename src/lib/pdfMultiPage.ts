@@ -18,6 +18,9 @@ export async function generateMultiPagePDF(
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
+  const margin = 6;
+  const contentWidth = pageWidth - margin * 2;
+  const contentHeight = pageHeight - margin * 2;
 
   for (let i = 0; i < pageElements.length; i++) {
     const element = pageElements[i];
@@ -31,27 +34,27 @@ export async function generateMultiPagePDF(
 
     const imgData = canvas.toDataURL('image/png');
     
-    // Calculate dimensions to fit on A4
-    const imgWidth = pageWidth;
+    // Calculate dimensions to fit in printable content area
+    const imgWidth = contentWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     
-    // Scale down if content exceeds page height
+    // Scale down if content exceeds printable height
     let renderWidth = imgWidth;
     let renderHeight = imgHeight;
     let xOffset = 0;
     
-    if (renderHeight > pageHeight) {
-      const scaleFactor = pageHeight / renderHeight;
-      renderHeight = pageHeight;
+    if (renderHeight > contentHeight) {
+      const scaleFactor = contentHeight / renderHeight;
+      renderHeight = contentHeight;
       renderWidth = renderWidth * scaleFactor;
-      xOffset = (pageWidth - renderWidth) / 2;
+      xOffset = (contentWidth - renderWidth) / 2;
     }
 
     if (i > 0) {
       pdf.addPage();
     }
     
-    pdf.addImage(imgData, 'PNG', xOffset, 0, renderWidth, renderHeight);
+    pdf.addImage(imgData, 'PNG', margin + xOffset, margin, renderWidth, renderHeight);
   }
 
   pdf.save(filename);
@@ -134,9 +137,11 @@ export function getItemsPerPage(documentType: 'neuroglam' | 'rusan' | 'parb' | '
   // Different PO formats have different content densities
   switch (documentType) {
     case 'neuroglam':
-    case 'rusan':
-      // These have undertaking text which takes more space
+      // This format has undertaking text which takes more space
       return { firstPage: 8, subsequentPages: 18 };
+    case 'rusan':
+      // Increased font sizes + undertaking/signature/footer need extra space
+      return { firstPage: 6, subsequentPages: 14 };
     case 'parb':
       return { firstPage: 8, subsequentPages: 18 };
     case 'vyado':
