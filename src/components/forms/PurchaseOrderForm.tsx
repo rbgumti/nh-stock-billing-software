@@ -271,7 +271,7 @@ export function PurchaseOrderForm({ onClose, onSubmit, stockItems }: PurchaseOrd
                     <SelectContent>
                       {stockItems
                         .filter(item => item.isActive !== false)
-                        .filter(item => !formData.supplier || item.supplier === formData.supplier)
+                        .filter(item => !formData.supplier || item.supplier?.toLowerCase().trim() === formData.supplier.toLowerCase().trim())
                         .map((item) => (
                           <SelectItem key={item.id} value={item.id.toString()}>
                             {item.name} - {item.category}
