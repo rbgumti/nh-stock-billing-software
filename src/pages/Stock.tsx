@@ -61,6 +61,10 @@ const FormFallback = () => (
 export default function Stock() {
   const [searchTerm, setSearchTerm] = useState("");
   const [poTypeFilter, setPoTypeFilter] = useState<"all" | "Stock" | "Service">("all");
+  const [poSearchTerm, setPoSearchTerm] = useState("");
+  const [poMonthFilter, setPoMonthFilter] = useState<string>("all");
+  const [grnSearchTerm, setGrnSearchTerm] = useState("");
+  const [grnMonthFilter, setGrnMonthFilter] = useState<string>("all");
   const [filterCategory, setFilterCategory] = useState("all");
   const [sortBy, setSortBy] = useState<"name" | "expiry" | "stock" | "value">("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
