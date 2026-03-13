@@ -2115,8 +2115,53 @@ export default function Stock() {
             <h2 className="text-2xl font-bold bg-gradient-to-r from-teal to-emerald bg-clip-text text-transparent">Goods Receipt Notes</h2>
           </div>
 
+          {/* Search & Month Sort */}
+          <Card className="glass-strong border-0 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-teal/5 via-transparent to-emerald/5" />
+            <CardContent className="pt-6 relative">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by GRN/PO number, supplier, or item name..."
+                    value={grnSearchTerm}
+                    onChange={(e) => setGrnSearchTerm(e.target.value)}
+                    className="pl-9 glass-subtle border-0"
+                  />
+                </div>
+                <select
+                  value={grnMonthFilter}
+                  onChange={(e) => setGrnMonthFilter(e.target.value)}
+                  className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="all">All Months</option>
+                  {Array.from(new Set(purchaseOrders.filter(po => po.status === 'Received').map(po => {
+                    const d = new Date(po.grnDate || po.orderDate);
+                    return isNaN(d.getTime()) ? null : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                  }).filter(Boolean))).sort().reverse().map(m => (
+                    <option key={m} value={m!}>{new Date(m + '-01').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</option>
+                  ))}
+                </select>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {purchaseOrders.filter(po => po.status === 'Received').map((po, index) => (
+            {purchaseOrders.filter(po => {
+              if (po.status !== 'Received') return false;
+              const search = grnSearchTerm.toLowerCase().trim();
+              const matchesSearch = !search ||
+                po.poNumber?.toLowerCase().includes(search) ||
+                po.grnNumber?.toLowerCase().includes(search) ||
+                po.supplier?.toLowerCase().includes(search) ||
+                po.items?.some(item => item.stockItemName?.toLowerCase().includes(search)) ||
+                po.invoiceNumber?.toLowerCase().includes(search);
+              const matchesMonth = grnMonthFilter === "all" || (() => {
+                const d = new Date(po.grnDate || po.orderDate);
+                return !isNaN(d.getTime()) && `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === grnMonthFilter;
+              })();
+              return matchesSearch && matchesMonth;
+            }).map((po, index) => (
               <Card key={po.id} className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className={`absolute inset-0 bg-gradient-to-br ${
                   index % 3 === 0 ? 'from-teal/8 via-transparent to-emerald/8' :
