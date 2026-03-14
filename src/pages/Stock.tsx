@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { formatPrecision } from "@/lib/formatUtils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // Lazy-load form components (only needed when dialogs open)
@@ -973,8 +974,8 @@ export default function Stock() {
       doc.rect(margin, yPos - 5, pageWidth - (margin * 2), 8);
       doc.text(item.stockItemName.length > 35 ? item.stockItemName.substring(0, 33) + ".." : item.stockItemName, margin + 2, yPos);
       doc.text(item.quantity.toString(), 100, yPos);
-      doc.text(`₹${item.unitPrice.toFixed(2)}`, 130, yPos);
-      doc.text(`₹${item.totalPrice.toFixed(2)}`, 165, yPos);
+      doc.text(`₹${formatPrecision(item.unitPrice)}`, 130, yPos);
+      doc.text(`₹${formatPrecision(item.totalPrice)}`, 165, yPos);
       yPos += 8;
     });
     
