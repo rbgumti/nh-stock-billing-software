@@ -499,7 +499,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                           value={grnItem.batchNo || ""}
                           onChange={(e) => updateBatchNo(index, e.target.value)}
                           placeholder="Batch"
-                          className="w-full text-sm"
+                          className="w-full min-w-[10ch] text-sm"
                         />
                       </div>
                       
@@ -508,7 +508,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                           type="date"
                           value={grnItem.expiryDate || ""}
                           onChange={(e) => updateExpiryDate(index, e.target.value)}
-                          className="w-full text-sm"
+                          className="w-full min-w-[10ch] text-sm"
                         />
                       </div>
                       

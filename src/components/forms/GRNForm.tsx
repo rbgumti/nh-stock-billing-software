@@ -495,7 +495,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                           value={grnItem.batchNo || ""}
                           onChange={(e) => updateBatchNo(index, e.target.value)}
                           placeholder="Batch No"
-                          className="w-full"
+                          className="w-full min-w-[10ch]"
                         />
                       </div>
                       
@@ -504,7 +504,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                           type="date"
                           value={grnItem.expiryDate || ""}
                           onChange={(e) => updateExpiryDate(index, e.target.value)}
-                          className="w-full"
+                          className="w-full min-w-[10ch]"
                         />
                       </div>
                       
