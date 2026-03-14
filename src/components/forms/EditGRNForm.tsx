@@ -427,7 +427,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-9 gap-3 p-3 bg-gray-50 dark:bg-gray-800 font-medium text-sm rounded-lg">
+                <div className="grid gap-3 p-3 bg-gray-50 dark:bg-gray-800 font-medium text-sm rounded-lg" style={{ gridTemplateColumns: '1.2fr 0.7fr 0.7fr minmax(10ch, 1.2fr) minmax(10ch, 1.2fr) 1fr 1fr 0.7fr 0.6fr' }}>
                   <div>Item</div>
                   <div className="text-center">Ordered</div>
                   <div className="text-center">Received</div>
@@ -456,7 +456,8 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                   return (
                     <div 
                       key={index} 
-                      className={`grid grid-cols-9 gap-3 p-3 border rounded-lg items-center ${isAdditional ? 'ml-4 border-dashed bg-muted/30' : ''}`}
+                      className={`grid gap-3 p-3 border rounded-lg items-center ${isAdditional ? 'ml-4 border-dashed bg-muted/30' : ''}`}
+                      style={{ gridTemplateColumns: '1.2fr 0.7fr 0.7fr minmax(10ch, 1.2fr) minmax(10ch, 1.2fr) 1fr 1fr 0.7fr 0.6fr' }}
                     >
                       <div className="font-medium text-sm">
                         {isAdditional ? (
@@ -498,7 +499,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                           value={grnItem.batchNo || ""}
                           onChange={(e) => updateBatchNo(index, e.target.value)}
                           placeholder="Batch"
-                          className="w-full text-sm"
+                          className="w-full min-w-[10ch] text-sm"
                         />
                       </div>
                       
@@ -507,7 +508,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                           type="date"
                           value={grnItem.expiryDate || ""}
                           onChange={(e) => updateExpiryDate(index, e.target.value)}
-                          className="w-full text-sm"
+                          className="w-full min-w-[10ch] text-sm"
                         />
                       </div>
                       
