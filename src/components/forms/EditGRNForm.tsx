@@ -427,7 +427,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid gap-3 p-3 bg-gray-50 dark:bg-gray-800 font-medium text-sm rounded-lg" style={{ gridTemplateColumns: '1.2fr 0.7fr 0.7fr minmax(10ch, 1.2fr) minmax(10ch, 1.2fr) 1fr 1fr 0.7fr 0.6fr' }}>
+                <div className="grid gap-3 p-3 bg-gray-50 dark:bg-gray-800 font-medium text-sm rounded-lg" style={{ gridTemplateColumns: '1.2fr 0.7fr 0.7fr minmax(15ch, 1.2fr) minmax(10ch, 1.2fr) 1fr 1fr 0.7fr 0.6fr' }}>
                   <div>Item</div>
                   <div className="text-center">Ordered</div>
                   <div className="text-center">Received</div>
