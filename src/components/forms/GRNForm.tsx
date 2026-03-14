@@ -422,7 +422,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-10 gap-3 p-3 bg-gray-50 dark:bg-gray-800 font-medium text-sm rounded-lg">
+                <div className="grid gap-3 p-3 bg-gray-50 dark:bg-gray-800 font-medium text-sm rounded-lg" style={{ gridTemplateColumns: '1.2fr 0.7fr 0.7fr 1.2fr 1.2fr 1fr 1fr 0.7fr 1fr 0.6fr' }}>
                   <div>Item</div>
                   <div className="text-center">Ordered</div>
                   <div className="text-center">Received</div>
@@ -452,7 +452,8 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                   return (
                     <div 
                       key={index} 
-                      className={`grid grid-cols-10 gap-3 p-3 border rounded-lg ${isAdditional ? 'ml-4 border-dashed bg-muted/30' : ''}`}
+                      className={`grid gap-3 p-3 border rounded-lg ${isAdditional ? 'ml-4 border-dashed bg-muted/30' : ''}`}
+                      style={{ gridTemplateColumns: '1.2fr 0.7fr 0.7fr 1.2fr 1.2fr 1fr 1fr 0.7fr 1fr 0.6fr' }}
                     >
                       <div className="font-medium flex items-center">
                         {isAdditional ? (
