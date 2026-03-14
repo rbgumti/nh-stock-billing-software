@@ -495,7 +495,7 @@ style={{ gridTemplateColumns: '1.2fr 0.7fr 0.7fr minmax(15ch, 1.2fr) minmax(10ch
                           value={grnItem.batchNo || ""}
                           onChange={(e) => updateBatchNo(index, e.target.value)}
                           placeholder="Batch No"
-                          className="w-full min-w-[10ch]"
+                          className="w-full min-w-[15ch]"
                         />
                       </div>
                       
