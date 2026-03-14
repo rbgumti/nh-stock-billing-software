@@ -457,7 +457,7 @@ export function EditGRNForm({ purchaseOrder, stockItems, onClose, onSubmit }: Ed
                     <div 
                       key={index} 
                       className={`grid gap-3 p-3 border rounded-lg items-center ${isAdditional ? 'ml-4 border-dashed bg-muted/30' : ''}`}
-                      style={{ gridTemplateColumns: '1.2fr 0.7fr 0.7fr minmax(10ch, 1.2fr) minmax(10ch, 1.2fr) 1fr 1fr 0.7fr 0.6fr' }}
+style={{ gridTemplateColumns: '1.2fr 0.7fr 0.7fr minmax(15ch, 1.2fr) minmax(10ch, 1.2fr) 1fr 1fr 0.7fr 0.6fr' }}
                     >
                       <div className="font-medium text-sm">
                         {isAdditional ? (
