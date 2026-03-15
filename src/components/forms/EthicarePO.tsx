@@ -230,7 +230,7 @@ export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: Eth
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>Parb Pharma Purchase Order {totalPages > 1 && `(${totalPages} pages)`}</span>
+            <span>Ethicare Pharma Purchase Order {totalPages > 1 && `(${totalPages} pages)`}</span>
             <div className="flex gap-2">
               <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2" disabled={isGeneratingPDF}>
                 {isGeneratingPDF ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
