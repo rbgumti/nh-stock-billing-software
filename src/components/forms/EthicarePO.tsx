@@ -57,7 +57,7 @@ export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: Eth
       const sanitizedPONumber = poNumber.replace(/[^a-zA-Z0-9-_]/g, '-');
       await generateMultiPagePDF(validRefs, {
         scale: 3,
-        filename: `PO-${sanitizedPONumber}-Parb-Pharma.pdf`
+        filename: `PO-${sanitizedPONumber}-Ethicare-Pharma.pdf`
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
