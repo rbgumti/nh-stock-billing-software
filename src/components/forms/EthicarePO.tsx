@@ -21,7 +21,7 @@ export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: Eth
   const { doctorName } = useAppSettings();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
-  const { firstPage, subsequentPages } = getItemsPerPage('parb');
+  const { firstPage, subsequentPages } = getItemsPerPage('ethicare');
   const paginatedItems = paginateItems(items, firstPage, subsequentPages);
   const totalPages = paginatedItems.length;
 
