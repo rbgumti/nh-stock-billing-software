@@ -2068,9 +2068,9 @@ export default function Stock() {
                             <FileText className="h-4 w-4 mr-2" />
                             Neuroglam Format
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setShowParbPharmaPO(po)}>
+                          <DropdownMenuItem onClick={() => setShowEthicarePO(po)}>
                             <FileText className="h-4 w-4 mr-2" />
-                            Parb Pharma Format
+                            Ethicare Pharma Format
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setShowRusanPharmaPO(po)}>
                             <FileText className="h-4 w-4 mr-2" />
