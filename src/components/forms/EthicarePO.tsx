@@ -117,8 +117,8 @@ export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: Eth
             {/* Supplier Box */}
             <div className="p-3 mb-3 rounded-lg text-base" style={{ backgroundColor: '#e8f4fd', border: '2px solid #0066cc' }}>
               <span className="font-black" style={{ color: '#003366' }}>TO: </span>
-              <span className="font-black text-gray-900">PARB PHARMACEUTICALS PVT. LTD.</span>
-              <p className="text-gray-800 font-bold text-sm">E-9, INDUSTRIAL AREA SIIDCUL, SILAQULI, DEHRADUN UTTARAKHAND</p>
+              <span className="font-black text-gray-900">ETHICARE PHARMACEUTICALS (P).LTD.</span>
+              <p className="text-gray-800 font-bold text-sm">307 GIDC, POR DISTT. VADODARA 391243 GUJARAT INDIA</p>
             </div>
 
             {/* Subject & Salutation */}
