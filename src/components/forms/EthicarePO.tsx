@@ -8,7 +8,7 @@ import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { generateMultiPagePDF, printMultiPage, paginateItems, getItemsPerPage } from "@/lib/pdfMultiPage";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
 
-interface ParbPharmaPOProps {
+interface EthicarePOProps {
   poNumber: string;
   poDate: string;
   items: PurchaseOrderItem[];
@@ -16,7 +16,7 @@ interface ParbPharmaPOProps {
   onClose: () => void;
 }
 
-export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: ParbPharmaPOProps) {
+export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: EthicarePOProps) {
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { doctorName } = useAppSettings();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
