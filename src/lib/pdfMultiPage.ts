@@ -133,7 +133,7 @@ export async function printMultiPage(
  * Calculate how many items can fit per page based on document type
  * Returns the number of items that fit on first page and subsequent pages
  */
-export function getItemsPerPage(documentType: 'neuroglam' | 'rusan' | 'parb' | 'vyado' | 'veeess' | 'generic'): { firstPage: number; subsequentPages: number } {
+export function getItemsPerPage(documentType: 'neuroglam' | 'rusan' | 'parb' | 'ethicare' | 'vyado' | 'veeess' | 'generic'): { firstPage: number; subsequentPages: number } {
   // Different PO formats have different content densities
   switch (documentType) {
     case 'neuroglam':
@@ -143,6 +143,7 @@ export function getItemsPerPage(documentType: 'neuroglam' | 'rusan' | 'parb' | '
       // Increased font sizes + undertaking/signature/footer need extra space
       return { firstPage: 6, subsequentPages: 14 };
     case 'parb':
+    case 'ethicare':
       return { firstPage: 8, subsequentPages: 18 };
     case 'vyado':
     case 'veeess':

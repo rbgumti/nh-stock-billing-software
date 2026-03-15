@@ -8,7 +8,7 @@ import { useAppSettings } from "@/hooks/usePerformanceMode";
 import { generateMultiPagePDF, printMultiPage, paginateItems, getItemsPerPage } from "@/lib/pdfMultiPage";
 import navjeevanLogo from "@/assets/NH_LOGO.png";
 
-interface ParbPharmaPOProps {
+interface EthicarePOProps {
   poNumber: string;
   poDate: string;
   items: PurchaseOrderItem[];
@@ -16,12 +16,12 @@ interface ParbPharmaPOProps {
   onClose: () => void;
 }
 
-export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: ParbPharmaPOProps) {
+export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: EthicarePOProps) {
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { doctorName } = useAppSettings();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
-  const { firstPage, subsequentPages } = getItemsPerPage('parb');
+  const { firstPage, subsequentPages } = getItemsPerPage('ethicare');
   const paginatedItems = paginateItems(items, firstPage, subsequentPages);
   const totalPages = paginatedItems.length;
 
@@ -57,7 +57,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
       const sanitizedPONumber = poNumber.replace(/[^a-zA-Z0-9-_]/g, '-');
       await generateMultiPagePDF(validRefs, {
         scale: 3,
-        filename: `PO-${sanitizedPONumber}-Parb-Pharma.pdf`
+        filename: `PO-${sanitizedPONumber}-Ethicare-Pharma.pdf`
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -117,8 +117,8 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             {/* Supplier Box */}
             <div className="p-3 mb-3 rounded-lg text-base" style={{ backgroundColor: '#e8f4fd', border: '2px solid #0066cc' }}>
               <span className="font-black" style={{ color: '#003366' }}>TO: </span>
-              <span className="font-black text-gray-900">PARB PHARMACEUTICALS PVT. LTD.</span>
-              <p className="text-gray-800 font-bold text-sm">E-9, INDUSTRIAL AREA SIIDCUL, SILAQULI, DEHRADUN UTTARAKHAND</p>
+              <span className="font-black text-gray-900">ETHICARE PHARMACEUTICALS (P).LTD.</span>
+              <p className="text-gray-800 font-bold text-sm">307 GIDC, POR DISTT. VADODARA 391243 GUJARAT INDIA</p>
             </div>
 
             {/* Subject & Salutation */}
@@ -184,7 +184,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
             <div className="mt-2">
               <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
               <p className="text-sm font-semibold text-justify text-gray-800" style={{ lineHeight: '1.35' }}>
-                We hereby confirm that the products which we intend to buy from PARB PHARMACEUTICALS PVT. LTD. E-9, INDUSTRIAL AREA SIIDCUL, SILAQUI DEHRADUN UTTARAKHAND INDIA Our P.O.NO {poNumber}. .dt- {formatDate(poDate)}. These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License no PSMHC/Pb./2024/863. We are full aware these products containing controlled substance as per Narcotic drugs & psychotropic substance Act 1985, and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation & for its sale within india only & not meant for export.
+                We hereby confirm that the products which we intend to buy from ETHICARE PHARMACEUTICALS (P).LTD. 307 GIDC, POR DISTT. VADODARA 391243 GUJARAT INDIA Our P.O.NO {poNumber}. .dt- {formatDate(poDate)}. These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License no PSMHC/Pb./2024/863. We are full aware these products containing controlled substance as per Narcotic drugs & psychotropic substance Act 1985, and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation & for its sale within india only & not meant for export.
               </p>
             </div>
 
@@ -230,7 +230,7 @@ export function ParbPharmaPO({ poNumber, poDate, items, stockItems, onClose }: P
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>Parb Pharma Purchase Order {totalPages > 1 && `(${totalPages} pages)`}</span>
+            <span>Ethicare Pharma Purchase Order {totalPages > 1 && `(${totalPages} pages)`}</span>
             <div className="flex gap-2">
               <Button onClick={handleDownloadPDF} size="sm" variant="outline" className="flex items-center gap-2" disabled={isGeneratingPDF}>
                 {isGeneratingPDF ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}

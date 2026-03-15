@@ -27,7 +27,7 @@ const SupplierPaymentForm = lazy(() => import("@/components/forms/SupplierPaymen
 const StockLedger = lazy(() => import("@/components/StockLedger").then(m => ({ default: m.StockLedger })));
 const SupplierLedger = lazy(() => import("@/components/SupplierLedger").then(m => ({ default: m.SupplierLedger })));
 const SupplierAgingReport = lazy(() => import("@/components/SupplierAgingReport").then(m => ({ default: m.SupplierAgingReport })));
-const ParbPharmaPO = lazy(() => import("@/components/forms/ParbPharmaPO").then(m => ({ default: m.ParbPharmaPO })));
+const EthicarePO = lazy(() => import("@/components/forms/EthicarePO").then(m => ({ default: m.EthicarePO })));
 const RusanPharmaPO = lazy(() => import("@/components/forms/RusanPharmaPO").then(m => ({ default: m.RusanPharmaPO })));
 const NeuroglamPO = lazy(() => import("@/components/forms/NeuroglamPO").then(m => ({ default: m.NeuroglamPO })));
 const VyadoHealthcarePO = lazy(() => import("@/components/forms/VyadoHealthcarePO").then(m => ({ default: m.VyadoHealthcarePO })));
@@ -88,7 +88,7 @@ export default function Stock() {
   const [showSupplierLedger, setShowSupplierLedger] = useState(false);
   const [supplierLedgerId, setSupplierLedgerId] = useState<string | undefined>(undefined);
   const [showAgingReport, setShowAgingReport] = useState(false);
-  const [showParbPharmaPO, setShowParbPharmaPO] = useState<PurchaseOrder | null>(null);
+  const [showEthicarePO, setShowEthicarePO] = useState<PurchaseOrder | null>(null);
   const [showNeuroglamPO, setShowNeuroglamPO] = useState<PurchaseOrder | null>(null);
   const [showVyadoHealthcarePO, setShowVyadoHealthcarePO] = useState<PurchaseOrder | null>(null);
   const [showVeeEssPharmaPO, setShowVeeEssPharmaPO] = useState<PurchaseOrder | null>(null);
@@ -2068,9 +2068,9 @@ export default function Stock() {
                             <FileText className="h-4 w-4 mr-2" />
                             Neuroglam Format
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setShowParbPharmaPO(po)}>
+                          <DropdownMenuItem onClick={() => setShowEthicarePO(po)}>
                             <FileText className="h-4 w-4 mr-2" />
-                            Parb Pharma Format
+                            Ethicare Pharma Format
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setShowRusanPharmaPO(po)}>
                             <FileText className="h-4 w-4 mr-2" />
@@ -2777,13 +2777,13 @@ export default function Stock() {
         />
       )}
 
-      {showParbPharmaPO && (
-        <ParbPharmaPO
-          poNumber={showParbPharmaPO.poNumber}
-          poDate={showParbPharmaPO.orderDate}
-          items={showParbPharmaPO.items}
+      {showEthicarePO && (
+        <EthicarePO
+          poNumber={showEthicarePO.poNumber}
+          poDate={showEthicarePO.orderDate}
+          items={showEthicarePO.items}
           stockItems={stockItems}
-          onClose={() => setShowParbPharmaPO(null)}
+          onClose={() => setShowEthicarePO(null)}
         />
       )}
 
