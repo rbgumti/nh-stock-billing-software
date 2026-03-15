@@ -88,7 +88,7 @@ export default function Stock() {
   const [showSupplierLedger, setShowSupplierLedger] = useState(false);
   const [supplierLedgerId, setSupplierLedgerId] = useState<string | undefined>(undefined);
   const [showAgingReport, setShowAgingReport] = useState(false);
-  const [showParbPharmaPO, setShowParbPharmaPO] = useState<PurchaseOrder | null>(null);
+  const [showEthicarePO, setShowEthicarePO] = useState<PurchaseOrder | null>(null);
   const [showNeuroglamPO, setShowNeuroglamPO] = useState<PurchaseOrder | null>(null);
   const [showVyadoHealthcarePO, setShowVyadoHealthcarePO] = useState<PurchaseOrder | null>(null);
   const [showVeeEssPharmaPO, setShowVeeEssPharmaPO] = useState<PurchaseOrder | null>(null);
