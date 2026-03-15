@@ -27,7 +27,7 @@ const SupplierPaymentForm = lazy(() => import("@/components/forms/SupplierPaymen
 const StockLedger = lazy(() => import("@/components/StockLedger").then(m => ({ default: m.StockLedger })));
 const SupplierLedger = lazy(() => import("@/components/SupplierLedger").then(m => ({ default: m.SupplierLedger })));
 const SupplierAgingReport = lazy(() => import("@/components/SupplierAgingReport").then(m => ({ default: m.SupplierAgingReport })));
-const ParbPharmaPO = lazy(() => import("@/components/forms/ParbPharmaPO").then(m => ({ default: m.ParbPharmaPO })));
+const EthicarePO = lazy(() => import("@/components/forms/EthicarePO").then(m => ({ default: m.EthicarePO })));
 const RusanPharmaPO = lazy(() => import("@/components/forms/RusanPharmaPO").then(m => ({ default: m.RusanPharmaPO })));
 const NeuroglamPO = lazy(() => import("@/components/forms/NeuroglamPO").then(m => ({ default: m.NeuroglamPO })));
 const VyadoHealthcarePO = lazy(() => import("@/components/forms/VyadoHealthcarePO").then(m => ({ default: m.VyadoHealthcarePO })));
