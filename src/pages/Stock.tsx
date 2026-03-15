@@ -2777,13 +2777,13 @@ export default function Stock() {
         />
       )}
 
-      {showParbPharmaPO && (
-        <ParbPharmaPO
-          poNumber={showParbPharmaPO.poNumber}
-          poDate={showParbPharmaPO.orderDate}
-          items={showParbPharmaPO.items}
+      {showEthicarePO && (
+        <EthicarePO
+          poNumber={showEthicarePO.poNumber}
+          poDate={showEthicarePO.orderDate}
+          items={showEthicarePO.items}
           stockItems={stockItems}
-          onClose={() => setShowParbPharmaPO(null)}
+          onClose={() => setShowEthicarePO(null)}
         />
       )}
 
