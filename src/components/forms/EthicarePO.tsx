@@ -181,27 +181,26 @@ export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: Eth
         {/* Undertaking & Signature - Only on last page */}
         {isLastPage && (
           <>
-            <div className="mt-2">
-              <p className="font-black text-base mb-1" style={{ color: '#003366' }}>UNDERTAKING:</p>
-              <p className="text-sm font-semibold text-justify text-gray-800" style={{ lineHeight: '1.35' }}>
+            <div className="mt-1">
+              <p className="font-black text-sm mb-0.5" style={{ color: '#003366' }}>UNDERTAKING:</p>
+              <p className="font-semibold text-justify text-gray-800" style={{ fontSize: '10pt', lineHeight: '1.25' }}>
                 We hereby confirm that the products which we intend to buy from ETHICARE PHARMACEUTICALS (P).LTD. 307 GIDC, POR DISTT. VADODARA 391243 GUJARAT INDIA Our P.O.NO {poNumber}. .dt- {formatDate(poDate)}. These products purchased by us will be exclusively sold by psychiatric clinic and hospital in addition to the designated de-addiction centers and hospital with de addiction facilities only, on our License no PSMHC/Pb./2024/863. We are full aware these products containing controlled substance as per Narcotic drugs & psychotropic substance Act 1985, and we will keep the relevant records of sale and purchase to us. Also we assure our acknowledgement in form 6(consignment note) for receipt of above purchase item to supplier immediately on receipt of above controlled substances. Further we undertake that we are taking the products for sale of below mentioned formulation & for its sale within india only & not meant for export.
               </p>
             </div>
 
             {/* Signature Section */}
-            <div className="mt-3 flex justify-between text-base">
+            <div className="mt-2 flex justify-between items-end text-base">
               <div className="text-left">
                 <p className="font-black" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
                 <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-                <div className="min-h-[90px]"></div>
+                <div className="min-h-[130px]"></div>
                 <div className="pt-1 border-t-2 border-gray-600 min-w-[220px]">
                   <span className="font-black text-gray-900 text-lg">{doctorName}</span>
                   <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
                   <p className="text-gray-600 text-sm font-semibold italic">(Signature & Stamp)</p>
                 </div>
               </div>
-              <div className="text-center min-w-[160px]">
-                <div className="min-h-[90px]"></div>
+              <div className="text-left min-w-[160px]">
                 <div className="pt-1 border-t-2 border-gray-600">
                   <span className="font-black text-gray-900 text-lg">Date: {formatDate(poDate)}</span>
                 </div>
@@ -211,7 +210,7 @@ export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: Eth
         )}
 
         {/* Footer */}
-        <div className="mt-3 text-center text-base font-black pt-3" style={{ borderTop: '3px solid #003366' }}>
+        <div className="mt-2 text-center text-base font-black pt-2" style={{ borderTop: '3px solid #003366' }}>
           <p style={{ color: '#003366' }}>
             NAVJEEVAN HOSPITAL - Opp. Bus Stand, Bara Sirhind, Distt. Fatehgarh Sahib (Punjab)
           </p>
