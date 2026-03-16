@@ -193,7 +193,7 @@ export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: Eth
               <div className="text-left">
                 <p className="font-black" style={{ color: '#003366' }}>For Navjeevan Hospital,</p>
                 <p className="text-gray-800 font-bold text-sm">Opp. New Bus Stand, G.T. Road, Sirhind</p>
-                <div className="min-h-[60px]"></div>
+                <div className="min-h-[90px]"></div>
                 <div className="pt-1 border-t-2 border-gray-600 min-w-[220px]">
                   <span className="font-black text-gray-900 text-lg">{doctorName}</span>
                   <p className="text-gray-700 text-sm font-bold">Navjeevan Hospital, Sirhind</p>
@@ -201,7 +201,7 @@ export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: Eth
                 </div>
               </div>
               <div className="text-center min-w-[160px]">
-                <div className="min-h-[60px]"></div>
+                <div className="min-h-[90px]"></div>
                 <div className="pt-1 border-t-2 border-gray-600">
                   <span className="font-black text-gray-900 text-lg">Date: {formatDate(poDate)}</span>
                 </div>
