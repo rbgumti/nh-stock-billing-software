@@ -75,7 +75,7 @@ export function EthicarePO({ poNumber, poDate, items, stockItems, onClose }: Eth
         key={pageIndex}
         ref={(el) => { pageRefs.current[pageIndex] = el; }}
         className="p-6 bg-white text-black flex flex-col mb-4"
-        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '14pt', lineHeight: '1.5', fontWeight: '600', minHeight: '1123px', height: '1123px', boxSizing: 'border-box' }}
+        style={{ fontFamily: "'Segoe UI', Arial, sans-serif", fontSize: '14pt', lineHeight: '1.5', fontWeight: '600', minHeight: '1123px', boxSizing: 'border-box' }}
       >
         {/* Header with Logo */}
         <div className="text-center mb-3 pb-3 border-b-4" style={{ borderBottomStyle: 'double', borderColor: '#003366' }}>
