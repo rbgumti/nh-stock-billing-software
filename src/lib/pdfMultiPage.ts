@@ -144,7 +144,7 @@ export function getItemsPerPage(documentType: 'neuroglam' | 'rusan' | 'parb' | '
       return { firstPage: 6, subsequentPages: 14 };
     case 'parb':
     case 'ethicare':
-      return { firstPage: 8, subsequentPages: 18 };
+      return { firstPage: 6, subsequentPages: 16 };
     case 'vyado':
     case 'veeess':
       // Simpler formats with more table space
