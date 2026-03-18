@@ -422,7 +422,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid gap-3 p-3 bg-gray-50 dark:bg-gray-800 font-medium text-sm rounded-lg" style={{ gridTemplateColumns: '1.15fr 0.5fr 1.55fr minmax(15ch, 1.15fr) minmax(18ch, 2.2fr) 1.15fr 0.95fr 0.7fr 0.95fr 0.55fr' }}>
+                <div className="grid gap-3 p-3 bg-gray-50 dark:bg-gray-800 font-medium text-sm rounded-lg" style={{ gridTemplateColumns: '1.1fr 0.5fr minmax(10ch, 1.6fr) minmax(15ch, 1.1fr) minmax(18ch, 2.2fr) 1.1fr 0.9fr 0.7fr 0.9fr 0.5fr' }}>
                   <div>Item</div>
                   <div className="text-center">Ordered</div>
                   <div className="text-center">Received</div>
@@ -453,7 +453,7 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
                     <div 
                       key={index} 
                       className={`grid gap-3 p-3 border rounded-lg ${isAdditional ? 'ml-4 border-dashed bg-muted/30' : ''}`}
-style={{ gridTemplateColumns: '1.15fr 0.5fr 1.55fr minmax(15ch, 1.15fr) minmax(18ch, 2.2fr) 1.15fr 0.95fr 0.7fr 0.95fr 0.55fr' }}
+style={{ gridTemplateColumns: '1.1fr 0.5fr minmax(10ch, 1.6fr) minmax(15ch, 1.1fr) minmax(18ch, 2.2fr) 1.1fr 0.9fr 0.7fr 0.9fr 0.5fr' }}
                     >
                       <div className="font-medium flex items-center">
                         {isAdditional ? (
