@@ -421,15 +421,15 @@ export function GRNForm({ onClose, onSubmit, purchaseOrder, stockItems }: GRNFor
               <CardTitle>Goods Receipt</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="grid gap-2 p-2 bg-gray-50 dark:bg-gray-800 font-medium text-xs rounded-lg" style={{ gridTemplateColumns: '1.1fr 0.5fr minmax(9ch, 1.4fr) minmax(14ch, 1.1fr) minmax(16ch, 1.8fr) minmax(8ch, 1.2fr) minmax(8ch, 1.1fr) 0.7fr 0.9fr 0.5fr' }}>
+              <div className="space-y-3 overflow-x-auto">
+                <div className="grid gap-1.5 p-2 bg-gray-50 dark:bg-gray-800 font-medium text-[11px] rounded-lg min-w-[900px]" style={{ gridTemplateColumns: '1.3fr 0.45fr 0.8fr 1.1fr 1.1fr 0.9fr 0.9fr 0.7fr 0.8fr 0.45fr' }}>
                   <div>Item</div>
-                  <div className="text-center">Ordered</div>
-                  <div className="text-center">Received</div>
+                  <div className="text-center">Ord</div>
+                  <div>Received</div>
                   <div>Batch No</div>
-                  <div>Expiry Date</div>
-                  <div>Cost/Tab (₹)</div>
-                  <div>MRP/Tab (₹)</div>
+                  <div>Expiry</div>
+                  <div>Cost/Tab</div>
+                  <div>MRP/Tab</div>
                   <div className="text-center">Status</div>
                   <div>Remarks</div>
                   <div className="text-center">Batch</div>
