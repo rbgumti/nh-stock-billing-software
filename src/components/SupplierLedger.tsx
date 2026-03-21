@@ -293,13 +293,16 @@ export function SupplierLedger({
     doc.setFillColor(33, 37, 41);
     doc.setTextColor(255, 255, 255);
     doc.rect(14, y - 5, pageWidth - 28, 8, 'F');
-    doc.setFontSize(9);
+    doc.setFontSize(7);
     doc.text('Date', 16, y);
-    doc.text('Description', 40, y);
-    doc.text('Reference', 95, y);
-    doc.text('Debit', 130, y);
-    doc.text('Credit', 155, y);
-    doc.text('Balance', 180, y);
+    doc.text('PO No', 35, y);
+    doc.text('GRN No', 52, y);
+    doc.text('Inv No', 70, y);
+    doc.text('Inv Date', 88, y);
+    doc.text('Description', 108, y);
+    doc.text('Debit', 145, y);
+    doc.text('Credit', 165, y);
+    doc.text('Balance', 185, y);
 
     // Table rows
     doc.setTextColor(0, 0, 0);
@@ -316,13 +319,16 @@ export function SupplierLedger({
         doc.rect(14, y - 4, pageWidth - 28, 7, 'F');
       }
       
-      doc.setFontSize(8);
+      doc.setFontSize(7);
       doc.text(entry.date || '-', 16, y);
-      doc.text(entry.description.substring(0, 30), 40, y);
-      doc.text(entry.reference.substring(0, 20), 95, y);
-      doc.text(entry.type === 'debit' ? formatCurrency(entry.amount) : '-', 130, y);
-      doc.text(entry.type === 'credit' ? formatCurrency(entry.amount) : '-', 155, y);
-      doc.text(formatCurrency(entry.balance), 180, y);
+      doc.text((entry.poNumber || '-').substring(0, 12), 35, y);
+      doc.text((entry.grnNumber || '-').substring(0, 12), 52, y);
+      doc.text((entry.invoiceNumber || '-').substring(0, 12), 70, y);
+      doc.text((entry.invoiceDate || '-').substring(0, 12), 88, y);
+      doc.text(entry.description.substring(0, 22), 108, y);
+      doc.text(entry.type === 'debit' ? formatCurrency(entry.amount) : '-', 145, y);
+      doc.text(entry.type === 'credit' ? formatCurrency(entry.amount) : '-', 165, y);
+      doc.text(formatCurrency(entry.balance), 185, y);
       
       y += 7;
     });
