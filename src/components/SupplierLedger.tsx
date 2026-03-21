@@ -219,6 +219,15 @@ export function SupplierLedger({
       });
   }, [selectedSupplier, supplierPOs, supplierPayments]);
 
+  const formatDateOnly = (d: string | undefined) => {
+    if (!d) return '-';
+    try {
+      const parsed = new Date(d);
+      if (isNaN(parsed.getTime())) return d;
+      return format(parsed, 'dd-MM-yyyy');
+    } catch { return d; }
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -231,7 +240,7 @@ export function SupplierLedger({
     if (!selectedSupplier || ledgerEntries.length === 0) return;
 
     const data = ledgerEntries.map(entry => ({
-      'Date': entry.date,
+      'Date': formatDateOnly(entry.date),
       'PO No': entry.poNumber,
       'GRN No': entry.grnNumber,
       'Invoice No': entry.invoiceNumber,
@@ -320,7 +329,7 @@ export function SupplierLedger({
       }
       
       doc.setFontSize(7);
-      doc.text(entry.date || '-', 16, y);
+      doc.text(formatDateOnly(entry.date), 16, y);
       doc.text((entry.poNumber || '-').substring(0, 12), 35, y);
       doc.text((entry.grnNumber || '-').substring(0, 12), 52, y);
       doc.text((entry.invoiceNumber || '-').substring(0, 12), 70, y);
@@ -518,7 +527,7 @@ export function SupplierLedger({
                             <TableBody>
                               {ledgerEntries.map((entry) => (
                                 <TableRow key={entry.id} className="border-border/30">
-                                  <TableCell className="font-medium text-sm">{entry.date || '-'}</TableCell>
+                                  <TableCell className="font-medium text-sm">{formatDateOnly(entry.date)}</TableCell>
                                   <TableCell className="text-sm">{entry.poNumber}</TableCell>
                                   <TableCell className="text-sm">{entry.grnNumber}</TableCell>
                                   <TableCell className="text-sm">{entry.invoiceNumber}</TableCell>
