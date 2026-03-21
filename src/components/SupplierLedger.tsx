@@ -495,32 +495,38 @@ export function SupplierLedger({
                       {ledgerEntries.length > 0 ? (
                         <div className="overflow-x-auto">
                           <Table>
-                            <TableHeader>
+                             <TableHeader>
                               <TableRow className="border-border/50">
-                                <TableHead className="w-[100px]">Date</TableHead>
+                                <TableHead className="w-[90px]">Date</TableHead>
+                                <TableHead>PO No</TableHead>
+                                <TableHead>GRN No</TableHead>
+                                <TableHead>Invoice No</TableHead>
+                                <TableHead>Invoice Date</TableHead>
                                 <TableHead>Description</TableHead>
-                                <TableHead>Reference</TableHead>
                                 <TableHead className="text-right">Debit (Bill)</TableHead>
-                                <TableHead className="text-right">Credit (Paid)</TableHead>
+                                <TableHead className="text-right">Credit (Payment)</TableHead>
                                 <TableHead className="text-right">Balance</TableHead>
-                                <TableHead className="w-[100px]">Status</TableHead>
+                                <TableHead className="w-[90px]">Status</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {ledgerEntries.map((entry) => (
                                 <TableRow key={entry.id} className="border-border/30">
                                   <TableCell className="font-medium text-sm">{entry.date || '-'}</TableCell>
+                                  <TableCell className="text-sm">{entry.poNumber}</TableCell>
+                                  <TableCell className="text-sm">{entry.grnNumber}</TableCell>
+                                  <TableCell className="text-sm">{entry.invoiceNumber}</TableCell>
+                                  <TableCell className="text-sm">{entry.invoiceDate}</TableCell>
                                   <TableCell>
                                     <div className="flex items-center gap-2">
                                       {entry.type === 'debit' ? (
-                                        <ArrowUpRight className="h-4 w-4 text-pink" />
+                                        <ArrowUpRight className="h-4 w-4 text-pink flex-shrink-0" />
                                       ) : (
-                                        <ArrowDownLeft className="h-4 w-4 text-emerald" />
+                                        <ArrowDownLeft className="h-4 w-4 text-emerald flex-shrink-0" />
                                       )}
                                       <span className="text-sm">{entry.description}</span>
                                     </div>
                                   </TableCell>
-                                  <TableCell className="text-sm text-muted-foreground">{entry.reference}</TableCell>
                                   <TableCell className="text-right font-medium text-pink">
                                     {entry.type === 'debit' ? formatCurrency(entry.amount) : '-'}
                                   </TableCell>
@@ -549,7 +555,7 @@ export function SupplierLedger({
                               ))}
                               {/* Totals Row */}
                               <TableRow className="bg-muted/30 font-bold border-t-2 border-border">
-                                <TableCell colSpan={3} className="text-right">TOTALS</TableCell>
+                                <TableCell colSpan={6} className="text-right">TOTALS</TableCell>
                                 <TableCell className="text-right text-pink">{formatCurrency(summary.totalDebits)}</TableCell>
                                 <TableCell className="text-right text-emerald">{formatCurrency(summary.totalCredits)}</TableCell>
                                 <TableCell className="text-right text-gold">{formatCurrency(summary.balance)}</TableCell>
