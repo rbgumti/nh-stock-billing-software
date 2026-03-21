@@ -45,6 +45,10 @@ interface LedgerEntry {
   type: 'debit' | 'credit';
   description: string;
   reference: string;
+  poNumber: string;
+  grnNumber: string;
+  invoiceNumber: string;
+  invoiceDate: string;
   amount: number;
   status: string;
   balance: number;
