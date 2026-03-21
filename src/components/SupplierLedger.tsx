@@ -527,7 +527,7 @@ export function SupplierLedger({
                             <TableBody>
                               {ledgerEntries.map((entry) => (
                                 <TableRow key={entry.id} className="border-border/30">
-                                  <TableCell className="font-medium text-sm">{entry.date || '-'}</TableCell>
+                                  <TableCell className="font-medium text-sm">{formatDateOnly(entry.date)}</TableCell>
                                   <TableCell className="text-sm">{entry.poNumber}</TableCell>
                                   <TableCell className="text-sm">{entry.grnNumber}</TableCell>
                                   <TableCell className="text-sm">{entry.invoiceNumber}</TableCell>
