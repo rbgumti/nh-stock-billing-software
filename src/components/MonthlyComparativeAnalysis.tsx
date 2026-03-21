@@ -104,6 +104,24 @@ export function MonthlyComparativeAnalysis() {
     loadMonthlyData();
   }, [selectedMonths]);
 
+  // Helper to fetch all rows beyond the 1000-row default limit
+  const fetchAllPages = async <T,>(
+    queryBuilder: (offset: number, limit: number) => PromiseLike<{ data: T[] | null; error: any }>,
+  ): Promise<T[]> => {
+    const PAGE = 1000;
+    let offset = 0;
+    let allRows: T[] = [];
+    while (true) {
+      const { data, error } = await queryBuilder(offset, offset + PAGE - 1);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      allRows = allRows.concat(data);
+      if (data.length < PAGE) break;
+      offset += PAGE;
+    }
+    return allRows;
+  };
+
   const loadMonthlyData = async () => {
     setLoading(true);
     try {
@@ -112,36 +130,34 @@ export function MonthlyComparativeAnalysis() {
       const startDate = new Date();
       startDate.setMonth(startDate.getMonth() - selectedMonths);
 
-      // Fetch day_reports for financial data
-      const { data: dayReports, error: dayError } = await supabase
-        .from('day_reports')
-        .select('report_date, fees, lab_collection, paytm_gpay, deposit_in_bank, new_patients, follow_up_patients, tapentadol_patients, psychiatry_patients, psychiatry_collection, expenses')
-        .gte('report_date', startDate.toISOString().split('T')[0])
-        .order('report_date', { ascending: true });
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const startDateISO = startDate.toISOString();
 
-      if (dayError) throw dayError;
-
-      // Fetch invoices for revenue calculation
-      const { data: invoices, error: invError } = await supabase
-        .from('invoices')
-        .select('id, invoice_date, total')
-        .gte('invoice_date', startDate.toISOString().split('T')[0]);
-
-      if (invError) throw invError;
-
-      // Fetch invoice_items with category info for qty sold
-      const { data: invoiceItems, error: itemsError } = await supabase
-        .from('invoice_items')
-        .select(`
-          invoice_id,
-          medicine_name,
-          quantity,
-          total,
-          created_at
-        `)
-        .gte('created_at', startDate.toISOString());
-
-      if (itemsError) throw itemsError;
+      // Fetch all rows using pagination to avoid 1000-row limit
+      const [dayReports, invoices, invoiceItems] = await Promise.all([
+        fetchAllPages<DayReportRow>((from, to) =>
+          supabase
+            .from('day_reports')
+            .select('report_date, fees, lab_collection, paytm_gpay, deposit_in_bank, new_patients, follow_up_patients, tapentadol_patients, psychiatry_patients, psychiatry_collection, expenses')
+            .gte('report_date', startDateStr)
+            .order('report_date', { ascending: true })
+            .range(from, to)
+        ),
+        fetchAllPages<{ id: string; invoice_date: string; total: number }>((from, to) =>
+          supabase
+            .from('invoices')
+            .select('id, invoice_date, total')
+            .gte('invoice_date', startDateStr)
+            .range(from, to)
+        ),
+        fetchAllPages<{ invoice_id: string; medicine_name: string; quantity: number; total: number; created_at: string }>((from, to) =>
+          supabase
+            .from('invoice_items')
+            .select('invoice_id, medicine_name, quantity, total, created_at')
+            .gte('created_at', startDateISO)
+            .range(from, to)
+        ),
+      ]);
 
       // Fetch stock items for category mapping
       const { data: stockItems } = await supabase
