@@ -45,6 +45,10 @@ interface LedgerEntry {
   type: 'debit' | 'credit';
   description: string;
   reference: string;
+  poNumber: string;
+  grnNumber: string;
+  invoiceNumber: string;
+  invoiceDate: string;
   amount: number;
   status: string;
   balance: number;
@@ -95,12 +99,16 @@ export function SupplierLedger({
         date: po.grnDate || po.orderDate,
         type: 'debit',
         description: po.poType === 'Service' 
-          ? `Service PO: ${po.serviceDescription || 'Service Order'}`
-          : `Purchase Order - ${po.items?.length || 0} items`,
+          ? `Service: ${po.serviceDescription || 'Service Order'}`
+          : `Purchase - ${po.items?.length || 0} items`,
         reference: po.grnNumber ? `GRN: ${po.grnNumber}` : `PO: ${po.poNumber}`,
+        poNumber: po.poNumber || '-',
+        grnNumber: po.grnNumber || '-',
+        invoiceNumber: po.invoiceNumber || '-',
+        invoiceDate: po.invoiceDate || '-',
         amount: po.totalAmount,
         status: po.status === 'Received' ? 'Received' : po.status,
-        balance: 0, // Will be calculated
+        balance: 0,
         source: po.grnNumber ? 'grn' : 'po',
         sourceId: po.id
       });
@@ -117,7 +125,11 @@ export function SupplierLedger({
           ? `UTR: ${payment.utr_number}` 
           : payment.reference_number 
             ? `Ref: ${payment.reference_number}`
-            : `Payment #${payment.id}`,
+            : `Payment`,
+        poNumber: payment.po_number || '-',
+        grnNumber: '-',
+        invoiceNumber: '-',
+        invoiceDate: '-',
         amount: payment.amount,
         status: payment.status || 'Completed',
         balance: 0,
@@ -220,8 +232,11 @@ export function SupplierLedger({
 
     const data = ledgerEntries.map(entry => ({
       'Date': entry.date,
+      'PO No': entry.poNumber,
+      'GRN No': entry.grnNumber,
+      'Invoice No': entry.invoiceNumber,
+      'Invoice Date': entry.invoiceDate,
       'Description': entry.description,
-      'Reference': entry.reference,
       'Debit (Bill)': entry.type === 'debit' ? entry.amount : '',
       'Credit (Payment)': entry.type === 'credit' ? entry.amount : '',
       'Balance': entry.balance,
@@ -231,8 +246,11 @@ export function SupplierLedger({
     // Add summary row
     data.push({
       'Date': '',
+      'PO No': '',
+      'GRN No': '',
+      'Invoice No': '',
+      'Invoice Date': '',
       'Description': 'TOTAL',
-      'Reference': '',
       'Debit (Bill)': summary.totalDebits,
       'Credit (Payment)': summary.totalCredits,
       'Balance': summary.balance,
@@ -275,13 +293,16 @@ export function SupplierLedger({
     doc.setFillColor(33, 37, 41);
     doc.setTextColor(255, 255, 255);
     doc.rect(14, y - 5, pageWidth - 28, 8, 'F');
-    doc.setFontSize(9);
+    doc.setFontSize(7);
     doc.text('Date', 16, y);
-    doc.text('Description', 40, y);
-    doc.text('Reference', 95, y);
-    doc.text('Debit', 130, y);
-    doc.text('Credit', 155, y);
-    doc.text('Balance', 180, y);
+    doc.text('PO No', 35, y);
+    doc.text('GRN No', 52, y);
+    doc.text('Inv No', 70, y);
+    doc.text('Inv Date', 88, y);
+    doc.text('Description', 108, y);
+    doc.text('Debit', 145, y);
+    doc.text('Credit', 165, y);
+    doc.text('Balance', 185, y);
 
     // Table rows
     doc.setTextColor(0, 0, 0);
@@ -298,13 +319,16 @@ export function SupplierLedger({
         doc.rect(14, y - 4, pageWidth - 28, 7, 'F');
       }
       
-      doc.setFontSize(8);
+      doc.setFontSize(7);
       doc.text(entry.date || '-', 16, y);
-      doc.text(entry.description.substring(0, 30), 40, y);
-      doc.text(entry.reference.substring(0, 20), 95, y);
-      doc.text(entry.type === 'debit' ? formatCurrency(entry.amount) : '-', 130, y);
-      doc.text(entry.type === 'credit' ? formatCurrency(entry.amount) : '-', 155, y);
-      doc.text(formatCurrency(entry.balance), 180, y);
+      doc.text((entry.poNumber || '-').substring(0, 12), 35, y);
+      doc.text((entry.grnNumber || '-').substring(0, 12), 52, y);
+      doc.text((entry.invoiceNumber || '-').substring(0, 12), 70, y);
+      doc.text((entry.invoiceDate || '-').substring(0, 12), 88, y);
+      doc.text(entry.description.substring(0, 22), 108, y);
+      doc.text(entry.type === 'debit' ? formatCurrency(entry.amount) : '-', 145, y);
+      doc.text(entry.type === 'credit' ? formatCurrency(entry.amount) : '-', 165, y);
+      doc.text(formatCurrency(entry.balance), 185, y);
       
       y += 7;
     });
@@ -477,32 +501,38 @@ export function SupplierLedger({
                       {ledgerEntries.length > 0 ? (
                         <div className="overflow-x-auto">
                           <Table>
-                            <TableHeader>
+                             <TableHeader>
                               <TableRow className="border-border/50">
-                                <TableHead className="w-[100px]">Date</TableHead>
+                                <TableHead className="w-[90px]">Date</TableHead>
+                                <TableHead>PO No</TableHead>
+                                <TableHead>GRN No</TableHead>
+                                <TableHead>Invoice No</TableHead>
+                                <TableHead>Invoice Date</TableHead>
                                 <TableHead>Description</TableHead>
-                                <TableHead>Reference</TableHead>
                                 <TableHead className="text-right">Debit (Bill)</TableHead>
-                                <TableHead className="text-right">Credit (Paid)</TableHead>
+                                <TableHead className="text-right">Credit (Payment)</TableHead>
                                 <TableHead className="text-right">Balance</TableHead>
-                                <TableHead className="w-[100px]">Status</TableHead>
+                                <TableHead className="w-[90px]">Status</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {ledgerEntries.map((entry) => (
                                 <TableRow key={entry.id} className="border-border/30">
                                   <TableCell className="font-medium text-sm">{entry.date || '-'}</TableCell>
+                                  <TableCell className="text-sm">{entry.poNumber}</TableCell>
+                                  <TableCell className="text-sm">{entry.grnNumber}</TableCell>
+                                  <TableCell className="text-sm">{entry.invoiceNumber}</TableCell>
+                                  <TableCell className="text-sm">{entry.invoiceDate}</TableCell>
                                   <TableCell>
                                     <div className="flex items-center gap-2">
                                       {entry.type === 'debit' ? (
-                                        <ArrowUpRight className="h-4 w-4 text-pink" />
+                                        <ArrowUpRight className="h-4 w-4 text-pink flex-shrink-0" />
                                       ) : (
-                                        <ArrowDownLeft className="h-4 w-4 text-emerald" />
+                                        <ArrowDownLeft className="h-4 w-4 text-emerald flex-shrink-0" />
                                       )}
                                       <span className="text-sm">{entry.description}</span>
                                     </div>
                                   </TableCell>
-                                  <TableCell className="text-sm text-muted-foreground">{entry.reference}</TableCell>
                                   <TableCell className="text-right font-medium text-pink">
                                     {entry.type === 'debit' ? formatCurrency(entry.amount) : '-'}
                                   </TableCell>
@@ -531,7 +561,7 @@ export function SupplierLedger({
                               ))}
                               {/* Totals Row */}
                               <TableRow className="bg-muted/30 font-bold border-t-2 border-border">
-                                <TableCell colSpan={3} className="text-right">TOTALS</TableCell>
+                                <TableCell colSpan={6} className="text-right">TOTALS</TableCell>
                                 <TableCell className="text-right text-pink">{formatCurrency(summary.totalDebits)}</TableCell>
                                 <TableCell className="text-right text-emerald">{formatCurrency(summary.totalCredits)}</TableCell>
                                 <TableCell className="text-right text-gold">{formatCurrency(summary.balance)}</TableCell>
