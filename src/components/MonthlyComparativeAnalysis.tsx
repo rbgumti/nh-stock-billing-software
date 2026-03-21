@@ -105,27 +105,17 @@ export function MonthlyComparativeAnalysis() {
   }, [selectedMonths]);
 
   // Helper to fetch all rows beyond the 1000-row default limit
-  const fetchAll = async <T,>(
-    table: string,
-    select: string,
-    filterCol: string,
-    filterVal: string,
-    orderCol?: string,
+  const fetchAllPages = async <T,>(
+    queryBuilder: (offset: number, limit: number) => Promise<{ data: T[] | null; error: any }>,
   ): Promise<T[]> => {
     const PAGE = 1000;
     let offset = 0;
     let allRows: T[] = [];
     while (true) {
-      let query = supabase
-        .from(table)
-        .select(select)
-        .gte(filterCol, filterVal)
-        .range(offset, offset + PAGE - 1);
-      if (orderCol) query = query.order(orderCol, { ascending: true });
-      const { data, error } = await query;
+      const { data, error } = await queryBuilder(offset, offset + PAGE - 1);
       if (error) throw error;
       if (!data || data.length === 0) break;
-      allRows = allRows.concat(data as T[]);
+      allRows = allRows.concat(data);
       if (data.length < PAGE) break;
       offset += PAGE;
     }
@@ -145,20 +135,27 @@ export function MonthlyComparativeAnalysis() {
 
       // Fetch all rows using pagination to avoid 1000-row limit
       const [dayReports, invoices, invoiceItems] = await Promise.all([
-        fetchAll<DayReportRow>(
-          'day_reports',
-          'report_date, fees, lab_collection, paytm_gpay, deposit_in_bank, new_patients, follow_up_patients, tapentadol_patients, psychiatry_patients, psychiatry_collection, expenses',
-          'report_date', startDateStr, 'report_date'
+        fetchAllPages<DayReportRow>((from, to) =>
+          supabase
+            .from('day_reports')
+            .select('report_date, fees, lab_collection, paytm_gpay, deposit_in_bank, new_patients, follow_up_patients, tapentadol_patients, psychiatry_patients, psychiatry_collection, expenses')
+            .gte('report_date', startDateStr)
+            .order('report_date', { ascending: true })
+            .range(from, to)
         ),
-        fetchAll<{ id: string; invoice_date: string; total: number }>(
-          'invoices',
-          'id, invoice_date, total',
-          'invoice_date', startDateStr
+        fetchAllPages<{ id: string; invoice_date: string; total: number }>((from, to) =>
+          supabase
+            .from('invoices')
+            .select('id, invoice_date, total')
+            .gte('invoice_date', startDateStr)
+            .range(from, to)
         ),
-        fetchAll<{ invoice_id: string; medicine_name: string; quantity: number; total: number; created_at: string }>(
-          'invoice_items',
-          'invoice_id, medicine_name, quantity, total, created_at',
-          'created_at', startDateISO
+        fetchAllPages<{ invoice_id: string; medicine_name: string; quantity: number; total: number; created_at: string }>((from, to) =>
+          supabase
+            .from('invoice_items')
+            .select('invoice_id, medicine_name, quantity, total, created_at')
+            .gte('created_at', startDateISO)
+            .range(from, to)
         ),
       ]);
 
