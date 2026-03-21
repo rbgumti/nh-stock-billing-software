@@ -99,12 +99,16 @@ export function SupplierLedger({
         date: po.grnDate || po.orderDate,
         type: 'debit',
         description: po.poType === 'Service' 
-          ? `Service PO: ${po.serviceDescription || 'Service Order'}`
-          : `Purchase Order - ${po.items?.length || 0} items`,
+          ? `Service: ${po.serviceDescription || 'Service Order'}`
+          : `Purchase - ${po.items?.length || 0} items`,
         reference: po.grnNumber ? `GRN: ${po.grnNumber}` : `PO: ${po.poNumber}`,
+        poNumber: po.poNumber || '-',
+        grnNumber: po.grnNumber || '-',
+        invoiceNumber: po.invoiceNumber || '-',
+        invoiceDate: po.invoiceDate || '-',
         amount: po.totalAmount,
         status: po.status === 'Received' ? 'Received' : po.status,
-        balance: 0, // Will be calculated
+        balance: 0,
         source: po.grnNumber ? 'grn' : 'po',
         sourceId: po.id
       });
