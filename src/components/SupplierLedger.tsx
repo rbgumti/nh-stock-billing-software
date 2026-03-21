@@ -232,8 +232,11 @@ export function SupplierLedger({
 
     const data = ledgerEntries.map(entry => ({
       'Date': entry.date,
+      'PO No': entry.poNumber,
+      'GRN No': entry.grnNumber,
+      'Invoice No': entry.invoiceNumber,
+      'Invoice Date': entry.invoiceDate,
       'Description': entry.description,
-      'Reference': entry.reference,
       'Debit (Bill)': entry.type === 'debit' ? entry.amount : '',
       'Credit (Payment)': entry.type === 'credit' ? entry.amount : '',
       'Balance': entry.balance,
@@ -243,8 +246,11 @@ export function SupplierLedger({
     // Add summary row
     data.push({
       'Date': '',
+      'PO No': '',
+      'GRN No': '',
+      'Invoice No': '',
+      'Invoice Date': '',
       'Description': 'TOTAL',
-      'Reference': '',
       'Debit (Bill)': summary.totalDebits,
       'Credit (Payment)': summary.totalCredits,
       'Balance': summary.balance,
