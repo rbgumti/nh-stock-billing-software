@@ -106,7 +106,7 @@ export function MonthlyComparativeAnalysis() {
 
   // Helper to fetch all rows beyond the 1000-row default limit
   const fetchAllPages = async <T,>(
-    queryBuilder: (offset: number, limit: number) => Promise<{ data: T[] | null; error: any }>,
+    queryBuilder: (offset: number, limit: number) => PromiseLike<{ data: T[] | null; error: any }>,
   ): Promise<T[]> => {
     const PAGE = 1000;
     let offset = 0;
