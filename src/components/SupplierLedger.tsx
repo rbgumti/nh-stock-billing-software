@@ -219,6 +219,15 @@ export function SupplierLedger({
       });
   }, [selectedSupplier, supplierPOs, supplierPayments]);
 
+  const formatDateOnly = (d: string | undefined) => {
+    if (!d) return '-';
+    try {
+      const parsed = new Date(d);
+      if (isNaN(parsed.getTime())) return d;
+      return format(parsed, 'dd-MM-yyyy');
+    } catch { return d; }
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
