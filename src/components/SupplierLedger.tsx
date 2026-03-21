@@ -125,7 +125,11 @@ export function SupplierLedger({
           ? `UTR: ${payment.utr_number}` 
           : payment.reference_number 
             ? `Ref: ${payment.reference_number}`
-            : `Payment #${payment.id}`,
+            : `Payment`,
+        poNumber: payment.po_number || '-',
+        grnNumber: '-',
+        invoiceNumber: '-',
+        invoiceDate: '-',
         amount: payment.amount,
         status: payment.status || 'Completed',
         balance: 0,
