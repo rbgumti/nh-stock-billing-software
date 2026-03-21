@@ -240,7 +240,7 @@ export function SupplierLedger({
     if (!selectedSupplier || ledgerEntries.length === 0) return;
 
     const data = ledgerEntries.map(entry => ({
-      'Date': entry.date,
+      'Date': formatDateOnly(entry.date),
       'PO No': entry.poNumber,
       'GRN No': entry.grnNumber,
       'Invoice No': entry.invoiceNumber,
