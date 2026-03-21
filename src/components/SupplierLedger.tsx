@@ -329,7 +329,7 @@ export function SupplierLedger({
       }
       
       doc.setFontSize(7);
-      doc.text(entry.date || '-', 16, y);
+      doc.text(formatDateOnly(entry.date), 16, y);
       doc.text((entry.poNumber || '-').substring(0, 12), 35, y);
       doc.text((entry.grnNumber || '-').substring(0, 12), 52, y);
       doc.text((entry.invoiceNumber || '-').substring(0, 12), 70, y);
