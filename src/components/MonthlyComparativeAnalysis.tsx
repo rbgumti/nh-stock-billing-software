@@ -125,10 +125,9 @@ export function MonthlyComparativeAnalysis() {
   const loadMonthlyData = async () => {
     setLoading(true);
     try {
-      // Get date range for selected months
+      // Get date range for selected months (use day=1 to avoid month-rollover)
       const endDate = new Date();
-      const startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - selectedMonths);
+      const startDate = new Date(endDate.getFullYear(), endDate.getMonth() - selectedMonths, 1);
 
       const startDateStr = startDate.toISOString().split('T')[0];
       const startDateISO = startDate.toISOString();
