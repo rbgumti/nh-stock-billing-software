@@ -125,10 +125,9 @@ export function MonthlyComparativeAnalysis() {
   const loadMonthlyData = async () => {
     setLoading(true);
     try {
-      // Get date range for selected months
+      // Get date range for selected months (use day=1 to avoid month-rollover)
       const endDate = new Date();
-      const startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - selectedMonths);
+      const startDate = new Date(endDate.getFullYear(), endDate.getMonth() - selectedMonths, 1);
 
       const startDateStr = startDate.toISOString().split('T')[0];
       const startDateISO = startDate.toISOString();
@@ -172,10 +171,10 @@ export function MonthlyComparativeAnalysis() {
       // Brand-wise quantity tracking: brandName -> { monthKey -> qty }
       const brandQtyMap = new Map<string, { category: 'BNX' | 'TPN'; monthlyQty: Map<string, number> }>();
 
-      // Initialize months
+      // Initialize months (use day=1 to avoid month-rollover bugs, e.g. Mar 31 → setMonth(1) = Mar 3)
       for (let i = 0; i < selectedMonths; i++) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
+        const now = new Date();
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         const monthLabel = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
         
