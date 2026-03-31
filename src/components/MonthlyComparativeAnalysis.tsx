@@ -172,10 +172,10 @@ export function MonthlyComparativeAnalysis() {
       // Brand-wise quantity tracking: brandName -> { monthKey -> qty }
       const brandQtyMap = new Map<string, { category: 'BNX' | 'TPN'; monthlyQty: Map<string, number> }>();
 
-      // Initialize months
+      // Initialize months (use day=1 to avoid month-rollover bugs, e.g. Mar 31 → setMonth(1) = Mar 3)
       for (let i = 0; i < selectedMonths; i++) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
+        const now = new Date();
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         const monthLabel = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
         
