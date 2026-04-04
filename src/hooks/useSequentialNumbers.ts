@@ -86,10 +86,10 @@ export const useSequentialNumbers = () => {
   };
 
   const getNextGoodsReceiptNumber = async (): Promise<string> => {
-    // Format: NH/GRN-XXXX (sequential across all GRNs)
-    const prefix = 'NH/GRN-';
+    const fySuffix = getFinancialYearSuffix();
+    const prefix = `NH/GRN-${fySuffix}-`;
     
-    // Query database for highest GRN number with this prefix
+    // Query database for highest GRN number with this FY prefix
     const { data, error } = await supabase
       .from('purchase_orders')
       .select('grn_number')
