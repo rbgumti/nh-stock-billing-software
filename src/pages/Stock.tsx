@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck, Clock, ArrowUpDown, ArrowUp, ArrowDown, SortAsc, SortDesc, Eye } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck, Clock, ArrowUpDown, ArrowUp, ArrowDown, SortAsc, SortDesc, Eye, Ban } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -98,7 +98,8 @@ export default function Stock() {
   const [exportEndDate, setExportEndDate] = useState<Date | undefined>(undefined);
   const [downloadingGrnId, setDownloadingGrnId] = useState<string | null>(null);
   const { stockItems, addStockItem, updateStockItem, subscribe, findOrCreateBatch, getBatchesForMedicine, invalidateCache, forceRefresh } = useStockStore();
-  const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO, refreshPurchaseOrders } = usePurchaseOrderStore();
+  const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, cancelPurchaseOrder, subscribe: subscribePO, refreshPurchaseOrders } = usePurchaseOrderStore();
+  const [cancellingPOId, setCancellingPOId] = useState<string | null>(null);
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
   const { payments, addPayment, updatePayment, deletePayment, getOutstandingPayments, getUpcomingPayments } = useSupplierPaymentStore();
   const { isAdmin } = useUserRole();
@@ -1972,6 +1973,7 @@ export default function Stock() {
                     <Badge className={`shadow-sm ${
                       po.status === 'Pending' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
                       po.status === 'Received' ? 'bg-gradient-to-r from-emerald to-teal text-white border-0' :
+                      po.status === 'Cancelled' ? 'bg-destructive text-destructive-foreground border-0' :
                       'glass-subtle border-purple/20'
                     }`}>
                       {po.status}
@@ -2038,6 +2040,23 @@ export default function Stock() {
                           >
                             <Truck className="h-4 w-4 mr-2" />
                             Process GRN
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            className="glass-subtle border-destructive/20 hover:border-destructive/40 hover:bg-destructive/10"
+                            onClick={() => {
+                              if (cancellingPOId === po.id) {
+                                cancelPurchaseOrder(po.id);
+                                setCancellingPOId(null);
+                              } else {
+                                setCancellingPOId(po.id);
+                                setTimeout(() => setCancellingPOId(null), 3000);
+                              }
+                            }}
+                          >
+                            <Ban className="h-4 w-4 mr-1 text-destructive" />
+                            {cancellingPOId === po.id ? 'Confirm Cancel?' : 'Cancel PO'}
                           </Button>
                         </>
                       )}
@@ -2213,6 +2232,23 @@ export default function Stock() {
                       <span className="font-medium text-foreground">{po.items.length}</span> item(s) received
                     </div>
                     <div className="flex gap-2 mt-4 flex-wrap">
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        className="glass-subtle border-destructive/20 hover:border-destructive/40 hover:bg-destructive/10"
+                        onClick={() => {
+                          if (cancellingPOId === po.id) {
+                            cancelPurchaseOrder(po.id);
+                            setCancellingPOId(null);
+                          } else {
+                            setCancellingPOId(po.id);
+                            setTimeout(() => setCancellingPOId(null), 3000);
+                          }
+                        }}
+                      >
+                        <Ban className="h-4 w-4 mr-1 text-destructive" />
+                        {cancellingPOId === po.id ? 'Confirm Cancel?' : 'Cancel GRN'}
+                      </Button>
                       <Button 
                         variant="outline" 
                         size="sm"
