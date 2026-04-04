@@ -113,9 +113,10 @@ export const useSequentialNumbers = () => {
   };
 
   const getNextInvoiceNumber = async (): Promise<string> => {
-    const prefix = 'NH/INV-';
+    const fySuffix = getFinancialYearSuffix();
+    const prefix = `NH/INV-${fySuffix}-`;
     
-    // Query database for highest invoice number with this prefix
+    // Query database for highest invoice number with this FY prefix
     const { data, error } = await supabase
       .from('invoices')
       .select('invoice_number')
@@ -129,27 +130,6 @@ export const useSequentialNumbers = () => {
       const parsed = parseInt(suffix, 10);
       if (!isNaN(parsed)) {
         nextNum = parsed + 1;
-      }
-    }
-    
-    // If no NH/INV- numbers exist yet, check legacy format to continue sequence
-    if (nextNum === 1) {
-      const { data: legacyData } = await supabase
-        .from('invoices')
-        .select('invoice_number')
-        .like('invoice_number', 'INV%')
-        .order('invoice_number', { ascending: false })
-        .limit(1);
-      
-      if (legacyData && legacyData.length > 0 && legacyData[0].invoice_number) {
-        // Extract trailing digits from legacy format like INV20260208288
-        const match = legacyData[0].invoice_number.match(/(\d+)$/);
-        if (match) {
-          const parsed = parseInt(match[1], 10);
-          if (!isNaN(parsed)) {
-            nextNum = parsed + 1;
-          }
-        }
       }
     }
     
