@@ -2040,6 +2040,23 @@ export default function Stock() {
                             <Truck className="h-4 w-4 mr-2" />
                             Process GRN
                           </Button>
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            className="glass-subtle border-destructive/20 hover:border-destructive/40 hover:bg-destructive/10"
+                            onClick={() => {
+                              if (cancellingPOId === po.id) {
+                                cancelPurchaseOrder(po.id);
+                                setCancellingPOId(null);
+                              } else {
+                                setCancellingPOId(po.id);
+                                setTimeout(() => setCancellingPOId(null), 3000);
+                              }
+                            }}
+                          >
+                            <Ban className="h-4 w-4 mr-1 text-destructive" />
+                            {cancellingPOId === po.id ? 'Confirm Cancel?' : 'Cancel PO'}
+                          </Button>
                         </>
                       )}
                       {po.invoiceUrl && (
