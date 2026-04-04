@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck, Clock, ArrowUpDown, ArrowUp, ArrowDown, SortAsc, SortDesc, Eye } from "lucide-react";
+import { Search, Plus, Package, AlertTriangle, FileText, Truck, Download, ChevronDown, Users, Pencil, Trash2, CreditCard, Calendar, DollarSign, ExternalLink, Pill, Droplets, Brain, BookOpen, FileSpreadsheet, Wrench, CalendarIcon, Loader2, BookOpenCheck, Clock, ArrowUpDown, ArrowUp, ArrowDown, SortAsc, SortDesc, Eye, Ban } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
