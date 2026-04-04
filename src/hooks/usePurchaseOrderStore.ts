@@ -414,6 +414,31 @@ export function usePurchaseOrderStore() {
     }
   };
 
+  const cancelPurchaseOrder = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('purchase_orders')
+        .update({ status: 'Cancelled' })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await loadPurchaseOrders(true);
+      toast({
+        title: "Purchase Order Cancelled",
+        description: "The purchase order has been cancelled successfully."
+      });
+    } catch (error: any) {
+      console.error('Error cancelling purchase order:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to cancel purchase order",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   const getPurchaseOrder = (id: string) => {
     return purchaseOrders.find(po => po.id === id);
   };
@@ -428,6 +453,7 @@ export function usePurchaseOrderStore() {
     loading,
     addPurchaseOrder,
     updatePurchaseOrder,
+    cancelPurchaseOrder,
     getPurchaseOrder,
     subscribe,
     refreshPurchaseOrders: () => loadPurchaseOrders(true)
