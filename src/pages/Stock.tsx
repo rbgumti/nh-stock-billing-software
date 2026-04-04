@@ -98,7 +98,8 @@ export default function Stock() {
   const [exportEndDate, setExportEndDate] = useState<Date | undefined>(undefined);
   const [downloadingGrnId, setDownloadingGrnId] = useState<string | null>(null);
   const { stockItems, addStockItem, updateStockItem, subscribe, findOrCreateBatch, getBatchesForMedicine, invalidateCache, forceRefresh } = useStockStore();
-  const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, subscribe: subscribePO, refreshPurchaseOrders } = usePurchaseOrderStore();
+  const { purchaseOrders, addPurchaseOrder, updatePurchaseOrder, cancelPurchaseOrder, subscribe: subscribePO, refreshPurchaseOrders } = usePurchaseOrderStore();
+  const [cancellingPOId, setCancellingPOId] = useState<string | null>(null);
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, getSupplierByName } = useSupplierStore();
   const { payments, addPayment, updatePayment, deletePayment, getOutstandingPayments, getUpcomingPayments } = useSupplierPaymentStore();
   const { isAdmin } = useUserRole();
