@@ -1973,6 +1973,7 @@ export default function Stock() {
                     <Badge className={`shadow-sm ${
                       po.status === 'Pending' ? 'bg-gradient-to-r from-orange to-gold text-white border-0' :
                       po.status === 'Received' ? 'bg-gradient-to-r from-emerald to-teal text-white border-0' :
+                      po.status === 'Cancelled' ? 'bg-destructive text-destructive-foreground border-0' :
                       'glass-subtle border-purple/20'
                     }`}>
                       {po.status}
