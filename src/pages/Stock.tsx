@@ -2232,6 +2232,23 @@ export default function Stock() {
                     </div>
                     <div className="flex gap-2 mt-4 flex-wrap">
                       <Button 
+                        variant="outline"
+                        size="sm"
+                        className="glass-subtle border-destructive/20 hover:border-destructive/40 hover:bg-destructive/10"
+                        onClick={() => {
+                          if (cancellingPOId === po.id) {
+                            cancelPurchaseOrder(po.id);
+                            setCancellingPOId(null);
+                          } else {
+                            setCancellingPOId(po.id);
+                            setTimeout(() => setCancellingPOId(null), 3000);
+                          }
+                        }}
+                      >
+                        <Ban className="h-4 w-4 mr-1 text-destructive" />
+                        {cancellingPOId === po.id ? 'Confirm Cancel?' : 'Cancel GRN'}
+                      </Button>
+                      <Button 
                         variant="outline" 
                         size="sm"
                         className="glass-subtle border-purple/20 hover:border-purple/40"
