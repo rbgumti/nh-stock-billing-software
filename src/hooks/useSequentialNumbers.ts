@@ -45,11 +45,25 @@ export const useSequentialNumbers = () => {
     sequentialStore = numbers;
   }, [numbers]);
 
+  // Get financial year suffix like "26-27" based on current date
+  const getFinancialYearSuffix = (): string => {
+    const now = new Date();
+    const month = now.getMonth(); // 0-indexed (0=Jan, 3=Apr)
+    const year = now.getFullYear() % 100; // last 2 digits
+    if (month >= 3) {
+      // April onwards: current year - next year
+      return `${year}-${(year + 1).toString().padStart(2, '0')}`;
+    } else {
+      // Jan-Mar: previous year - current year
+      return `${(year - 1).toString().padStart(2, '0')}-${year}`;
+    }
+  };
+
   const getNextPurchaseOrderNumber = async (): Promise<string> => {
-    // Format: NH/PO-XXXX (sequential across all POs)
-    const prefix = 'NH/PO-';
+    const fySuffix = getFinancialYearSuffix();
+    const prefix = `NH/PO-${fySuffix}-`;
     
-    // Query database for highest PO number with this prefix
+    // Query database for highest PO number with this FY prefix
     const { data, error } = await supabase
       .from('purchase_orders')
       .select('po_number')
