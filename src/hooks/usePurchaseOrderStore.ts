@@ -423,7 +423,14 @@ export function usePurchaseOrderStore() {
 
       if (error) throw error;
 
-      await loadPurchaseOrders(true);
+      // Optimistic local update so the UI reflects immediately
+      const updated = purchaseOrders.map(po =>
+        po.id === id ? { ...po, status: 'Cancelled' as const } : po
+      );
+      globalPOCache = updated;
+      poCacheTimestamp = Date.now();
+      setPurchaseOrders(updated);
+
       toast({
         title: "Purchase Order Cancelled",
         description: "The purchase order has been cancelled successfully."
