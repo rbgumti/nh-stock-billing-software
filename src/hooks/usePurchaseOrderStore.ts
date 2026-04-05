@@ -280,7 +280,9 @@ export function usePurchaseOrderStore() {
       }
 
       // Immediately refetch to update UI without waiting for realtime
-      await loadPurchaseOrders();
+      globalPOCache = [];
+      poCacheTimestamp = 0;
+      await loadPurchaseOrders(true);
     } catch (error: any) {
       console.error('Error adding purchase order:', error);
       toast({
