@@ -15,6 +15,7 @@ import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
+import { OneDriveSyncDialog } from "@/components/OneDriveSyncDialog";
 
 const formatInvoiceDate = (dateStr: string) => {
   try {
@@ -531,12 +532,15 @@ export default function Invoices() {
           </h1>
           <p className="text-muted-foreground mt-2">{loading ? 'Loading...' : `${totalCount} invoices total`}</p>
         </div>
-        <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
-          <Link to="/invoices/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Invoice
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <OneDriveSyncDialog />
+          <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
+            <Link to="/invoices/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Invoice
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
