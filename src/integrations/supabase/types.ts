@@ -445,6 +445,42 @@ export type Database = {
           },
         ]
       }
+      onedrive_sync_log: {
+        Row: {
+          created_at: string
+          id: string
+          invoice_id: string | null
+          invoice_number: string | null
+          medicine_name: string | null
+          position: number
+          row_number: number
+          sheet_name: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          invoice_number?: string | null
+          medicine_name?: string | null
+          position: number
+          row_number: number
+          sheet_name?: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          invoice_number?: string | null
+          medicine_name?: string | null
+          position?: number
+          row_number?: number
+          sheet_name?: string
+          value?: number
+        }
+        Relationships: []
+      }
       patients: {
         Row: {
           aadhar_card: string | null
