@@ -213,7 +213,7 @@ Deno.serve(async (req) => {
     if (!tasks.length) {
       return new Response(JSON.stringify({
         success: true, created: 0, skipped: 0, errors: [], message: 'No new numbers to sync',
-        worksheet: worksheetName,
+        worksheet: worksheetName, workbook: resolvedWorkbookName, itemId,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
