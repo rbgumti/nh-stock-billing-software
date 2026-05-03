@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
     }
 
     // 2) Read used range — both values and formulas (so "=6+24" is preserved)
-    const usedRangeUrl = `/me/drive/items/${body.itemId}/workbook/worksheets/${encodeURIComponent(worksheetName!)}/usedRange(valuesOnly=false)?$select=address,values,formulas,rowIndex,columnIndex`;
+    const usedRangeUrl = `/me/drive/items/${itemId}/workbook/worksheets/${encodeURIComponent(worksheetName!)}/usedRange(valuesOnly=false)?$select=address,values,formulas,rowIndex,columnIndex`;
     const usedRange = await gw(usedRangeUrl, LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY);
     const formulas: any[][] = usedRange?.formulas || [];
     const values: any[][] = usedRange?.values || [];
