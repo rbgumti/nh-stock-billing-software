@@ -21,6 +21,8 @@ type Health =
 interface SyncResult {
   success: boolean;
   worksheet?: string;
+  workbook?: string;
+  itemId?: string;
   created?: number;
   errors?: Array<{ row: number; position: number; medicine: string; qty: number; reason: string }>;
   created_invoices?: Array<{ row: number; position: number; medicine: string; qty: number; invoice_number: string }>;
@@ -34,6 +36,7 @@ interface Props {
 export function OneDriveSyncDialog({ onSynced }: Props) {
   const [open, setOpen] = useState(false);
   const [itemId, setItemId] = useState("");
+  const [workbookName, setWorkbookName] = useState("Daily Stock Report");
   const [worksheetName, setWorksheetName] = useState("");
   const [patientName, setPatientName] = useState("TEST Test");
   const [loading, setLoading] = useState(false);
@@ -69,6 +72,7 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
       if (raw) {
         const s = JSON.parse(raw);
         setItemId(s.itemId || "");
+        setWorkbookName(s.workbookName || "Daily Stock Report");
         setWorksheetName(s.worksheetName || "");
         setPatientName(s.patientName || "TEST Test");
       }
@@ -76,12 +80,12 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
   }, []);
 
   const persist = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ itemId, worksheetName, patientName }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ itemId, workbookName, worksheetName, patientName }));
   };
 
   const runSync = async () => {
-    if (!itemId.trim()) {
-      toast({ title: "Missing", description: "Enter the OneDrive workbook item ID.", variant: "destructive" });
+    if (!itemId.trim() && !workbookName.trim()) {
+      toast({ title: "Missing", description: "Enter the workbook name or item ID.", variant: "destructive" });
       return;
     }
     persist();
@@ -90,7 +94,8 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
     try {
       const { data, error } = await supabase.functions.invoke("sync-onedrive-invoices", {
         body: {
-          itemId: itemId.trim(),
+          itemId: itemId.trim() || undefined,
+          workbookName: workbookName.trim() || undefined,
           worksheetName: worksheetName.trim() || undefined,
           patientName: patientName.trim() || "TEST Test",
         },
@@ -98,6 +103,8 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
       if (error) throw error;
       const r = data as SyncResult;
       setResult(r);
+      // If the function resolved an itemId, cache it for instant subsequent syncs
+      if (r?.itemId && !itemId.trim()) setItemId(r.itemId);
       if (r.success) {
         toast({
           title: "Sync complete",
@@ -155,15 +162,22 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
 
         <div className="space-y-3">
           <div>
-            <Label htmlFor="itemId">OneDrive workbook item ID *</Label>
-            <Input id="itemId" value={itemId} onChange={(e) => setItemId(e.target.value)} placeholder="e.g. 01ABCDEFGHIJKLMNOPQRST" />
+            <Label htmlFor="wbName">Workbook name</Label>
+            <Input id="wbName" value={workbookName} onChange={(e) => setWorkbookName(e.target.value)} placeholder="Daily Stock Report" />
             <p className="text-xs text-muted-foreground mt-1">
-              Open the file in OneDrive on the web → <em>File ▸ Info</em> or share link; the long ID after <code>resid=</code> works for personal OneDrive accounts when this project's connected Microsoft account owns the file.
+              Searched in your connected OneDrive. The first matching <code>.xlsx</code> is used.
             </p>
           </div>
           <div>
+            <Label htmlFor="itemId">OneDrive item ID (optional, overrides name)</Label>
+            <Input id="itemId" value={itemId} onChange={(e) => setItemId(e.target.value)} placeholder="auto-resolved from workbook name" />
+          </div>
+          <div>
             <Label htmlFor="ws">Worksheet name (optional)</Label>
-            <Input id="ws" value={worksheetName} onChange={(e) => setWorksheetName(e.target.value)} placeholder="defaults to first sheet" />
+            <Input id="ws" value={worksheetName} onChange={(e) => setWorksheetName(e.target.value)} placeholder={`defaults to today's day (${new Date().getDate()})`} />
+            <p className="text-xs text-muted-foreground mt-1">
+              Sheets are named "1", "2", … for day-of-month. Leave blank to use today.
+            </p>
           </div>
           <div>
             <Label htmlFor="pn">Patient name</Label>
