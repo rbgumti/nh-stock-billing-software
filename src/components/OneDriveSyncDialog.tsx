@@ -5,11 +5,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Cloud, Loader2 } from "lucide-react";
+import { Cloud, Loader2, CheckCircle2, XCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "onedrive_sync_settings_v1";
+const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-onedrive-invoices?health=1`;
+
+type Health =
+  | { status: "idle" }
+  | { status: "checking" }
+  | { status: "ok"; excelReachable: boolean; excelError: string | null; hasSecrets: boolean }
+  | { status: "error"; message: string };
 
 interface SyncResult {
   success: boolean;
