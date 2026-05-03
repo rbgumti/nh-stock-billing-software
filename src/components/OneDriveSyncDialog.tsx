@@ -38,6 +38,30 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
   const [patientName, setPatientName] = useState("TEST Test");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
+  const [health, setHealth] = useState<Health>({ status: "idle" });
+
+  const checkHealth = async () => {
+    setHealth({ status: "checking" });
+    try {
+      const res = await fetch(FN_URL, {
+        method: "GET",
+        headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const j = await res.json();
+      const hasSecrets = !!(j?.secrets?.LOVABLE_API_KEY && j?.secrets?.MICROSOFT_EXCEL_API_KEY);
+      setHealth({
+        status: "ok",
+        excelReachable: !!j?.excel_connection?.reachable,
+        excelError: j?.excel_connection?.error || null,
+        hasSecrets,
+      });
+    } catch (e: any) {
+      setHealth({ status: "error", message: e?.message || "Unreachable" });
+    }
+  };
+
+  useEffect(() => { if (open) checkHealth(); }, [open]);
 
   useEffect(() => {
     try {
