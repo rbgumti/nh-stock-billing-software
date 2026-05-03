@@ -5,11 +5,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Cloud, Loader2 } from "lucide-react";
+import { Cloud, Loader2, CheckCircle2, XCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "onedrive_sync_settings_v1";
+const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-onedrive-invoices?health=1`;
+
+type Health =
+  | { status: "idle" }
+  | { status: "checking" }
+  | { status: "ok"; excelReachable: boolean; excelError: string | null; hasSecrets: boolean }
+  | { status: "error"; message: string };
 
 interface SyncResult {
   success: boolean;
@@ -31,6 +38,30 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
   const [patientName, setPatientName] = useState("TEST Test");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
+  const [health, setHealth] = useState<Health>({ status: "idle" });
+
+  const checkHealth = async () => {
+    setHealth({ status: "checking" });
+    try {
+      const res = await fetch(FN_URL, {
+        method: "GET",
+        headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const j = await res.json();
+      const hasSecrets = !!(j?.secrets?.LOVABLE_API_KEY && j?.secrets?.MICROSOFT_EXCEL_API_KEY);
+      setHealth({
+        status: "ok",
+        excelReachable: !!j?.excel_connection?.reachable,
+        excelError: j?.excel_connection?.error || null,
+        hasSecrets,
+      });
+    } catch (e: any) {
+      setHealth({ status: "error", message: e?.message || "Unreachable" });
+    }
+  };
+
+  useEffect(() => { if (open) checkHealth(); }, [open]);
 
   useEffect(() => {
     try {
@@ -102,6 +133,25 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
             FIFO batch selection. Only new numbers since the last sync are processed.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Health indicator */}
+        <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 min-w-0">
+            {health.status === "checking" && <><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /><span className="text-muted-foreground">Checking edge function…</span></>}
+            {health.status === "idle" && <><AlertCircle className="h-4 w-4 text-muted-foreground" /><span className="text-muted-foreground">Status unknown</span></>}
+            {health.status === "error" && <><XCircle className="h-4 w-4 text-destructive" /><span className="truncate"><strong className="text-destructive">Unreachable:</strong> {health.message}</span></>}
+            {health.status === "ok" && (
+              health.hasSecrets && health.excelReachable
+                ? <><CheckCircle2 className="h-4 w-4 text-emerald-500" /><span><strong className="text-emerald-600">Ready</strong> — function deployed, Excel connected</span></>
+                : !health.hasSecrets
+                  ? <><XCircle className="h-4 w-4 text-destructive" /><span><strong className="text-destructive">Missing secrets</strong> — connect Microsoft Excel</span></>
+                  : <><AlertCircle className="h-4 w-4 text-amber-500" /><span className="truncate"><strong className="text-amber-600">Excel not reachable:</strong> {health.excelError || "verify connection"}</span></>
+            )}
+          </div>
+          <Button size="sm" variant="ghost" onClick={checkHealth} disabled={health.status === "checking"} className="shrink-0 h-7 px-2">
+            <RefreshCw className={`h-3.5 w-3.5 ${health.status === "checking" ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
 
         <div className="space-y-3">
           <div>
