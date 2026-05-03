@@ -341,6 +341,8 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       worksheet: worksheetName,
+      workbook: resolvedWorkbookName,
+      itemId,
       created: created.length,
       skipped: 0,
       errors,
