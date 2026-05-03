@@ -21,6 +21,8 @@ type Health =
 interface SyncResult {
   success: boolean;
   worksheet?: string;
+  workbook?: string;
+  itemId?: string;
   created?: number;
   errors?: Array<{ row: number; position: number; medicine: string; qty: number; reason: string }>;
   created_invoices?: Array<{ row: number; position: number; medicine: string; qty: number; invoice_number: string }>;
