@@ -36,6 +36,7 @@ interface Props {
 export function OneDriveSyncDialog({ onSynced }: Props) {
   const [open, setOpen] = useState(false);
   const [itemId, setItemId] = useState("");
+  const [workbookName, setWorkbookName] = useState("Daily Stock Report");
   const [worksheetName, setWorksheetName] = useState("");
   const [patientName, setPatientName] = useState("TEST Test");
   const [loading, setLoading] = useState(false);
@@ -71,6 +72,7 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
       if (raw) {
         const s = JSON.parse(raw);
         setItemId(s.itemId || "");
+        setWorkbookName(s.workbookName || "Daily Stock Report");
         setWorksheetName(s.worksheetName || "");
         setPatientName(s.patientName || "TEST Test");
       }
@@ -78,12 +80,12 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
   }, []);
 
   const persist = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ itemId, worksheetName, patientName }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ itemId, workbookName, worksheetName, patientName }));
   };
 
   const runSync = async () => {
-    if (!itemId.trim()) {
-      toast({ title: "Missing", description: "Enter the OneDrive workbook item ID.", variant: "destructive" });
+    if (!itemId.trim() && !workbookName.trim()) {
+      toast({ title: "Missing", description: "Enter the workbook name or item ID.", variant: "destructive" });
       return;
     }
     persist();
@@ -92,7 +94,8 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
     try {
       const { data, error } = await supabase.functions.invoke("sync-onedrive-invoices", {
         body: {
-          itemId: itemId.trim(),
+          itemId: itemId.trim() || undefined,
+          workbookName: workbookName.trim() || undefined,
           worksheetName: worksheetName.trim() || undefined,
           patientName: patientName.trim() || "TEST Test",
         },
@@ -100,6 +103,8 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
       if (error) throw error;
       const r = data as SyncResult;
       setResult(r);
+      // If the function resolved an itemId, cache it for instant subsequent syncs
+      if (r?.itemId && !itemId.trim()) setItemId(r.itemId);
       if (r.success) {
         toast({
           title: "Sync complete",
