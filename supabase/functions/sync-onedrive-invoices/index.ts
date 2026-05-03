@@ -105,15 +105,41 @@ Deno.serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const body = (await req.json()) as Body;
-    if (!body?.itemId) throw new Error('itemId is required (OneDrive workbook driveItem id)');
     const patientName = body.patientName || 'TEST Test';
 
-    // 1) Pick worksheet
-    let worksheetName = body.worksheetName;
+    // 0) Resolve workbook itemId — by name search if not provided
+    let itemId = body.itemId?.trim();
+    let resolvedWorkbookName: string | undefined;
+    if (!itemId) {
+      const wbName = (body.workbookName || 'Daily Stock Report').trim();
+      const q = encodeURIComponent(wbName);
+      const search = await gw(
+        `/me/drive/root/search(q='${q}')?$select=id,name,file&$top=25`,
+        LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY
+      );
+      const candidates = (search?.value || []).filter((x: any) =>
+        x?.file && /\.xlsx?$/i.test(x.name || '')
+      );
+      // Prefer exact (case-insensitive) name match; otherwise first xlsx hit
+      const exact = candidates.find((x: any) =>
+        String(x.name || '').replace(/\.xlsx?$/i, '').trim().toLowerCase() === wbName.toLowerCase()
+      );
+      const pick = exact || candidates[0];
+      if (!pick) throw new Error(`Workbook "${wbName}" not found in OneDrive`);
+      itemId = pick.id;
+      resolvedWorkbookName = pick.name;
+    }
+
+    // 1) Pick worksheet — default to today's day-of-month (e.g. "3")
+    let worksheetName = body.worksheetName?.trim();
     if (!worksheetName) {
-      const ws = await gw(`/me/drive/items/${body.itemId}/workbook/worksheets`, LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY);
-      if (!ws?.value?.length) throw new Error('No worksheets found in workbook');
-      worksheetName = ws.value[0].name;
+      const ws = await gw(`/me/drive/items/${itemId}/workbook/worksheets`, LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY);
+      const sheets: any[] = ws?.value || [];
+      if (!sheets.length) throw new Error('No worksheets found in workbook');
+      const today = String(new Date().getDate()); // "1".."31"
+      const match = sheets.find(s => String(s.name).trim() === today)
+        || sheets.find(s => String(s.name).trim().toLowerCase() === today.toLowerCase());
+      worksheetName = (match || sheets[0]).name;
     }
 
     // 2) Read used range — both values and formulas (so "=6+24" is preserved)
