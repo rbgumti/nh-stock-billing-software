@@ -13,9 +13,10 @@ const corsHeaders = {
 const GATEWAY = 'https://connector-gateway.lovable.dev/microsoft_excel';
 
 interface Body {
-  itemId: string;          // OneDrive driveItem id of the workbook
-  worksheetName?: string;  // default: first worksheet
-  patientName?: string;    // default: 'TEST Test'
+  itemId?: string;          // OneDrive driveItem id of the workbook (optional if workbookName provided)
+  workbookName?: string;    // e.g. "Daily Stock Report" — auto-resolved to itemId
+  worksheetName?: string;   // default: today's day-of-month (e.g. "3" on 3 May)
+  patientName?: string;     // default: 'TEST Test'
 }
 
 function getFinancialYearSuffix(): string {
