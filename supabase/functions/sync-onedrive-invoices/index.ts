@@ -60,6 +60,39 @@ function parseFormulaNumbers(raw: unknown): number[] {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
+  // Health check: GET or ?health=1 → reports deployment + secret/connection status
+  const url = new URL(req.url);
+  if (req.method === 'GET' || url.searchParams.get('health') === '1') {
+    const hasLovable = !!Deno.env.get('LOVABLE_API_KEY');
+    const hasExcel = !!Deno.env.get('MICROSOFT_EXCEL_API_KEY');
+    let excelReachable = false;
+    let excelError: string | null = null;
+    if (hasLovable && hasExcel) {
+      try {
+        const r = await fetch('https://connector-gateway.lovable.dev/api/v1/verify_credentials', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
+            'X-Connection-Api-Key': Deno.env.get('MICROSOFT_EXCEL_API_KEY')!,
+            'Content-Type': 'application/json',
+          },
+        });
+        const j = await r.json().catch(() => ({}));
+        excelReachable = r.ok && (j?.outcome === 'verified' || j?.outcome === 'skipped');
+        if (!excelReachable) excelError = j?.error || j?.message || `HTTP ${r.status}`;
+      } catch (e) {
+        excelError = e instanceof Error ? e.message : String(e);
+      }
+    }
+    return new Response(JSON.stringify({
+      ok: true,
+      deployed: true,
+      timestamp: new Date().toISOString(),
+      secrets: { LOVABLE_API_KEY: hasLovable, MICROSOFT_EXCEL_API_KEY: hasExcel },
+      excel_connection: { reachable: excelReachable, error: excelError },
+    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
   try {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const MICROSOFT_EXCEL_API_KEY = Deno.env.get('MICROSOFT_EXCEL_API_KEY');
