@@ -162,15 +162,22 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
 
         <div className="space-y-3">
           <div>
-            <Label htmlFor="itemId">OneDrive workbook item ID *</Label>
-            <Input id="itemId" value={itemId} onChange={(e) => setItemId(e.target.value)} placeholder="e.g. 01ABCDEFGHIJKLMNOPQRST" />
+            <Label htmlFor="wbName">Workbook name</Label>
+            <Input id="wbName" value={workbookName} onChange={(e) => setWorkbookName(e.target.value)} placeholder="Daily Stock Report" />
             <p className="text-xs text-muted-foreground mt-1">
-              Open the file in OneDrive on the web → <em>File ▸ Info</em> or share link; the long ID after <code>resid=</code> works for personal OneDrive accounts when this project's connected Microsoft account owns the file.
+              Searched in your connected OneDrive. The first matching <code>.xlsx</code> is used.
             </p>
           </div>
           <div>
+            <Label htmlFor="itemId">OneDrive item ID (optional, overrides name)</Label>
+            <Input id="itemId" value={itemId} onChange={(e) => setItemId(e.target.value)} placeholder="auto-resolved from workbook name" />
+          </div>
+          <div>
             <Label htmlFor="ws">Worksheet name (optional)</Label>
-            <Input id="ws" value={worksheetName} onChange={(e) => setWorksheetName(e.target.value)} placeholder="defaults to first sheet" />
+            <Input id="ws" value={worksheetName} onChange={(e) => setWorksheetName(e.target.value)} placeholder={`defaults to today's day (${new Date().getDate()})`} />
+            <p className="text-xs text-muted-foreground mt-1">
+              Sheets are named "1", "2", … for day-of-month. Leave blank to use today.
+            </p>
           </div>
           <div>
             <Label htmlFor="pn">Patient name</Label>
