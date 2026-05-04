@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       ok: true,
       deployed: true,
       timestamp: new Date().toISOString(),
-      secrets: { LOVABLE_API_KEY: hasLovable, MICROSOFT_EXCEL_API_KEY: hasExcel },
+      secrets: { LOVABLE_API_KEY: hasLovable, MICROSOFT_EXCEL_API_KEY: hasExcel, excel_key_used: excelKeyName || null },
       excel_connection: { reachable: excelReachable, error: excelError },
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
