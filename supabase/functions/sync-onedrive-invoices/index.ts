@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
-            'X-Connection-Api-Key': Deno.env.get('MICROSOFT_EXCEL_API_KEY')!,
+            'X-Connection-Api-Key': excelKey!,
             'Content-Type': 'application/json',
           },
         });
