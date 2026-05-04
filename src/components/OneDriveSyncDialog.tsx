@@ -109,7 +109,7 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
         method: "POST",
         headers: FUNCTION_HEADERS,
         body: JSON.stringify({
-          itemId: itemId.trim() || undefined,
+          itemId: itemIdToSend || undefined,
           workbookName: workbookName.trim() || undefined,
           worksheetName: worksheetName.trim() || undefined,
           patientName: patientName.trim() || "TEST Test",
