@@ -95,6 +95,12 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
       toast({ title: "Missing", description: "Enter the workbook name or item ID.", variant: "destructive" });
       return;
     }
+    // If user pasted a OneDrive URL into item ID, drop it — the function will resolve by name
+    let itemIdToSend = itemId.trim();
+    if (itemIdToSend.startsWith("http") || itemIdToSend.includes("/")) {
+      itemIdToSend = "";
+      setItemId("");
+    }
     persist();
     setLoading(true);
     setResult(null);
