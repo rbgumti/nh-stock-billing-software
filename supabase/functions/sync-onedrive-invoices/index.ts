@@ -65,7 +65,11 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   if (req.method === 'GET' || url.searchParams.get('health') === '1') {
     const hasLovable = !!Deno.env.get('LOVABLE_API_KEY');
-    const hasExcel = !!Deno.env.get('MICROSOFT_EXCEL_API_KEY');
+    const excelKeyName = Deno.env.get('MICROSOFT_EXCEL_API_KEY_2')
+      ? 'MICROSOFT_EXCEL_API_KEY_2'
+      : (Deno.env.get('MICROSOFT_EXCEL_API_KEY') ? 'MICROSOFT_EXCEL_API_KEY' : '');
+    const excelKey = excelKeyName ? Deno.env.get(excelKeyName) : undefined;
+    const hasExcel = !!excelKey;
     let excelReachable = false;
     let excelError: string | null = null;
     if (hasLovable && hasExcel) {
@@ -74,7 +78,7 @@ Deno.serve(async (req) => {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
-            'X-Connection-Api-Key': Deno.env.get('MICROSOFT_EXCEL_API_KEY')!,
+            'X-Connection-Api-Key': excelKey!,
             'Content-Type': 'application/json',
           },
         });
@@ -89,14 +93,15 @@ Deno.serve(async (req) => {
       ok: true,
       deployed: true,
       timestamp: new Date().toISOString(),
-      secrets: { LOVABLE_API_KEY: hasLovable, MICROSOFT_EXCEL_API_KEY: hasExcel },
+      secrets: { LOVABLE_API_KEY: hasLovable, MICROSOFT_EXCEL_API_KEY: hasExcel, excel_key_used: excelKeyName || null },
       excel_connection: { reachable: excelReachable, error: excelError },
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
   try {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    const MICROSOFT_EXCEL_API_KEY = Deno.env.get('MICROSOFT_EXCEL_API_KEY');
+    const MICROSOFT_EXCEL_API_KEY =
+      Deno.env.get('MICROSOFT_EXCEL_API_KEY_2') || Deno.env.get('MICROSOFT_EXCEL_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
     if (!MICROSOFT_EXCEL_API_KEY) throw new Error('MICROSOFT_EXCEL_API_KEY not configured (connect Microsoft Excel)');
 
