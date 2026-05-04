@@ -100,7 +100,8 @@ Deno.serve(async (req) => {
 
   try {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    const MICROSOFT_EXCEL_API_KEY = Deno.env.get('MICROSOFT_EXCEL_API_KEY');
+    const MICROSOFT_EXCEL_API_KEY =
+      Deno.env.get('MICROSOFT_EXCEL_API_KEY_2') || Deno.env.get('MICROSOFT_EXCEL_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
     if (!MICROSOFT_EXCEL_API_KEY) throw new Error('MICROSOFT_EXCEL_API_KEY not configured (connect Microsoft Excel)');
 
