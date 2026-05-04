@@ -64,8 +64,8 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
         excelError: j?.excel_connection?.error || null,
         hasSecrets,
       });
-    } catch (e: any) {
-      setHealth({ status: "error", message: e?.message || "Unreachable" });
+    } catch (e: unknown) {
+      setHealth({ status: "error", message: e instanceof Error ? e.message : "Unreachable" });
     }
   };
 
@@ -81,7 +81,9 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
         setWorksheetName(s.worksheetName || "");
         setPatientName(s.patientName || "TEST Test");
       }
-    } catch {}
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+    }
   }, []);
 
   const persist = () => {
@@ -121,8 +123,8 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
       } else {
         toast({ title: "Sync failed", description: r.error || "Unknown error", variant: "destructive" });
       }
-    } catch (e: any) {
-      const msg = e?.message || String(e);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
       setResult({ success: false, error: msg });
       toast({ title: "Sync failed", description: msg, variant: "destructive" });
     } finally {
