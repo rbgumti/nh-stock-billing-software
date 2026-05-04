@@ -7,10 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Cloud, Loader2, CheckCircle2, XCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "onedrive_sync_settings_v1";
-const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-onedrive-invoices?health=1`;
+const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-onedrive-invoices`;
+const FN_HEALTH_URL = `${FN_ENDPOINT}?health=1`;
+const FUNCTION_HEADERS = {
+  apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+  Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string}`,
+  "Content-Type": "application/json",
+};
 
 type Health =
   | { status: "idle" }
@@ -46,9 +51,9 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
   const checkHealth = async () => {
     setHealth({ status: "checking" });
     try {
-      const res = await fetch(FN_URL, {
+      const res = await fetch(FN_HEALTH_URL, {
         method: "GET",
-        headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string },
+        headers: FUNCTION_HEADERS,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const j = await res.json();
@@ -92,16 +97,18 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
     setLoading(true);
     setResult(null);
     try {
-      const { data, error } = await supabase.functions.invoke("sync-onedrive-invoices", {
-        body: {
+      const res = await fetch(FN_ENDPOINT, {
+        method: "POST",
+        headers: FUNCTION_HEADERS,
+        body: JSON.stringify({
           itemId: itemId.trim() || undefined,
           workbookName: workbookName.trim() || undefined,
           worksheetName: worksheetName.trim() || undefined,
           patientName: patientName.trim() || "TEST Test",
-        },
+        }),
       });
-      if (error) throw error;
-      const r = data as SyncResult;
+      const r = (await res.json().catch(() => null)) as SyncResult | null;
+      if (!res.ok || !r) throw new Error(r?.error || `Sync request failed: HTTP ${res.status}`);
       setResult(r);
       // If the function resolved an itemId, cache it for instant subsequent syncs
       if (r?.itemId && !itemId.trim()) setItemId(r.itemId);
