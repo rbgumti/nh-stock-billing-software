@@ -95,6 +95,12 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
       toast({ title: "Missing", description: "Enter the workbook name or item ID.", variant: "destructive" });
       return;
     }
+    // If user pasted a OneDrive URL into item ID, drop it — the function will resolve by name
+    let itemIdToSend = itemId.trim();
+    if (itemIdToSend.startsWith("http") || itemIdToSend.includes("/")) {
+      itemIdToSend = "";
+      setItemId("");
+    }
     persist();
     setLoading(true);
     setResult(null);
@@ -103,7 +109,7 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
         method: "POST",
         headers: FUNCTION_HEADERS,
         body: JSON.stringify({
-          itemId: itemId.trim() || undefined,
+          itemId: itemIdToSend || undefined,
           workbookName: workbookName.trim() || undefined,
           worksheetName: worksheetName.trim() || undefined,
           patientName: patientName.trim() || "TEST Test",

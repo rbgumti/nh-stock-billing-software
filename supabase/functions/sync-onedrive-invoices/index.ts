@@ -109,6 +109,16 @@ Deno.serve(async (req) => {
 
     // 0) Resolve workbook itemId — by name search if not provided
     let itemId = body.itemId?.trim();
+    // If a OneDrive share URL was pasted, try to extract resid=...; otherwise discard it
+    if (itemId && (itemId.startsWith('http') || itemId.includes('/'))) {
+      const m = itemId.match(/[?&]resid=([^&]+)/i);
+      if (m) {
+        itemId = decodeURIComponent(m[1]);
+      } else {
+        console.log('Ignoring non-id itemId input, will resolve by workbook name');
+        itemId = undefined;
+      }
+    }
     let resolvedWorkbookName: string | undefined;
     if (!itemId) {
       const wbName = (body.workbookName || 'Daily Stock Report').trim();
