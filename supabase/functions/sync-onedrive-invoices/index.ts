@@ -10,7 +10,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const GATEWAY = 'https://connector-gateway.lovable.dev/microsoft_excel';
+const GATEWAY = 'https://connector-gateway.lovable.dev/microsoft_onedrive';
 
 interface Body {
   itemId?: string;          // OneDrive driveItem id of the workbook (optional if workbookName provided)
