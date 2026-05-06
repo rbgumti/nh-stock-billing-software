@@ -65,10 +65,36 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   if (req.method === 'GET' || url.searchParams.get('health') === '1') {
     const hasLovable = !!Deno.env.get('LOVABLE_API_KEY');
-    const excelKeyName = Deno.env.get('MICROSOFT_EXCEL_API_KEY_2')
-      ? 'MICROSOFT_EXCEL_API_KEY_2'
-      : (Deno.env.get('MICROSOFT_EXCEL_API_KEY') ? 'MICROSOFT_EXCEL_API_KEY' : '');
-    const excelKey = excelKeyName ? Deno.env.get(excelKeyName) : undefined;
+    const candidateNames = ['MICROSOFT_EXCEL_API_KEY_3','MICROSOFT_EXCEL_API_KEY_2','MICROSOFT_EXCEL_API_KEY_1','MICROSOFT_EXCEL_API_KEY'];
+    let excelKeyName = '';
+    let excelKey: string | undefined;
+    // Probe each available key with verify_credentials and pick the first that works
+    if (hasLovable) {
+      for (const n of candidateNames) {
+        const v = Deno.env.get(n);
+        if (!v) continue;
+        try {
+          const r = await fetch('https://connector-gateway.lovable.dev/api/v1/verify_credentials', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
+              'X-Connection-Api-Key': v,
+              'Content-Type': 'application/json',
+            },
+          });
+          const j = await r.json().catch(() => ({}));
+          if (r.ok && (j?.outcome === 'verified' || j?.outcome === 'skipped')) {
+            excelKeyName = n; excelKey = v; break;
+          }
+        } catch { /* try next */ }
+      }
+      if (!excelKeyName) {
+        // fall back to first present key just for reporting
+        for (const n of candidateNames) {
+          if (Deno.env.get(n)) { excelKeyName = n; excelKey = Deno.env.get(n); break; }
+        }
+      }
+    }
     const hasExcel = !!excelKey;
     let excelReachable = false;
     let excelError: string | null = null;
