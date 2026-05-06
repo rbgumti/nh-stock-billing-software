@@ -126,10 +126,27 @@ Deno.serve(async (req) => {
 
   try {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    const MICROSOFT_EXCEL_API_KEY =
-      Deno.env.get('MICROSOFT_EXCEL_API_KEY_2') || Deno.env.get('MICROSOFT_EXCEL_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
-    if (!MICROSOFT_EXCEL_API_KEY) throw new Error('MICROSOFT_EXCEL_API_KEY not configured (connect Microsoft Excel)');
+    // Probe all available Excel keys; use the first one whose credential verifies
+    const candidates = ['MICROSOFT_EXCEL_API_KEY_3','MICROSOFT_EXCEL_API_KEY_2','MICROSOFT_EXCEL_API_KEY_1','MICROSOFT_EXCEL_API_KEY'];
+    let MICROSOFT_EXCEL_API_KEY: string | undefined;
+    for (const n of candidates) {
+      const v = Deno.env.get(n);
+      if (!v) continue;
+      try {
+        const r = await fetch('https://connector-gateway.lovable.dev/api/v1/verify_credentials', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'X-Connection-Api-Key': v, 'Content-Type': 'application/json' },
+        });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && (j?.outcome === 'verified' || j?.outcome === 'skipped')) { MICROSOFT_EXCEL_API_KEY = v; break; }
+      } catch { /* try next */ }
+    }
+    if (!MICROSOFT_EXCEL_API_KEY) {
+      // Fallback to any present key (will likely 401 but gives a clearer error)
+      for (const n of candidates) { const v = Deno.env.get(n); if (v) { MICROSOFT_EXCEL_API_KEY = v; break; } }
+    }
+    if (!MICROSOFT_EXCEL_API_KEY) throw new Error('No working Microsoft Excel connection found. Please reconnect with Files.Read.All and Files.ReadWrite.All scopes.');
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
