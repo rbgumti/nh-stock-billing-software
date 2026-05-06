@@ -10,7 +10,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const GATEWAY = 'https://connector-gateway.lovable.dev/microsoft_excel';
+const GATEWAY = 'https://connector-gateway.lovable.dev/microsoft_onedrive';
 
 interface Body {
   itemId?: string;          // OneDrive driveItem id of the workbook (optional if workbookName provided)
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   if (req.method === 'GET' || url.searchParams.get('health') === '1') {
     const hasLovable = !!Deno.env.get('LOVABLE_API_KEY');
-    const candidateNames = ['MICROSOFT_EXCEL_API_KEY_3','MICROSOFT_EXCEL_API_KEY_2','MICROSOFT_EXCEL_API_KEY_1','MICROSOFT_EXCEL_API_KEY'];
+    const candidateNames = ['MICROSOFT_ONEDRIVE_API_KEY','MICROSOFT_ONEDRIVE_API_KEY_1','MICROSOFT_ONEDRIVE_API_KEY_2'];
     let excelKeyName = '';
     let excelKey: string | undefined;
     // Probe each available key with verify_credentials and pick the first that works
@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
     // Probe all available Excel keys; use the first one whose credential verifies
-    const candidates = ['MICROSOFT_EXCEL_API_KEY_3','MICROSOFT_EXCEL_API_KEY_2','MICROSOFT_EXCEL_API_KEY_1','MICROSOFT_EXCEL_API_KEY'];
+    const candidates = ['MICROSOFT_ONEDRIVE_API_KEY','MICROSOFT_ONEDRIVE_API_KEY_1','MICROSOFT_ONEDRIVE_API_KEY_2'];
     let MICROSOFT_EXCEL_API_KEY: string | undefined;
     for (const n of candidates) {
       const v = Deno.env.get(n);
@@ -143,10 +143,9 @@ Deno.serve(async (req) => {
       } catch { /* try next */ }
     }
     if (!MICROSOFT_EXCEL_API_KEY) {
-      // Fallback to any present key (will likely 401 but gives a clearer error)
       for (const n of candidates) { const v = Deno.env.get(n); if (v) { MICROSOFT_EXCEL_API_KEY = v; break; } }
     }
-    if (!MICROSOFT_EXCEL_API_KEY) throw new Error('No working Microsoft Excel connection found. Please reconnect with Files.Read.All and Files.ReadWrite.All scopes.');
+    if (!MICROSOFT_EXCEL_API_KEY) throw new Error('No working Microsoft OneDrive connection found.');
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
