@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   if (req.method === 'GET' || url.searchParams.get('health') === '1') {
     const hasLovable = !!Deno.env.get('LOVABLE_API_KEY');
-    const candidateNames = ['MICROSOFT_EXCEL_API_KEY_3','MICROSOFT_EXCEL_API_KEY_2','MICROSOFT_EXCEL_API_KEY_1','MICROSOFT_EXCEL_API_KEY'];
+    const candidateNames = ['MICROSOFT_ONEDRIVE_API_KEY','MICROSOFT_ONEDRIVE_API_KEY_1','MICROSOFT_ONEDRIVE_API_KEY_2'];
     let excelKeyName = '';
     let excelKey: string | undefined;
     // Probe each available key with verify_credentials and pick the first that works
