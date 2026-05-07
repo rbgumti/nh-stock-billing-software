@@ -5,6 +5,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileUp, Loader2, FileSpreadsheet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ExcelJS from "exceljs";
@@ -33,7 +34,10 @@ interface Props { onSynced?: (summary: SyncSummary) => void; }
 export function FileSyncDialog({ onSynced }: Props) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [workbook, setWorkbook] = useState<ExcelJS.Workbook | null>(null);
+  const [sheetNames, setSheetNames] = useState<string[]>([]);
   const [worksheetName, setWorksheetName] = useState("");
+  const [previewCount, setPreviewCount] = useState<number | null>(null);
   const [patientName, setPatientName] = useState("TEST Test");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
@@ -47,14 +51,9 @@ export function FileSyncDialog({ onSynced }: Props) {
     return s.split("+").map((t) => Number(t.trim())).filter((n) => Number.isFinite(n) && n > 0);
   };
 
-  const parseWorkbook = async (): Promise<ParsedWorkbookRow[]> => {
-    if (!file) return [];
-    const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(await file.arrayBuffer());
-    const requested = worksheetName.trim();
-    const today = String(new Date().getDate());
-    const ws = (requested && wb.getWorksheet(requested)) || wb.getWorksheet(today) || wb.worksheets[0];
-    if (!ws) throw new Error("No worksheets found in uploaded workbook");
+  const parseSheet = (wb: ExcelJS.Workbook, name: string): ParsedWorkbookRow[] => {
+    const ws = wb.getWorksheet(name);
+    if (!ws) return [];
     return ws.getRows(2, Math.max(ws.rowCount - 1, 0))
       ?.map((row) => {
         const fv = row.getCell(5).value;
@@ -72,23 +71,51 @@ export function FileSyncDialog({ onSynced }: Props) {
       .filter((r) => r.medicineName && r.quantities.length) || [];
   };
 
+  const onFile = async (f: File | null) => {
+    setFile(f);
+    setWorkbook(null);
+    setSheetNames([]);
+    setWorksheetName("");
+    setPreviewCount(null);
+    setResult(null);
+    if (!f) return;
+    try {
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(await f.arrayBuffer());
+      const names = wb.worksheets.map((w) => w.name);
+      setWorkbook(wb);
+      setSheetNames(names);
+      const today = String(new Date().getDate());
+      const initial = names.includes(today) ? today : (names[names.length - 1] || "");
+      setWorksheetName(initial);
+      if (initial) setPreviewCount(parseSheet(wb, initial).reduce((n, r) => n + r.quantities.length, 0));
+    } catch (e: unknown) {
+      toast({ title: "Cannot read file", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+    }
+  };
+
+  const onSheetChange = (name: string) => {
+    setWorksheetName(name);
+    if (workbook) setPreviewCount(parseSheet(workbook, name).reduce((n, r) => n + r.quantities.length, 0));
+  };
+
   const runSync = async () => {
-    if (!file) {
-      toast({ title: "Pick a file", description: "Select an .xlsx workbook first.", variant: "destructive" });
+    if (!workbook || !worksheetName) {
+      toast({ title: "Pick a file & sheet", description: "Upload a workbook and choose the sheet.", variant: "destructive" });
       return;
     }
     setLoading(true);
     setResult(null);
     try {
-      const parsedRows = await parseWorkbook();
+      const parsedRows = parseSheet(workbook, worksheetName);
       if (!parsedRows.length) {
-        throw new Error("No rows found with medicine names in column A and quantities/formulas in column E.");
+        throw new Error(`Sheet "${worksheetName}" has no rows with medicine names in column A and quantities in column E.`);
       }
       const res = await fetch(FN_ENDPOINT, {
         method: "POST",
         headers: FUNCTION_HEADERS,
         body: JSON.stringify({
-          worksheetName: worksheetName.trim() || undefined,
+          worksheetName,
           patientName: patientName.trim() || "TEST Test",
           parsedRows,
         }),
@@ -135,13 +162,29 @@ export function FileSyncDialog({ onSynced }: Props) {
         <div className="space-y-3">
           <div>
             <Label htmlFor="fsFile">Workbook (.xlsx)</Label>
-            <Input id="fsFile" type="file" accept=".xlsx,.xlsm" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+            <Input id="fsFile" type="file" accept=".xlsx,.xlsm"
+              onChange={(e) => onFile(e.target.files?.[0] || null)} />
           </div>
-          <div>
-            <Label htmlFor="fsWs">Worksheet name (optional)</Label>
-            <Input id="fsWs" value={worksheetName} onChange={(e) => setWorksheetName(e.target.value)}
-              placeholder={`defaults to today's day (${new Date().getDate()})`} />
-          </div>
+          {sheetNames.length > 0 && (
+            <div>
+              <Label htmlFor="fsWs">Worksheet</Label>
+              <Select value={worksheetName} onValueChange={onSheetChange}>
+                <SelectTrigger id="fsWs"><SelectValue placeholder="Pick a sheet" /></SelectTrigger>
+                <SelectContent>
+                  {sheetNames.map((n) => (
+                    <SelectItem key={n} value={n}>{n}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {previewCount !== null && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {previewCount === 0
+                    ? "No quantities found in column E on this sheet."
+                    : `Will attempt to create ${previewCount} invoice(s) from this sheet (minus already-synced rows).`}
+                </p>
+              )}
+            </div>
+          )}
           <div>
             <Label htmlFor="fsPn">Patient name</Label>
             <Input id="fsPn" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
@@ -173,7 +216,7 @@ export function FileSyncDialog({ onSynced }: Props) {
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>Close</Button>
-          <Button onClick={runSync} disabled={loading || !file}
+          <Button onClick={runSync} disabled={loading || !workbook || !worksheetName}
             className="bg-gradient-to-r from-emerald-500 to-cyan text-white">
             {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Syncing…</>
               : <><FileSpreadsheet className="h-4 w-4 mr-2" />Sync Now</>}
