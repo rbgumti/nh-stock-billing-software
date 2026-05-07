@@ -5,8 +5,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Cloud, Loader2, CheckCircle2, XCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { Cloud, Loader2, CheckCircle2, XCircle, AlertCircle, RefreshCw, FileSpreadsheet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import ExcelJS from "exceljs";
 
 const STORAGE_KEY = "onedrive_sync_settings_v1";
 const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-onedrive-invoices`;
@@ -32,6 +33,12 @@ interface SyncResult {
   errors?: Array<{ row: number; position: number; medicine: string; qty: number; reason: string }>;
   created_invoices?: Array<{ row: number; position: number; medicine: string; qty: number; invoice_number: string }>;
   error?: string;
+}
+
+interface ParsedWorkbookRow {
+  row: number;
+  medicineName: string;
+  quantities: number[];
 }
 
 interface Props {
