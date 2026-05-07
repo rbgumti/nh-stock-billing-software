@@ -149,10 +149,12 @@ Deno.serve(async (req) => {
         if (r.ok && (j?.outcome === 'verified' || j?.outcome === 'skipped')) { MICROSOFT_EXCEL_API_KEY = v; break; }
       } catch { /* try next */ }
     }
-    if (!MICROSOFT_EXCEL_API_KEY) {
-      for (const n of candidates) { const v = Deno.env.get(n); if (v) { MICROSOFT_EXCEL_API_KEY = v; break; } }
+    if (!MICROSOFT_EXCEL_API_KEY && !useUploadedRows) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Microsoft connection is unavailable. Upload the Excel workbook in the sync dialog to process invoices without the connector.',
+      }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    if (!MICROSOFT_EXCEL_API_KEY) throw new Error('No working Microsoft OneDrive connection found.');
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
