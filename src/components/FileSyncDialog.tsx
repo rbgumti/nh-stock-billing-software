@@ -139,15 +139,17 @@ export function FileSyncDialog({ onSynced }: Props) {
           worksheetName,
           patientName: patientName.trim() || "TEST Test",
           parsedRows,
+          debug,
         }),
       });
       const r = (await res.json().catch(() => null)) as SyncResult | null;
       if (!res.ok || !r) throw new Error(r?.error || `Sync failed: HTTP ${res.status}`);
       setResult(r);
       if (r.success) {
+        const attempted = r.attempted ?? parsedRows.length;
         toast({
-          title: "Sync complete",
-          description: `${r.created ?? 0} invoice(s) created${r.errors?.length ? `, ${r.errors.length} skipped` : ""}.`,
+          title: debug ? "Debug sync complete" : "Sync complete",
+          description: `${r.created ?? 0}/${attempted} invoice(s) created${r.errors?.length ? `, ${r.errors.length} skipped` : ""}.`,
         });
         onSynced?.({ created: r.created ?? 0, skipped: r.errors?.length ?? 0, worksheet: r.worksheet });
       } else {
