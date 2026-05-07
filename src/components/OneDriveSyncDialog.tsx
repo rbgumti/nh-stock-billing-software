@@ -77,8 +77,12 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
     if (!worksheet) throw new Error("No worksheets found in uploaded workbook");
     return worksheet.getRows(2, Math.max(worksheet.rowCount - 1, 0))
       ?.map((row) => {
-        const formulaValue = row.getCell(5).value as any;
-        const formulaText = formulaValue?.formula ? `=${formulaValue.formula}` : formulaValue?.result ?? formulaValue;
+        const formulaValue = row.getCell(5).value;
+        const formulaText = typeof formulaValue === "object" && formulaValue !== null && "formula" in formulaValue
+          ? `=${String(formulaValue.formula)}`
+          : typeof formulaValue === "object" && formulaValue !== null && "result" in formulaValue
+            ? formulaValue.result
+            : formulaValue;
         return {
           row: row.number,
           medicineName: String(row.getCell(1).text || row.getCell(1).value || "").trim(),
