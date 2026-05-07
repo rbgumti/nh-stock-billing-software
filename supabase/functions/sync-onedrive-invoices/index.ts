@@ -65,6 +65,46 @@ function parseFormulaNumbers(raw: unknown): number[] {
   return s.split('+').map(t => Number(t.trim())).filter(n => Number.isFinite(n) && n > 0);
 }
 
+function normalizeMedicineName(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/[\u2010-\u2015]/g, '-')
+    .replace(/\b(mg|tab|tablet|tabs|cap|capsule|ml)\b/g, ' ')
+    .replace(/[^a-z0-9.]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function compactMedicineName(raw: string): string {
+  return normalizeMedicineName(raw).replace(/[^a-z0-9]/g, '');
+}
+
+function editDistanceAtMostOne(a: string, b: string): boolean {
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 1) return false;
+  let i = 0, j = 0, edits = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i++; j++; continue; }
+    edits++;
+    if (edits > 1) return false;
+    if (a.length > b.length) i++;
+    else if (b.length > a.length) j++;
+    else { i++; j++; }
+  }
+  return edits + (i < a.length ? 1 : 0) + (j < b.length ? 1 : 0) <= 1;
+}
+
+function medicineNamesMatch(uploadedName: string, stockName: string): boolean {
+  const uploaded = normalizeMedicineName(uploadedName);
+  const stock = normalizeMedicineName(stockName);
+  if (!uploaded || !stock) return false;
+  if (uploaded === stock) return true;
+  const uploadedCompact = compactMedicineName(uploadedName);
+  const stockCompact = compactMedicineName(stockName);
+  if (uploadedCompact === stockCompact) return true;
+  return uploadedCompact.length >= 6 && stockCompact.length >= 6 && editDistanceAtMostOne(uploadedCompact, stockCompact);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -327,13 +367,12 @@ Deno.serve(async (req) => {
       return !isNaN(t);
     }
 
-    // FIFO batch picker by exact name match (case-insensitive)
+    // FIFO batch picker by normalized medicine name match (handles punctuation, MG suffixes, and minor typos)
     function pickFifoBatch(name: string, qty: number): any | null {
-      const target = name.trim().toLowerCase();
       const candidates = Array.from(stockById.values()).filter((m: any) =>
         m.is_active &&
         (m.current_stock ?? 0) >= qty &&
-        String(m.name || '').trim().toLowerCase() === target
+        medicineNamesMatch(name, String(m.name || ''))
       );
       if (!candidates.length) return null;
       candidates.sort((a: any, b: any) => {
@@ -353,7 +392,7 @@ Deno.serve(async (req) => {
     for (const t of tasks) {
       const batch = pickFifoBatch(t.medName, t.qty);
       if (!batch) {
-        errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: 'No matching active stock with sufficient quantity (exact name match required)' });
+        errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: 'No matching active stock with sufficient quantity' });
         continue;
       }
 
@@ -438,7 +477,7 @@ Deno.serve(async (req) => {
       workbook: resolvedWorkbookName,
       itemId,
       created: created.length,
-      skipped: 0,
+      skipped: errors.length,
       errors,
       created_invoices: created,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
