@@ -15,7 +15,7 @@ import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
-import { OneDriveSyncDialog } from "@/components/OneDriveSyncDialog";
+import { OneDriveSyncDialog, type SyncSummary } from "@/components/OneDriveSyncDialog";
 
 const formatInvoiceDate = (dateStr: string) => {
   try {
@@ -138,10 +138,13 @@ export default function Invoices() {
     }
   };
 
-  const handleSyncComplete = () => {
+  const [syncBanner, setSyncBanner] = useState<(SyncSummary & { at: number }) | null>(null);
+
+  const handleSyncComplete = (summary: SyncSummary) => {
     setSearchTerm("");
     setDebouncedSearch("");
     setStatusFilter("all");
+    setSyncBanner({ ...summary, at: Date.now() });
     if (currentPage === 1) {
       loadInvoices();
     } else {
@@ -554,7 +557,32 @@ export default function Invoices() {
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {syncBanner && (
+        <div
+          className={`flex items-start justify-between gap-3 rounded-lg border px-4 py-3 ${
+            syncBanner.skipped > 0
+              ? "border-amber-500/40 bg-amber-500/10"
+              : "border-emerald-500/40 bg-emerald-500/10"
+          }`}
+        >
+          <div className="text-sm">
+            <p className="font-semibold">
+              OneDrive sync complete
+              {syncBanner.worksheet ? ` — sheet "${syncBanner.worksheet}"` : ""}
+            </p>
+            <p className="text-muted-foreground">
+              <strong className="text-emerald-600">{syncBanner.created}</strong> invoice(s) created
+              {", "}
+              <strong className={syncBanner.skipped > 0 ? "text-amber-600" : ""}>{syncBanner.skipped}</strong> skipped.
+            </p>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => setSyncBanner(null)} className="h-7 px-2">
+            Dismiss
+          </Button>
+        </div>
+      )}
+
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="glass-strong border-0 overflow-hidden relative group hover:shadow-glow transition-all duration-300">
           <div className="absolute inset-0 bg-gradient-to-br from-purple/10 via-transparent to-cyan/10 opacity-50 group-hover:opacity-100 transition-opacity" />

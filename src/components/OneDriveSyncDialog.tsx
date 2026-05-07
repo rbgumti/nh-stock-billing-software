@@ -41,8 +41,14 @@ interface ParsedWorkbookRow {
   quantities: number[];
 }
 
+export interface SyncSummary {
+  created: number;
+  skipped: number;
+  worksheet?: string;
+}
+
 interface Props {
-  onSynced?: () => void;
+  onSynced?: (summary: SyncSummary) => void;
 }
 
 export function OneDriveSyncDialog({ onSynced }: Props) {
@@ -174,7 +180,11 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
           title: "Sync complete",
           description: `${r.created ?? 0} invoice(s) created${r.errors?.length ? `, ${r.errors.length} skipped` : ""}.`,
         });
-        onSynced?.();
+        onSynced?.({
+          created: r.created ?? 0,
+          skipped: r.errors?.length ?? 0,
+          worksheet: r.worksheet,
+        });
       } else {
         toast({ title: "Sync failed", description: r.error || "Unknown error", variant: "destructive" });
       }
