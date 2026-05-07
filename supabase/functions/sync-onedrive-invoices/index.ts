@@ -261,29 +261,45 @@ Deno.serve(async (req) => {
     // 6) Build list of (rowSheetIdx, medicineNameInColA, position, qty)
     const aColIdx = 0 - colOffset; // we want sheet column A (index 0)
     const eColIdx = 4 - colOffset; // sheet column E (index 4)
-    const tasks: Array<{ rowSheet: number; medName: string; position: number; qty: number }> = [];
+    const tasks: SyncTask[] = [];
 
-    for (let r = 0; r < (formulas.length || values.length); r++) {
-      const sheetRow = rowOffset + r + 1; // 1-based
-      if (sheetRow < 2) continue; // skip header row 1
-
-      const aCell = aColIdx >= 0 ? (values[r]?.[aColIdx] ?? '') : '';
-      const medName = String(aCell || '').trim();
-      if (!medName) continue;
-
-      // Prefer formula (raw "=6+24..."), fall back to computed value
-      let eRaw: any = '';
-      if (eColIdx >= 0) {
-        eRaw = formulas[r]?.[eColIdx] ?? values[r]?.[eColIdx] ?? '';
+    if (useUploadedRows) {
+      for (const row of uploadedRows) {
+        const sheetRow = Number(row.row);
+        const medName = String(row.medicineName || '').trim();
+        const nums = Array.isArray(row.quantities)
+          ? row.quantities.map(Number).filter(n => Number.isFinite(n) && n > 0)
+          : [];
+        if (!sheetRow || sheetRow < 2 || !medName || !nums.length) continue;
+        nums.forEach((qty, idx) => {
+          const position = idx + 1;
+          if (seen.has(`${sheetRow}:${position}`)) return;
+          tasks.push({ rowSheet: sheetRow, medName, position, qty });
+        });
       }
-      const nums = parseFormulaNumbers(eRaw);
-      if (!nums.length) continue;
+    } else {
+      for (let r = 0; r < (formulas.length || values.length); r++) {
+        const sheetRow = rowOffset + r + 1; // 1-based
+        if (sheetRow < 2) continue; // skip header row 1
 
-      nums.forEach((qty, idx) => {
-        const position = idx + 1;
-        if (seen.has(`${sheetRow}:${position}`)) return;
-        tasks.push({ rowSheet: sheetRow, medName, position, qty });
-      });
+        const aCell = aColIdx >= 0 ? (values[r]?.[aColIdx] ?? '') : '';
+        const medName = String(aCell || '').trim();
+        if (!medName) continue;
+
+        // Prefer formula (raw "=6+24..."), fall back to computed value
+        let eRaw: any = '';
+        if (eColIdx >= 0) {
+          eRaw = formulas[r]?.[eColIdx] ?? values[r]?.[eColIdx] ?? '';
+        }
+        const nums = parseFormulaNumbers(eRaw);
+        if (!nums.length) continue;
+
+        nums.forEach((qty, idx) => {
+          const position = idx + 1;
+          if (seen.has(`${sheetRow}:${position}`)) return;
+          tasks.push({ rowSheet: sheetRow, medName, position, qty });
+        });
+      }
     }
 
     if (!tasks.length) {
