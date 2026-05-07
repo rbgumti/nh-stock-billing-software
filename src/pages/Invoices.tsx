@@ -67,10 +67,13 @@ export default function Invoices() {
     loadInvoices();
   }, [currentPage, statusFilter, debouncedSearch]);
 
-  const loadInvoices = async () => {
+  const loadInvoices = async (options?: { page?: number; status?: string; search?: string }) => {
     try {
       setLoading(true);
-      const from = (currentPage - 1) * pageSize;
+      const page = options?.page ?? currentPage;
+      const activeStatus = options?.status ?? statusFilter;
+      const activeSearch = options?.search ?? debouncedSearch;
+      const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       
       let query = supabase
@@ -81,15 +84,15 @@ export default function Invoices() {
         `, { count: 'exact' });
 
       // Apply search filter
-      if (debouncedSearch.trim()) {
+      if (activeSearch.trim()) {
         query = query.or(
-          `invoice_number.ilike.%${debouncedSearch.trim()}%,patient_name.ilike.%${debouncedSearch.trim()}%`
+          `invoice_number.ilike.%${activeSearch.trim()}%,patient_name.ilike.%${activeSearch.trim()}%`
         );
       }
 
       // Apply status filter
-      if (statusFilter !== "all") {
-        query = query.eq('status', statusFilter);
+      if (activeStatus !== "all") {
+        query = query.eq('status', activeStatus);
       }
 
       const { data: invoicesData, error: invoicesError, count } = await query
@@ -166,8 +169,8 @@ export default function Invoices() {
     setDebouncedSearch("");
     setStatusFilter("all");
     setSyncBanner({ ...summary, at: Date.now() });
-    if (currentPage !== 1) setCurrentPage(1);
-    loadInvoices();
+    setCurrentPage(1);
+    loadInvoices({ page: 1, status: "all", search: "" });
     prependSyncedInvoices(summary.invoiceIds);
   };
 
