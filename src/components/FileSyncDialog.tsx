@@ -21,9 +21,11 @@ const FUNCTION_HEADERS = {
 interface SyncResult {
   success: boolean;
   worksheet?: string;
+  attempted?: number;
   created?: number;
   errors?: Array<{ row: number; position: number; medicine: string; qty: number; reason: string }>;
   created_invoices?: Array<{ row: number; position: number; medicine: string; qty: number; invoice_number: string }>;
+  debug?: boolean;
   error?: string;
 }
 
@@ -40,6 +42,7 @@ export function FileSyncDialog({ onSynced }: Props) {
   const [previewCount, setPreviewCount] = useState<number | null>(null);
   const [patientName, setPatientName] = useState("TEST Test");
   const [loading, setLoading] = useState(false);
+  const [debug, setDebug] = useState(true);
   const [result, setResult] = useState<SyncResult | null>(null);
 
   const TARGET_ROWS = [3, 4, 5, 6, 7, ...Array.from({ length: 22 }, (_, i) => 11 + i)];
@@ -136,15 +139,17 @@ export function FileSyncDialog({ onSynced }: Props) {
           worksheetName,
           patientName: patientName.trim() || "TEST Test",
           parsedRows,
+          debug,
         }),
       });
       const r = (await res.json().catch(() => null)) as SyncResult | null;
       if (!res.ok || !r) throw new Error(r?.error || `Sync failed: HTTP ${res.status}`);
       setResult(r);
       if (r.success) {
+        const attempted = r.attempted ?? parsedRows.length;
         toast({
-          title: "Sync complete",
-          description: `${r.created ?? 0} invoice(s) created${r.errors?.length ? `, ${r.errors.length} skipped` : ""}.`,
+          title: debug ? "Debug sync complete" : "Sync complete",
+          description: `${r.created ?? 0}/${attempted} invoice(s) created${r.errors?.length ? `, ${r.errors.length} skipped` : ""}.`,
         });
         onSynced?.({ created: r.created ?? 0, skipped: r.errors?.length ?? 0, worksheet: r.worksheet });
       } else {
@@ -207,14 +212,36 @@ export function FileSyncDialog({ onSynced }: Props) {
             <Label htmlFor="fsPn">Patient name</Label>
             <Input id="fsPn" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
           </div>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={debug}
+              onChange={(e) => setDebug(e.target.checked)}
+              className="h-4 w-4"
+            />
+            <span>
+              <strong>Debug mode</strong> — force one invoice per target row (A3–A7, A11–A32) using the
+              total from column E, ignore prior sync log.
+            </span>
+          </label>
         </div>
 
         {result && (
           <div className="mt-3 max-h-48 overflow-auto rounded-md border border-border p-3 text-sm space-y-1">
             {result.success ? (
               <>
-                <p className="font-medium">Worksheet: {result.worksheet}</p>
-                <p>Created: <strong>{result.created ?? 0}</strong></p>
+                <p className="font-medium">Worksheet: {result.worksheet} {result.debug && <span className="text-xs text-amber-500">(debug)</span>}</p>
+                <p>Created: <strong>{result.created ?? 0}</strong>{typeof result.attempted === "number" && <> / {result.attempted} attempted</>}</p>
+                {!!result.created_invoices?.length && (
+                  <details className="mt-1">
+                    <summary className="cursor-pointer text-xs text-muted-foreground">Show created invoices</summary>
+                    <ul className="list-disc pl-4 text-xs mt-1">
+                      {result.created_invoices.map((c, i) => (
+                        <li key={i}>Row {c.row} — {c.medicine} × {c.qty} → {c.invoice_number}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
                 {!!result.errors?.length && (
                   <div className="mt-2">
                     <p className="text-destructive font-medium">Skipped: {result.errors.length}</p>

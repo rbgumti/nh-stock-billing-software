@@ -22,6 +22,7 @@ interface Body {
     medicineName: string;
     quantities: number[];
   }>;
+  debug?: boolean;          // when true: bypass dedup AND force one invoice per uploaded row using qty=sum(quantities)
 }
 
 type SyncTask = { rowSheet: number; medName: string; position: number; qty: number };
@@ -176,6 +177,7 @@ Deno.serve(async (req) => {
     const patientName = body.patientName || 'TEST Test';
     const uploadedRows = Array.isArray(body.parsedRows) ? body.parsedRows : [];
     const useUploadedRows = uploadedRows.length > 0;
+    const debugMode = body.debug === true;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
@@ -282,7 +284,7 @@ Deno.serve(async (req) => {
     // Uploaded files are intentionally reprocessed because a local workbook upload is a user-confirmed import,
     // and row/position values can overlap with previous OneDrive syncs for the same sheet name.
     const seen = new Set<string>();
-    if (!useUploadedRows) {
+    if (!useUploadedRows && !debugMode) {
       const { data: existing } = await supabase
         .from('onedrive_sync_log')
         .select('row_number, position')
@@ -318,11 +320,16 @@ Deno.serve(async (req) => {
           ? row.quantities.map(Number).filter(n => Number.isFinite(n) && n > 0)
           : [];
         if (!sheetRow || sheetRow < 2 || !medName || !nums.length) continue;
-        nums.forEach((qty, idx) => {
-          const position = idx + 1;
-          if (seen.has(`${sheetRow}:${position}`)) return;
-          tasks.push({ rowSheet: sheetRow, medName, position, qty });
-        });
+        if (debugMode) {
+          const totalQty = nums.reduce((s, n) => s + n, 0);
+          if (totalQty > 0) tasks.push({ rowSheet: sheetRow, medName, position: 1, qty: totalQty });
+        } else {
+          nums.forEach((qty, idx) => {
+            const position = idx + 1;
+            if (seen.has(`${sheetRow}:${position}`)) return;
+            tasks.push({ rowSheet: sheetRow, medName, position, qty });
+          });
+        }
       }
     } else {
       for (let r = 0; r < (formulas.length || values.length); r++) {
@@ -481,10 +488,12 @@ Deno.serve(async (req) => {
       worksheet: worksheetName,
       workbook: resolvedWorkbookName,
       itemId,
+      attempted: tasks.length,
       created: created.length,
       skipped: errors.length,
       errors,
       created_invoices: created,
+      debug: debugMode,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
