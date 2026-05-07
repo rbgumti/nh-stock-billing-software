@@ -16,6 +16,7 @@ import hospitalLogo from "@/assets/NH_LOGO.png";
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
 import { OneDriveSyncDialog, type SyncSummary } from "@/components/OneDriveSyncDialog";
+import { FileSyncDialog } from "@/components/FileSyncDialog";
 
 const formatInvoiceDate = (dateStr: string) => {
   try {
@@ -547,6 +548,7 @@ export default function Invoices() {
           <p className="text-muted-foreground mt-2">{loading ? 'Loading...' : `${totalCount} invoices total`}</p>
         </div>
         <div className="flex items-center gap-2">
+          <FileSyncDialog onSynced={handleSyncComplete} />
           <OneDriveSyncDialog onSynced={handleSyncComplete} />
           <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
             <Link to="/invoices/new">
