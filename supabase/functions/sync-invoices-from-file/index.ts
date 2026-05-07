@@ -217,7 +217,14 @@ Deno.serve(async (req) => {
         stockById.set(batch.item_id, { ...batch, current_stock: newStock });
       }
 
-      created.push({ row: t.rowSheet, position: t.position, medicine: batch.name, qty: t.qty, invoice_number: inv.invoice_number });
+      created.push({
+        row: t.rowSheet,
+        position: t.position,
+        medicine: batch.name,
+        qty: t.qty,
+        invoice_id: inv.id,
+        invoice_number: inv.invoice_number,
+      });
     }
 
     return new Response(JSON.stringify({
