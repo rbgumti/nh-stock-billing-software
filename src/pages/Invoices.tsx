@@ -67,10 +67,13 @@ export default function Invoices() {
     loadInvoices();
   }, [currentPage, statusFilter, debouncedSearch]);
 
-  const loadInvoices = async () => {
+  const loadInvoices = async (options?: { page?: number; status?: string; search?: string }) => {
     try {
       setLoading(true);
-      const from = (currentPage - 1) * pageSize;
+      const page = options?.page ?? currentPage;
+      const activeStatus = options?.status ?? statusFilter;
+      const activeSearch = options?.search ?? debouncedSearch;
+      const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       
       let query = supabase
@@ -81,15 +84,15 @@ export default function Invoices() {
         `, { count: 'exact' });
 
       // Apply search filter
-      if (debouncedSearch.trim()) {
+      if (activeSearch.trim()) {
         query = query.or(
-          `invoice_number.ilike.%${debouncedSearch.trim()}%,patient_name.ilike.%${debouncedSearch.trim()}%`
+          `invoice_number.ilike.%${activeSearch.trim()}%,patient_name.ilike.%${activeSearch.trim()}%`
         );
       }
 
       // Apply status filter
-      if (statusFilter !== "all") {
-        query = query.eq('status', statusFilter);
+      if (activeStatus !== "all") {
+        query = query.eq('status', activeStatus);
       }
 
       const { data: invoicesData, error: invoicesError, count } = await query
@@ -106,24 +109,7 @@ export default function Invoices() {
       }
 
       // Transform data - no additional queries needed
-      const invoicesWithItems = invoicesData.map((invoice: any) => ({
-        id: invoice.id,
-        invoiceNumber: invoice.invoice_number || invoice.id,
-        patientName: invoice.patient_name,
-        patientId: invoice.patient_id,
-        date: invoice.invoice_date,
-        amount: Number(invoice.total),
-        status: invoice.status,
-        items: (invoice.invoice_items || []).map((item: any) => ({
-          name: item.medicine_name,
-          quantity: item.quantity,
-          price: Number(item.unit_price),
-          batchNo: item.batch_no || "",
-          expiryDate: item.expiry_date || "",
-          mrp: Number(item.mrp),
-        })),
-        originalData: invoice,
-      }));
+      const invoicesWithItems = invoicesData.map(toInvoiceCard);
 
       setInvoices(invoicesWithItems);
     } catch (error: any) {
@@ -138,6 +124,44 @@ export default function Invoices() {
     }
   };
 
+  const toInvoiceCard = (invoice: any) => ({
+    id: invoice.id,
+    invoiceNumber: invoice.invoice_number || invoice.id,
+    patientName: invoice.patient_name,
+    patientId: invoice.patient_id,
+    date: invoice.invoice_date,
+    amount: Number(invoice.total),
+    status: invoice.status,
+    items: (invoice.invoice_items || []).map((item: any) => ({
+      name: item.medicine_name,
+      quantity: item.quantity,
+      price: Number(item.unit_price),
+      batchNo: item.batch_no || "",
+      expiryDate: item.expiry_date || "",
+      mrp: Number(item.mrp),
+    })),
+    originalData: invoice,
+  });
+
+  const prependSyncedInvoices = async (invoiceIds?: string[]) => {
+    if (!invoiceIds?.length) return;
+    const { data, error } = await supabase
+      .from('invoices')
+      .select(`
+        *,
+        invoice_items (*)
+      `)
+      .in('id', invoiceIds)
+      .order('created_at', { ascending: false });
+
+    if (error || !data?.length) return;
+    const syncedInvoices = data.map(toInvoiceCard);
+    setInvoices((current) => [
+      ...syncedInvoices,
+      ...current.filter((invoice) => !invoiceIds.includes(invoice.id)),
+    ].slice(0, pageSize));
+  };
+
   const [syncBanner, setSyncBanner] = useState<(SyncSummary & { at: number }) | null>(null);
 
   const handleSyncComplete = (summary: SyncSummary) => {
@@ -145,11 +169,9 @@ export default function Invoices() {
     setDebouncedSearch("");
     setStatusFilter("all");
     setSyncBanner({ ...summary, at: Date.now() });
-    if (currentPage === 1) {
-      loadInvoices();
-    } else {
-      setCurrentPage(1);
-    }
+    setCurrentPage(1);
+    loadInvoices({ page: 1, status: "all", search: "" });
+    prependSyncedInvoices(summary.invoiceIds);
   };
 
   const statuses = ["all", "Paid", "Pending", "Overdue"];
