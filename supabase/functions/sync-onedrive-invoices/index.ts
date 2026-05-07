@@ -488,10 +488,12 @@ Deno.serve(async (req) => {
       worksheet: worksheetName,
       workbook: resolvedWorkbookName,
       itemId,
+      attempted: tasks.length,
       created: created.length,
       skipped: errors.length,
       errors,
       created_invoices: created,
+      debug: debugMode,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
