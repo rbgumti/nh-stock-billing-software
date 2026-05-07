@@ -15,7 +15,7 @@ import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
-import { OneDriveSyncDialog, type SyncSummary } from "@/components/OneDriveSyncDialog";
+import type { SyncSummary } from "@/components/OneDriveSyncDialog";
 import { FileSyncDialog } from "@/components/FileSyncDialog";
 
 const formatInvoiceDate = (dateStr: string) => {
@@ -549,7 +549,6 @@ export default function Invoices() {
         </div>
         <div className="flex items-center gap-2">
           <FileSyncDialog onSynced={handleSyncComplete} />
-          <OneDriveSyncDialog onSynced={handleSyncComplete} />
           <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
             <Link to="/invoices/new">
               <Plus className="h-4 w-4 mr-2" />
@@ -569,7 +568,7 @@ export default function Invoices() {
         >
           <div className="text-sm">
             <p className="font-semibold">
-              OneDrive sync complete
+              Sync complete
               {syncBanner.worksheet ? ` — sheet "${syncBanner.worksheet}"` : ""}
             </p>
             <p className="text-muted-foreground">
