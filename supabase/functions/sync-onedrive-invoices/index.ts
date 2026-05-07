@@ -132,6 +132,11 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const body = (await req.json()) as Body;
+    const patientName = body.patientName || 'TEST Test';
+    const uploadedRows = Array.isArray(body.parsedRows) ? body.parsedRows : [];
+    const useUploadedRows = uploadedRows.length > 0;
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
     // Probe all available Excel keys; use the first one whose credential verifies
@@ -159,11 +164,6 @@ Deno.serve(async (req) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    const body = (await req.json()) as Body;
-    const patientName = body.patientName || 'TEST Test';
-    const uploadedRows = Array.isArray(body.parsedRows) ? body.parsedRows : [];
-    const useUploadedRows = uploadedRows.length > 0;
 
     // 0) Resolve workbook itemId — by name search if not provided. Skipped for uploaded workbook fallback.
     let itemId = body.itemId?.trim();
