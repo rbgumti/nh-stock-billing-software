@@ -367,13 +367,12 @@ Deno.serve(async (req) => {
       return !isNaN(t);
     }
 
-    // FIFO batch picker by exact name match (case-insensitive)
+    // FIFO batch picker by normalized medicine name match (handles punctuation, MG suffixes, and minor typos)
     function pickFifoBatch(name: string, qty: number): any | null {
-      const target = name.trim().toLowerCase();
       const candidates = Array.from(stockById.values()).filter((m: any) =>
         m.is_active &&
         (m.current_stock ?? 0) >= qty &&
-        String(m.name || '').trim().toLowerCase() === target
+        medicineNamesMatch(name, String(m.name || ''))
       );
       if (!candidates.length) return null;
       candidates.sort((a: any, b: any) => {
@@ -393,7 +392,7 @@ Deno.serve(async (req) => {
     for (const t of tasks) {
       const batch = pickFifoBatch(t.medName, t.qty);
       if (!batch) {
-        errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: 'No matching active stock with sufficient quantity (exact name match required)' });
+        errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: 'No matching active stock with sufficient quantity' });
         continue;
       }
 
