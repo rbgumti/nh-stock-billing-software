@@ -230,8 +230,18 @@ export function FileSyncDialog({ onSynced }: Props) {
           <div className="mt-3 max-h-48 overflow-auto rounded-md border border-border p-3 text-sm space-y-1">
             {result.success ? (
               <>
-                <p className="font-medium">Worksheet: {result.worksheet}</p>
-                <p>Created: <strong>{result.created ?? 0}</strong></p>
+                <p className="font-medium">Worksheet: {result.worksheet} {result.debug && <span className="text-xs text-amber-500">(debug)</span>}</p>
+                <p>Created: <strong>{result.created ?? 0}</strong>{typeof result.attempted === "number" && <> / {result.attempted} attempted</>}</p>
+                {!!result.created_invoices?.length && (
+                  <details className="mt-1">
+                    <summary className="cursor-pointer text-xs text-muted-foreground">Show created invoices</summary>
+                    <ul className="list-disc pl-4 text-xs mt-1">
+                      {result.created_invoices.map((c, i) => (
+                        <li key={i}>Row {c.row} — {c.medicine} × {c.qty} → {c.invoice_number}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
                 {!!result.errors?.length && (
                   <div className="mt-2">
                     <p className="text-destructive font-medium">Skipped: {result.errors.length}</p>
