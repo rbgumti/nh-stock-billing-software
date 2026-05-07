@@ -284,7 +284,7 @@ Deno.serve(async (req) => {
     // Uploaded files are intentionally reprocessed because a local workbook upload is a user-confirmed import,
     // and row/position values can overlap with previous OneDrive syncs for the same sheet name.
     const seen = new Set<string>();
-    if (!useUploadedRows) {
+    if (!useUploadedRows && !debugMode) {
       const { data: existing } = await supabase
         .from('onedrive_sync_log')
         .select('row_number, position')
