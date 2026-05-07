@@ -22,6 +22,7 @@ interface Body {
     medicineName: string;
     quantities: number[];
   }>;
+  debug?: boolean;          // when true: bypass dedup AND force one invoice per uploaded row using qty=sum(quantities)
 }
 
 type SyncTask = { rowSheet: number; medName: string; position: number; qty: number };
