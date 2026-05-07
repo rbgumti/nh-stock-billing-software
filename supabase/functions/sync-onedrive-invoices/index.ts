@@ -320,11 +320,16 @@ Deno.serve(async (req) => {
           ? row.quantities.map(Number).filter(n => Number.isFinite(n) && n > 0)
           : [];
         if (!sheetRow || sheetRow < 2 || !medName || !nums.length) continue;
-        nums.forEach((qty, idx) => {
-          const position = idx + 1;
-          if (seen.has(`${sheetRow}:${position}`)) return;
-          tasks.push({ rowSheet: sheetRow, medName, position, qty });
-        });
+        if (debugMode) {
+          const totalQty = nums.reduce((s, n) => s + n, 0);
+          if (totalQty > 0) tasks.push({ rowSheet: sheetRow, medName, position: 1, qty: totalQty });
+        } else {
+          nums.forEach((qty, idx) => {
+            const position = idx + 1;
+            if (seen.has(`${sheetRow}:${position}`)) return;
+            tasks.push({ rowSheet: sheetRow, medName, position, qty });
+          });
+        }
       }
     } else {
       for (let r = 0; r < (formulas.length || values.length); r++) {
