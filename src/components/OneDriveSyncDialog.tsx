@@ -51,9 +51,42 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
   const [workbookName, setWorkbookName] = useState("Daily Stock Report");
   const [worksheetName, setWorksheetName] = useState("");
   const [patientName, setPatientName] = useState("TEST Test");
+  const [workbookFile, setWorkbookFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
   const [health, setHealth] = useState<Health>({ status: "idle" });
+
+  const parseFormulaNumbers = (raw: unknown): number[] => {
+    if (raw === null || raw === undefined) return [];
+    let s = String(raw).trim();
+    if (!s) return [];
+    if (s.startsWith("=")) s = s.slice(1);
+    if (!/^[\d+\s.]+$/.test(s)) return [];
+    return s.split("+").map((t) => Number(t.trim())).filter((n) => Number.isFinite(n) && n > 0);
+  };
+
+  const parseWorkbookFile = async (): Promise<ParsedWorkbookRow[]> => {
+    if (!workbookFile) return [];
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(await workbookFile.arrayBuffer());
+    const requestedSheet = worksheetName.trim();
+    const todaySheet = String(new Date().getDate());
+    const worksheet = (requestedSheet && workbook.getWorksheet(requestedSheet))
+      || workbook.getWorksheet(todaySheet)
+      || workbook.worksheets[0];
+    if (!worksheet) throw new Error("No worksheets found in uploaded workbook");
+    return worksheet.getRows(2, Math.max(worksheet.rowCount - 1, 0))
+      ?.map((row) => {
+        const formulaValue = row.getCell(5).value as any;
+        const formulaText = formulaValue?.formula ? `=${formulaValue.formula}` : formulaValue?.result ?? formulaValue;
+        return {
+          row: row.number,
+          medicineName: String(row.getCell(1).text || row.getCell(1).value || "").trim(),
+          quantities: parseFormulaNumbers(formulaText),
+        };
+      })
+      .filter((row) => row.medicineName && row.quantities.length) || [];
+  };
 
   const checkHealth = async () => {
     setHealth({ status: "checking" });
