@@ -53,18 +53,25 @@ export function FileSyncDialog({ onSynced }: Props) {
     return s.split("+").map((t) => Number(t.trim())).filter((n) => Number.isFinite(n) && n > 0);
   };
 
+  const totalFormulaNumbers = (raw: unknown): number | null => {
+    const nums = parseFormulaNumbers(raw);
+    if (!nums.length) return null;
+    return nums.reduce((sum, n) => sum + n, 0);
+  };
+
   const readQty = (raw: unknown): number[] => {
     if (raw === null || raw === undefined) return [];
     if (typeof raw === "number" && Number.isFinite(raw) && raw > 0) return [raw];
     if (typeof raw === "object" && raw !== null) {
       const obj = raw as { formula?: unknown; result?: unknown };
-      if ("formula" in obj && obj.formula != null) {
-        const fromFormula = parseFormulaNumbers(`=${String(obj.formula)}`);
-        if (fromFormula.length) return fromFormula;
-      }
       if ("result" in obj && typeof obj.result === "number" && obj.result > 0) return [obj.result];
+      if ("formula" in obj && obj.formula != null) {
+        const formulaTotal = totalFormulaNumbers(`=${String(obj.formula)}`);
+        if (formulaTotal && formulaTotal > 0) return [formulaTotal];
+      }
     }
-    return parseFormulaNumbers(raw);
+    const formulaTotal = totalFormulaNumbers(raw);
+    return formulaTotal && formulaTotal > 0 ? [formulaTotal] : [];
   };
 
   const parseSheet = (wb: ExcelJS.Workbook, name: string): ParsedWorkbookRow[] => {
@@ -165,8 +172,8 @@ export function FileSyncDialog({ onSynced }: Props) {
           <DialogTitle>Sync invoices from Excel file</DialogTitle>
           <DialogDescription>
             Upload an <code>.xlsx</code> workbook. Reads <strong>column A</strong> (medicine name) and{" "}
-            <strong>column E</strong> (e.g. <code>=6+24+6</code>) from row 2 onward. Each <em>+</em>-separated
-            number becomes one invoice using FIFO batch selection. Already-synced numbers are skipped.
+            <strong>column E</strong> from rows A3–A7 and A11–A32. Each row creates one invoice using the
+            total quantity from column E.
           </DialogDescription>
         </DialogHeader>
 
