@@ -278,12 +278,17 @@ Deno.serve(async (req) => {
     if (pErr) throw pErr;
     if (!patientRow) throw new Error(`Patient "${patientName}" not found. Create them first.`);
 
-    // 4) Existing log entries for this sheet (to skip duplicates)
-    const { data: existing } = await supabase
-      .from('onedrive_sync_log')
-      .select('row_number, position')
-      .eq('sheet_name', worksheetName!);
-    const seen = new Set((existing || []).map(e => `${e.row_number}:${e.position}`));
+    // 4) Existing log entries for OneDrive sheets (to skip duplicates).
+    // Uploaded files are intentionally reprocessed because a local workbook upload is a user-confirmed import,
+    // and row/position values can overlap with previous OneDrive syncs for the same sheet name.
+    const seen = new Set<string>();
+    if (!useUploadedRows) {
+      const { data: existing } = await supabase
+        .from('onedrive_sync_log')
+        .select('row_number, position')
+        .eq('sheet_name', worksheetName!);
+      for (const e of existing || []) seen.add(`${e.row_number}:${e.position}`);
+    }
 
     // 5) Find current max invoice number for FY (we'll increment locally per insert)
     const fy = getFinancialYearSuffix();
