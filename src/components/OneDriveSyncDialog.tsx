@@ -131,8 +131,8 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
   };
 
   const runSync = async () => {
-    if (!itemId.trim() && !workbookName.trim()) {
-      toast({ title: "Missing", description: "Enter the workbook name or item ID.", variant: "destructive" });
+    if (!workbookFile && !itemId.trim() && !workbookName.trim()) {
+      toast({ title: "Missing", description: "Upload the workbook, or enter the workbook name/item ID.", variant: "destructive" });
       return;
     }
     // If user pasted a OneDrive URL into item ID, drop it — the function will resolve by name
@@ -145,6 +145,10 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
     setLoading(true);
     setResult(null);
     try {
+      const parsedRows = await parseWorkbookFile();
+      if (workbookFile && !parsedRows.length) {
+        throw new Error("No rows found with medicine names in column A and quantities/formulas in column E.");
+      }
       const res = await fetch(FN_ENDPOINT, {
         method: "POST",
         headers: FUNCTION_HEADERS,
@@ -153,6 +157,7 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
           workbookName: workbookName.trim() || undefined,
           worksheetName: worksheetName.trim() || undefined,
           patientName: patientName.trim() || "TEST Test",
+          parsedRows: parsedRows.length ? parsedRows : undefined,
         }),
       });
       const r = (await res.json().catch(() => null)) as SyncResult | null;
