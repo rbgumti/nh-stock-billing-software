@@ -16,7 +16,6 @@ import hospitalLogo from "@/assets/NH_LOGO.png";
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
 import { FileSyncDialog, type SyncSummary } from "@/components/FileSyncDialog";
-import { FileSyncDialog } from "@/components/FileSyncDialog";
 
 const formatInvoiceDate = (dateStr: string) => {
   try {
