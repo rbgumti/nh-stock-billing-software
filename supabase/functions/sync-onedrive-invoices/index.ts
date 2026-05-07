@@ -17,7 +17,14 @@ interface Body {
   workbookName?: string;    // e.g. "Daily Stock Report" — auto-resolved to itemId
   worksheetName?: string;   // default: today's day-of-month (e.g. "3" on 3 May)
   patientName?: string;     // default: 'TEST Test'
+  parsedRows?: Array<{      // connector-free fallback: rows parsed from an uploaded workbook in the browser
+    row: number;
+    medicineName: string;
+    quantities: number[];
+  }>;
 }
+
+type SyncTask = { rowSheet: number; medName: string; position: number; qty: number };
 
 function getFinancialYearSuffix(): string {
   const now = new Date();
