@@ -477,7 +477,7 @@ Deno.serve(async (req) => {
       workbook: resolvedWorkbookName,
       itemId,
       created: created.length,
-      skipped: 0,
+      skipped: errors.length,
       errors,
       created_invoices: created,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
