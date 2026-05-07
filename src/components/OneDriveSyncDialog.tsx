@@ -222,6 +222,13 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
 
         <div className="space-y-3">
           <div>
+            <Label htmlFor="wbFile">Workbook upload</Label>
+            <Input id="wbFile" type="file" accept=".xlsx,.xlsm" onChange={(e) => setWorkbookFile(e.target.files?.[0] || null)} />
+            <p className="text-xs text-muted-foreground mt-1">
+              Uses the selected Excel file directly, avoiding the Microsoft connector when it is unavailable.
+            </p>
+          </div>
+          <div>
             <Label htmlFor="wbName">Workbook name</Label>
             <Input id="wbName" value={workbookName} onChange={(e) => setWorkbookName(e.target.value)} placeholder="Daily Stock Report" />
             <p className="text-xs text-muted-foreground mt-1">
@@ -280,7 +287,7 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>Close</Button>
           <Button onClick={runSync} disabled={loading} className="bg-gradient-to-r from-cyan to-purple text-white">
-            {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Syncing…</> : "Sync Now"}
+            {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Syncing…</> : <><FileSpreadsheet className="h-4 w-4 mr-2" />Sync Now</>}
           </Button>
         </DialogFooter>
       </DialogContent>
