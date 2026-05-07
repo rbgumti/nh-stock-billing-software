@@ -42,6 +42,8 @@ export function FileSyncDialog({ onSynced }: Props) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
 
+  const TARGET_ROWS = [3, 4, 5, 6, 7, ...Array.from({ length: 22 }, (_, i) => 11 + i)];
+
   const parseFormulaNumbers = (raw: unknown): number[] => {
     if (raw === null || raw === undefined) return [];
     let s = String(raw).trim();
@@ -51,24 +53,33 @@ export function FileSyncDialog({ onSynced }: Props) {
     return s.split("+").map((t) => Number(t.trim())).filter((n) => Number.isFinite(n) && n > 0);
   };
 
+  const readQty = (raw: unknown): number[] => {
+    if (raw === null || raw === undefined) return [];
+    if (typeof raw === "number" && Number.isFinite(raw) && raw > 0) return [raw];
+    if (typeof raw === "object" && raw !== null) {
+      const obj = raw as { formula?: unknown; result?: unknown };
+      if ("formula" in obj && obj.formula != null) {
+        const fromFormula = parseFormulaNumbers(`=${String(obj.formula)}`);
+        if (fromFormula.length) return fromFormula;
+      }
+      if ("result" in obj && typeof obj.result === "number" && obj.result > 0) return [obj.result];
+    }
+    return parseFormulaNumbers(raw);
+  };
+
   const parseSheet = (wb: ExcelJS.Workbook, name: string): ParsedWorkbookRow[] => {
     const ws = wb.getWorksheet(name);
     if (!ws) return [];
-    return ws.getRows(2, Math.max(ws.rowCount - 1, 0))
-      ?.map((row) => {
-        const fv = row.getCell(5).value;
-        const ft = typeof fv === "object" && fv !== null && "formula" in fv
-          ? `=${String(fv.formula)}`
-          : typeof fv === "object" && fv !== null && "result" in fv
-            ? fv.result
-            : fv;
-        return {
-          row: row.number,
-          medicineName: String(row.getCell(1).text || row.getCell(1).value || "").trim(),
-          quantities: parseFormulaNumbers(ft),
-        };
-      })
-      .filter((r) => r.medicineName && r.quantities.length) || [];
+    const out: ParsedWorkbookRow[] = [];
+    for (const rowNum of TARGET_ROWS) {
+      const row = ws.getRow(rowNum);
+      const medicineName = String(row.getCell(1).text || row.getCell(1).value || "").trim();
+      if (!medicineName) continue;
+      const quantities = readQty(row.getCell(5).value);
+      if (!quantities.length) continue;
+      out.push({ row: rowNum, medicineName, quantities });
+    }
+    return out;
   };
 
   const onFile = async (f: File | null) => {
