@@ -138,6 +138,17 @@ export default function Invoices() {
     }
   };
 
+  const handleSyncComplete = () => {
+    setSearchTerm("");
+    setDebouncedSearch("");
+    setStatusFilter("all");
+    if (currentPage === 1) {
+      loadInvoices();
+    } else {
+      setCurrentPage(1);
+    }
+  };
+
   const statuses = ["all", "Paid", "Pending", "Overdue"];
 
   // No client-side filtering needed - server handles it
@@ -533,7 +544,7 @@ export default function Invoices() {
           <p className="text-muted-foreground mt-2">{loading ? 'Loading...' : `${totalCount} invoices total`}</p>
         </div>
         <div className="flex items-center gap-2">
-          <OneDriveSyncDialog />
+          <OneDriveSyncDialog onSynced={handleSyncComplete} />
           <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
             <Link to="/invoices/new">
               <Plus className="h-4 w-4 mr-2" />
