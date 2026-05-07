@@ -15,7 +15,7 @@ import { formatNumber } from "@/lib/formatUtils";
 import hospitalLogo from "@/assets/NH_LOGO.png";
 import { preloadPatients } from "@/hooks/usePatientCache";
 import { preloadStockItems } from "@/hooks/useStockStore";
-import type { SyncSummary } from "@/components/OneDriveSyncDialog";
+import { FileSyncDialog, type SyncSummary } from "@/components/FileSyncDialog";
 import { FileSyncDialog } from "@/components/FileSyncDialog";
 
 const formatInvoiceDate = (dateStr: string) => {

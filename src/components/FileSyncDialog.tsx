@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileUp, Loader2, FileSpreadsheet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ExcelJS from "exceljs";
-import type { SyncSummary } from "@/components/OneDriveSyncDialog";
 
-const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-onedrive-invoices`;
+export interface SyncSummary { created: number; skipped: number; worksheet?: string; }
+
+const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-invoices-from-file`;
 const FUNCTION_HEADERS = {
   apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
   Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string}`,
