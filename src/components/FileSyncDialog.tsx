@@ -42,6 +42,7 @@ export function FileSyncDialog({ onSynced }: Props) {
   const [previewCount, setPreviewCount] = useState<number | null>(null);
   const [patientName, setPatientName] = useState("TEST Test");
   const [loading, setLoading] = useState(false);
+  const [debug, setDebug] = useState(true);
   const [result, setResult] = useState<SyncResult | null>(null);
 
   const TARGET_ROWS = [3, 4, 5, 6, 7, ...Array.from({ length: 22 }, (_, i) => 11 + i)];
