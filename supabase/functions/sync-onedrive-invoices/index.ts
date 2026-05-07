@@ -160,8 +160,10 @@ Deno.serve(async (req) => {
 
     const body = (await req.json()) as Body;
     const patientName = body.patientName || 'TEST Test';
+    const uploadedRows = Array.isArray(body.parsedRows) ? body.parsedRows : [];
+    const useUploadedRows = uploadedRows.length > 0;
 
-    // 0) Resolve workbook itemId — by name search if not provided
+    // 0) Resolve workbook itemId — by name search if not provided. Skipped for uploaded workbook fallback.
     let itemId = body.itemId?.trim();
     // If a OneDrive share URL was pasted, try to extract resid=...; otherwise discard it
     if (itemId && (itemId.startsWith('http') || itemId.includes('/'))) {
@@ -174,7 +176,7 @@ Deno.serve(async (req) => {
       }
     }
     let resolvedWorkbookName: string | undefined;
-    if (!itemId) {
+    if (!useUploadedRows && !itemId) {
       const wbName = (body.workbookName || 'Daily Stock Report').trim();
       const q = encodeURIComponent(wbName);
       const search = await gw(
@@ -197,6 +199,9 @@ Deno.serve(async (req) => {
     // 1) Pick worksheet — default to today's day-of-month (e.g. "3")
     let worksheetName = body.worksheetName?.trim();
     if (!worksheetName) {
+      if (useUploadedRows) {
+        worksheetName = String(new Date().getDate());
+      } else {
       const ws = await gw(`/me/drive/items/${itemId}/workbook/worksheets`, LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY);
       const sheets: any[] = ws?.value || [];
       if (!sheets.length) throw new Error('No worksheets found in workbook');
@@ -204,15 +209,22 @@ Deno.serve(async (req) => {
       const match = sheets.find(s => String(s.name).trim() === today)
         || sheets.find(s => String(s.name).trim().toLowerCase() === today.toLowerCase());
       worksheetName = (match || sheets[0]).name;
+      }
     }
 
     // 2) Read used range — both values and formulas (so "=6+24" is preserved)
-    const usedRangeUrl = `/me/drive/items/${itemId}/workbook/worksheets/${encodeURIComponent(worksheetName!)}/usedRange(valuesOnly=false)?$select=address,values,formulas,rowIndex,columnIndex`;
-    const usedRange = await gw(usedRangeUrl, LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY);
-    const formulas: any[][] = usedRange?.formulas || [];
-    const values: any[][] = usedRange?.values || [];
-    const rowOffset: number = usedRange?.rowIndex ?? 0; // 0-based first row index in sheet
-    const colOffset: number = usedRange?.columnIndex ?? 0;
+    let formulas: any[][] = [];
+    let values: any[][] = [];
+    let rowOffset = 0; // 0-based first row index in sheet
+    let colOffset = 0;
+    if (!useUploadedRows) {
+      const usedRangeUrl = `/me/drive/items/${itemId}/workbook/worksheets/${encodeURIComponent(worksheetName!)}/usedRange(valuesOnly=false)?$select=address,values,formulas,rowIndex,columnIndex`;
+      const usedRange = await gw(usedRangeUrl, LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY);
+      formulas = usedRange?.formulas || [];
+      values = usedRange?.values || [];
+      rowOffset = usedRange?.rowIndex ?? 0;
+      colOffset = usedRange?.columnIndex ?? 0;
+    }
 
     // 3) Find the patient (single shared "TEST Test")
     const { data: patientRow, error: pErr } = await supabase
