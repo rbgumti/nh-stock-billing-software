@@ -17,7 +17,14 @@ interface Body {
   workbookName?: string;    // e.g. "Daily Stock Report" — auto-resolved to itemId
   worksheetName?: string;   // default: today's day-of-month (e.g. "3" on 3 May)
   patientName?: string;     // default: 'TEST Test'
+  parsedRows?: Array<{      // connector-free fallback: rows parsed from an uploaded workbook in the browser
+    row: number;
+    medicineName: string;
+    quantities: number[];
+  }>;
 }
+
+type SyncTask = { rowSheet: number; medName: string; position: number; qty: number };
 
 function getFinancialYearSuffix(): string {
   const now = new Date();
@@ -125,6 +132,11 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const body = (await req.json()) as Body;
+    const patientName = body.patientName || 'TEST Test';
+    const uploadedRows = Array.isArray(body.parsedRows) ? body.parsedRows : [];
+    const useUploadedRows = uploadedRows.length > 0;
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
     // Probe all available Excel keys; use the first one whose credential verifies
@@ -142,19 +154,18 @@ Deno.serve(async (req) => {
         if (r.ok && (j?.outcome === 'verified' || j?.outcome === 'skipped')) { MICROSOFT_EXCEL_API_KEY = v; break; }
       } catch { /* try next */ }
     }
-    if (!MICROSOFT_EXCEL_API_KEY) {
-      for (const n of candidates) { const v = Deno.env.get(n); if (v) { MICROSOFT_EXCEL_API_KEY = v; break; } }
+    if (!MICROSOFT_EXCEL_API_KEY && !useUploadedRows) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Microsoft connection is unavailable. Upload the Excel workbook in the sync dialog to process invoices without the connector.',
+      }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    if (!MICROSOFT_EXCEL_API_KEY) throw new Error('No working Microsoft OneDrive connection found.');
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const body = (await req.json()) as Body;
-    const patientName = body.patientName || 'TEST Test';
-
-    // 0) Resolve workbook itemId — by name search if not provided
+    // 0) Resolve workbook itemId — by name search if not provided. Skipped for uploaded workbook fallback.
     let itemId = body.itemId?.trim();
     // If a OneDrive share URL was pasted, try to extract resid=...; otherwise discard it
     if (itemId && (itemId.startsWith('http') || itemId.includes('/'))) {
@@ -167,7 +178,7 @@ Deno.serve(async (req) => {
       }
     }
     let resolvedWorkbookName: string | undefined;
-    if (!itemId) {
+    if (!useUploadedRows && !itemId) {
       const wbName = (body.workbookName || 'Daily Stock Report').trim();
       const q = encodeURIComponent(wbName);
       const search = await gw(
@@ -190,6 +201,9 @@ Deno.serve(async (req) => {
     // 1) Pick worksheet — default to today's day-of-month (e.g. "3")
     let worksheetName = body.worksheetName?.trim();
     if (!worksheetName) {
+      if (useUploadedRows) {
+        worksheetName = String(new Date().getDate());
+      } else {
       const ws = await gw(`/me/drive/items/${itemId}/workbook/worksheets`, LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY);
       const sheets: any[] = ws?.value || [];
       if (!sheets.length) throw new Error('No worksheets found in workbook');
@@ -197,15 +211,22 @@ Deno.serve(async (req) => {
       const match = sheets.find(s => String(s.name).trim() === today)
         || sheets.find(s => String(s.name).trim().toLowerCase() === today.toLowerCase());
       worksheetName = (match || sheets[0]).name;
+      }
     }
 
     // 2) Read used range — both values and formulas (so "=6+24" is preserved)
-    const usedRangeUrl = `/me/drive/items/${itemId}/workbook/worksheets/${encodeURIComponent(worksheetName!)}/usedRange(valuesOnly=false)?$select=address,values,formulas,rowIndex,columnIndex`;
-    const usedRange = await gw(usedRangeUrl, LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY);
-    const formulas: any[][] = usedRange?.formulas || [];
-    const values: any[][] = usedRange?.values || [];
-    const rowOffset: number = usedRange?.rowIndex ?? 0; // 0-based first row index in sheet
-    const colOffset: number = usedRange?.columnIndex ?? 0;
+    let formulas: any[][] = [];
+    let values: any[][] = [];
+    let rowOffset = 0; // 0-based first row index in sheet
+    let colOffset = 0;
+    if (!useUploadedRows) {
+      const usedRangeUrl = `/me/drive/items/${itemId}/workbook/worksheets/${encodeURIComponent(worksheetName!)}/usedRange(valuesOnly=false)?$select=address,values,formulas,rowIndex,columnIndex`;
+      const usedRange = await gw(usedRangeUrl, LOVABLE_API_KEY, MICROSOFT_EXCEL_API_KEY);
+      formulas = usedRange?.formulas || [];
+      values = usedRange?.values || [];
+      rowOffset = usedRange?.rowIndex ?? 0;
+      colOffset = usedRange?.columnIndex ?? 0;
+    }
 
     // 3) Find the patient (single shared "TEST Test")
     const { data: patientRow, error: pErr } = await supabase
@@ -242,29 +263,45 @@ Deno.serve(async (req) => {
     // 6) Build list of (rowSheetIdx, medicineNameInColA, position, qty)
     const aColIdx = 0 - colOffset; // we want sheet column A (index 0)
     const eColIdx = 4 - colOffset; // sheet column E (index 4)
-    const tasks: Array<{ rowSheet: number; medName: string; position: number; qty: number }> = [];
+    const tasks: SyncTask[] = [];
 
-    for (let r = 0; r < (formulas.length || values.length); r++) {
-      const sheetRow = rowOffset + r + 1; // 1-based
-      if (sheetRow < 2) continue; // skip header row 1
-
-      const aCell = aColIdx >= 0 ? (values[r]?.[aColIdx] ?? '') : '';
-      const medName = String(aCell || '').trim();
-      if (!medName) continue;
-
-      // Prefer formula (raw "=6+24..."), fall back to computed value
-      let eRaw: any = '';
-      if (eColIdx >= 0) {
-        eRaw = formulas[r]?.[eColIdx] ?? values[r]?.[eColIdx] ?? '';
+    if (useUploadedRows) {
+      for (const row of uploadedRows) {
+        const sheetRow = Number(row.row);
+        const medName = String(row.medicineName || '').trim();
+        const nums = Array.isArray(row.quantities)
+          ? row.quantities.map(Number).filter(n => Number.isFinite(n) && n > 0)
+          : [];
+        if (!sheetRow || sheetRow < 2 || !medName || !nums.length) continue;
+        nums.forEach((qty, idx) => {
+          const position = idx + 1;
+          if (seen.has(`${sheetRow}:${position}`)) return;
+          tasks.push({ rowSheet: sheetRow, medName, position, qty });
+        });
       }
-      const nums = parseFormulaNumbers(eRaw);
-      if (!nums.length) continue;
+    } else {
+      for (let r = 0; r < (formulas.length || values.length); r++) {
+        const sheetRow = rowOffset + r + 1; // 1-based
+        if (sheetRow < 2) continue; // skip header row 1
 
-      nums.forEach((qty, idx) => {
-        const position = idx + 1;
-        if (seen.has(`${sheetRow}:${position}`)) return;
-        tasks.push({ rowSheet: sheetRow, medName, position, qty });
-      });
+        const aCell = aColIdx >= 0 ? (values[r]?.[aColIdx] ?? '') : '';
+        const medName = String(aCell || '').trim();
+        if (!medName) continue;
+
+        // Prefer formula (raw "=6+24..."), fall back to computed value
+        let eRaw: any = '';
+        if (eColIdx >= 0) {
+          eRaw = formulas[r]?.[eColIdx] ?? values[r]?.[eColIdx] ?? '';
+        }
+        const nums = parseFormulaNumbers(eRaw);
+        if (!nums.length) continue;
+
+        nums.forEach((qty, idx) => {
+          const position = idx + 1;
+          if (seen.has(`${sheetRow}:${position}`)) return;
+          tasks.push({ rowSheet: sheetRow, medName, position, qty });
+        });
+      }
     }
 
     if (!tasks.length) {

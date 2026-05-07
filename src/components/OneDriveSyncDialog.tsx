@@ -5,8 +5,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Cloud, Loader2, CheckCircle2, XCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { Cloud, Loader2, CheckCircle2, XCircle, AlertCircle, RefreshCw, FileSpreadsheet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import ExcelJS from "exceljs";
 
 const STORAGE_KEY = "onedrive_sync_settings_v1";
 const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-onedrive-invoices`;
@@ -34,6 +35,12 @@ interface SyncResult {
   error?: string;
 }
 
+interface ParsedWorkbookRow {
+  row: number;
+  medicineName: string;
+  quantities: number[];
+}
+
 interface Props {
   onSynced?: () => void;
 }
@@ -44,9 +51,46 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
   const [workbookName, setWorkbookName] = useState("Daily Stock Report");
   const [worksheetName, setWorksheetName] = useState("");
   const [patientName, setPatientName] = useState("TEST Test");
+  const [workbookFile, setWorkbookFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
   const [health, setHealth] = useState<Health>({ status: "idle" });
+
+  const parseFormulaNumbers = (raw: unknown): number[] => {
+    if (raw === null || raw === undefined) return [];
+    let s = String(raw).trim();
+    if (!s) return [];
+    if (s.startsWith("=")) s = s.slice(1);
+    if (!/^[\d+\s.]+$/.test(s)) return [];
+    return s.split("+").map((t) => Number(t.trim())).filter((n) => Number.isFinite(n) && n > 0);
+  };
+
+  const parseWorkbookFile = async (): Promise<ParsedWorkbookRow[]> => {
+    if (!workbookFile) return [];
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(await workbookFile.arrayBuffer());
+    const requestedSheet = worksheetName.trim();
+    const todaySheet = String(new Date().getDate());
+    const worksheet = (requestedSheet && workbook.getWorksheet(requestedSheet))
+      || workbook.getWorksheet(todaySheet)
+      || workbook.worksheets[0];
+    if (!worksheet) throw new Error("No worksheets found in uploaded workbook");
+    return worksheet.getRows(2, Math.max(worksheet.rowCount - 1, 0))
+      ?.map((row) => {
+        const formulaValue = row.getCell(5).value;
+        const formulaText = typeof formulaValue === "object" && formulaValue !== null && "formula" in formulaValue
+          ? `=${String(formulaValue.formula)}`
+          : typeof formulaValue === "object" && formulaValue !== null && "result" in formulaValue
+            ? formulaValue.result
+            : formulaValue;
+        return {
+          row: row.number,
+          medicineName: String(row.getCell(1).text || row.getCell(1).value || "").trim(),
+          quantities: parseFormulaNumbers(formulaText),
+        };
+      })
+      .filter((row) => row.medicineName && row.quantities.length) || [];
+  };
 
   const checkHealth = async () => {
     setHealth({ status: "checking" });
@@ -91,8 +135,8 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
   };
 
   const runSync = async () => {
-    if (!itemId.trim() && !workbookName.trim()) {
-      toast({ title: "Missing", description: "Enter the workbook name or item ID.", variant: "destructive" });
+    if (!workbookFile && !itemId.trim() && !workbookName.trim()) {
+      toast({ title: "Missing", description: "Upload the workbook, or enter the workbook name/item ID.", variant: "destructive" });
       return;
     }
     // If user pasted a OneDrive URL into item ID, drop it — the function will resolve by name
@@ -105,6 +149,10 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
     setLoading(true);
     setResult(null);
     try {
+      const parsedRows = await parseWorkbookFile();
+      if (workbookFile && !parsedRows.length) {
+        throw new Error("No rows found with medicine names in column A and quantities/formulas in column E.");
+      }
       const res = await fetch(FN_ENDPOINT, {
         method: "POST",
         headers: FUNCTION_HEADERS,
@@ -113,6 +161,7 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
           workbookName: workbookName.trim() || undefined,
           worksheetName: worksheetName.trim() || undefined,
           patientName: patientName.trim() || "TEST Test",
+          parsedRows: parsedRows.length ? parsedRows : undefined,
         }),
       });
       const r = (await res.json().catch(() => null)) as SyncResult | null;
@@ -177,6 +226,13 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
 
         <div className="space-y-3">
           <div>
+            <Label htmlFor="wbFile">Workbook upload</Label>
+            <Input id="wbFile" type="file" accept=".xlsx,.xlsm" onChange={(e) => setWorkbookFile(e.target.files?.[0] || null)} />
+            <p className="text-xs text-muted-foreground mt-1">
+              Uses the selected Excel file directly, avoiding the Microsoft connector when it is unavailable.
+            </p>
+          </div>
+          <div>
             <Label htmlFor="wbName">Workbook name</Label>
             <Input id="wbName" value={workbookName} onChange={(e) => setWorkbookName(e.target.value)} placeholder="Daily Stock Report" />
             <p className="text-xs text-muted-foreground mt-1">
@@ -235,7 +291,7 @@ export function OneDriveSyncDialog({ onSynced }: Props) {
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>Close</Button>
           <Button onClick={runSync} disabled={loading} className="bg-gradient-to-r from-cyan to-purple text-white">
-            {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Syncing…</> : "Sync Now"}
+            {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Syncing…</> : <><FileSpreadsheet className="h-4 w-4 mr-2" />Sync Now</>}
           </Button>
         </DialogFooter>
       </DialogContent>
