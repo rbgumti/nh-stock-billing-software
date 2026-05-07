@@ -106,24 +106,7 @@ export default function Invoices() {
       }
 
       // Transform data - no additional queries needed
-      const invoicesWithItems = invoicesData.map((invoice: any) => ({
-        id: invoice.id,
-        invoiceNumber: invoice.invoice_number || invoice.id,
-        patientName: invoice.patient_name,
-        patientId: invoice.patient_id,
-        date: invoice.invoice_date,
-        amount: Number(invoice.total),
-        status: invoice.status,
-        items: (invoice.invoice_items || []).map((item: any) => ({
-          name: item.medicine_name,
-          quantity: item.quantity,
-          price: Number(item.unit_price),
-          batchNo: item.batch_no || "",
-          expiryDate: item.expiry_date || "",
-          mrp: Number(item.mrp),
-        })),
-        originalData: invoice,
-      }));
+      const invoicesWithItems = invoicesData.map(toInvoiceCard);
 
       setInvoices(invoicesWithItems);
     } catch (error: any) {
