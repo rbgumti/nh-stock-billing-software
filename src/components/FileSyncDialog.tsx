@@ -10,7 +10,12 @@ import { FileUp, Loader2, FileSpreadsheet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ExcelJS from "exceljs";
 
-export interface SyncSummary { created: number; skipped: number; worksheet?: string; }
+export interface SyncSummary {
+  created: number;
+  skipped: number;
+  worksheet?: string;
+  invoiceIds?: string[];
+}
 
 const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-invoices-from-file`;
 const FUNCTION_HEADERS = {
@@ -25,7 +30,7 @@ interface SyncResult {
   attempted?: number;
   created?: number;
   errors?: Array<{ row: number; position: number; medicine: string; qty: number; reason: string }>;
-  created_invoices?: Array<{ row: number; position: number; medicine: string; qty: number; invoice_number: string }>;
+  created_invoices?: Array<{ row: number; position: number; medicine: string; qty: number; invoice_id?: string; invoice_number: string }>;
   debug?: boolean;
   error?: string;
 }
@@ -152,7 +157,12 @@ export function FileSyncDialog({ onSynced }: Props) {
           title: debug ? "Debug sync complete" : "Sync complete",
           description: `${r.created ?? 0}/${attempted} invoice(s) created${r.errors?.length ? `, ${r.errors.length} skipped` : ""}.`,
         });
-        onSynced?.({ created: r.created ?? 0, skipped: r.errors?.length ?? 0, worksheet: r.worksheet });
+        onSynced?.({
+          created: r.created ?? 0,
+          skipped: r.errors?.length ?? 0,
+          worksheet: r.worksheet,
+          invoiceIds: r.created_invoices?.map((invoice) => invoice.invoice_id).filter(Boolean) as string[] | undefined,
+        });
       } else {
         toast({ title: "Sync failed", description: r.error || "Unknown error", variant: "destructive" });
       }
