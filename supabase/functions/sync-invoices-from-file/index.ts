@@ -214,12 +214,12 @@ Deno.serve(async (req) => {
 
       const { error: itErr } = await supabase.from('invoice_items').insert({
         invoice_id: inv.id,
-        medicine_id: batch.item_id,
-        medicine_name: batch.name,
-        batch_no: batch.batch_no,
-        expiry_date: batch.expiry_date,
-        mrp: batch.mrp,
-        quantity: t.qty,
+        medicine_id: batch?.item_id ?? null,
+        medicine_name: batch?.name ?? t.medName,
+        batch_no: batch?.batch_no ?? null,
+        expiry_date: batch?.expiry_date ?? null,
+        mrp: forceDebug ? lineTotal : batch?.mrp,
+        quantity: forceDebug ? 1 : t.qty,
         unit_price: unitPrice,
         total: lineTotal,
       });
@@ -227,21 +227,23 @@ Deno.serve(async (req) => {
         errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: `Invoice item insert failed: ${itErr.message}` });
       }
 
-      const newStock = (batch.current_stock ?? 0) - t.qty;
-      const { error: stErr } = await supabase
-        .from('stock_items')
-        .update({ current_stock: newStock })
-        .eq('item_id', batch.item_id);
-      if (stErr) {
-        errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: `Stock update failed: ${stErr.message}` });
-      } else {
-        stockById.set(batch.item_id, { ...batch, current_stock: newStock });
+      if (!forceDebug && batch) {
+        const newStock = (batch.current_stock ?? 0) - t.qty;
+        const { error: stErr } = await supabase
+          .from('stock_items')
+          .update({ current_stock: newStock })
+          .eq('item_id', batch.item_id);
+        if (stErr) {
+          errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: `Stock update failed: ${stErr.message}` });
+        } else {
+          stockById.set(batch.item_id, { ...batch, current_stock: newStock });
+        }
       }
 
       created.push({
         row: t.rowSheet,
         position: t.position,
-        medicine: batch.name,
+        medicine: batch?.name ?? t.medName,
         qty: t.qty,
         invoice_id: inv.id,
         invoice_number: inv.invoice_number,
