@@ -24,8 +24,9 @@ function getFinancialYearSuffix(): string {
   const y = now.getFullYear();
   const m = now.getMonth() + 1;
   const startYear = m >= 4 ? y : y - 1;
-  const endYear = (startYear + 1).toString().slice(-2);
-  return `${startYear}-${endYear}`;
+  const startSuffix = startYear.toString().slice(-2);
+  const endSuffix = (startYear + 1).toString().slice(-2);
+  return `${startSuffix}-${endSuffix}`;
 }
 
 function normalizeMedicineName(raw: string): string {
@@ -65,6 +66,24 @@ function medicineNamesMatch(uploadedName: string, stockName: string): boolean {
   return uc.length >= 6 && sc.length >= 6 && editDistanceAtMostOne(uc, sc);
 }
 
+function invoiceDateForWorksheet(worksheetName: string): string {
+  const now = new Date();
+  const dayMatch = String(worksheetName || '').trim().match(/^(\d{1,2})$/);
+  if (!dayMatch) return now.toISOString();
+
+  const day = Number(dayMatch[1]);
+  const istNow = new Date(now.getTime() + 330 * 60 * 1000);
+  const year = istNow.getUTCFullYear();
+  const month = istNow.getUTCMonth();
+  const sheetDate = new Date(Date.UTC(year, month, day));
+
+  if (sheetDate.getUTCFullYear() !== year || sheetDate.getUTCMonth() !== month || sheetDate.getUTCDate() !== day) {
+    return now.toISOString();
+  }
+
+  return sheetDate.toISOString();
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -73,6 +92,7 @@ Deno.serve(async (req) => {
     const patientName = body.patientName || 'TEST Test';
     const uploadedRows = Array.isArray(body.parsedRows) ? body.parsedRows : [];
     const worksheetName = body.worksheetName || String(new Date().getDate());
+    const forceDebug = body.debug === true;
     if (!uploadedRows.length) {
       return new Response(JSON.stringify({ success: false, error: 'parsedRows is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -154,15 +174,16 @@ Deno.serve(async (req) => {
 
     const created: any[] = [];
     const errors: Array<{ row: number; position: number; medicine: string; qty: number; reason: string }> = [];
+    const invoiceDate = invoiceDateForWorksheet(worksheetName);
 
     for (const t of tasks) {
       const batch = pickFifoBatch(t.medName, t.qty);
-      if (!batch) {
+      if (!batch && !forceDebug) {
         errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: 'No matching active stock with sufficient quantity' });
         continue;
       }
-      const unitPrice = Number(batch.mrp ?? batch.unit_price ?? 0);
-      const lineTotal = +(unitPrice * t.qty).toFixed(2);
+      const lineTotal = forceDebug ? +Number(t.qty).toFixed(2) : +(Number(batch.mrp ?? batch.unit_price ?? 0) * t.qty).toFixed(2);
+      const unitPrice = forceDebug ? lineTotal : Number(batch.mrp ?? batch.unit_price ?? 0);
       const invoiceNumber = `${prefix}${String(nextSeq).padStart(4, '0')}`;
       nextSeq++;
 
@@ -173,15 +194,15 @@ Deno.serve(async (req) => {
           patient_id: patientRow.id,
           patient_name: patientRow.patient_name,
           patient_phone: patientRow.phone || '',
-          invoice_date: new Date().toISOString(),
+          invoice_date: invoiceDate,
           subtotal: lineTotal,
           discount: 0,
           tax: 0,
           total: lineTotal,
-          status: 'Pending',
+          status: 'Paid',
           payment_status: 'Paid',
           payment_method: 'Cash',
-          notes: `Auto-synced from uploaded sheet "${worksheetName}" row ${t.rowSheet}`,
+          notes: `Auto-synced from uploaded sheet "${worksheetName}" row ${t.rowSheet}${forceDebug ? ' (debug force)' : ''}`,
         })
         .select('id, invoice_number')
         .single();
@@ -193,12 +214,12 @@ Deno.serve(async (req) => {
 
       const { error: itErr } = await supabase.from('invoice_items').insert({
         invoice_id: inv.id,
-        medicine_id: batch.item_id,
-        medicine_name: batch.name,
-        batch_no: batch.batch_no,
-        expiry_date: batch.expiry_date,
-        mrp: batch.mrp,
-        quantity: t.qty,
+        medicine_id: batch?.item_id ?? null,
+        medicine_name: batch?.name ?? t.medName,
+        batch_no: batch?.batch_no ?? null,
+        expiry_date: batch?.expiry_date ?? null,
+        mrp: forceDebug ? lineTotal : batch?.mrp,
+        quantity: forceDebug ? 1 : t.qty,
         unit_price: unitPrice,
         total: lineTotal,
       });
@@ -206,21 +227,23 @@ Deno.serve(async (req) => {
         errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: `Invoice item insert failed: ${itErr.message}` });
       }
 
-      const newStock = (batch.current_stock ?? 0) - t.qty;
-      const { error: stErr } = await supabase
-        .from('stock_items')
-        .update({ current_stock: newStock })
-        .eq('item_id', batch.item_id);
-      if (stErr) {
-        errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: `Stock update failed: ${stErr.message}` });
-      } else {
-        stockById.set(batch.item_id, { ...batch, current_stock: newStock });
+      if (!forceDebug && batch) {
+        const newStock = (batch.current_stock ?? 0) - t.qty;
+        const { error: stErr } = await supabase
+          .from('stock_items')
+          .update({ current_stock: newStock })
+          .eq('item_id', batch.item_id);
+        if (stErr) {
+          errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: `Stock update failed: ${stErr.message}` });
+        } else {
+          stockById.set(batch.item_id, { ...batch, current_stock: newStock });
+        }
       }
 
       created.push({
         row: t.rowSheet,
         position: t.position,
-        medicine: batch.name,
+        medicine: batch?.name ?? t.medName,
         qty: t.qty,
         invoice_id: inv.id,
         invoice_number: inv.invoice_number,
