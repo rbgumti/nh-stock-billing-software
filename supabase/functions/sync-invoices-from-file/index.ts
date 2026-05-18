@@ -65,6 +65,24 @@ function medicineNamesMatch(uploadedName: string, stockName: string): boolean {
   return uc.length >= 6 && sc.length >= 6 && editDistanceAtMostOne(uc, sc);
 }
 
+function invoiceDateForWorksheet(worksheetName: string): string {
+  const now = new Date();
+  const dayMatch = String(worksheetName || '').trim().match(/^(\d{1,2})$/);
+  if (!dayMatch) return now.toISOString();
+
+  const day = Number(dayMatch[1]);
+  const istNow = new Date(now.getTime() + 330 * 60 * 1000);
+  const year = istNow.getUTCFullYear();
+  const month = istNow.getUTCMonth();
+  const sheetDate = new Date(Date.UTC(year, month, day));
+
+  if (sheetDate.getUTCFullYear() !== year || sheetDate.getUTCMonth() !== month || sheetDate.getUTCDate() !== day) {
+    return now.toISOString();
+  }
+
+  return sheetDate.toISOString();
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -154,6 +172,7 @@ Deno.serve(async (req) => {
 
     const created: any[] = [];
     const errors: Array<{ row: number; position: number; medicine: string; qty: number; reason: string }> = [];
+    const invoiceDate = invoiceDateForWorksheet(worksheetName);
 
     for (const t of tasks) {
       const batch = pickFifoBatch(t.medName, t.qty);
@@ -173,7 +192,7 @@ Deno.serve(async (req) => {
           patient_id: patientRow.id,
           patient_name: patientRow.patient_name,
           patient_phone: patientRow.phone || '',
-          invoice_date: new Date().toISOString(),
+          invoice_date: invoiceDate,
           subtotal: lineTotal,
           discount: 0,
           tax: 0,
