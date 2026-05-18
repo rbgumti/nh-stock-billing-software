@@ -24,8 +24,9 @@ function getFinancialYearSuffix(): string {
   const y = now.getFullYear();
   const m = now.getMonth() + 1;
   const startYear = m >= 4 ? y : y - 1;
-  const endYear = (startYear + 1).toString().slice(-2);
-  return `${startYear}-${endYear}`;
+  const startSuffix = startYear.toString().slice(-2);
+  const endSuffix = (startYear + 1).toString().slice(-2);
+  return `${startSuffix}-${endSuffix}`;
 }
 
 function normalizeMedicineName(raw: string): string {
