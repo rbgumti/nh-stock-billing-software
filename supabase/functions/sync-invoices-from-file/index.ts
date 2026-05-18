@@ -92,6 +92,7 @@ Deno.serve(async (req) => {
     const patientName = body.patientName || 'TEST Test';
     const uploadedRows = Array.isArray(body.parsedRows) ? body.parsedRows : [];
     const worksheetName = body.worksheetName || String(new Date().getDate());
+    const forceDebug = body.debug === true;
     if (!uploadedRows.length) {
       return new Response(JSON.stringify({ success: false, error: 'parsedRows is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -177,12 +178,12 @@ Deno.serve(async (req) => {
 
     for (const t of tasks) {
       const batch = pickFifoBatch(t.medName, t.qty);
-      if (!batch) {
+      if (!batch && !forceDebug) {
         errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: 'No matching active stock with sufficient quantity' });
         continue;
       }
-      const unitPrice = Number(batch.mrp ?? batch.unit_price ?? 0);
-      const lineTotal = +(unitPrice * t.qty).toFixed(2);
+      const lineTotal = forceDebug ? +Number(t.qty).toFixed(2) : +(Number(batch.mrp ?? batch.unit_price ?? 0) * t.qty).toFixed(2);
+      const unitPrice = forceDebug ? lineTotal : Number(batch.mrp ?? batch.unit_price ?? 0);
       const invoiceNumber = `${prefix}${String(nextSeq).padStart(4, '0')}`;
       nextSeq++;
 
@@ -198,10 +199,10 @@ Deno.serve(async (req) => {
           discount: 0,
           tax: 0,
           total: lineTotal,
-          status: 'Pending',
+          status: 'Paid',
           payment_status: 'Paid',
           payment_method: 'Cash',
-          notes: `Auto-synced from uploaded sheet "${worksheetName}" row ${t.rowSheet}`,
+          notes: `Auto-synced from uploaded sheet "${worksheetName}" row ${t.rowSheet}${forceDebug ? ' (debug force)' : ''}`,
         })
         .select('id, invoice_number')
         .single();
