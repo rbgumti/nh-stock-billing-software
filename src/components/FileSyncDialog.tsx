@@ -17,6 +17,8 @@ export interface SyncSummary {
   invoiceIds?: string[];
 }
 
+interface ParsedWorkbookRow { row: number; medicineName: string; quantities: number[]; rate: number | null; }
+
 const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-invoices-from-file`;
 const FUNCTION_HEADERS = {
   apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
