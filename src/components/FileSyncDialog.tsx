@@ -230,18 +230,11 @@ export function FileSyncDialog({ onSynced }: Props) {
             <Label htmlFor="fsPn">Patient name</Label>
             <Input id="fsPn" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
           </div>
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input
-              type="checkbox"
-              checked={debug}
-              onChange={(e) => setDebug(e.target.checked)}
-              className="h-4 w-4"
-            />
-            <span>
-              <strong>Debug mode</strong> — force one invoice per target row (A3–A7, A11–A32) using the
-              total from column E, ignore prior sync log.
-            </span>
-          </label>
+          <p className="text-xs text-muted-foreground">
+            One invoice is created for each medicine row that has a quantity in
+            the <strong>Issued to Patients</strong> column (E). Unit price uses the
+            <strong> Rate</strong> column (I) when present.
+          </p>
         </div>
 
         {result && (
