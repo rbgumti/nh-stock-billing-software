@@ -13,11 +13,11 @@ const corsHeaders = {
 interface Body {
   worksheetName?: string;
   patientName?: string;
-  parsedRows: Array<{ row: number; medicineName: string; quantities: number[] }>;
+  parsedRows: Array<{ row: number; medicineName: string; quantities: number[]; rate?: number | null }>;
   debug?: boolean;
 }
 
-type SyncTask = { rowSheet: number; medName: string; position: number; qty: number };
+type SyncTask = { rowSheet: number; medName: string; position: number; qty: number; rate: number | null };
 
 function getFinancialYearSuffix(): string {
   const now = new Date();
@@ -134,7 +134,8 @@ Deno.serve(async (req) => {
         : [];
       if (!sheetRow || !medName || !nums.length) continue;
       const totalQty = nums.reduce((s, n) => s + n, 0);
-      if (totalQty > 0) tasks.push({ rowSheet: sheetRow, medName, position: 1, qty: totalQty });
+      const rate = (typeof row.rate === 'number' && Number.isFinite(row.rate) && row.rate > 0) ? row.rate : null;
+      if (totalQty > 0) tasks.push({ rowSheet: sheetRow, medName, position: 1, qty: totalQty, rate });
     }
 
     if (!tasks.length) {
@@ -177,13 +178,12 @@ Deno.serve(async (req) => {
     const invoiceDate = invoiceDateForWorksheet(worksheetName);
 
     for (const t of tasks) {
+      // Always try to FIFO-match a batch (for stock deduction), but never skip the row.
       const batch = pickFifoBatch(t.medName, t.qty);
-      if (!batch && !forceDebug) {
-        errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: 'No matching active stock with sufficient quantity' });
-        continue;
-      }
-      const lineTotal = forceDebug ? +Number(t.qty).toFixed(2) : +(Number(batch.mrp ?? batch.unit_price ?? 0) * t.qty).toFixed(2);
-      const unitPrice = forceDebug ? lineTotal : Number(batch.mrp ?? batch.unit_price ?? 0);
+      // Pricing priority: sheet rate (col I) -> batch mrp -> batch unit_price -> 0
+      const effectiveRate = t.rate ?? Number(batch?.mrp ?? batch?.unit_price ?? 0);
+      const unitPrice = +Number(effectiveRate || 0).toFixed(2);
+      const lineTotal = +(unitPrice * t.qty).toFixed(2);
       const invoiceNumber = `${prefix}${String(nextSeq).padStart(4, '0')}`;
       nextSeq++;
 
@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
           status: 'Paid',
           payment_status: 'Paid',
           payment_method: 'Cash',
-          notes: `Auto-synced from uploaded sheet "${worksheetName}" row ${t.rowSheet}${forceDebug ? ' (debug force)' : ''}`,
+          notes: `Auto-synced from uploaded sheet "${worksheetName}" row ${t.rowSheet}`,
         })
         .select('id, invoice_number')
         .single();
@@ -218,8 +218,8 @@ Deno.serve(async (req) => {
         medicine_name: batch?.name ?? t.medName,
         batch_no: batch?.batch_no ?? null,
         expiry_date: batch?.expiry_date ?? null,
-        mrp: forceDebug ? lineTotal : batch?.mrp,
-        quantity: forceDebug ? 1 : t.qty,
+        mrp: batch?.mrp ?? unitPrice,
+        quantity: t.qty,
         unit_price: unitPrice,
         total: lineTotal,
       });
@@ -227,7 +227,7 @@ Deno.serve(async (req) => {
         errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: `Invoice item insert failed: ${itErr.message}` });
       }
 
-      if (!forceDebug && batch) {
+      if (batch) {
         const newStock = (batch.current_stock ?? 0) - t.qty;
         const { error: stErr } = await supabase
           .from('stock_items')

@@ -17,6 +17,8 @@ export interface SyncSummary {
   invoiceIds?: string[];
 }
 
+interface ParsedWorkbookRow { row: number; medicineName: string; quantities: number[]; rate: number | null; }
+
 const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-invoices-from-file`;
 const FUNCTION_HEADERS = {
   apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
@@ -35,7 +37,7 @@ interface SyncResult {
   error?: string;
 }
 
-interface ParsedWorkbookRow { row: number; medicineName: string; quantities: number[]; }
+
 
 interface Props { onSynced?: (summary: SyncSummary) => void; }
 
@@ -93,7 +95,12 @@ export function FileSyncDialog({ onSynced }: Props) {
       if (!medicineName) continue;
       const quantities = readQty(row.getCell(5).value);
       if (!quantities.length) continue;
-      out.push({ row: rowNum, medicineName, quantities });
+      const rateRaw = row.getCell(9).value;
+      let rate: number | null = null;
+      if (typeof rateRaw === "number" && Number.isFinite(rateRaw)) rate = rateRaw;
+      else if (rateRaw && typeof rateRaw === "object" && "result" in (rateRaw as any) && typeof (rateRaw as any).result === "number") rate = (rateRaw as any).result;
+      else { const n = Number(String(rateRaw ?? "").trim()); if (Number.isFinite(n) && n > 0) rate = n; }
+      out.push({ row: rowNum, medicineName, quantities, rate });
     }
     return out;
   };
@@ -223,18 +230,11 @@ export function FileSyncDialog({ onSynced }: Props) {
             <Label htmlFor="fsPn">Patient name</Label>
             <Input id="fsPn" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
           </div>
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input
-              type="checkbox"
-              checked={debug}
-              onChange={(e) => setDebug(e.target.checked)}
-              className="h-4 w-4"
-            />
-            <span>
-              <strong>Debug mode</strong> — force one invoice per target row (A3–A7, A11–A32) using the
-              total from column E, ignore prior sync log.
-            </span>
-          </label>
+          <p className="text-xs text-muted-foreground">
+            One invoice is created for each medicine row that has a quantity in
+            the <strong>Issued to Patients</strong> column (E). Unit price uses the
+            <strong> Rate</strong> column (I) when present.
+          </p>
         </div>
 
         {result && (
