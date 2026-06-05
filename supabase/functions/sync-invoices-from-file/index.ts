@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
           status: 'Paid',
           payment_status: 'Paid',
           payment_method: 'Cash',
-          notes: `Auto-synced from uploaded sheet "${worksheetName}" row ${t.rowSheet}${forceDebug ? ' (debug force)' : ''}`,
+          notes: `Auto-synced from uploaded sheet "${worksheetName}" row ${t.rowSheet}`,
         })
         .select('id, invoice_number')
         .single();
@@ -218,8 +218,8 @@ Deno.serve(async (req) => {
         medicine_name: batch?.name ?? t.medName,
         batch_no: batch?.batch_no ?? null,
         expiry_date: batch?.expiry_date ?? null,
-        mrp: forceDebug ? lineTotal : batch?.mrp,
-        quantity: forceDebug ? 1 : t.qty,
+        mrp: batch?.mrp ?? unitPrice,
+        quantity: t.qty,
         unit_price: unitPrice,
         total: lineTotal,
       });
@@ -227,7 +227,7 @@ Deno.serve(async (req) => {
         errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: `Invoice item insert failed: ${itErr.message}` });
       }
 
-      if (!forceDebug && batch) {
+      if (batch) {
         const newStock = (batch.current_stock ?? 0) - t.qty;
         const { error: stErr } = await supabase
           .from('stock_items')
