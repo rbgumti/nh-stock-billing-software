@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileUp, Loader2, FileSpreadsheet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ExcelJS from "exceljs";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface SyncSummary {
   created: number;
@@ -18,13 +19,6 @@ export interface SyncSummary {
 }
 
 interface ParsedWorkbookRow { row: number; medicineName: string; quantities: number[]; rate: number | null; }
-
-const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-invoices-from-file`;
-const FUNCTION_HEADERS = {
-  apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
-  Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string}`,
-  "Content-Type": "application/json",
-};
 
 interface SyncResult {
   success: boolean;
@@ -37,6 +31,190 @@ interface SyncResult {
   error?: string;
 }
 
+type SyncTask = { rowSheet: number; medName: string; position: number; qty: number; rate: number | null };
+
+const getFinancialYearSuffix = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const startYear = month >= 4 ? year : year - 1;
+  return `${String(startYear).slice(-2)}-${String(startYear + 1).slice(-2)}`;
+};
+
+const invoiceSequence = (invoiceNumber: string | null | undefined, prefix: string): number | null => {
+  if (!invoiceNumber?.startsWith(prefix)) return null;
+  const suffix = invoiceNumber.slice(prefix.length).trim();
+  if (!/^\d+$/.test(suffix)) return null;
+  const parsed = Number(suffix);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const normalizeMedicineName = (raw: string): string => raw
+  .toLowerCase()
+  .replace(/[\u2010-\u2015]/g, "-")
+  .replace(/\b(mg|tab|tablet|tabs|cap|capsule|ml)\b/g, " ")
+  .replace(/[^a-z0-9.]+/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const compactMedicineName = (raw: string): string => normalizeMedicineName(raw).replace(/[^a-z0-9]/g, "");
+
+const editDistanceAtMostOne = (a: string, b: string): boolean => {
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 1) return false;
+  let i = 0, j = 0, edits = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i += 1; j += 1; continue; }
+    edits += 1;
+    if (edits > 1) return false;
+    if (a.length > b.length) i += 1;
+    else if (b.length > a.length) j += 1;
+    else { i += 1; j += 1; }
+  }
+  return edits + (i < a.length ? 1 : 0) + (j < b.length ? 1 : 0) <= 1;
+};
+
+const medicineNamesMatch = (uploadedName: string, stockName: string): boolean => {
+  const uploaded = normalizeMedicineName(uploadedName);
+  const stock = normalizeMedicineName(stockName);
+  if (!uploaded || !stock) return false;
+  if (uploaded === stock) return true;
+  const uploadedCompact = compactMedicineName(uploadedName);
+  const stockCompact = compactMedicineName(stockName);
+  if (uploadedCompact === stockCompact) return true;
+  return uploadedCompact.length >= 6 && stockCompact.length >= 6 && editDistanceAtMostOne(uploadedCompact, stockCompact);
+};
+
+const invoiceDateForWorksheet = (worksheetName: string): string => {
+  const now = new Date();
+  const dayMatch = String(worksheetName || "").trim().match(/^(\d{1,2})$/);
+  if (!dayMatch) return now.toISOString();
+  const day = Number(dayMatch[1]);
+  const istNow = new Date(now.getTime() + 330 * 60 * 1000);
+  const sheetDate = new Date(Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), day));
+  if (sheetDate.getUTCMonth() !== istNow.getUTCMonth() || sheetDate.getUTCDate() !== day) return now.toISOString();
+  return sheetDate.toISOString();
+};
+
+const isSummaryRow = (medicineName: string): boolean => /^(grand\s+total|total|summary)$/i.test(medicineName.trim());
+
+const syncInvoicesInBrowser = async (
+  worksheetName: string,
+  patientName: string,
+  parsedRows: ParsedWorkbookRow[],
+): Promise<SyncResult> => {
+  const { data: patientRow, error: patientError } = await supabase
+    .from("patients")
+    .select("id, patient_name, phone")
+    .ilike("patient_name", patientName)
+    .limit(1)
+    .maybeSingle();
+  if (patientError) throw patientError;
+  if (!patientRow) throw new Error(`Patient "${patientName}" not found. Create them first.`);
+
+  const tasks: SyncTask[] = [];
+  for (const row of parsedRows) {
+    const sheetRow = Number(row.row);
+    const medName = String(row.medicineName || "").trim();
+    const nums = Array.isArray(row.quantities) ? row.quantities.map(Number).filter((n) => Number.isFinite(n) && n > 0) : [];
+    if (!sheetRow || !medName || isSummaryRow(medName) || !nums.length) continue;
+    tasks.push({
+      rowSheet: sheetRow,
+      medName,
+      position: 1,
+      qty: nums.reduce((sum, n) => sum + n, 0),
+      rate: typeof row.rate === "number" && Number.isFinite(row.rate) && row.rate > 0 ? row.rate : null,
+    });
+  }
+
+  if (!tasks.length) return { success: true, worksheet: worksheetName, attempted: 0, created: 0, errors: [], created_invoices: [] };
+
+  const fy = getFinancialYearSuffix();
+  const prefix = `NH/INV-${fy}-`;
+  const { data: invoiceRows, error: invoiceError } = await supabase
+    .from("invoices")
+    .select("invoice_number")
+    .like("invoice_number", `${prefix}%`);
+  if (invoiceError) throw invoiceError;
+  let nextSeq = (invoiceRows || []).reduce((max, row) => Math.max(max, invoiceSequence(row.invoice_number, prefix) || 0), 0) + 1;
+
+  const { data: stockRows, error: stockError } = await supabase
+    .from("stock_items")
+    .select("item_id, name, batch_no, expiry_date, current_stock, unit_price, mrp, is_active");
+  if (stockError) throw stockError;
+  const stockById = new Map<number, any>((stockRows || []).map((item: any) => [item.item_id, { ...item }]));
+
+  const isValidExpiry = (date?: string | null): boolean => !!date && date !== "N/A" && !Number.isNaN(new Date(date).getTime());
+  const pickFifoBatch = (name: string, qty: number) => {
+    const candidates = Array.from(stockById.values()).filter((item: any) =>
+      item.is_active && (item.current_stock ?? 0) >= qty && medicineNamesMatch(name, String(item.name || ""))
+    );
+    candidates.sort((a: any, b: any) => {
+      const av = isValidExpiry(a.expiry_date), bv = isValidExpiry(b.expiry_date);
+      if (!av && !bv) return 0;
+      if (!av) return 1;
+      if (!bv) return -1;
+      return new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime();
+    });
+    return candidates[0] || null;
+  };
+
+  const created: NonNullable<SyncResult["created_invoices"]> = [];
+  const errors: NonNullable<SyncResult["errors"]> = [];
+  const invoiceDate = invoiceDateForWorksheet(worksheetName);
+
+  for (const task of tasks) {
+    const batch = pickFifoBatch(task.medName, task.qty);
+    const unitPrice = +Number(task.rate ?? batch?.mrp ?? batch?.unit_price ?? 0).toFixed(2);
+    const lineTotal = +(unitPrice * task.qty).toFixed(2);
+    const invoiceNumber = `${prefix}${String(nextSeq).padStart(4, "0")}`;
+    nextSeq += 1;
+
+    const { data: invoice, error: insertInvoiceError } = await supabase.from("invoices").insert({
+      invoice_number: invoiceNumber,
+      patient_id: patientRow.id,
+      patient_name: patientRow.patient_name,
+      patient_phone: patientRow.phone || "",
+      invoice_date: invoiceDate,
+      subtotal: lineTotal,
+      discount: 0,
+      tax: 0,
+      total: lineTotal,
+      status: "Paid",
+      payment_status: "Paid",
+      payment_method: "Cash",
+      notes: `Auto-synced from uploaded sheet "${worksheetName}" row ${task.rowSheet}`,
+    }).select("id, invoice_number").single();
+    if (insertInvoiceError || !invoice) {
+      errors.push({ row: task.rowSheet, position: task.position, medicine: task.medName, qty: task.qty, reason: `Invoice insert failed: ${insertInvoiceError?.message || "unknown"}` });
+      continue;
+    }
+
+    const { error: itemError } = await supabase.from("invoice_items").insert({
+      invoice_id: invoice.id,
+      medicine_id: batch?.item_id ?? null,
+      medicine_name: batch?.name ?? task.medName,
+      batch_no: batch?.batch_no ?? null,
+      expiry_date: batch?.expiry_date ?? null,
+      mrp: batch?.mrp ?? unitPrice,
+      quantity: task.qty,
+      unit_price: unitPrice,
+      total: lineTotal,
+    });
+    if (itemError) errors.push({ row: task.rowSheet, position: task.position, medicine: task.medName, qty: task.qty, reason: `Invoice item insert failed: ${itemError.message}` });
+
+    if (batch) {
+      const newStock = (batch.current_stock ?? 0) - task.qty;
+      const { error: stockUpdateError } = await supabase.from("stock_items").update({ current_stock: newStock }).eq("item_id", batch.item_id);
+      if (stockUpdateError) errors.push({ row: task.rowSheet, position: task.position, medicine: task.medName, qty: task.qty, reason: `Stock update failed: ${stockUpdateError.message}` });
+      else stockById.set(batch.item_id, { ...batch, current_stock: newStock });
+    }
+
+    created.push({ row: task.rowSheet, position: task.position, medicine: batch?.name ?? task.medName, qty: task.qty, invoice_id: invoice.id, invoice_number: invoice.invoice_number || invoiceNumber });
+  }
+
+  return { success: true, worksheet: worksheetName, attempted: tasks.length, created: created.length, errors, created_invoices: created };
+};
 
 
 interface Props { onSynced?: (summary: SyncSummary) => void; }
@@ -92,7 +270,7 @@ export function FileSyncDialog({ onSynced }: Props) {
     for (const rowNum of TARGET_ROWS) {
       const row = ws.getRow(rowNum);
       const medicineName = String(row.getCell(1).text || row.getCell(1).value || "").trim();
-      if (!medicineName) continue;
+      if (!medicineName || isSummaryRow(medicineName)) continue;
       const quantities = readQty(row.getCell(5).value);
       if (!quantities.length) continue;
       const rateRaw = row.getCell(9).value;
@@ -145,33 +323,32 @@ export function FileSyncDialog({ onSynced }: Props) {
       if (!parsedRows.length) {
         throw new Error(`Sheet "${worksheetName}" has no rows with medicine names in column A and quantities in column E.`);
       }
-      const res = await fetch(FN_ENDPOINT, {
-        method: "POST",
-        headers: FUNCTION_HEADERS,
-        body: JSON.stringify({
+      const { data: r, error } = await supabase.functions.invoke("sync-invoices-from-file", {
+        body: {
           worksheetName,
           patientName: patientName.trim() || "TEST Test",
           parsedRows,
           debug,
-        }),
+        },
       });
-      const r = (await res.json().catch(() => null)) as SyncResult | null;
-      if (!res.ok || !r) throw new Error(r?.error || `Sync failed: HTTP ${res.status}`);
-      setResult(r);
-      if (r.success) {
-        const attempted = r.attempted ?? parsedRows.length;
+      const syncResult = error || !r
+        ? await syncInvoicesInBrowser(worksheetName, patientName.trim() || "TEST Test", parsedRows)
+        : r as SyncResult;
+      setResult(syncResult);
+      if (syncResult.success) {
+        const attempted = syncResult.attempted ?? parsedRows.length;
         toast({
           title: debug ? "Debug sync complete" : "Sync complete",
-          description: `${r.created ?? 0}/${attempted} invoice(s) created${r.errors?.length ? `, ${r.errors.length} skipped` : ""}.`,
+          description: `${syncResult.created ?? 0}/${attempted} invoice(s) created${syncResult.errors?.length ? `, ${syncResult.errors.length} skipped` : ""}.`,
         });
         onSynced?.({
-          created: r.created ?? 0,
-          skipped: r.errors?.length ?? 0,
-          worksheet: r.worksheet,
-          invoiceIds: r.created_invoices?.map((invoice) => invoice.invoice_id).filter(Boolean) as string[] | undefined,
+          created: syncResult.created ?? 0,
+          skipped: syncResult.errors?.length ?? 0,
+          worksheet: syncResult.worksheet,
+          invoiceIds: syncResult.created_invoices?.map((invoice) => invoice.invoice_id).filter(Boolean) as string[] | undefined,
         });
       } else {
-        toast({ title: "Sync failed", description: r.error || "Unknown error", variant: "destructive" });
+        toast({ title: "Sync failed", description: syncResult.error || "Unknown error", variant: "destructive" });
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);

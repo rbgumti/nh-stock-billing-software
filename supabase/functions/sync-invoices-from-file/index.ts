@@ -66,6 +66,43 @@ function medicineNamesMatch(uploadedName: string, stockName: string): boolean {
   return uc.length >= 6 && sc.length >= 6 && editDistanceAtMostOne(uc, sc);
 }
 
+function invoiceSequence(invoiceNumber: string | null | undefined, prefix: string): number | null {
+  if (!invoiceNumber || !invoiceNumber.startsWith(prefix)) return null;
+  const suffix = invoiceNumber.slice(prefix.length).trim();
+  if (!/^\d+$/.test(suffix)) return null;
+  const parsed = Number(suffix);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+async function getNextInvoiceSequence(supabase: any, prefix: string): Promise<number> {
+  let offset = 0;
+  let maxSeq = 0;
+  const pageSize = 1000;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('invoice_number')
+      .like('invoice_number', `${prefix}%`)
+      .range(offset, offset + pageSize - 1);
+    if (error) throw error;
+
+    for (const row of (data || [])) {
+      const seq = invoiceSequence(row.invoice_number, prefix);
+      if (seq !== null && seq > maxSeq) maxSeq = seq;
+    }
+
+    if (!data || data.length < pageSize) break;
+    offset += pageSize;
+  }
+
+  return maxSeq + 1;
+}
+
+function isSummaryRow(medicineName: string): boolean {
+  return /^(grand\s+total|total|summary)$/i.test(medicineName.trim());
+}
+
 function invoiceDateForWorksheet(worksheetName: string): string {
   const now = new Date();
   const dayMatch = String(worksheetName || '').trim().match(/^(\d{1,2})$/);
@@ -92,7 +129,6 @@ Deno.serve(async (req) => {
     const patientName = body.patientName || 'TEST Test';
     const uploadedRows = Array.isArray(body.parsedRows) ? body.parsedRows : [];
     const worksheetName = body.worksheetName || String(new Date().getDate());
-    const forceDebug = body.debug === true;
     if (!uploadedRows.length) {
       return new Response(JSON.stringify({ success: false, error: 'parsedRows is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -113,17 +149,7 @@ Deno.serve(async (req) => {
 
     const fy = getFinancialYearSuffix();
     const prefix = `NH/INV-${fy}-`;
-    const { data: lastInv } = await supabase
-      .from('invoices')
-      .select('invoice_number')
-      .like('invoice_number', `${prefix}%`)
-      .order('invoice_number', { ascending: false })
-      .limit(1);
-    let nextSeq = 1;
-    if (lastInv && lastInv.length && lastInv[0].invoice_number) {
-      const n = parseInt(String(lastInv[0].invoice_number).replace(prefix, ''), 10);
-      if (!isNaN(n)) nextSeq = n + 1;
-    }
+    let nextSeq = await getNextInvoiceSequence(supabase, prefix);
 
     const tasks: SyncTask[] = [];
     for (const row of uploadedRows) {
@@ -132,7 +158,7 @@ Deno.serve(async (req) => {
       const nums = Array.isArray(row.quantities)
         ? row.quantities.map(Number).filter(n => Number.isFinite(n) && n > 0)
         : [];
-      if (!sheetRow || !medName || !nums.length) continue;
+      if (!sheetRow || !medName || isSummaryRow(medName) || !nums.length) continue;
       const totalQty = nums.reduce((s, n) => s + n, 0);
       const rate = (typeof row.rate === 'number' && Number.isFinite(row.rate) && row.rate > 0) ? row.rate : null;
       if (totalQty > 0) tasks.push({ rowSheet: sheetRow, medName, position: 1, qty: totalQty, rate });
