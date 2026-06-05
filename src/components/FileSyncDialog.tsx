@@ -37,7 +37,7 @@ interface SyncResult {
   error?: string;
 }
 
-interface ParsedWorkbookRow { row: number; medicineName: string; quantities: number[]; }
+
 
 interface Props { onSynced?: (summary: SyncSummary) => void; }
 
