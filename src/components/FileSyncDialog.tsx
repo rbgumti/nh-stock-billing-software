@@ -270,7 +270,7 @@ export function FileSyncDialog({ onSynced }: Props) {
     for (const rowNum of TARGET_ROWS) {
       const row = ws.getRow(rowNum);
       const medicineName = String(row.getCell(1).text || row.getCell(1).value || "").trim();
-      if (!medicineName) continue;
+      if (!medicineName || isSummaryRow(medicineName)) continue;
       const quantities = readQty(row.getCell(5).value);
       if (!quantities.length) continue;
       const rateRaw = row.getCell(9).value;
@@ -331,8 +331,9 @@ export function FileSyncDialog({ onSynced }: Props) {
           debug,
         },
       });
-      if (error || !r) throw new Error((r as SyncResult | null)?.error || error?.message || "Sync failed");
-      const syncResult = r as SyncResult;
+      const syncResult = error || !r
+        ? await syncInvoicesInBrowser(worksheetName, patientName.trim() || "TEST Test", parsedRows)
+        : r as SyncResult;
       setResult(syncResult);
       if (syncResult.success) {
         const attempted = syncResult.attempted ?? parsedRows.length;
