@@ -13,11 +13,11 @@ const corsHeaders = {
 interface Body {
   worksheetName?: string;
   patientName?: string;
-  parsedRows: Array<{ row: number; medicineName: string; quantities: number[] }>;
+  parsedRows: Array<{ row: number; medicineName: string; quantities: number[]; rate?: number | null }>;
   debug?: boolean;
 }
 
-type SyncTask = { rowSheet: number; medName: string; position: number; qty: number };
+type SyncTask = { rowSheet: number; medName: string; position: number; qty: number; rate: number | null };
 
 function getFinancialYearSuffix(): string {
   const now = new Date();
