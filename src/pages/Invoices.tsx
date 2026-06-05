@@ -101,17 +101,19 @@ export default function Invoices() {
 
       if (invoicesError) throw invoicesError;
 
-      setTotalCount(count || 0);
+      const nextCount = count || 0;
+      setTotalCount(nextCount);
 
       if (!invoicesData) {
         setInvoices([]);
-        return;
+        return { count: nextCount, invoices: [] };
       }
 
       // Transform data - no additional queries needed
       const invoicesWithItems = invoicesData.map(toInvoiceCard);
 
       setInvoices(invoicesWithItems);
+      return { count: nextCount, invoices: invoicesWithItems };
     } catch (error: any) {
       console.error("Error loading invoices:", error);
       toast({
@@ -119,6 +121,7 @@ export default function Invoices() {
         description: "Failed to load invoices. Please try again.",
         variant: "destructive"
       });
+      return null;
     } finally {
       setLoading(false);
     }
@@ -144,7 +147,7 @@ export default function Invoices() {
   });
 
   const prependSyncedInvoices = async (invoiceIds?: string[]) => {
-    if (!invoiceIds?.length) return;
+    if (!invoiceIds?.length) return [];
     const { data, error } = await supabase
       .from('invoices')
       .select(`
@@ -154,24 +157,36 @@ export default function Invoices() {
       .in('id', invoiceIds)
       .order('created_at', { ascending: false });
 
-    if (error || !data?.length) return;
+    if (error || !data?.length) return [];
     const syncedInvoices = data.map(toInvoiceCard);
     setInvoices((current) => [
       ...syncedInvoices,
       ...current.filter((invoice) => !invoiceIds.includes(invoice.id)),
     ].slice(0, pageSize));
+    return syncedInvoices;
   };
 
   const [syncBanner, setSyncBanner] = useState<(SyncSummary & { at: number }) | null>(null);
 
-  const handleSyncComplete = (summary: SyncSummary) => {
+  const handleSyncComplete = async (summary: SyncSummary) => {
     setSearchTerm("");
     setDebouncedSearch("");
     setStatusFilter("all");
     setSyncBanner({ ...summary, at: Date.now() });
     setCurrentPage(1);
-    loadInvoices({ page: 1, status: "all", search: "" });
-    prependSyncedInvoices(summary.invoiceIds);
+    const syncedInvoices = await prependSyncedInvoices(summary.invoiceIds);
+    const refreshed = await loadInvoices({ page: 1, status: "all", search: "" });
+    if (!refreshed && summary.created > 0) {
+      setTotalCount((current) => current + summary.created);
+    } else if (summary.created > 0 && refreshed.count < totalCount + summary.created) {
+      setTotalCount(totalCount + summary.created);
+    }
+    if (syncedInvoices.length) {
+      setInvoices((current) => [
+        ...syncedInvoices,
+        ...current.filter((invoice) => !summary.invoiceIds?.includes(invoice.id)),
+      ].slice(0, pageSize));
+    }
   };
 
   const statuses = ["all", "Paid", "Pending", "Overdue"];
