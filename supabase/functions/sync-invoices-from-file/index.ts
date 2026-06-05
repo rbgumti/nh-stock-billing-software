@@ -134,7 +134,8 @@ Deno.serve(async (req) => {
         : [];
       if (!sheetRow || !medName || !nums.length) continue;
       const totalQty = nums.reduce((s, n) => s + n, 0);
-      if (totalQty > 0) tasks.push({ rowSheet: sheetRow, medName, position: 1, qty: totalQty });
+      const rate = (typeof row.rate === 'number' && Number.isFinite(row.rate) && row.rate > 0) ? row.rate : null;
+      if (totalQty > 0) tasks.push({ rowSheet: sheetRow, medName, position: 1, qty: totalQty, rate });
     }
 
     if (!tasks.length) {
