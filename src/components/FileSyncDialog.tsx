@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileUp, Loader2, FileSpreadsheet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ExcelJS from "exceljs";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface SyncSummary {
   created: number;
@@ -18,13 +19,6 @@ export interface SyncSummary {
 }
 
 interface ParsedWorkbookRow { row: number; medicineName: string; quantities: number[]; rate: number | null; }
-
-const FN_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-invoices-from-file`;
-const FUNCTION_HEADERS = {
-  apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
-  Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string}`,
-  "Content-Type": "application/json",
-};
 
 interface SyncResult {
   success: boolean;
@@ -145,33 +139,31 @@ export function FileSyncDialog({ onSynced }: Props) {
       if (!parsedRows.length) {
         throw new Error(`Sheet "${worksheetName}" has no rows with medicine names in column A and quantities in column E.`);
       }
-      const res = await fetch(FN_ENDPOINT, {
-        method: "POST",
-        headers: FUNCTION_HEADERS,
-        body: JSON.stringify({
+      const { data: r, error } = await supabase.functions.invoke("sync-invoices-from-file", {
+        body: {
           worksheetName,
           patientName: patientName.trim() || "TEST Test",
           parsedRows,
           debug,
-        }),
+        },
       });
-      const r = (await res.json().catch(() => null)) as SyncResult | null;
-      if (!res.ok || !r) throw new Error(r?.error || `Sync failed: HTTP ${res.status}`);
-      setResult(r);
-      if (r.success) {
-        const attempted = r.attempted ?? parsedRows.length;
+      if (error || !r) throw new Error((r as SyncResult | null)?.error || error?.message || "Sync failed");
+      const syncResult = r as SyncResult;
+      setResult(syncResult);
+      if (syncResult.success) {
+        const attempted = syncResult.attempted ?? parsedRows.length;
         toast({
           title: debug ? "Debug sync complete" : "Sync complete",
-          description: `${r.created ?? 0}/${attempted} invoice(s) created${r.errors?.length ? `, ${r.errors.length} skipped` : ""}.`,
+          description: `${syncResult.created ?? 0}/${attempted} invoice(s) created${syncResult.errors?.length ? `, ${syncResult.errors.length} skipped` : ""}.`,
         });
         onSynced?.({
-          created: r.created ?? 0,
-          skipped: r.errors?.length ?? 0,
-          worksheet: r.worksheet,
-          invoiceIds: r.created_invoices?.map((invoice) => invoice.invoice_id).filter(Boolean) as string[] | undefined,
+          created: syncResult.created ?? 0,
+          skipped: syncResult.errors?.length ?? 0,
+          worksheet: syncResult.worksheet,
+          invoiceIds: syncResult.created_invoices?.map((invoice) => invoice.invoice_id).filter(Boolean) as string[] | undefined,
         });
       } else {
-        toast({ title: "Sync failed", description: r.error || "Unknown error", variant: "destructive" });
+        toast({ title: "Sync failed", description: syncResult.error || "Unknown error", variant: "destructive" });
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
