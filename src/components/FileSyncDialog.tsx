@@ -95,7 +95,12 @@ export function FileSyncDialog({ onSynced }: Props) {
       if (!medicineName) continue;
       const quantities = readQty(row.getCell(5).value);
       if (!quantities.length) continue;
-      out.push({ row: rowNum, medicineName, quantities });
+      const rateRaw = row.getCell(9).value;
+      let rate: number | null = null;
+      if (typeof rateRaw === "number" && Number.isFinite(rateRaw)) rate = rateRaw;
+      else if (rateRaw && typeof rateRaw === "object" && "result" in (rateRaw as any) && typeof (rateRaw as any).result === "number") rate = (rateRaw as any).result;
+      else { const n = Number(String(rateRaw ?? "").trim()); if (Number.isFinite(n) && n > 0) rate = n; }
+      out.push({ row: rowNum, medicineName, quantities, rate });
     }
     return out;
   };
