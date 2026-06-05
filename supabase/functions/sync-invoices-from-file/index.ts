@@ -178,13 +178,12 @@ Deno.serve(async (req) => {
     const invoiceDate = invoiceDateForWorksheet(worksheetName);
 
     for (const t of tasks) {
+      // Always try to FIFO-match a batch (for stock deduction), but never skip the row.
       const batch = pickFifoBatch(t.medName, t.qty);
-      if (!batch && !forceDebug) {
-        errors.push({ row: t.rowSheet, position: t.position, medicine: t.medName, qty: t.qty, reason: 'No matching active stock with sufficient quantity' });
-        continue;
-      }
-      const lineTotal = forceDebug ? +Number(t.qty).toFixed(2) : +(Number(batch.mrp ?? batch.unit_price ?? 0) * t.qty).toFixed(2);
-      const unitPrice = forceDebug ? lineTotal : Number(batch.mrp ?? batch.unit_price ?? 0);
+      // Pricing priority: sheet rate (col I) -> batch mrp -> batch unit_price -> 0
+      const effectiveRate = t.rate ?? Number(batch?.mrp ?? batch?.unit_price ?? 0);
+      const unitPrice = +Number(effectiveRate || 0).toFixed(2);
+      const lineTotal = +(unitPrice * t.qty).toFixed(2);
       const invoiceNumber = `${prefix}${String(nextSeq).padStart(4, '0')}`;
       nextSeq++;
 
