@@ -85,8 +85,12 @@ const medicineNamesMatch = (uploadedName: string, stockName: string): boolean =>
   return uploadedCompact.length >= 6 && stockCompact.length >= 6 && editDistanceAtMostOne(uploadedCompact, stockCompact);
 };
 
-const invoiceDateForWorksheet = (worksheetName: string): string => {
+const invoiceDateForWorksheet = (worksheetName: string, selectedDate?: string): string => {
   const now = new Date();
+  const explicitDate = String(selectedDate || "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(explicitDate)) {
+    return new Date(`${explicitDate}T00:00:00.000Z`).toISOString();
+  }
   const dayMatch = String(worksheetName || "").trim().match(/^(\d{1,2})$/);
   if (!dayMatch) return now.toISOString();
   const day = Number(dayMatch[1]);
@@ -96,12 +100,13 @@ const invoiceDateForWorksheet = (worksheetName: string): string => {
   return sheetDate.toISOString();
 };
 
-const isSummaryRow = (medicineName: string): boolean => /^(grand\s+total|total|summary)$/i.test(medicineName.trim());
+const isSummaryRow = (medicineName: string): boolean => /^(brand|grand\s+total|total|summary|total\s+sale|total\s+as\s+per\s+sheet)$/i.test(medicineName.trim());
 
 const syncInvoicesInBrowser = async (
   worksheetName: string,
   patientName: string,
   parsedRows: ParsedWorkbookRow[],
+  invoiceDateOverride?: string,
 ): Promise<SyncResult> => {
   const { data: patientRow, error: patientError } = await supabase
     .from("patients")
@@ -161,7 +166,7 @@ const syncInvoicesInBrowser = async (
 
   const created: NonNullable<SyncResult["created_invoices"]> = [];
   const errors: NonNullable<SyncResult["errors"]> = [];
-  const invoiceDate = invoiceDateForWorksheet(worksheetName);
+  const invoiceDate = invoiceDateForWorksheet(worksheetName, invoiceDateOverride);
 
   for (const task of tasks) {
     const batch = pickFifoBatch(task.medName, task.qty);
@@ -227,11 +232,10 @@ export function FileSyncDialog({ onSynced }: Props) {
   const [worksheetName, setWorksheetName] = useState("");
   const [previewCount, setPreviewCount] = useState<number | null>(null);
   const [patientName, setPatientName] = useState("TEST Test");
+  const [invoiceDate, setInvoiceDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(false);
   const [debug, setDebug] = useState(true);
   const [result, setResult] = useState<SyncResult | null>(null);
-
-  const TARGET_ROWS = [3, 4, 5, 6, 7, ...Array.from({ length: 22 }, (_, i) => 11 + i)];
 
   const parseFormulaNumbers = (raw: unknown): number[] => {
     if (raw === null || raw === undefined) return [];
