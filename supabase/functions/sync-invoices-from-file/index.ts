@@ -12,6 +12,7 @@ const corsHeaders = {
 
 interface Body {
   worksheetName?: string;
+  invoiceDate?: string;
   patientName?: string;
   parsedRows: Array<{ row: number; medicineName: string; quantities: number[]; rate?: number | null }>;
   debug?: boolean;
@@ -100,11 +101,15 @@ async function getNextInvoiceSequence(supabase: any, prefix: string): Promise<nu
 }
 
 function isSummaryRow(medicineName: string): boolean {
-  return /^(grand\s+total|total|summary)$/i.test(medicineName.trim());
+  return /^(brand|grand\s+total|total|summary|total\s+sale|total\s+as\s+per\s+sheet)$/i.test(medicineName.trim());
 }
 
-function invoiceDateForWorksheet(worksheetName: string): string {
+function invoiceDateForWorksheet(worksheetName: string, selectedDate?: string): string {
   const now = new Date();
+  const explicitDate = String(selectedDate || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(explicitDate)) {
+    return new Date(`${explicitDate}T00:00:00.000Z`).toISOString();
+  }
   const dayMatch = String(worksheetName || '').trim().match(/^(\d{1,2})$/);
   if (!dayMatch) return now.toISOString();
 
@@ -201,7 +206,7 @@ Deno.serve(async (req) => {
 
     const created: any[] = [];
     const errors: Array<{ row: number; position: number; medicine: string; qty: number; reason: string }> = [];
-    const invoiceDate = invoiceDateForWorksheet(worksheetName);
+    const invoiceDate = invoiceDateForWorksheet(worksheetName, body.invoiceDate);
 
     for (const t of tasks) {
       // Always try to FIFO-match a batch (for stock deduction), but never skip the row.
