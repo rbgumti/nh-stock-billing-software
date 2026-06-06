@@ -49,6 +49,30 @@ const invoiceSequence = (invoiceNumber: string | null | undefined, prefix: strin
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const getNextInvoiceSequence = async (prefix: string): Promise<number> => {
+  let from = 0;
+  const pageSize = 1000;
+  let maxSeq = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("invoices")
+      .select("invoice_number")
+      .like("invoice_number", `${prefix}%`)
+      .range(from, from + pageSize - 1);
+    if (error) throw error;
+
+    (data || []).forEach((row) => {
+      maxSeq = Math.max(maxSeq, invoiceSequence(row.invoice_number, prefix) || 0);
+    });
+
+    if (!data || data.length < pageSize) break;
+    from += pageSize;
+  }
+
+  return maxSeq + 1;
+};
+
 const normalizeMedicineName = (raw: string): string => raw
   .toLowerCase()
   .replace(/[\u2010-\u2015]/g, "-")
@@ -136,12 +160,7 @@ const syncInvoicesInBrowser = async (
 
   const fy = getFinancialYearSuffix();
   const prefix = `NH/INV-${fy}-`;
-  const { data: invoiceRows, error: invoiceError } = await supabase
-    .from("invoices")
-    .select("invoice_number")
-    .like("invoice_number", `${prefix}%`);
-  if (invoiceError) throw invoiceError;
-  let nextSeq = (invoiceRows || []).reduce((max, row) => Math.max(max, invoiceSequence(row.invoice_number, prefix) || 0), 0) + 1;
+  let nextSeq = await getNextInvoiceSequence(prefix);
 
   const { data: stockRows, error: stockError } = await supabase
     .from("stock_items")
