@@ -115,24 +115,34 @@ export const useSequentialNumbers = () => {
   const getNextInvoiceNumber = async (): Promise<string> => {
     const fySuffix = getFinancialYearSuffix();
     const prefix = `NH/INV-${fySuffix}-`;
-    
-    // Query database for highest invoice number with this FY prefix
-    const { data, error } = await supabase
-      .from('invoices')
-      .select('invoice_number')
-      .like('invoice_number', `${prefix}%`)
-      .order('invoice_number', { ascending: false })
-      .limit(1);
-    
+
     let nextNum = 1;
-    if (!error && data && data.length > 0 && data[0].invoice_number) {
-      const suffix = data[0].invoice_number.replace(prefix, '');
-      const parsed = parseInt(suffix, 10);
-      if (!isNaN(parsed)) {
-        nextNum = parsed + 1;
+    let from = 0;
+    const pageSize = 1000;
+
+    while (true) {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('invoice_number')
+        .like('invoice_number', `${prefix}%`)
+        .range(from, from + pageSize - 1);
+
+      if (error || !data) break;
+
+      data.forEach((row) => {
+        const suffix = row.invoice_number?.replace(prefix, '') || '';
+        if (/^\d+$/.test(suffix)) {
+          const parsed = parseInt(suffix, 10);
+          if (!isNaN(parsed)) nextNum = Math.max(nextNum, parsed + 1);
+        }
+      });
+
+      if (data.length < pageSize) {
+        break;
       }
+      from += pageSize;
     }
-    
+
     const paddedNumber = nextNum.toString().padStart(4, '0');
     return `${prefix}${paddedNumber}`;
   };
