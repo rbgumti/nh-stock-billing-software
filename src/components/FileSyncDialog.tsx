@@ -234,7 +234,7 @@ export function FileSyncDialog({ onSynced }: Props) {
   const [patientName, setPatientName] = useState("TEST Test");
   const [invoiceDate, setInvoiceDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(false);
-  const [debug, setDebug] = useState(true);
+  const [debug] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
 
   const parseFormulaNumbers = (raw: unknown): number[] => {
@@ -304,7 +304,7 @@ export function FileSyncDialog({ onSynced }: Props) {
       const today = String(new Date().getDate());
       const initial = names.includes(today) ? today : (names[names.length - 1] || "");
       setWorksheetName(initial);
-      if (initial) setPreviewCount(parseSheet(wb, initial).reduce((n, r) => n + r.quantities.length, 0));
+      if (initial) setPreviewCount(parseSheet(wb, initial).length);
     } catch (e: unknown) {
       toast({ title: "Cannot read file", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
     }
@@ -312,7 +312,7 @@ export function FileSyncDialog({ onSynced }: Props) {
 
   const onSheetChange = (name: string) => {
     setWorksheetName(name);
-    if (workbook) setPreviewCount(parseSheet(workbook, name).reduce((n, r) => n + r.quantities.length, 0));
+    if (workbook) setPreviewCount(parseSheet(workbook, name).length);
   };
 
   const runSync = async () => {
@@ -377,8 +377,8 @@ export function FileSyncDialog({ onSynced }: Props) {
           <DialogTitle>Sync invoices from Excel file</DialogTitle>
           <DialogDescription>
             Upload an <code>.xlsx</code> workbook. Reads <strong>column A</strong> (medicine name) and{" "}
-            <strong>column E</strong> from rows A3–A7 and A11–A32. Each row creates one invoice using the
-            total quantity from column E.
+            <strong>column E</strong> (Issued to Patients) across the sheet. Each medicine row with a quantity
+            creates one invoice using the total quantity from column E.
           </DialogDescription>
         </DialogHeader>
 
@@ -403,11 +403,15 @@ export function FileSyncDialog({ onSynced }: Props) {
                 <p className="text-xs text-muted-foreground mt-1">
                   {previewCount === 0
                     ? "No quantities found in column E on this sheet."
-                    : `Will attempt to create ${previewCount} invoice(s) from this sheet (minus already-synced rows).`}
+                    : `Will attempt to create ${previewCount} invoice(s) from this sheet.`}
                 </p>
               )}
             </div>
           )}
+          <div>
+            <Label htmlFor="fsDate">Invoice date</Label>
+            <Input id="fsDate" type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} />
+          </div>
           <div>
             <Label htmlFor="fsPn">Patient name</Label>
             <Input id="fsPn" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
