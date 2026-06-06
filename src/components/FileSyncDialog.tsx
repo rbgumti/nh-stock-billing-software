@@ -49,6 +49,30 @@ const invoiceSequence = (invoiceNumber: string | null | undefined, prefix: strin
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const getNextInvoiceSequence = async (prefix: string): Promise<number> => {
+  let from = 0;
+  const pageSize = 1000;
+  let maxSeq = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("invoices")
+      .select("invoice_number")
+      .like("invoice_number", `${prefix}%`)
+      .range(from, from + pageSize - 1);
+    if (error) throw error;
+
+    (data || []).forEach((row) => {
+      maxSeq = Math.max(maxSeq, invoiceSequence(row.invoice_number, prefix) || 0);
+    });
+
+    if (!data || data.length < pageSize) break;
+    from += pageSize;
+  }
+
+  return maxSeq + 1;
+};
+
 const normalizeMedicineName = (raw: string): string => raw
   .toLowerCase()
   .replace(/[\u2010-\u2015]/g, "-")
@@ -85,8 +109,12 @@ const medicineNamesMatch = (uploadedName: string, stockName: string): boolean =>
   return uploadedCompact.length >= 6 && stockCompact.length >= 6 && editDistanceAtMostOne(uploadedCompact, stockCompact);
 };
 
-const invoiceDateForWorksheet = (worksheetName: string): string => {
+const invoiceDateForWorksheet = (worksheetName: string, selectedDate?: string): string => {
   const now = new Date();
+  const explicitDate = String(selectedDate || "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(explicitDate)) {
+    return new Date(`${explicitDate}T00:00:00.000Z`).toISOString();
+  }
   const dayMatch = String(worksheetName || "").trim().match(/^(\d{1,2})$/);
   if (!dayMatch) return now.toISOString();
   const day = Number(dayMatch[1]);
@@ -96,12 +124,13 @@ const invoiceDateForWorksheet = (worksheetName: string): string => {
   return sheetDate.toISOString();
 };
 
-const isSummaryRow = (medicineName: string): boolean => /^(grand\s+total|total|summary)$/i.test(medicineName.trim());
+const isSummaryRow = (medicineName: string): boolean => /^(brand|grand\s+total|total|summary|total\s+sale|total\s+as\s+per\s+sheet)$/i.test(medicineName.trim());
 
 const syncInvoicesInBrowser = async (
   worksheetName: string,
   patientName: string,
   parsedRows: ParsedWorkbookRow[],
+  invoiceDateOverride?: string,
 ): Promise<SyncResult> => {
   const { data: patientRow, error: patientError } = await supabase
     .from("patients")
@@ -131,12 +160,7 @@ const syncInvoicesInBrowser = async (
 
   const fy = getFinancialYearSuffix();
   const prefix = `NH/INV-${fy}-`;
-  const { data: invoiceRows, error: invoiceError } = await supabase
-    .from("invoices")
-    .select("invoice_number")
-    .like("invoice_number", `${prefix}%`);
-  if (invoiceError) throw invoiceError;
-  let nextSeq = (invoiceRows || []).reduce((max, row) => Math.max(max, invoiceSequence(row.invoice_number, prefix) || 0), 0) + 1;
+  let nextSeq = await getNextInvoiceSequence(prefix);
 
   const { data: stockRows, error: stockError } = await supabase
     .from("stock_items")
@@ -161,7 +185,7 @@ const syncInvoicesInBrowser = async (
 
   const created: NonNullable<SyncResult["created_invoices"]> = [];
   const errors: NonNullable<SyncResult["errors"]> = [];
-  const invoiceDate = invoiceDateForWorksheet(worksheetName);
+  const invoiceDate = invoiceDateForWorksheet(worksheetName, invoiceDateOverride);
 
   for (const task of tasks) {
     const batch = pickFifoBatch(task.medName, task.qty);
@@ -227,11 +251,10 @@ export function FileSyncDialog({ onSynced }: Props) {
   const [worksheetName, setWorksheetName] = useState("");
   const [previewCount, setPreviewCount] = useState<number | null>(null);
   const [patientName, setPatientName] = useState("TEST Test");
+  const [invoiceDate, setInvoiceDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(false);
-  const [debug, setDebug] = useState(true);
+  const [debug] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
-
-  const TARGET_ROWS = [3, 4, 5, 6, 7, ...Array.from({ length: 22 }, (_, i) => 11 + i)];
 
   const parseFormulaNumbers = (raw: unknown): number[] => {
     if (raw === null || raw === undefined) return [];
@@ -267,7 +290,7 @@ export function FileSyncDialog({ onSynced }: Props) {
     const ws = wb.getWorksheet(name);
     if (!ws) return [];
     const out: ParsedWorkbookRow[] = [];
-    for (const rowNum of TARGET_ROWS) {
+    for (let rowNum = 1; rowNum <= ws.rowCount; rowNum += 1) {
       const row = ws.getRow(rowNum);
       const medicineName = String(row.getCell(1).text || row.getCell(1).value || "").trim();
       if (!medicineName || isSummaryRow(medicineName)) continue;
@@ -300,7 +323,7 @@ export function FileSyncDialog({ onSynced }: Props) {
       const today = String(new Date().getDate());
       const initial = names.includes(today) ? today : (names[names.length - 1] || "");
       setWorksheetName(initial);
-      if (initial) setPreviewCount(parseSheet(wb, initial).reduce((n, r) => n + r.quantities.length, 0));
+      if (initial) setPreviewCount(parseSheet(wb, initial).length);
     } catch (e: unknown) {
       toast({ title: "Cannot read file", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
     }
@@ -308,7 +331,7 @@ export function FileSyncDialog({ onSynced }: Props) {
 
   const onSheetChange = (name: string) => {
     setWorksheetName(name);
-    if (workbook) setPreviewCount(parseSheet(workbook, name).reduce((n, r) => n + r.quantities.length, 0));
+    if (workbook) setPreviewCount(parseSheet(workbook, name).length);
   };
 
   const runSync = async () => {
@@ -326,13 +349,14 @@ export function FileSyncDialog({ onSynced }: Props) {
       const { data: r, error } = await supabase.functions.invoke("sync-invoices-from-file", {
         body: {
           worksheetName,
+          invoiceDate,
           patientName: patientName.trim() || "TEST Test",
           parsedRows,
           debug,
         },
       });
       const syncResult = error || !r
-        ? await syncInvoicesInBrowser(worksheetName, patientName.trim() || "TEST Test", parsedRows)
+        ? await syncInvoicesInBrowser(worksheetName, patientName.trim() || "TEST Test", parsedRows, invoiceDate)
         : r as SyncResult;
       setResult(syncResult);
       if (syncResult.success) {
@@ -372,8 +396,8 @@ export function FileSyncDialog({ onSynced }: Props) {
           <DialogTitle>Sync invoices from Excel file</DialogTitle>
           <DialogDescription>
             Upload an <code>.xlsx</code> workbook. Reads <strong>column A</strong> (medicine name) and{" "}
-            <strong>column E</strong> from rows A3–A7 and A11–A32. Each row creates one invoice using the
-            total quantity from column E.
+            <strong>column E</strong> (Issued to Patients) across the sheet. Each medicine row with a quantity
+            creates one invoice using the total quantity from column E.
           </DialogDescription>
         </DialogHeader>
 
@@ -398,11 +422,15 @@ export function FileSyncDialog({ onSynced }: Props) {
                 <p className="text-xs text-muted-foreground mt-1">
                   {previewCount === 0
                     ? "No quantities found in column E on this sheet."
-                    : `Will attempt to create ${previewCount} invoice(s) from this sheet (minus already-synced rows).`}
+                    : `Will attempt to create ${previewCount} invoice(s) from this sheet.`}
                 </p>
               )}
             </div>
           )}
+          <div>
+            <Label htmlFor="fsDate">Invoice date</Label>
+            <Input id="fsDate" type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} />
+          </div>
           <div>
             <Label htmlFor="fsPn">Patient name</Label>
             <Input id="fsPn" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
