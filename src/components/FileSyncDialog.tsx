@@ -271,7 +271,7 @@ export function FileSyncDialog({ onSynced }: Props) {
     const ws = wb.getWorksheet(name);
     if (!ws) return [];
     const out: ParsedWorkbookRow[] = [];
-    for (const rowNum of TARGET_ROWS) {
+    for (let rowNum = 1; rowNum <= ws.rowCount; rowNum += 1) {
       const row = ws.getRow(rowNum);
       const medicineName = String(row.getCell(1).text || row.getCell(1).value || "").trim();
       if (!medicineName || isSummaryRow(medicineName)) continue;
@@ -330,13 +330,14 @@ export function FileSyncDialog({ onSynced }: Props) {
       const { data: r, error } = await supabase.functions.invoke("sync-invoices-from-file", {
         body: {
           worksheetName,
+          invoiceDate,
           patientName: patientName.trim() || "TEST Test",
           parsedRows,
           debug,
         },
       });
       const syncResult = error || !r
-        ? await syncInvoicesInBrowser(worksheetName, patientName.trim() || "TEST Test", parsedRows)
+        ? await syncInvoicesInBrowser(worksheetName, patientName.trim() || "TEST Test", parsedRows, invoiceDate)
         : r as SyncResult;
       setResult(syncResult);
       if (syncResult.success) {
