@@ -280,7 +280,7 @@ Deno.serve(async (req) => {
       created.push({
         row: t.rowSheet,
         position: t.position,
-        medicine: batch?.name ?? t.medName,
+        medicine: t.medName,
         qty: t.qty,
         invoice_id: inv.id,
         invoice_number: inv.invoice_number,
