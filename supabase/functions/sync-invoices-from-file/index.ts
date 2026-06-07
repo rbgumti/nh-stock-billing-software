@@ -252,7 +252,7 @@ Deno.serve(async (req) => {
       const { error: itErr } = await supabase.from('invoice_items').insert({
         invoice_id: inv.id,
         medicine_id: batch?.item_id ?? null,
-        medicine_name: batch?.name ?? t.medName,
+        medicine_name: t.medName,
         batch_no: batch?.batch_no ?? null,
         expiry_date: batch?.expiry_date ?? null,
         mrp: batch?.mrp ?? unitPrice,
