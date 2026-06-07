@@ -517,6 +517,20 @@ export function FileSyncDialog({ onSynced }: Props) {
           </div>
         )}
 
+        <div className="mt-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-2">
+          <Label className="text-sm font-medium text-destructive">Delete synced invoices by date</Label>
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <Label htmlFor="fsDelDate" className="text-xs">Invoice date</Label>
+              <Input id="fsDelDate" type="date" value={deleteDate} onChange={(e) => setDeleteDate(e.target.value)} />
+            </div>
+            <Button variant="destructive" onClick={runDeleteByDate} disabled={deleting || !deleteDate}>
+              {deleting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Deleting…</> : <><Trash2 className="h-4 w-4 mr-2" />Delete</>}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">Removes only auto-synced invoices (notes starting with "Auto-synced") for the selected date.</p>
+        </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>Close</Button>
           <Button onClick={runSync} disabled={loading || !workbook || !worksheetName}
