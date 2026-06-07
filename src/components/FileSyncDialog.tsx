@@ -98,10 +98,17 @@ const editDistanceAtMostOne = (a: string, b: string): boolean => {
   return edits + (i < a.length ? 1 : 0) + (j < b.length ? 1 : 0) <= 1;
 };
 
+const extractNumericTokens = (raw: string): string[] => {
+  const matches = String(raw).toLowerCase().match(/\d+(?:\.\d+)?/g);
+  return matches ? [...matches].sort() : [];
+};
+
 const medicineNamesMatch = (uploadedName: string, stockName: string): boolean => {
   const uploaded = normalizeMedicineName(uploadedName);
   const stock = normalizeMedicineName(stockName);
   if (!uploaded || !stock) return false;
+  // Numeric tokens (dosages like 1, 2, 0.4) MUST match exactly so WINAM 1 != WINAM 2.
+  if (extractNumericTokens(uploadedName).join(",") !== extractNumericTokens(stockName).join(",")) return false;
   if (uploaded === stock) return true;
   const uploadedCompact = compactMedicineName(uploadedName);
   const stockCompact = compactMedicineName(stockName);
