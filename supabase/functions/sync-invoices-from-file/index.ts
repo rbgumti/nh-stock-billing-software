@@ -56,10 +56,16 @@ function editDistanceAtMostOne(a: string, b: string): boolean {
   }
   return edits + (i < a.length ? 1 : 0) + (j < b.length ? 1 : 0) <= 1;
 }
+function extractNumericTokens(raw: string): string[] {
+  const matches = String(raw).toLowerCase().match(/\d+(?:\.\d+)?/g);
+  return matches ? [...matches].sort() : [];
+}
 function medicineNamesMatch(uploadedName: string, stockName: string): boolean {
   const u = normalizeMedicineName(uploadedName);
   const s = normalizeMedicineName(stockName);
   if (!u || !s) return false;
+  // Dosage numbers (e.g. "1" vs "2") must match exactly so WINAM 1 != WINAM 2.
+  if (extractNumericTokens(uploadedName).join(',') !== extractNumericTokens(stockName).join(',')) return false;
   if (u === s) return true;
   const uc = compactMedicineName(uploadedName);
   const sc = compactMedicineName(stockName);
