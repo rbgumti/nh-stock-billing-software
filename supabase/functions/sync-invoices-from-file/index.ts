@@ -64,12 +64,18 @@ function medicineNamesMatch(uploadedName: string, stockName: string): boolean {
   const u = normalizeMedicineName(uploadedName);
   const s = normalizeMedicineName(stockName);
   if (!u || !s) return false;
-  // Dosage numbers (e.g. "1" vs "2") must match exactly so WINAM 1 != WINAM 2.
-  if (extractNumericTokens(uploadedName).join(',') !== extractNumericTokens(stockName).join(',')) return false;
+  // Enforce dosage match only when BOTH sides have numeric tokens (so WINAM 1 != WINAM 2).
+  // If only the sheet has a dosage (e.g. "VCLOD 0.1" vs stock "VCLOD"), allow match.
+  const uT = extractNumericTokens(uploadedName);
+  const sT = extractNumericTokens(stockName);
+  if (uT.length && sT.length && uT.join(',') !== sT.join(',')) return false;
   if (u === s) return true;
   const uc = compactMedicineName(uploadedName);
   const sc = compactMedicineName(stockName);
   if (uc === sc) return true;
+  const ucNoNum = uc.replace(/\d+/g, '');
+  const scNoNum = sc.replace(/\d+/g, '');
+  if (ucNoNum && ucNoNum === scNoNum) return true;
   return uc.length >= 6 && sc.length >= 6 && editDistanceAtMostOne(uc, sc);
 }
 
