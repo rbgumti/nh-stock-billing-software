@@ -239,7 +239,7 @@ const syncInvoicesInBrowser = async (
     const { error: itemError } = await supabase.from("invoice_items").insert({
       invoice_id: invoice.id,
       medicine_id: batch?.item_id ?? null,
-      medicine_name: task.medName,
+      medicine_name: batch?.name ?? applyMedicineAliases(task.medName),
       batch_no: batch?.batch_no ?? null,
       expiry_date: batch?.expiry_date ?? null,
       mrp: batch?.mrp ?? unitPrice,
