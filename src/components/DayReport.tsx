@@ -541,17 +541,25 @@ export default function DayReport() {
       // Aggregate sold quantities by medicine NAME only (not by batch ID)
       // This prevents double-counting when a medicine has multiple batches
       let soldQuantitiesByName: Record<string, number> = {};
+      // Track actual sold rate (unit_price from invoice) so report reflects sheet rate, not stock MRP
+      let soldRatesByName: Record<string, { totalQty: number; totalAmount: number }> = {};
 
       if (invoiceIds.length > 0) {
         const { data: invoiceItems } = await supabase
           .from('invoice_items')
-          .select('medicine_id, medicine_name, quantity')
+          .select('medicine_id, medicine_name, quantity, unit_price, mrp')
           .in('invoice_id', invoiceIds);
 
         (invoiceItems || []).forEach((it) => {
           // Always aggregate by medicine name to avoid batch-level duplication
           const key = normalizeMedicineName(it.medicine_name).toLowerCase();
           soldQuantitiesByName[key] = (soldQuantitiesByName[key] || 0) + it.quantity;
+          const rate = Number(it.unit_price ?? it.mrp ?? 0);
+          if (rate > 0 && it.quantity > 0) {
+            if (!soldRatesByName[key]) soldRatesByName[key] = { totalQty: 0, totalAmount: 0 };
+            soldRatesByName[key].totalQty += it.quantity;
+            soldRatesByName[key].totalAmount += rate * it.quantity;
+          }
         });
       }
 
