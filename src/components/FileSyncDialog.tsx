@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileUp, Loader2, FileSpreadsheet } from "lucide-react";
+import { FileUp, Loader2, FileSpreadsheet, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ExcelJS from "exceljs";
 import { supabase } from "@/integrations/supabase/client";
@@ -262,6 +262,8 @@ export function FileSyncDialog({ onSynced }: Props) {
   const [loading, setLoading] = useState(false);
   const [debug] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
+  const [deleteDate, setDeleteDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [deleting, setDeleting] = useState(false);
 
   const parseFormulaNumbers = (raw: unknown): number[] => {
     if (raw === null || raw === undefined) return [];
@@ -390,6 +392,39 @@ export function FileSyncDialog({ onSynced }: Props) {
     }
   };
 
+  const runDeleteByDate = async () => {
+    if (!deleteDate) return;
+    const confirmed = window.confirm(`Delete ALL auto-synced invoices dated ${deleteDate}? This cannot be undone.`);
+    if (!confirmed) return;
+    setDeleting(true);
+    try {
+      const startIso = new Date(`${deleteDate}T00:00:00.000Z`).toISOString();
+      const endIso = new Date(new Date(`${deleteDate}T00:00:00.000Z`).getTime() + 86400000).toISOString();
+      const { data: rows, error: qErr } = await supabase
+        .from("invoices")
+        .select("id")
+        .like("notes", "Auto-synced%")
+        .gte("invoice_date", startIso)
+        .lt("invoice_date", endIso);
+      if (qErr) throw qErr;
+      const ids = (rows || []).map((r) => r.id);
+      if (!ids.length) {
+        toast({ title: "Nothing to delete", description: `No auto-synced invoices found for ${deleteDate}.` });
+        return;
+      }
+      const { error: itemErr } = await supabase.from("invoice_items").delete().in("invoice_id", ids);
+      if (itemErr) throw itemErr;
+      const { error: delErr } = await supabase.from("invoices").delete().in("id", ids);
+      if (delErr) throw delErr;
+      toast({ title: "Deleted", description: `Removed ${ids.length} synced invoice(s) for ${deleteDate}.` });
+      onSynced?.({ created: 0, skipped: 0, worksheet: `delete-${deleteDate}` });
+    } catch (e: unknown) {
+      toast({ title: "Delete failed", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -481,6 +516,20 @@ export function FileSyncDialog({ onSynced }: Props) {
             )}
           </div>
         )}
+
+        <div className="mt-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-2">
+          <Label className="text-sm font-medium text-destructive">Delete synced invoices by date</Label>
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <Label htmlFor="fsDelDate" className="text-xs">Invoice date</Label>
+              <Input id="fsDelDate" type="date" value={deleteDate} onChange={(e) => setDeleteDate(e.target.value)} />
+            </div>
+            <Button variant="destructive" onClick={runDeleteByDate} disabled={deleting || !deleteDate}>
+              {deleting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Deleting…</> : <><Trash2 className="h-4 w-4 mr-2" />Delete</>}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">Removes only auto-synced invoices (notes starting with "Auto-synced") for the selected date.</p>
+        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>Close</Button>
