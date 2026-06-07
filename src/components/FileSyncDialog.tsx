@@ -262,6 +262,8 @@ export function FileSyncDialog({ onSynced }: Props) {
   const [loading, setLoading] = useState(false);
   const [debug] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
+  const [deleteDate, setDeleteDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [deleting, setDeleting] = useState(false);
 
   const parseFormulaNumbers = (raw: unknown): number[] => {
     if (raw === null || raw === undefined) return [];
