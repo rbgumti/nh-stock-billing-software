@@ -629,7 +629,11 @@ export default function DayReport() {
             const opening = isFromSnapshot ? snapshotData.opening : medicine.totalStock;
             const liveStock = medicine.totalStock;
             const closing = opening - sold + received;
-            const rate = medicine.mrp || medicine.unitPrice;
+            const soldRateInfo = soldRatesByName[lookupKey];
+            const actualSoldRate = soldRateInfo && soldRateInfo.totalQty > 0
+              ? soldRateInfo.totalAmount / soldRateInfo.totalQty
+              : 0;
+            const rate = actualSoldRate > 0 ? actualSoldRate : (medicine.mrp || medicine.unitPrice);
 
             return {
               brand: medicine.name,
