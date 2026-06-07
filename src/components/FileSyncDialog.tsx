@@ -224,7 +224,7 @@ const syncInvoicesInBrowser = async (
     const { error: itemError } = await supabase.from("invoice_items").insert({
       invoice_id: invoice.id,
       medicine_id: batch?.item_id ?? null,
-      medicine_name: batch?.name ?? task.medName,
+      medicine_name: task.medName,
       batch_no: batch?.batch_no ?? null,
       expiry_date: batch?.expiry_date ?? null,
       mrp: batch?.mrp ?? unitPrice,
@@ -241,7 +241,7 @@ const syncInvoicesInBrowser = async (
       else stockById.set(batch.item_id, { ...batch, current_stock: newStock });
     }
 
-    created.push({ row: task.rowSheet, position: task.position, medicine: batch?.name ?? task.medName, qty: task.qty, invoice_id: invoice.id, invoice_number: invoice.invoice_number || invoiceNumber });
+    created.push({ row: task.rowSheet, position: task.position, medicine: task.medName, qty: task.qty, invoice_id: invoice.id, invoice_number: invoice.invoice_number || invoiceNumber });
   }
 
   return { success: true, worksheet: worksheetName, attempted: tasks.length, created: created.length, errors, created_invoices: created };
