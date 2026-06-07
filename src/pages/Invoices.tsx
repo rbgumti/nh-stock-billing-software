@@ -586,7 +586,7 @@ export default function Invoices() {
         </div>
         <div className="flex items-center gap-2">
           <FileSyncDialog onSynced={handleSyncComplete} />
-          <DeleteSyncedDialog onDeleted={() => loadInvoices(0)} />
+          <DeleteSyncedDialog onDeleted={() => loadInvoices({ page: 0 })} />
           <Button asChild className="bg-gradient-to-r from-gold to-orange hover:shadow-glow-gold text-white font-semibold">
             <Link to="/invoices/new">
               <Plus className="h-4 w-4 mr-2" />
