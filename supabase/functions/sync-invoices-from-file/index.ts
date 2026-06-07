@@ -56,10 +56,16 @@ function editDistanceAtMostOne(a: string, b: string): boolean {
   }
   return edits + (i < a.length ? 1 : 0) + (j < b.length ? 1 : 0) <= 1;
 }
+function extractNumericTokens(raw: string): string[] {
+  const matches = String(raw).toLowerCase().match(/\d+(?:\.\d+)?/g);
+  return matches ? [...matches].sort() : [];
+}
 function medicineNamesMatch(uploadedName: string, stockName: string): boolean {
   const u = normalizeMedicineName(uploadedName);
   const s = normalizeMedicineName(stockName);
   if (!u || !s) return false;
+  // Dosage numbers (e.g. "1" vs "2") must match exactly so WINAM 1 != WINAM 2.
+  if (extractNumericTokens(uploadedName).join(',') !== extractNumericTokens(stockName).join(',')) return false;
   if (u === s) return true;
   const uc = compactMedicineName(uploadedName);
   const sc = compactMedicineName(stockName);
@@ -246,7 +252,7 @@ Deno.serve(async (req) => {
       const { error: itErr } = await supabase.from('invoice_items').insert({
         invoice_id: inv.id,
         medicine_id: batch?.item_id ?? null,
-        medicine_name: batch?.name ?? t.medName,
+        medicine_name: t.medName,
         batch_no: batch?.batch_no ?? null,
         expiry_date: batch?.expiry_date ?? null,
         mrp: batch?.mrp ?? unitPrice,
@@ -274,7 +280,7 @@ Deno.serve(async (req) => {
       created.push({
         row: t.rowSheet,
         position: t.position,
-        medicine: batch?.name ?? t.medName,
+        medicine: t.medName,
         qty: t.qty,
         invoice_id: inv.id,
         invoice_number: inv.invoice_number,
