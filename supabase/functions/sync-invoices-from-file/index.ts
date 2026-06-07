@@ -30,8 +30,14 @@ function getFinancialYearSuffix(): string {
   return `${startSuffix}-${endSuffix}`;
 }
 
+function applyMedicineAliases(raw: string): string {
+  const lower = String(raw).toLowerCase().trim();
+  // Sheet uses "Boquit Lite" — treat as "Boquit Lite 0.4 mg" everywhere
+  if (/^boquit\s*lite$/i.test(lower)) return 'Boquit Lite 0.4 mg';
+  return raw;
+}
 function normalizeMedicineName(raw: string): string {
-  return raw
+  return applyMedicineAliases(raw)
     .toLowerCase()
     .replace(/[\u2010-\u2015]/g, '-')
     .replace(/\b(mg|tab|tablet|tabs|cap|capsule|ml)\b/g, ' ')
