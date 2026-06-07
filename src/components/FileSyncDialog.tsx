@@ -73,7 +73,14 @@ const getNextInvoiceSequence = async (prefix: string): Promise<number> => {
   return maxSeq + 1;
 };
 
-const normalizeMedicineName = (raw: string): string => raw
+const applyMedicineAliases = (raw: string): string => {
+  const lower = String(raw).toLowerCase().trim();
+  // Sheet uses "Boquit Lite" — treat as "Boquit Lite 0.4 mg" everywhere
+  if (/^boquit\s*lite$/i.test(lower)) return "Boquit Lite 0.4 mg";
+  return raw;
+};
+
+const normalizeMedicineName = (raw: string): string => applyMedicineAliases(raw)
   .toLowerCase()
   .replace(/[\u2010-\u2015]/g, "-")
   .replace(/\b(mg|tab|tablet|tabs|cap|capsule|ml)\b/g, " ")
